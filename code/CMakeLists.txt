@@ -39,7 +39,6 @@ file(GLOB SOURCE_FILES src/*.cpp src/*.hpp)
 #	src/water.cpp
 #	src/world.cpp
 #	src/mini_ecs.cpp
-# 	src/pebbles.cpp
 
 #    ext/project_path.hpp
 #	src/common.hpp
@@ -49,7 +48,6 @@ file(GLOB SOURCE_FILES src/*.cpp src/*.hpp)
 #	src/water.hpp
 #	src/world.hpp
 #	src/mini_ecs.hpp
-#	src/pebbles.hpp
 #	)
 
 # external libraries will be installed into /usr/local/include and /usr/local/lib but that folder is not automatically included in the search on MACs
