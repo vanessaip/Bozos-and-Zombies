@@ -48,7 +48,7 @@ private:
 	// OpenGL window handle
 	GLFWwindow* window;
 
-	// Number of fish eaten by the salmon, displayed in the window title
+	// TODO: could probably use a similar points system for items gained from saving students
 	unsigned int points;
 
 	// Game state

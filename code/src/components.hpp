@@ -10,7 +10,7 @@ struct Player
 
 };
 
-// Turtles have a hard shell
+// Zombies can turn Humans into Zombies
 struct Zombie
 {
 
@@ -60,7 +60,7 @@ struct DebugComponent
 	// Note, an empty struct has size 1
 };
 
-// A timer that will be associated to dying salmon
+// A timer that will be associated to dying player
 struct DeathTimer
 {
 	float timer_ms = 3000.f;
