@@ -1,0 +1,4 @@
+code/build/
+code/out/
+.vscode
+code/ext/project_path.hpp
