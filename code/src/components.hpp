@@ -11,7 +11,7 @@ struct Player
 };
 
 // Turtles have a hard shell
-struct HardShell
+struct Zombie
 {
 
 };

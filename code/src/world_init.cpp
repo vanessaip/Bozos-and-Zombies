@@ -57,7 +57,7 @@ Entity createFish(RenderSystem* renderer, vec2 position)
 	return entity;
 }
 
-Entity createTurtle(RenderSystem* renderer, vec2 position)
+Entity createZombie(RenderSystem* renderer, vec2 position)
 {
 	auto entity = Entity();
 
@@ -68,14 +68,14 @@ Entity createTurtle(RenderSystem* renderer, vec2 position)
 	// Initialize the motion
 	auto& motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
-	motion.velocity = { -100.f, 0.f };
+	motion.velocity = { 0.f, 0.f };
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	motion.scale = vec2({ -TURTLE_BB_WIDTH, TURTLE_BB_HEIGHT });
 
-	// Create and (empty) Turtle component to be able to refer to all turtles
-	registry.hardShells.emplace(entity);
+	// Create and (empty) Zombie component to be able to refer to all zombies
+	registry.zombies.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TURTLE,

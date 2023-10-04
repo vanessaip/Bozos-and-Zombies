@@ -9,15 +9,12 @@
 #include "physics_system.hpp"
 
 // Game configuration
-const size_t MAX_TURTLES = 15;
 const size_t MAX_FISH = 5;
-const size_t TURTLE_DELAY_MS = 2000 * 3;
 const size_t FISH_DELAY_MS = 5000 * 3;
 
 // Create the fish world
 WorldSystem::WorldSystem()
 	: points(0)
-	, next_turtle_spawn(0.f)
 	, next_fish_spawn(0.f) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
@@ -148,28 +145,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 	}
 
-	// Spawning new turtles
-	next_turtle_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.hardShells.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f) {
-		// Reset timer
-		next_turtle_spawn = (TURTLE_DELAY_MS / 2) + uniform_dist(rng) * (TURTLE_DELAY_MS / 2);
-		// Create turtle
-		Entity entity = createTurtle(renderer, {0,0});
-		// Setting random initial position and constant velocity
-		Motion& motion = registry.motions.get(entity);
-		motion.position =
-			vec2(window_width_px -200.f,
-				 50.f + uniform_dist(rng) * (window_height_px - 100.f));
-		motion.velocity = vec2(-100.f, 0.f);
-	}
-
 	// Spawning new fish
 	next_fish_spawn -= elapsed_ms_since_last_update * current_speed;
 	if (registry.softShells.components.size() <= MAX_FISH && next_fish_spawn < 0.f) {
 		// !!!  TODO A1: Create new fish with createFish({0,0}), as for the Turtles above
 	}
 
-	// Processing the salmon state
+	// Processing the player state
 	assert(registry.screenStates.components.size() <= 1);
     ScreenState &screen = registry.screenStates.components[0];
 
@@ -216,8 +198,16 @@ void WorldSystem::restart_game() {
 	registry.list_all_components();
 
 	// Create a new salmon
-	player_salmon = createSalmon(renderer, { 100, 200 });
-	registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
+	player_bozo = createBozo(renderer, { 200, 500 });
+	registry.colors.insert(player_bozo, {1, 0.8f, 0.8f});
+
+	// Create zombie (one starter zombie per level?)
+	Entity zombie = createZombie(renderer, {0,0});
+	// Setting random initial position and constant velocity (can keep random zombie position?)
+	Motion& motion = registry.motions.get(zombie);
+	motion.position =
+		vec2(window_width_px -200.f,
+				50.f + uniform_dist(rng) * (window_height_px - 100.f));
 }
 
 // Compute collisions between entities
@@ -229,19 +219,19 @@ void WorldSystem::handle_collisions() {
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other_entity;
 
-		// For now, we are only interested in collisions that involve the salmon
+		// For now, we are only interested in collisions that involve the player
 		if (registry.players.has(entity)) {
 			//Player& player = registry.players.get(entity);
 
-			// Checking Player - HardShell collisions
-			if (registry.hardShells.has(entity_other)) {
+			// Checking Player - Zombie collisions
+			if (registry.zombies.has(entity_other)) {
 				// initiate death unless already dying
 				if (!registry.deathTimers.has(entity)) {
-					// Scream, reset timer, and make the salmon sink
+					// Scream, reset timer, and make the player [dying animation]
 					registry.deathTimers.emplace(entity);
 					Mix_PlayChannel(-1, salmon_dead_sound, 0);
 
-					// !!! TODO A1: change the salmon orientation and color on death
+					// !!! TODO: animate player death
 				}
 			}
 			// Checking Player - SoftShell collisions
