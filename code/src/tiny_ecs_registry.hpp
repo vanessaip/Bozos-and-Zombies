@@ -19,7 +19,7 @@ public:
 	ComponentContainer<Mesh*> meshPtrs;
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<ScreenState> screenStates;
-	ComponentContainer<SoftShell> softShells;
+	ComponentContainer<Human> humans;
 	ComponentContainer<Zombie> zombies;
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<vec3> colors;
@@ -36,7 +36,7 @@ public:
 		registry_list.push_back(&meshPtrs);
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&screenStates);
-		registry_list.push_back(&softShells);
+		registry_list.push_back(&humans);
 		registry_list.push_back(&zombies);
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&colors);

@@ -16,8 +16,8 @@ struct Zombie
 
 };
 
-// Fish and Salmon have a soft shell
-struct SoftShell
+// Player and Student(s) are Human
+struct Human
 {
 
 };

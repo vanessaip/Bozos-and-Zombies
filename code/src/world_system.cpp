@@ -9,13 +9,10 @@
 #include "physics_system.hpp"
 
 // Game configuration
-const size_t MAX_FISH = 5;
-const size_t FISH_DELAY_MS = 5000 * 3;
 
 // Create the fish world
 WorldSystem::WorldSystem()
-	: points(0)
-	, next_fish_spawn(0.f) {
+	: points(0) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -145,12 +142,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 	}
 
-	// Spawning new fish
-	next_fish_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.softShells.components.size() <= MAX_FISH && next_fish_spawn < 0.f) {
-		// !!!  TODO A1: Create new fish with createFish({0,0}), as for the Turtles above
-	}
-
 	// Processing the player state
 	assert(registry.screenStates.components.size() <= 1);
     ScreenState &screen = registry.screenStates.components[0];
@@ -204,8 +195,16 @@ void WorldSystem::restart_game() {
 	// Create zombie (one starter zombie per level?)
 	Entity zombie = createZombie(renderer, {0,0});
 	// Setting random initial position and constant velocity (can keep random zombie position?)
-	Motion& motion = registry.motions.get(zombie);
-	motion.position =
+	Motion& zombie_motion = registry.motions.get(zombie);
+	zombie_motion.position =
+		vec2(window_width_px -200.f,
+				50.f + uniform_dist(rng) * (window_height_px - 100.f));
+
+	// Create student
+	Entity student = createStudent(renderer, {0,0});
+	// Setting random initial position and constant velocity
+	Motion& student_motion = registry.motions.get(student);
+	student_motion.position = 
 		vec2(window_width_px -200.f,
 				50.f + uniform_dist(rng) * (window_height_px - 100.f));
 }
@@ -223,7 +222,7 @@ void WorldSystem::handle_collisions() {
 		if (registry.players.has(entity)) {
 			//Player& player = registry.players.get(entity);
 
-			// Checking Player - Zombie collisions
+			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
 			if (registry.zombies.has(entity_other)) {
 				// initiate death unless already dying
 				if (!registry.deathTimers.has(entity)) {
@@ -234,15 +233,15 @@ void WorldSystem::handle_collisions() {
 					// !!! TODO: animate player death
 				}
 			}
-			// Checking Player - SoftShell collisions
-			else if (registry.softShells.has(entity_other)) {
+			// Checking Player - Human collisions
+			else if (registry.humans.has(entity_other)) {
 				if (!registry.deathTimers.has(entity)) {
 					// chew, count points, and set the LightUp timer
 					registry.remove_all_components_of(entity_other);
 					Mix_PlayChannel(-1, salmon_eat_sound, 0);
 					++points;
 
-					// !!! TODO A1: create a new struct called LightUp in components.hpp and add an instance to the salmon entity by modifying the ECS registry
+					// !!! TODO: just colliding with other students immunizes them or require keyboard input from user?
 				}
 			}
 		}

@@ -17,8 +17,9 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 	motion.scale = mesh.original_size * 150.f;
 	motion.scale.x *= -1; // point front to the right
 
-	// Create and (empty) Salmon component to be able to refer to all turtles
+	// Create and (empty) Bozo component to be able to refer to all players
 	registry.players.emplace(entity);
+	registry.humans.emplace(entity); // zombies will target all entities with human component
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
@@ -28,7 +29,7 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createFish(RenderSystem* renderer, vec2 position)
+Entity createStudent(RenderSystem* renderer, vec2 position)
 {
 	// Reserve en entity
 	auto entity = Entity();
@@ -40,14 +41,14 @@ Entity createFish(RenderSystem* renderer, vec2 position)
 	// Initialize the position, scale, and physics components
 	auto& motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
-	motion.velocity = { -50.f, 0.f };
+	motion.velocity = { 0.f, 0.f };
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	motion.scale = vec2({ -FISH_BB_WIDTH, FISH_BB_HEIGHT });
 
-	// Create an (empty) Fish component to be able to refer to all fish
-	registry.softShells.emplace(entity);
+	// Create an (empty) Student component to be able to refer to all students
+	registry.humans.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::FISH,
