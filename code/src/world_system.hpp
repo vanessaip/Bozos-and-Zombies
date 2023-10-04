@@ -55,7 +55,7 @@ private:
 	RenderSystem* renderer;
 	float current_speed;
 	float next_fish_spawn;
-	Entity player_salmon;
+	Entity player_bozo;
 
 	// music references
 	Mix_Music* background_music;
