@@ -1,7 +1,8 @@
-#pragma once
+ #pragma once
 #include "common.hpp"
 #include <vector>
 #include <unordered_map>
+#include <cassert>
 #include "../ext/stb_image/stb_image.h"
 
 // Player component
@@ -24,10 +25,18 @@ struct SoftShell
 
 // All data relevant to the shape and motion of entities
 struct Motion {
-	vec2 position = { 0.f, 0.f };
-	float angle = 0.f;
-	vec2 velocity = { 0.f, 0.f };
-	vec2 scale = { 10.f, 10.f };
+	vec2 position;
+	float angle;
+	vec2 velocity;
+	vec2 scale;
+
+	Motion(vec2 position = { 0.f, 0.f }, float angle = 0.f, vec2 velocity = {0.f, 0.f}, vec2 scale = {10.f, 10.f}) 
+	{
+		this->position = position;
+		this->angle = angle;
+		this->velocity = velocity;
+		this->scale = scale;
+	}
 };
 
 // Stucture to store collision information
@@ -61,6 +70,25 @@ struct DebugComponent
 struct DeathTimer
 {
 	float timer_ms = 3000.f;
+};
+
+struct KeyframeAnimation
+{
+	int num_of_frames = 0;
+	int curr_frame = 0;
+	float timer_ms = 0.f;
+	float switch_time = 0.f;
+	bool loop = false;
+	std::vector<Motion> motion_frames;
+
+	KeyframeAnimation(int num_of_frames, float switch_time, bool loop, std::vector<Motion>& frames) 
+	{
+		this->num_of_frames = num_of_frames;
+		this->switch_time = switch_time;
+		this->loop = loop;
+		this->motion_frames = frames;
+	}
+	
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)
@@ -113,7 +141,8 @@ struct Mesh
 enum class TEXTURE_ASSET_ID {
 	FISH = 0,
 	TURTLE = FISH + 1,
-	TEXTURE_COUNT = TURTLE + 1
+	SHARK = TURTLE + 1,
+	TEXTURE_COUNT = SHARK + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

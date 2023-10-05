@@ -35,6 +35,9 @@ public:
 	// Check for collisions
 	void handle_collisions();
 
+	// Sets up keyframe interpolation for given entity
+	//void animation(Entity& entity);
+
 	// Should the game be over ?
 	bool is_over()const;
 private:

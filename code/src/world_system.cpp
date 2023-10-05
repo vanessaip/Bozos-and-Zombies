@@ -198,9 +198,58 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// reduce window brightness if any of the present salmons is dying
 	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
 
-	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death timer
+	
+	for (Entity entity : registry.animations.entities)
+	{
+		KeyframeAnimation& animation = registry.animations.get(entity);
+		animation.timer_ms += elapsed_ms_since_last_update;
+
+		if (animation.timer_ms >= animation.switch_time) {
+			animation.timer_ms = 0.f;
+			animation.curr_frame++;
+		}
+		
+		int next = animation.loop ? (animation.curr_frame + 1) % (animation.num_of_frames) : (animation.curr_frame + 1);
+		if (next >= animation.num_of_frames) {
+			if (!animation.loop)
+				continue;
+		}
+
+		if (animation.curr_frame >= animation.num_of_frames) {
+			//if (!animation.loop)
+				//continue;
+			//else
+				animation.curr_frame = 0;
+
+		}
+
+		Motion& curr_frame = animation.motion_frames[animation.curr_frame];
+		Motion& next_frame = animation.motion_frames[next];
+		Motion& entity_motion = registry.motions.get(entity);
+
+		if (curr_frame.position != next_frame.position)
+			entity_motion.position = curr_frame.position + (next_frame.position - curr_frame.position) * (animation.timer_ms / animation.switch_time);
+		if (curr_frame.angle != next_frame.angle)
+			entity_motion.angle = curr_frame.angle + (next_frame.angle - curr_frame.angle) * (animation.timer_ms / animation.switch_time);
+		if (curr_frame.scale != next_frame.scale)
+			entity_motion.scale = curr_frame.scale + (next_frame.scale - curr_frame.scale) * (animation.timer_ms / animation.switch_time);
+		if (curr_frame.velocity != next_frame.velocity)
+			entity_motion.velocity = curr_frame.velocity + (next_frame.velocity - curr_frame.velocity) * (animation.timer_ms / animation.switch_time);
+	}
+	
 
 	return true;
+}
+
+void setup_keyframes(Entity& entity)
+{
+	Motion m1 = Motion(vec2(500.0f, 100.0f), 0.f);
+	Motion m2 = Motion(vec2(100.0f, 300.0f), (2.0f * 3.14f / 2.f));
+	Motion m3 = Motion(vec2(500.0f, 600.0f), (2.0f * -3.14f / 3.f));
+	Motion m4 = Motion(vec2(1000.0f, 300.0f), (3.14f));
+	std::vector<Motion> frames = { m1, m2, m3, m4 };
+
+	registry.animations.emplace(entity, KeyframeAnimation(frames.size(), 3000.f, true, frames));
 }
 
 // Reset the world state to its initial state
@@ -223,6 +272,8 @@ void WorldSystem::restart_game() {
 	// Create a new salmon
 	player_salmon = createSalmon(renderer, { 100, 200 });
 	registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
+	Entity shark = createShark(renderer, { 400, 50 });
+	setup_keyframes(shark);
 
 	// !! TODO A2: Enable static pebbles on the ground, for reference
 	// Create pebbles on the floor, use this for reference
