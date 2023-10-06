@@ -48,15 +48,13 @@ private:
 	// OpenGL window handle
 	GLFWwindow* window;
 
-	// Number of fish eaten by the salmon, displayed in the window title
+	// TODO: could probably use a similar points system for items gained from saving students
 	unsigned int points;
 
 	// Game state
 	RenderSystem* renderer;
 	float current_speed;
-	float next_turtle_spawn;
-	float next_fish_spawn;
-	Entity player_salmon;
+	Entity player_bozo;
 
 	// music references
 	Mix_Music* background_music;

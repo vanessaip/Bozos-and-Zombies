@@ -10,14 +10,14 @@ struct Player
 
 };
 
-// Turtles have a hard shell
-struct HardShell
+// Zombies can turn Humans into Zombies
+struct Zombie
 {
 
 };
 
-// Fish and Salmon have a soft shell
-struct SoftShell
+// Player and Student(s) are Human
+struct Human
 {
 
 };
@@ -60,7 +60,7 @@ struct DebugComponent
 	// Note, an empty struct has size 1
 };
 
-// A timer that will be associated to dying salmon
+// A timer that will be associated to dying player
 struct DeathTimer
 {
 	float timer_ms = 3000.f;
@@ -114,16 +114,17 @@ struct Mesh
  */
 
 enum class TEXTURE_ASSET_ID {
-	FISH = 0,
-	TURTLE = FISH + 1,
-	TEXTURE_COUNT = TURTLE + 1
+	STUDENT = 0,
+	ZOMBIE = STUDENT + 1,
+	BOZO = ZOMBIE + 1,
+	TEXTURE_COUNT = BOZO + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
-	SALMON = COLOURED + 1,
-	TEXTURED = SALMON + 1,
+	// SALMON = COLOURED + 1, // can reuse if we end up having meshes
+	TEXTURED = COLOURED + 1,
 	WATER = TEXTURED + 1,
 	EFFECT_COUNT = WATER + 1
 };
