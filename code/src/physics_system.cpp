@@ -34,10 +34,17 @@ void PhysicsSystem::step(float elapsed_ms)
 	for(uint i = 0; i < motion_container.size(); i++)
 	{
 		// !!! TODO A1: update motion.position based on step_seconds and motion.velocity
-		//Motion& motion = motion_container.components[i];
-		//Entity entity = motion_container.entities[i];
-		//float step_seconds = elapsed_ms / 1000.f;
-		(void)elapsed_ms; // placeholder to silence unused warning until implemented
+		Motion& motion = motion_container.components[i];
+		Entity entity = motion_container.entities[i];
+
+		float step_seconds = elapsed_ms / 1000.f;
+
+		if (motion.jumpState[1]) {
+			jump(motion);
+		}
+
+		motion.position[0] += motion.velocity[0] * step_seconds;
+		motion.position[1] += motion.velocity[1] * step_seconds;
 	}
 
 	// Check for collisions between all moving entities
@@ -59,5 +66,14 @@ void PhysicsSystem::step(float elapsed_ms)
 				registry.collisions.emplace_with_duplicates(entity_j, entity_i);
 			}
 		}
+	}
+}
+
+void PhysicsSystem::jump(Motion& motion) {
+	motion.velocity[1] += 15 ^ 2;
+	if (motion.position[1] > motion.jumpState[1]) {
+		motion.jumpState[0] = false;
+		motion.velocity[1] = 0;
+		motion.position[1] = motion.jumpState[1];
 	}
 }
