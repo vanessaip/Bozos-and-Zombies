@@ -292,7 +292,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	Motion& motion = registry.motions.get(player_bozo);
 	Player& player = registry.players.get(player_bozo);
 
-	if (action == GLFW_PRESS && (!registry.deathTimers.has(player))) {
+	if (action == GLFW_PRESS && (!registry.deathTimers.has(player_bozo))) {
 		if (key == GLFW_KEY_A) {
 			motion.velocity[0] -= 200;
 		}
@@ -307,7 +307,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	}
 
-	if (action == GLFW_RELEASE && (!registry.deathTimers.has(player))) {
+	if (action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo))) {
 		if (key == GLFW_KEY_A) {
 			motion.velocity[0] += 200;
 		}
