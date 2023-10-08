@@ -289,36 +289,30 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	Motion& bozo_motion = registry.motions.get(player_bozo);
+	Motion& motion = registry.motions.get(player_bozo);
+	Player& player = registry.players.get(player_bozo);
 
-	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && (!registry.deathTimers.has(player_bozo))) {
-		float speed = 200.f;
+	if (action == GLFW_PRESS && (!registry.deathTimers.has(player))) {
+		if (key == GLFW_KEY_A) {
+			motion.velocity[0] -= 200;
+		}
+		if (key == GLFW_KEY_D) {
+			motion.velocity[0] += 200;
+		}
 
-		switch (key) {
-		case GLFW_KEY_UP:
-			bozo_motion.velocity.y = -speed;
-			break;
-		case GLFW_KEY_DOWN:
-			bozo_motion.velocity.y = speed;
-			break;
-		case GLFW_KEY_LEFT:
-			bozo_motion.velocity.x = -speed;
-			break;
-		case GLFW_KEY_RIGHT:
-			bozo_motion.velocity.x = speed;
-			break;
+		if (key == GLFW_KEY_SPACE && !motion.jumpState[0]) {
+			motion.jumpState[0] = true;
+			motion.jumpState[1] = motion.position[1];
+			motion.velocity[1] -= 700;
 		}
 	}
-	else if ((action == GLFW_RELEASE) && (!registry.deathTimers.has(player_bozo))) {
-		switch (key) {
-		case GLFW_KEY_UP:
-		case GLFW_KEY_DOWN:
-			bozo_motion.velocity.y = 0.f;
-			break;
-		case GLFW_KEY_LEFT:
-		case GLFW_KEY_RIGHT:
-			bozo_motion.velocity.x = 0.f;
-			break;
+
+	if (action == GLFW_RELEASE && (!registry.deathTimers.has(player))) {
+		if (key == GLFW_KEY_A) {
+			motion.velocity[0] += 200;
+		}
+		if (key == GLFW_KEY_D) {
+			motion.velocity[0] -= 200;
 		}
 	}
 
