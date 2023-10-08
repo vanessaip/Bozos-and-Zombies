@@ -264,6 +264,33 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+	Motion& motion = registry.motions.get(player_bozo);
+	Player& player = registry.players.get(player_bozo);
+
+	if (action == GLFW_PRESS) {
+		if (key == GLFW_KEY_A) {
+			motion.velocity[0] -= 200;
+		}
+		if (key == GLFW_KEY_D) {
+			motion.velocity[0] += 200;
+		}
+
+		if (key == GLFW_KEY_SPACE && !motion.jumpState[0]) {
+			motion.jumpState[0] = true;
+			motion.jumpState[1] = motion.position[1];
+			motion.velocity[1] -= 700;
+		}
+	}
+
+	if (action == GLFW_RELEASE) {
+		if (key == GLFW_KEY_A) {
+			motion.velocity[0] += 200;
+		}
+		if (key == GLFW_KEY_D) {
+			motion.velocity[0] -= 200;
+		}
+	}
+
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
 		int w, h;

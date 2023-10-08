@@ -7,7 +7,6 @@
 // Player component
 struct Player
 {
-
 };
 
 // Zombies can turn Humans into Zombies
@@ -29,8 +28,10 @@ struct Motion {
 	vec2 velocity = { 0.f, 0.f };
 	vec2 scale = { 10.f, 10.f };
 	// First boolean is reflection on x axis with true for reflected
-	// First boolean is reflection on y axis with true for reflected
+	// Second boolean is reflection on y axis with true for reflected
 	vec2 reflect = { false, false };
+	// First is jump active state and second is return value. 
+	vec2 jumpState = { false, 0.f };
 };
 
 // Stucture to store collision information
