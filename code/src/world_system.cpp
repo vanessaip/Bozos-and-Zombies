@@ -134,11 +134,36 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
+
+	Motion& bozo_motion = registry.motions.get(player_bozo);
+
 	for (int i = (int)motion_container.components.size()-1; i>=0; --i) {
 	    Motion& motion = motion_container.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f) {
-			if(!registry.players.has(motion_container.entities[i])) // don't remove the player
-				registry.remove_all_components_of(motion_container.entities[i]);
+
+		if (registry.humans.has(motion_container.entities[i])) {
+			if (motion.position.x < 0.f ||
+				motion.position.x > window_width_px) {
+				motion.velocity.x = -motion.velocity.x; // reverse x direction
+			}
+		}
+		else {
+			if (motion.position.x + abs(motion.scale.x) < 0.f) {
+				if (!registry.players.has(motion_container.entities[i])) // don't remove the player
+					registry.remove_all_components_of(motion_container.entities[i]);
+			}
+		}
+
+		// If entity is a zombie, update its direction to always move towards Bozo
+		if (registry.zombies.has(motion_container.entities[i])) {
+			vec2 direction = bozo_motion.position - motion.position;
+			float length = sqrt(direction.x * direction.x + direction.y * direction.y);
+			if (length != 0) {  // prevent division by zero
+				direction.x /= length;
+				direction.y /= length;
+			}
+			float speed = 100.f;
+			motion.velocity.x = direction.x * speed;
+			motion.velocity.y = direction.y * speed;
 		}
 	}
 
@@ -196,9 +221,8 @@ void WorldSystem::restart_game() {
 	Entity zombie = createZombie(renderer, {0,0});
 	// Setting random initial position and constant velocity (can keep random zombie position?)
 	Motion& zombie_motion = registry.motions.get(zombie);
-	zombie_motion.position =
-		vec2(window_width_px -200.f,
-				50.f + uniform_dist(rng) * (window_height_px - 100.f));
+	zombie_motion.position = vec2(window_width_px - 200.f,
+			50.f + uniform_dist(rng) * (window_height_px - 100.f));
 
 	// Create student
 	Entity student = createStudent(renderer, {0,0});
@@ -207,6 +231,7 @@ void WorldSystem::restart_game() {
 	student_motion.position = 
 		vec2(window_width_px -200.f,
 				50.f + uniform_dist(rng) * (window_height_px - 100.f));
+	student_motion.velocity = vec2(-200.f, 0.f);
 }
 
 // Compute collisions between entities
@@ -264,12 +289,45 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+	Motion& bozo_motion = registry.motions.get(player_bozo);
+
+	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && (!registry.deathTimers.has(player_bozo))) {
+		float speed = 200.f;
+
+		switch (key) {
+		case GLFW_KEY_UP:
+			bozo_motion.velocity.y = -speed;
+			break;
+		case GLFW_KEY_DOWN:
+			bozo_motion.velocity.y = speed;
+			break;
+		case GLFW_KEY_LEFT:
+			bozo_motion.velocity.x = -speed;
+			break;
+		case GLFW_KEY_RIGHT:
+			bozo_motion.velocity.x = speed;
+			break;
+		}
+	}
+	else if ((action == GLFW_RELEASE) && (!registry.deathTimers.has(player_bozo))) {
+		switch (key) {
+		case GLFW_KEY_UP:
+		case GLFW_KEY_DOWN:
+			bozo_motion.velocity.y = 0.f;
+			break;
+		case GLFW_KEY_LEFT:
+		case GLFW_KEY_RIGHT:
+			bozo_motion.velocity.x = 0.f;
+			break;
+		}
+	}
+
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
 
-        restart_game();
+		restart_game();
 	}
 
 	// Debugging
