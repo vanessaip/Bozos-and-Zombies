@@ -21,6 +21,16 @@ struct Human
 
 };
 
+struct Background
+{
+
+};
+
+struct Platform
+{
+
+};
+
 // All data relevant to the shape and motion of entities
 struct Motion {
 	vec2 position = { 0.f, 0.f };
@@ -118,7 +128,9 @@ enum class TEXTURE_ASSET_ID {
 	STUDENT = 0,
 	ZOMBIE = STUDENT + 1,
 	BOZO = ZOMBIE + 1,
-	TEXTURE_COUNT = BOZO + 1
+	BACKGROUND = BOZO + 1,
+	PLATFORM = BACKGROUND + 1,
+	TEXTURE_COUNT = PLATFORM + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
