@@ -140,6 +140,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i) {
 		Motion& motion = motion_container.components[i];
 
+		auto& platforms = registry.platforms;
+
 		// Bounding entities to window
 		if (registry.players.has(motion_container.entities[i])) {
 			if (motion.position.x < 0.f) {
@@ -148,6 +150,38 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			else if (motion.position.x > window_width_px) {
 				motion.position.x = window_width_px;
 			}
+			if (motion.position.y < 0.f) {
+				motion.position.y = 0.f;
+			}
+			else if (motion.position.y > window_height_px - STUDENT_BB_HEIGHT / 2.f) {
+				motion.position.y = window_height_px - STUDENT_BB_HEIGHT / 2.f;
+				motion.velocity.y = 0.f;
+				motion.offGround = false;
+			}
+
+			bool offAll = true;
+
+			for (int i = 0; i < platforms.size(); i++) {
+				Entity& platform = platforms.entities[i];
+				Motion& platMotion = motion_container.get(platform);
+				float xPlatLeftBound = platMotion.position.x - platMotion.scale[0] / 2.f;
+				float xPlatRightBound = platMotion.position.x + platMotion.scale[0] / 2.f;
+				float yPlatPos = platMotion.position.y - (85.f / 2.f); // Hack: half this quantity so that entities don't fall through moving platforms
+				if (motion.velocity.y >= 0 && motion.position.y <= yPlatPos && motion.position.y >= yPlatPos - STUDENT_BB_HEIGHT && 
+					motion.position.x > xPlatLeftBound && motion.position.x < xPlatRightBound) {
+
+					// Move character with moving platform
+					if (registry.animations.has(platform))
+						motion.position += platMotion.velocity * (elapsed_ms_since_last_update / 1000.f);
+
+ 					motion.position.y = yPlatPos - (85.f / 2.f);
+					motion.velocity.y = 0.f;
+					motion.offGround = false;
+					offAll = offAll && false;
+				}
+			}
+
+			motion.offGround = offAll;
 		}
 		else {
 			if (motion.position.x < 0.f) {
@@ -157,6 +191,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			else if (motion.position.x > window_width_px) {
 				motion.position.x = window_width_px;
 				motion.velocity.x = -abs(motion.velocity.x);
+			}
+			if (motion.position.y < 0.f) {
+				motion.position.y = 0.f;
+			}
+			else if (motion.position.y > window_height_px - STUDENT_BB_HEIGHT / 2.f) {
+				motion.position.y = window_height_px - STUDENT_BB_HEIGHT / 2.f;
+				motion.velocity.y = 0.f;
+				motion.offGround = false;
 			}
 		}
 
@@ -225,29 +267,45 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// reduce window brightness if any of the present salmons is dying
 	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
 	
+	// update keyframe animated entity motions
 	for (Entity entity : registry.animations.entities)
 	{
+		bool updateVelocity = false;
 		KeyframeAnimation& animation = registry.animations.get(entity);
 		animation.timer_ms += elapsed_ms_since_last_update;
 
+		// update frame when time limit is reached
 		if (animation.timer_ms >= animation.switch_time) {
 			animation.timer_ms = 0.f;
 			animation.curr_frame++;
+			updateVelocity = true; // update velocity only when frame switch has occurred
 		}
 		
+		// ensure we set next frame to first frame if looping animation
 		int next = animation.loop ? (animation.curr_frame + 1) % (animation.num_of_frames) : (animation.curr_frame + 1);
 		if (next >= animation.num_of_frames) {
 			if (!animation.loop)
 				continue;
 		}
 
+		// restart animation if looping
 		if (animation.curr_frame >= animation.num_of_frames)
-				animation.curr_frame = 0;
+			animation.curr_frame = 0;
 
 		Motion& curr_frame = animation.motion_frames[animation.curr_frame];
 		Motion& next_frame = animation.motion_frames[next];
 		Motion& entity_motion = registry.motions.get(entity);
 
+		// set velocity so we can update entity velocities that are on top of animated entity (e.g. a platform)
+		if (updateVelocity) {
+			entity_motion.velocity =
+			{
+				(next_frame.position.x - curr_frame.position.x) / (animation.switch_time/1000.f),
+				(next_frame.position.y - curr_frame.position.y) / (animation.switch_time/1000.f),
+			};
+		}
+
+		// interpolate motion based on timer
 		if (curr_frame.position != next_frame.position)
 			entity_motion.position = curr_frame.position + (next_frame.position - curr_frame.position) * (animation.timer_ms / animation.switch_time);
 		if (curr_frame.angle != next_frame.angle)
@@ -256,25 +314,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			entity_motion.scale = curr_frame.scale + (next_frame.scale - curr_frame.scale) * (animation.timer_ms / animation.switch_time);
 		if (curr_frame.velocity != next_frame.velocity)
 			entity_motion.velocity = curr_frame.velocity + (next_frame.velocity - curr_frame.velocity) * (animation.timer_ms / animation.switch_time);
+
 	}
 	
 	// !!! TODO: update timers for dying **zombies** and remove if time drops below zero, similar to the death timer
 
 	return true;
-}
-
-// defines keyframes for entities that are animated
-void setup_keyframes(RenderSystem* renderer)
-{
-	// Example use case
-	/*
-	Entity platform2 = createPlatform(renderer, { window_width_px - 460.f,600 }, 460.f);
-	Motion m1 = Motion(vec2(300.f, 300.f));
-	Motion m2 = Motion(vec2(600.f, 300.f));
-	std::vector<Motion> frames = { m1, m2 };
-
-	registry.animations.emplace(platform2, KeyframeAnimation((int)frames.size(), 3000.f, true, frames));
-	*/
 }	
 
 // Reset the world state to its initial state
@@ -356,8 +401,7 @@ void WorldSystem::handle_collisions() {
 					Motion& motion_zombie = registry.motions.get(entity_other);
 
 					// Add a little jump animation
-					motion_player.jumpState[0] = true;
-					motion_player.jumpState[1] = motion_player.position[1];
+					motion_player.offGround = true;
 					motion_player.velocity[0] = 0.f;
 					motion_player.velocity[1] = -200.f;
 
@@ -414,25 +458,24 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	if (action == GLFW_PRESS && (!registry.deathTimers.has(player_bozo))) {
 		if (key == GLFW_KEY_A) {
-			motion.velocity[0] -= 200;
+			motion.velocity[0] -= 400;
 		}
 		if (key == GLFW_KEY_D) {
-			motion.velocity[0] += 200;
+			motion.velocity[0] += 400;
 		}
 
-		if (key == GLFW_KEY_SPACE && !motion.jumpState[0]) {
-			motion.jumpState[0] = true;
-			motion.jumpState[1] = motion.position[1];
-			motion.velocity[1] -= 700;
+		if (key == GLFW_KEY_SPACE && !motion.offGround) {
+			motion.offGround = true;
+			motion.velocity[1] -= 1000;
 		}
 	}
 
 	if (action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo))) {
 		if (key == GLFW_KEY_A) {
-			motion.velocity[0] += 200;
+			motion.velocity[0] += 400;
 		}
 		if (key == GLFW_KEY_D) {
-			motion.velocity[0] -= 200;
+			motion.velocity[0] -= 400;
 		}
 	}
 
@@ -472,4 +515,23 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	(vec2)mouse_position; // dummy to avoid compiler warning
+}
+
+// defines keyframes for entities that are animated
+void WorldSystem::setup_keyframes(RenderSystem* renderer)
+{
+	// Example use case
+
+	Entity moving_plat = createPlatform(renderer, { 0.f, 0.f }, 150.f);
+	Motion m1 = Motion(vec2(window_width_px - 150, 300));
+	Motion m2 = Motion(vec2(window_width_px - 150, 600));
+	std::vector<Motion> frames = { m1, m2 };
+	registry.animations.emplace(moving_plat, KeyframeAnimation((int)frames.size(), 3000.f, true, frames));
+
+	Entity moving_plat2 = createPlatform(renderer, { 0.f, 0.f }, 150.f);
+	Motion m3 = Motion(vec2(150, 300));
+	Motion m4 = Motion(vec2(500, 300));
+	std::vector<Motion> frames2 = { m3, m4 };
+	registry.animations.emplace(moving_plat2, KeyframeAnimation((int)frames.size(), 2000.f, true, frames2));
+
 }

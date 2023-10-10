@@ -46,16 +46,15 @@ struct Motion {
 	// First boolean is reflection on x axis with true for reflected
 	// Second boolean is reflection on y axis with true for reflected
 	vec2 reflect;
-	// First is jump active state and second is return value. 
-	vec2 jumpState = { false, 0.f };
-	Motion(vec2 position = { 0.f, 0.f }, float angle = 0.f, vec2 velocity = {0.f, 0.f}, vec2 scale = {10.f, 10.f}, vec2 reflect = { false, false }, vec2 jumpState = {false, 0.f})
+	bool offGround;
+	Motion(vec2 position = { 0.f, 0.f }, float angle = 0.f, vec2 velocity = {0.f, 0.f}, vec2 scale = {10.f, 10.f}, vec2 reflect = { false, false }, bool offGround = true)
 	{
 		this->position = position;
 		this->angle = angle;
 		this->velocity = velocity;
 		this->scale = scale;
 		this->reflect = reflect;
-		this->jumpState = jumpState;
+		this->offGround = offGround;
 	}
 };
 

@@ -2,6 +2,8 @@
 #include "physics_system.hpp"
 #include "world_init.hpp"
 
+//float GRAVITY = 10;
+
 // Returns the local bounding coordinates scaled by the current size of the entity
 vec2 get_bounding_box(const Motion& motion)
 {
@@ -38,8 +40,9 @@ void PhysicsSystem::step(float elapsed_ms)
 		Entity entity = motion_container.entities[i];
 		float step_seconds = elapsed_ms / 1000.f;
 
-		if (motion.jumpState[1]) {
-			jump(motion);
+
+		if (registry.humans.has(entity) && motion.offGround) {
+			motion.velocity[1] += PhysicsSystem::GRAVITY;
 		}
 
 		motion.position[0] += motion.velocity[0] * step_seconds;
@@ -65,14 +68,5 @@ void PhysicsSystem::step(float elapsed_ms)
 				registry.collisions.emplace_with_duplicates(entity_j, entity_i);
 			}
 		}
-	}
-}
-
-void PhysicsSystem::jump(Motion& motion) {
-	motion.velocity[1] += 15 ^ 2;
-	if (motion.position[1] > motion.jumpState[1]) {
-		motion.jumpState[0] = false;
-		motion.velocity[1] = 0;
-		motion.position[1] = motion.jumpState[1];
 	}
 }
