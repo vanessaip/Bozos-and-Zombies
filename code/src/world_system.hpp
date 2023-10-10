@@ -35,9 +35,6 @@ public:
 	// Check for collisions
 	void handle_collisions();
 
-	// Sets up keyframe interpolation for given entity
-	//void setup_keyframes(Entity& entity);
-
 	// Should the game be over ?
 	bool is_over()const;
 private:
@@ -45,6 +42,7 @@ private:
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
 
+	// Sets up keyframe interpolation for given entity
 	void setup_keyframes(RenderSystem* rendered);
 
 	// restart level
