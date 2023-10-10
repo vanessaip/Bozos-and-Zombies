@@ -134,11 +134,56 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
-	for (int i = (int)motion_container.components.size()-1; i>=0; --i) {
-	    Motion& motion = motion_container.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f) {
-			if(!registry.players.has(motion_container.entities[i])) // don't remove the player
-				registry.remove_all_components_of(motion_container.entities[i]);
+
+	Motion& bozo_motion = registry.motions.get(player_bozo);
+
+	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i) {
+		Motion& motion = motion_container.components[i];
+
+		// Bounding entities to window
+		if (registry.players.has(motion_container.entities[i])) {
+			if (motion.position.x < 0.f) {
+				motion.position.x = 0.f;
+			}
+			else if (motion.position.x > window_width_px) {
+				motion.position.x = window_width_px;
+			}
+		}
+		else {
+			if (motion.position.x < 0.f) {
+				motion.position.x = 0.f;
+				motion.velocity.x = abs(motion.velocity.x);
+			}
+			else if (motion.position.x > window_width_px) {
+				motion.position.x = window_width_px;
+				motion.velocity.x = -abs(motion.velocity.x);
+			}
+		}
+
+		if (registry.humans.has(motion_container.entities[i]) && !registry.players.has(motion_container.entities[i])) {
+			if (motion.position.x < 0.f ||
+				motion.position.x > window_width_px) {
+				motion.velocity.x = -motion.velocity.x;
+			}
+		}
+		else {
+			if (motion.position.x + abs(motion.scale.x) < 0.f) {
+				if (!registry.players.has(motion_container.entities[i])) // don't remove the player
+					registry.remove_all_components_of(motion_container.entities[i]);
+			}
+		}
+
+		// If entity is a zombie, update its direction to always move towards Bozo
+		if (registry.zombies.has(motion_container.entities[i])) {
+			vec2 direction = bozo_motion.position - motion.position;
+			float length = sqrt(direction.x * direction.x + direction.y * direction.y);
+			if (length != 0) {  // prevent division by zero
+				direction.x /= length;
+				direction.y /= length;
+			}
+			float speed = 100.f;
+			motion.velocity.x = direction.x * speed;
+			motion.velocity.y = direction.y * speed;
 		}
 	}
 
@@ -191,22 +236,24 @@ void WorldSystem::restart_game() {
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, { 200, 500 });
 	registry.colors.insert(player_bozo, {1, 0.8f, 0.8f});
+	Motion& bozo_motion = registry.motions.get(player_bozo);
+	bozo_motion.velocity = { 0.f, 0.f };
 
 	// Create zombie (one starter zombie per level?)
 	Entity zombie = createZombie(renderer, {0,0});
 	// Setting random initial position and constant velocity (can keep random zombie position?)
 	Motion& zombie_motion = registry.motions.get(zombie);
-	zombie_motion.position =
-		vec2(window_width_px -200.f,
-				50.f + uniform_dist(rng) * (window_height_px - 100.f));
+	zombie_motion.position = vec2(window_width_px - 200.f,
+			50.f + uniform_dist(rng) * (window_height_px - 100.f));
 
 	// Create student
 	Entity student = createStudent(renderer, {0,0});
 	// Setting random initial position and constant velocity
 	Motion& student_motion = registry.motions.get(student);
-	student_motion.position = 
-		vec2(window_width_px -200.f,
-				50.f + uniform_dist(rng) * (window_height_px - 100.f));
+	student_motion.position =
+		vec2(window_width_px - 200.f,
+			50.f + uniform_dist(rng) * (window_height_px - 100.f));
+	student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 200.f : -200.f;
 }
 
 // Compute collisions between entities
@@ -227,10 +274,20 @@ void WorldSystem::handle_collisions() {
 				// initiate death unless already dying
 				if (!registry.deathTimers.has(entity)) {
 					// Scream, reset timer, and make the player [dying animation]
+					Motion& motion = registry.motions.get(entity);
+					motion.angle = 3.14159f;
+					motion.velocity = { 0.f, 0.f }; // Stops all movement
+
+					// Modify Bozo's color
+					vec3& color = registry.colors.get(entity);
+					color = { 1.0f, 0.f, 0.f };
+
+					// Slowly falling effect
+					motion.velocity.y = 100.f;
+
 					registry.deathTimers.emplace(entity);
 					Mix_PlayChannel(-1, salmon_dead_sound, 0);
 
-					// !!! TODO: animate player death
 				}
 			}
 			// Checking Player - Human collisions
@@ -267,7 +324,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	Motion& motion = registry.motions.get(player_bozo);
 	Player& player = registry.players.get(player_bozo);
 
-	if (action == GLFW_PRESS) {
+	if (action == GLFW_PRESS && (!registry.deathTimers.has(player_bozo))) {
 		if (key == GLFW_KEY_A) {
 			motion.velocity[0] -= 200;
 		}
@@ -282,7 +339,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	}
 
-	if (action == GLFW_RELEASE) {
+	if (action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo))) {
 		if (key == GLFW_KEY_A) {
 			motion.velocity[0] += 200;
 		}
@@ -296,7 +353,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
 
-        restart_game();
+		restart_game();
 	}
 
 	// Debugging
