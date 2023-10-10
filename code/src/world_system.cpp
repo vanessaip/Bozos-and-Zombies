@@ -137,13 +137,33 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	Motion& bozo_motion = registry.motions.get(player_bozo);
 
-	for (int i = (int)motion_container.components.size()-1; i>=0; --i) {
-	    Motion& motion = motion_container.components[i];
+	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i) {
+		Motion& motion = motion_container.components[i];
 
-		if (registry.humans.has(motion_container.entities[i])) {
+		// Bounding entities to window
+		if (registry.players.has(motion_container.entities[i])) {
+			if (motion.position.x < 0.f) {
+				motion.position.x = 0.f;
+			}
+			else if (motion.position.x > window_width_px) {
+				motion.position.x = window_width_px;
+			}
+		}
+		else {
+			if (motion.position.x < 0.f) {
+				motion.position.x = 0.f;
+				motion.velocity.x = abs(motion.velocity.x);
+			}
+			else if (motion.position.x > window_width_px) {
+				motion.position.x = window_width_px;
+				motion.velocity.x = -abs(motion.velocity.x);
+			}
+		}
+
+		if (registry.humans.has(motion_container.entities[i]) && !registry.players.has(motion_container.entities[i])) {
 			if (motion.position.x < 0.f ||
 				motion.position.x > window_width_px) {
-				motion.velocity.x = -motion.velocity.x; // reverse x direction
+				motion.velocity.x = -motion.velocity.x;
 			}
 		}
 		else {
@@ -216,6 +236,8 @@ void WorldSystem::restart_game() {
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, { 200, 500 });
 	registry.colors.insert(player_bozo, {1, 0.8f, 0.8f});
+	Motion& bozo_motion = registry.motions.get(player_bozo);
+	bozo_motion.velocity = { 0.f, 0.f };
 
 	// Create zombie (one starter zombie per level?)
 	Entity zombie = createZombie(renderer, {0,0});
@@ -228,10 +250,10 @@ void WorldSystem::restart_game() {
 	Entity student = createStudent(renderer, {0,0});
 	// Setting random initial position and constant velocity
 	Motion& student_motion = registry.motions.get(student);
-	student_motion.position = 
-		vec2(window_width_px -200.f,
-				50.f + uniform_dist(rng) * (window_height_px - 100.f));
-	student_motion.velocity = vec2(-200.f, 0.f);
+	student_motion.position =
+		vec2(window_width_px - 200.f,
+			50.f + uniform_dist(rng) * (window_height_px - 100.f));
+	student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 200.f : -200.f;
 }
 
 // Compute collisions between entities
@@ -252,10 +274,20 @@ void WorldSystem::handle_collisions() {
 				// initiate death unless already dying
 				if (!registry.deathTimers.has(entity)) {
 					// Scream, reset timer, and make the player [dying animation]
+					Motion& motion = registry.motions.get(entity);
+					motion.angle = 3.14159f;
+					motion.velocity = { 0.f, 0.f }; // Stops all movement
+
+					// Modify Bozo's color
+					vec3& color = registry.colors.get(entity);
+					color = { 1.0f, 0.f, 0.f };
+
+					// Slowly falling effect
+					motion.velocity.y = 100.f;
+
 					registry.deathTimers.emplace(entity);
 					Mix_PlayChannel(-1, salmon_dead_sound, 0);
 
-					// !!! TODO: animate player death
 				}
 			}
 			// Checking Player - Human collisions
