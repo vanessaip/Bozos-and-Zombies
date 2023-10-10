@@ -29,13 +29,17 @@ struct Motion {
 	float angle;
 	vec2 velocity;
 	vec2 scale;
+	// First boolean is reflection on x axis with true for reflected
+	// First boolean is reflection on y axis with true for reflected
+	vec2 reflect;
 
-	Motion(vec2 position = { 0.f, 0.f }, float angle = 0.f, vec2 velocity = {0.f, 0.f}, vec2 scale = {10.f, 10.f}) 
+	Motion(vec2 position = { 0.f, 0.f }, float angle = 0.f, vec2 velocity = {0.f, 0.f}, vec2 scale = {10.f, 10.f}, vec2 reflect = { false, false }) 
 	{
 		this->position = position;
 		this->angle = angle;
 		this->velocity = velocity;
 		this->scale = scale;
+		this->reflect = reflect;
 	}
 };
 
@@ -72,14 +76,15 @@ struct DeathTimer
 	float timer_ms = 3000.f;
 };
 
+// Keyframe animation stores all keyframes and timing data for a given entity
 struct KeyframeAnimation
 {
-	int num_of_frames = 0;
+	int num_of_frames = 0;	// total number of keyframes
 	int curr_frame = 0;
-	float timer_ms = 0.f;
-	float switch_time = 0.f;
+	float timer_ms = 0.f;		// time since keyframe was updated
+	float switch_time = 0.f;	// time when next keyframe should be loaded in
 	bool loop = false;
-	std::vector<Motion> motion_frames;
+	std::vector<Motion> motion_frames;	// keyframes
 
 	KeyframeAnimation(int num_of_frames, float switch_time, bool loop, std::vector<Motion>& frames) 
 	{
@@ -141,15 +146,13 @@ struct Mesh
 enum class TEXTURE_ASSET_ID {
 	FISH = 0,
 	TURTLE = FISH + 1,
-	SHARK = TURTLE + 1,
-	TEXTURE_COUNT = SHARK + 1
+	TEXTURE_COUNT = TURTLE + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
-	PEBBLE = COLOURED + 1,
-	SALMON = PEBBLE + 1,
+	SALMON = COLOURED + 1,
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
 	EFFECT_COUNT = WATER + 1
@@ -159,8 +162,7 @@ const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 enum class GEOMETRY_BUFFER_ID {
 	SALMON = 0,
 	SPRITE = SALMON + 1,
-	PEBBLE = SPRITE + 1,
-	DEBUG_LINE = PEBBLE + 1,
+	DEBUG_LINE = SPRITE + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
 	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };

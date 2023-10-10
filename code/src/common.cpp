@@ -21,8 +21,24 @@ void Transform::translate(vec2 offset)
 	mat = mat * T;
 }
 
+// Used to make characters turn around
+// True for right, False for left
+void Transform::reflect(vec2 direction)
+{	
+	int xdir = 1;
+	int ydir = 1;
+	if (direction[0]) {
+		xdir = -1;
+	}
+	if (direction[1]) {
+		ydir = -1;
+	}
+	mat3 R = { { 1.f * xdir, 0.f, 0.f },{ 0.f, 1.f * ydir, 0.f },{ 0.f, 0.f, 1.f } };
+	mat = mat * R;
+}
+
 bool gl_has_errors()
-{
+{ 
 	GLenum error = glGetError();
 
 	if (error == GL_NO_ERROR) return false;
