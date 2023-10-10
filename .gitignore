@@ -1,0 +1,6 @@
+code/build/
+code/out/
+.vscode
+code/ext/project_path.hpp
+.vs
+/code/out/build/x64-Debug/

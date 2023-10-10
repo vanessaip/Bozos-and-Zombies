@@ -67,6 +67,8 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 	}
+	/*
+	// FUTURE: won't need for now, could reuse if we end up having meshes
 	else if (render_request.used_effect == EFFECT_ASSET_ID::SALMON)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
@@ -94,6 +96,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			gl_has_errors();
 		}
 	}
+	*/
 	else
 	{
 		assert(false && "Type of render request not supported");

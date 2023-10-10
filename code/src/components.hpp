@@ -8,17 +8,31 @@
 // Player component
 struct Player
 {
-
 };
 
-// Turtles have a hard shell
-struct HardShell
+// Zombies can turn Humans into Zombies
+struct Zombie
 {
 
 };
 
-// Fish and Salmon have a soft shell
-struct SoftShell
+// Player and Student(s) are Human
+struct Human
+{
+
+};
+
+struct Background
+{
+
+};
+
+struct Platform
+{
+
+};
+
+struct Wall
 {
 
 };
@@ -30,16 +44,18 @@ struct Motion {
 	vec2 velocity;
 	vec2 scale;
 	// First boolean is reflection on x axis with true for reflected
-	// First boolean is reflection on y axis with true for reflected
+	// Second boolean is reflection on y axis with true for reflected
 	vec2 reflect;
-
-	Motion(vec2 position = { 0.f, 0.f }, float angle = 0.f, vec2 velocity = {0.f, 0.f}, vec2 scale = {10.f, 10.f}, vec2 reflect = { false, false }) 
+	// First is jump active state and second is return value. 
+	vec2 jumpState = { false, 0.f };
+	Motion(vec2 position = { 0.f, 0.f }, float angle = 0.f, vec2 velocity = {0.f, 0.f}, vec2 scale = {10.f, 10.f}, vec2 reflect = { false, false }, vec2 jumpState = {false, 0.f})
 	{
 		this->position = position;
 		this->angle = angle;
 		this->velocity = velocity;
 		this->scale = scale;
 		this->reflect = reflect;
+		this->jumpState = jumpState;
 	}
 };
 
@@ -70,10 +86,11 @@ struct DebugComponent
 	// Note, an empty struct has size 1
 };
 
-// A timer that will be associated to dying salmon
+// A timer that will be associated to dying player, direction is 0 when rotationg left, direction is 1 when rotating right
 struct DeathTimer
 {
 	float timer_ms = 3000.f;
+	bool direction = 0;
 };
 
 // Keyframe animation stores all keyframes and timing data for a given entity
@@ -144,16 +161,19 @@ struct Mesh
  */
 
 enum class TEXTURE_ASSET_ID {
-	FISH = 0,
-	TURTLE = FISH + 1,
-	TEXTURE_COUNT = TURTLE + 1
+	STUDENT = 0,
+	ZOMBIE = STUDENT + 1,
+	BOZO = ZOMBIE + 1,
+	BACKGROUND = BOZO + 1,
+	PLATFORM = BACKGROUND + 1,
+	TEXTURE_COUNT = PLATFORM + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
-	SALMON = COLOURED + 1,
-	TEXTURED = SALMON + 1,
+	// SALMON = COLOURED + 1, // can reuse if we end up having meshes
+	TEXTURED = COLOURED + 1,
 	WATER = TEXTURED + 1,
 	EFFECT_COUNT = WATER + 1
 };

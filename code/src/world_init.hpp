@@ -5,20 +5,28 @@
 #include "render_system.hpp"
 
 // These are ahrd coded to the dimensions of the entity texture
-const float FISH_BB_WIDTH = 0.4f * 296.f;
-const float FISH_BB_HEIGHT = 0.4f * 165.f;
-const float TURTLE_BB_WIDTH = 0.4f * 300.f;
-const float TURTLE_BB_HEIGHT = 0.4f * 202.f;
-const float SHARK_BB_WIDTH = 0.4f * 600.f;
-const float SHARK_BB_HEIGHT = 0.4f * 404.f;
+const float STUDENT_BB_WIDTH = 0.4f * 400.f;
+const float STUDENT_BB_HEIGHT = 0.4f * 400.f;
+const float ZOMBIE_BB_WIDTH = 0.4f * 400.f;
+const float ZOMBIE_BB_HEIGHT = 0.4f * 400.f;
+const float BOZO_BB_WIDTH = 0.4f * 400.f;
+const float BOZO_BB_HEIGHT = 0.4f * 400.f;
+const float PLATFORM_HEIGHT = 20.f;
+const float WALL_WIDTH = 20.f;
 
 // the player
-Entity createSalmon(RenderSystem* renderer, vec2 pos);
+Entity createBozo(RenderSystem* renderer, vec2 pos);
 // the prey
-Entity createFish(RenderSystem* renderer, vec2 position);
+Entity createStudent(RenderSystem* renderer, vec2 position);
 // the enemy
-Entity createTurtle(RenderSystem* renderer, vec2 position);
+Entity createZombie(RenderSystem* renderer, vec2 position);
 // a red line for debugging purposes
 Entity createLine(vec2 position, vec2 size);
+// platforms
+Entity createPlatform(RenderSystem* renderer, vec2 position, float width);
+// walls
+Entity createWall(RenderSystem* renderer, vec2 position, float height);
+// render background as a sprite
+Entity createBackground(RenderSystem* renderer);
 
 

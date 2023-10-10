@@ -20,16 +20,20 @@ public:
 	ComponentContainer<Mesh*> meshPtrs;
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<ScreenState> screenStates;
-	ComponentContainer<SoftShell> softShells;
-	ComponentContainer<HardShell> hardShells;
+	ComponentContainer<Human> humans;
+	ComponentContainer<Zombie> zombies;
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<vec3> colors;
+	ComponentContainer<Platform> platforms;
+	ComponentContainer<Background> backgrounds;
+	ComponentContainer<Wall> walls;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
 		// TODO: A1 add a LightUp component
+		registry_list.push_back(&animations);
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);
 		registry_list.push_back(&collisions);
@@ -37,10 +41,13 @@ public:
 		registry_list.push_back(&meshPtrs);
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&screenStates);
-		registry_list.push_back(&softShells);
-		registry_list.push_back(&hardShells);
+		registry_list.push_back(&humans);
+		registry_list.push_back(&zombies);
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&colors);
+		registry_list.push_back(&platforms);
+		registry_list.push_back(&backgrounds);
+		registry_list.push_back(&walls);
 	}
 
 	void clear_all_components() {
