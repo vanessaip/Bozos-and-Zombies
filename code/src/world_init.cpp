@@ -88,7 +88,6 @@ Entity createZombie(RenderSystem* renderer, vec2 position)
 }
 
 // Platform has variable width (possibly variable height in future)
-// can also try duplicating number of platforms
 Entity createPlatform(RenderSystem* renderer, vec2 position, float width)
 {
 	auto entity = Entity();
@@ -117,6 +116,7 @@ Entity createPlatform(RenderSystem* renderer, vec2 position, float width)
 	return entity;
 }
 
+// Wall has variable height
 Entity createWall(RenderSystem* renderer, vec2 position, float height)
 {
 	auto entity = Entity();
@@ -134,7 +134,7 @@ Entity createWall(RenderSystem* renderer, vec2 position, float height)
 	// Setting initial values
 	motion.scale = vec2({ WALL_WIDTH, height });
 
-	// Create a Platform component
+	// Create a Wall component
 	registry.walls.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
@@ -162,7 +162,7 @@ Entity createBackground(RenderSystem* renderer)
 	// Setting initial values
 	motion.scale = vec2({ window_width_px, window_height_px });
 
-	// Create a Platform component
+	// Create a Background component
 	registry.backgrounds.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
