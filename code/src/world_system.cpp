@@ -290,8 +290,12 @@ void WorldSystem::handle_collisions() {
 					// Scream, reset timer, and make the player [dying animation]
 					Motion& motion_player = registry.motions.get(entity);
 					Motion& motion_zombie = registry.motions.get(entity_other);
-					
-					motion_player.velocity = { 0.f, 0.f }; // Stops all movement
+
+					// Add a little jump animation
+					motion_player.jumpState[0] = true;
+					motion_player.jumpState[1] = motion_player.position[1];
+					motion_player.velocity[0] = 0.f;
+					motion_player.velocity[1] = -200.f;
 
 					// Modify Bozo's color
 					vec3& color = registry.colors.get(entity);
