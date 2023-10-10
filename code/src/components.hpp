@@ -76,10 +76,11 @@ struct DebugComponent
 	// Note, an empty struct has size 1
 };
 
-// A timer that will be associated to dying player
+// A timer that will be associated to dying player, direction is 0 when rotationg left, direction is 1 when rotating right
 struct DeathTimer
 {
 	float timer_ms = 3000.f;
+	bool direction = 0;
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)

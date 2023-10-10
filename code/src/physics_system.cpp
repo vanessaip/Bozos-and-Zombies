@@ -36,7 +36,6 @@ void PhysicsSystem::step(float elapsed_ms)
 		// !!! TODO A1: update motion.position based on step_seconds and motion.velocity
 		Motion& motion = motion_container.components[i];
 		Entity entity = motion_container.entities[i];
-
 		float step_seconds = elapsed_ms / 1000.f;
 
 		if (motion.jumpState[1]) {
