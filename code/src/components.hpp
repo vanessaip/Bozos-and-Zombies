@@ -45,8 +45,7 @@ struct Motion {
 	// First boolean is reflection on x axis with true for reflected
 	// Second boolean is reflection on y axis with true for reflected
 	vec2 reflect = { false, false };
-	// First is jump active state and second is return value. 
-	vec2 jumpState = { false, 0.f };
+	bool offGround = { true };
 };
 
 // Stucture to store collision information

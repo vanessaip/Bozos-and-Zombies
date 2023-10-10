@@ -140,6 +140,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i) {
 		Motion& motion = motion_container.components[i];
 
+		auto& platforms = registry.platforms;
+
 		// Bounding entities to window
 		if (registry.players.has(motion_container.entities[i])) {
 			if (motion.position.x < 0.f) {
@@ -148,6 +150,34 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			else if (motion.position.x > window_width_px) {
 				motion.position.x = window_width_px;
 			}
+			if (motion.position.y < 0.f) {
+				motion.position.y = 0.f;
+			}
+			else if (motion.position.y > window_height_px - STUDENT_BB_HEIGHT / 2.f) {
+				motion.position.y = window_height_px - STUDENT_BB_HEIGHT / 2.f;
+				motion.velocity.y = 0.f;
+				motion.offGround = false;
+			}
+
+			bool offAll = true;
+
+			for (int i = 0; i < platforms.size(); i++) {
+				Entity& platform = platforms.entities[i];
+				Motion& platMotion = motion_container.get(platform);
+				float xPlatLeftBound = platMotion.position.x - platMotion.scale[0] / 2.f;
+				float xPlatRightBound = platMotion.position.x + platMotion.scale[0] / 2.f;
+				float yPlatPos = platMotion.position.y - 85.f;
+				if (motion.velocity.y >= 0 && motion.position.y <= yPlatPos && motion.position.y >= yPlatPos - STUDENT_BB_HEIGHT && 
+					motion.position.x > xPlatLeftBound && motion.position.x < xPlatRightBound) {
+
+ 					motion.position.y = yPlatPos;
+					motion.velocity.y = 0.f;
+					motion.offGround = false;
+					offAll = offAll && false;
+				}
+			}
+
+			motion.offGround = offAll;
 		}
 		else {
 			if (motion.position.x < 0.f) {
@@ -157,6 +187,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			else if (motion.position.x > window_width_px) {
 				motion.position.x = window_width_px;
 				motion.velocity.x = -abs(motion.velocity.x);
+			}
+			if (motion.position.y < 0.f) {
+				motion.position.y = 0.f;
+			}
+			else if (motion.position.y > window_height_px - STUDENT_BB_HEIGHT / 2.f) {
+				motion.position.y = window_height_px - STUDENT_BB_HEIGHT / 2.f;
+				motion.velocity.y = 0.f;
+				motion.offGround = false;
 			}
 		}
 
@@ -307,8 +345,7 @@ void WorldSystem::handle_collisions() {
 					Motion& motion_zombie = registry.motions.get(entity_other);
 
 					// Add a little jump animation
-					motion_player.jumpState[0] = true;
-					motion_player.jumpState[1] = motion_player.position[1];
+					motion_player.offGround = true;
 					motion_player.velocity[0] = 0.f;
 					motion_player.velocity[1] = -200.f;
 
@@ -365,25 +402,24 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	if (action == GLFW_PRESS && (!registry.deathTimers.has(player_bozo))) {
 		if (key == GLFW_KEY_A) {
-			motion.velocity[0] -= 200;
+			motion.velocity[0] -= 400;
 		}
 		if (key == GLFW_KEY_D) {
-			motion.velocity[0] += 200;
+			motion.velocity[0] += 400;
 		}
 
-		if (key == GLFW_KEY_SPACE && !motion.jumpState[0]) {
-			motion.jumpState[0] = true;
-			motion.jumpState[1] = motion.position[1];
-			motion.velocity[1] -= 700;
+		if (key == GLFW_KEY_SPACE && !motion.offGround) {
+			motion.offGround = true;
+			motion.velocity[1] -= 1000;
 		}
 	}
 
 	if (action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo))) {
 		if (key == GLFW_KEY_A) {
-			motion.velocity[0] += 200;
+			motion.velocity[0] += 400;
 		}
 		if (key == GLFW_KEY_D) {
-			motion.velocity[0] -= 200;
+			motion.velocity[0] -= 400;
 		}
 	}
 
