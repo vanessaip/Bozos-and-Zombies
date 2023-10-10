@@ -117,6 +117,34 @@ Entity createPlatform(RenderSystem* renderer, vec2 position, float width)
 	return entity;
 }
 
+Entity createWall(RenderSystem* renderer, vec2 position, float height)
+{
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the motion
+	auto& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.position = position;
+
+	// Setting initial values
+	motion.scale = vec2({ WALL_WIDTH, height });
+
+	// Create a Platform component
+	registry.walls.emplace(entity);
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::PLATFORM,
+		 EFFECT_ASSET_ID::TEXTURED,
+		 GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
 Entity createBackground(RenderSystem* renderer)
 {
 	auto entity = Entity();
