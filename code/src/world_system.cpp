@@ -247,6 +247,21 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
+	// Create background first (painter's algorithm for rendering)
+	Entity background = createBackground(renderer);
+
+	// Create platform(s) at set positions, specify width
+	// TODO(vanesssa): define array of platform dimensions for each level
+	Entity platform0 = createPlatform(renderer, {window_width_px/2, window_height_px-50.f}, window_width_px-60.f);
+	Entity platform1 = createPlatform(renderer, {260,600}, 460.f);
+	Entity platform2 = createPlatform(renderer, {window_width_px -460.f,600}, 460.f);
+	Entity platform3 = createPlatform(renderer, {window_width_px -500.f,300}, 300.f);
+	Entity platform4 = createPlatform(renderer, {window_width_px/2, 70.f}, window_width_px-60.f);
+
+	// Create walls
+	Entity wall0 = createWall(renderer, {40, 500}, 850);
+	Entity wall1 = createWall(renderer, {window_width_px -40, 500}, 850);
+
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, { 200, 500 });
 	registry.colors.insert(player_bozo, {1, 0.8f, 0.8f});

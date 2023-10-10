@@ -11,6 +11,8 @@ const float ZOMBIE_BB_WIDTH = 0.4f * 400.f;
 const float ZOMBIE_BB_HEIGHT = 0.4f * 400.f;
 const float BOZO_BB_WIDTH = 0.4f * 400.f;
 const float BOZO_BB_HEIGHT = 0.4f * 400.f;
+const float PLATFORM_HEIGHT = 20.f;
+const float WALL_WIDTH = 20.f;
 
 // the player
 Entity createBozo(RenderSystem* renderer, vec2 pos);
@@ -20,5 +22,11 @@ Entity createStudent(RenderSystem* renderer, vec2 position);
 Entity createZombie(RenderSystem* renderer, vec2 position);
 // a red line for debugging purposes
 Entity createLine(vec2 position, vec2 size);
+// platforms
+Entity createPlatform(RenderSystem* renderer, vec2 position, float width);
+// walls
+Entity createWall(RenderSystem* renderer, vec2 position, float height);
+// render background as a sprite
+Entity createBackground(RenderSystem* renderer);
 
 
