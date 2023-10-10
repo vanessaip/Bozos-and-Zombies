@@ -192,12 +192,26 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     ScreenState &screen = registry.screenStates.components[0];
 
     float min_timer_ms = 3000.f;
+	float min_angle = asin(-1);
+	float max_angle = asin(1);
+
 	for (Entity entity : registry.deathTimers.entities) {
-		// progress timer
+		// progress timer, make the rotation happening based on time
 		DeathTimer& timer = registry.deathTimers.get(entity);
+		Motion& motion = registry.motions.get(entity);
 		timer.timer_ms -= elapsed_ms_since_last_update;
 		if(timer.timer_ms < min_timer_ms){
 			min_timer_ms = timer.timer_ms;
+			if (timer.direction == 0) {
+				if (motion.angle > min_angle) {
+					motion.angle += asin(-1) / 50;
+				}	
+			}
+			else {
+				if (motion.angle < max_angle) {
+                    motion.angle += asin(1) / 50;
+				}			
+			}
 		}
 
 		// restart the game once the death timer expired
@@ -274,18 +288,24 @@ void WorldSystem::handle_collisions() {
 				// initiate death unless already dying
 				if (!registry.deathTimers.has(entity)) {
 					// Scream, reset timer, and make the player [dying animation]
-					Motion& motion = registry.motions.get(entity);
-					motion.angle = 3.14159f;
-					motion.velocity = { 0.f, 0.f }; // Stops all movement
+					Motion& motion_player = registry.motions.get(entity);
+					Motion& motion_zombie = registry.motions.get(entity_other);
+					
+					motion_player.velocity = { 0.f, 0.f }; // Stops all movement
 
 					// Modify Bozo's color
 					vec3& color = registry.colors.get(entity);
 					color = { 1.0f, 0.f, 0.f };
 
-					// Slowly falling effect
-					motion.velocity.y = 100.f;
-
 					registry.deathTimers.emplace(entity);
+
+					// Set the direction of the death
+					DeathTimer& timer = registry.deathTimers.get(entity);
+					if (motion_zombie.velocity.x < 0) {
+						timer.direction = 0;
+					}
+					else { timer.direction = 1; }
+
 					Mix_PlayChannel(-1, salmon_dead_sound, 0);
 
 				}
