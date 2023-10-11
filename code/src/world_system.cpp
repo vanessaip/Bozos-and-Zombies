@@ -141,6 +141,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		Motion& motion = motion_container.components[i];
 
 		auto& platforms = registry.platforms;
+		auto& walls = registry.walls;
 
 		// Bounding entities to window
 		if (registry.players.has(motion_container.entities[i])) {
@@ -159,7 +160,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				motion.offGround = false;
 			}
 
-			//bool offAll = true;
+			bool offAll = true;
 
 			for (int i = 0; i < platforms.size(); i++) {
 				Entity& platform = platforms.entities[i];
@@ -178,6 +179,22 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 					motion.velocity.y = 0.f;
 					motion.offGround = false;
 					offAll = offAll && false;
+				}
+			}
+
+			for (int i = 0; i < walls.size(); i++) {
+				Entity& wall = walls.entities[i];
+				Motion& wallMotion = motion_container.get(wall);
+				float wallLeftBound = 40.f + STUDENT_BB_WIDTH / 2.f;
+				float wallRightBound = 1240.f - STUDENT_BB_WIDTH / 2.f;
+
+				// Moving to the left
+				if (motion.position.x < wallLeftBound) {
+					// motion.velocity.x = 0.f;
+					motion.position.x += 5.f;
+				}
+				if (motion.position.x > wallRightBound) {
+					motion.position.x -= 5.f;
 				}
 			}
 
