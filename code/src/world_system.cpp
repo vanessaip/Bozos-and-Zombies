@@ -165,28 +165,58 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			for (int i = 0; i < platforms.size(); i++) {
 				Entity& platform = platforms.entities[i];
 				Motion& platMotion = motion_container.get(platform);
+
+				float playerRightSide = motion.position.x + STUDENT_BB_WIDTH / 2.f;
+				float playerLeftSide = motion.position.x - STUDENT_BB_WIDTH / 2.f;
+				float playerBottom = motion.position.y + STUDENT_BB_HEIGHT / 2.f;
+				float playerTop = motion.position.y - STUDENT_BB_HEIGHT / 2.f;
+
 				float xPlatLeftBound = platMotion.position.x - platMotion.scale[0] / 2.f;
 				float xPlatRightBound = platMotion.position.x + platMotion.scale[0] / 2.f;
-				float yPlatTop = platMotion.position.y - PLATFORM_HEIGHT / 2.f - STUDENT_BB_HEIGHT / 2.f;
-				float yPlatBottom = platMotion.position.y + PLATFORM_HEIGHT / 2.f + STUDENT_BB_HEIGHT / 2.f;
-				if (motion.velocity.y >= 0 && motion.position.y >= yPlatTop && motion.position.y < yPlatTop + 10.f && 
-					motion.position.x > xPlatLeftBound && motion.position.x < xPlatRightBound) {
+				float yPlatTop = platMotion.position.y - PLATFORM_HEIGHT / 2.f;
+				float yPlatBottom = platMotion.position.y + PLATFORM_HEIGHT / 2.f;
+
+				// Collision with Top of platform
+				if (motion.velocity.y >= 0 && playerBottom >= yPlatTop && playerBottom < yPlatTop + 20.f && 
+					playerRightSide > xPlatLeftBound && playerLeftSide < xPlatRightBound) {
 
 					// Move character with moving platform
 					if (registry.animations.has(platform))
 						motion.position += platMotion.velocity * (elapsed_ms_since_last_update / 1000.f);
 
-					motion.position.y = yPlatTop;
+					motion.position.y = yPlatTop - STUDENT_BB_HEIGHT / 2.f;
 					motion.velocity.y = 0.f;
 					motion.offGround = false;
 					offAll = offAll && false;
 				}
+				
+				// Collision with Bottom of platform
+				if (motion.velocity.y <= 0 && playerTop < yPlatBottom && playerTop > yPlatBottom - 20.f &&
+					playerRightSide > xPlatLeftBound && playerLeftSide < xPlatRightBound) {
 
-				if (motion.velocity.y <= 0 && motion.position.y < yPlatBottom && motion.position.y > yPlatBottom - 10.f &&
-					motion.position.x > xPlatLeftBound && motion.position.x < xPlatRightBound) {
-
-					motion.position.y = yPlatBottom;
+					motion.position.y = yPlatBottom + STUDENT_BB_HEIGHT / 2.f;
 					motion.velocity.y = 0.f;
+				}
+
+				// Collision with Right edge of platform.
+				if (playerLeftSide < xPlatRightBound &&
+					playerLeftSide > xPlatRightBound - 20.f &&
+					playerTop < yPlatBottom &&
+					playerBottom > yPlatTop) {
+
+
+					/*motion.position.y = yPlatBottom;*/
+					motion.position.x = xPlatRightBound + STUDENT_BB_WIDTH / 2.f;
+				}
+
+				if (playerRightSide > xPlatLeftBound &&
+					playerRightSide < xPlatLeftBound + 20.f &&
+					playerTop < yPlatBottom &&
+					playerBottom > yPlatTop) {
+
+
+					/*motion.position.y = yPlatBottom;*/
+					motion.position.x = xPlatLeftBound - STUDENT_BB_WIDTH / 2.f;
 				}
 			}
 
@@ -367,11 +397,11 @@ void WorldSystem::restart_game() {
 	bozo_motion.velocity = { 0.f, 0.f };
 
 	// Create zombie (one starter zombie per level?)
-	Entity zombie = createZombie(renderer, {0,0});
+	/*Entity zombie = createZombie(renderer, {0,0});*/
 	// Setting random initial position and constant velocity (can keep random zombie position?)
-	Motion& zombie_motion = registry.motions.get(zombie);
+	/*Motion& zombie_motion = registry.motions.get(zombie);
 	zombie_motion.position = vec2(window_width_px - 200.f,
-			50.f + uniform_dist(rng) * (window_height_px - 100.f));
+			50.f + uniform_dist(rng) * (window_height_px - 100.f));*/
 
 	// Create student
 	Entity student = createStudent(renderer, {0,0});
@@ -492,7 +522,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 		if (key == GLFW_KEY_W && !motion.offGround) {
 			motion.offGround = true;
-			motion.velocity[1] -= 1000;
+			motion.velocity[1] -= 700;
 		}
 	}
 
