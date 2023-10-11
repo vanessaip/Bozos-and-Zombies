@@ -144,7 +144,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		auto& walls = registry.walls;
 
 		// Bounding entities to window
-		if (registry.players.has(motion_container.entities[i])) {
+		if (registry.humans.has(motion_container.entities[i])) {
 			if (motion.position.x < 0.f) {
 				motion.position.x = 0.f;
 			}
@@ -167,18 +167,26 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				Motion& platMotion = motion_container.get(platform);
 				float xPlatLeftBound = platMotion.position.x - platMotion.scale[0] / 2.f;
 				float xPlatRightBound = platMotion.position.x + platMotion.scale[0] / 2.f;
-				float yPlatPos = platMotion.position.y - (85.f / 2.f); // Hack: half this quantity so that entities don't fall through moving platforms
-				if (motion.velocity.y >= 0 && motion.position.y <= yPlatPos && motion.position.y >= yPlatPos - STUDENT_BB_HEIGHT && 
+				float yPlatTop = platMotion.position.y - PLATFORM_HEIGHT / 2.f - STUDENT_BB_HEIGHT / 2.f;
+				float yPlatBottom = platMotion.position.y + PLATFORM_HEIGHT / 2.f + STUDENT_BB_HEIGHT / 2.f;
+				if (motion.velocity.y >= 0 && motion.position.y >= yPlatTop && motion.position.y < yPlatTop + 10.f && 
 					motion.position.x > xPlatLeftBound && motion.position.x < xPlatRightBound) {
 
 					// Move character with moving platform
 					if (registry.animations.has(platform))
 						motion.position += platMotion.velocity * (elapsed_ms_since_last_update / 1000.f);
 
- 					motion.position.y = yPlatPos - (85.f / 2.f);
+					motion.position.y = yPlatTop;
 					motion.velocity.y = 0.f;
 					motion.offGround = false;
 					offAll = offAll && false;
+				}
+
+				if (motion.velocity.y <= 0 && motion.position.y < yPlatBottom && motion.position.y > yPlatBottom - 10.f &&
+					motion.position.x > xPlatLeftBound && motion.position.x < xPlatRightBound) {
+
+					motion.position.y = yPlatBottom;
+					motion.velocity.y = 0.f;
 				}
 			}
 
@@ -451,25 +459,25 @@ void WorldSystem::handle_collisions() {
 				}
 			}
 			// Handle Player - Platform stand on collisions
-			else if (registry.platforms.has(entity_other)) {
-					Motion& motion_bozo = registry.motions.get(entity);
-					Motion& motion_plat = registry.motions.get(entity_other);
-							float xPlatLeftBound = motion_plat.position.x - motion_plat.scale[0] / 2.f;
-							float xPlatRightBound = motion_plat.position.x + motion_plat.scale[0] / 2.f;
-							float yPlatPos = motion_plat.position.y - 85.f;
-		         			// Stand on platform
-						if (motion_bozo.velocity.y >= 0.f && motion_bozo.position.y <= yPlatPos && motion_bozo.position.y >= yPlatPos - STUDENT_BB_HEIGHT &&
-							motion_bozo.position.x > xPlatLeftBound && motion_bozo.position.x < xPlatRightBound) {
-							// registry.collisions.emplace_with_duplicates(entity_bozo, entity_plat);
-							motion_bozo.position.y = yPlatPos;
-									motion_bozo.velocity.y = 0.f;
-									motion_bozo.offGround = false;
-									// offAll = offAll && false;
-						}
-						else if (motion_bozo.position.x < xPlatLeftBound || motion_bozo.position.x > xPlatRightBound) {
-							motion_bozo.offGround = true;
-						}
-				}			
+			//else if (registry.platforms.has(entity_other)) {
+			//		Motion& motion_bozo = registry.motions.get(entity);
+			//		Motion& motion_plat = registry.motions.get(entity_other);
+			//				float xPlatLeftBound = motion_plat.position.x - motion_plat.scale[0] / 2.f;
+			//				float xPlatRightBound = motion_plat.position.x + motion_plat.scale[0] / 2.f;
+			//				float yPlatPos = motion_plat.position.y - 85.f;
+		    //        			// Stand on platform
+			//			if (motion_bozo.velocity.y >= 0.f && motion_bozo.position.y <= yPlatPos && motion_bozo.position.y >= yPlatPos - STUDENT_BB_HEIGHT &&
+			//				motion_bozo.position.x > xPlatLeftBound && motion_bozo.position.x < xPlatRightBound) {
+			//				// registry.collisions.emplace_with_duplicates(entity_bozo, entity_plat);
+			//				motion_bozo.position.y = yPlatPos;
+			//						motion_bozo.velocity.y = 0.f;
+			//						motion_bozo.offGround = false;
+			//						// offAll = offAll && false;
+			//			}
+			//			else if (motion_bozo.position.x < xPlatLeftBound || motion_bozo.position.x > xPlatRightBound) {
+			//				motion_bozo.offGround = true;
+			//			}
+			//	}			
 		}
 	}
 
@@ -503,7 +511,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 		if (key == GLFW_KEY_SPACE && !motion.offGround) {
 			motion.offGround = true;
-			motion.velocity[1] -= 700;
+			motion.velocity[1] -= 1000;
 		}
 	}
 
