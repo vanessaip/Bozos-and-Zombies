@@ -145,17 +145,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 		// Bounding entities to window
 		if (registry.humans.has(motion_container.entities[i])) {
-			if (motion.position.x < 0.f) {
-				motion.position.x = 0.f;
+			if (motion.position.x < 40.f + BOZO_BB_WIDTH / 2.f) {
+				motion.position.x = 40.f + BOZO_BB_WIDTH / 2.f;
 			}
-			else if (motion.position.x > window_width_px) {
-				motion.position.x = window_width_px;
+			else if (motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f - 40.f) {
+				motion.position.x = window_width_px - BOZO_BB_WIDTH / 2.f - 40.f;
 			}
-			if (motion.position.y < 0.f) {
-				motion.position.y = 0.f;
+			if (motion.position.y < 0.f + BOZO_BB_HEIGHT / 2.f) {
+				motion.position.y = 0.f + BOZO_BB_HEIGHT / 2.f;
 			}
-			else if (motion.position.y > window_height_px - STUDENT_BB_HEIGHT / 2.f) {
-				motion.position.y = window_height_px - STUDENT_BB_HEIGHT / 2.f;
+			else if (motion.position.y > window_height_px - BOZO_BB_HEIGHT / 2.f) {
+				motion.position.y = window_height_px - BOZO_BB_HEIGHT / 2.f;
 				motion.velocity.y = 0.f;
 				motion.offGround = false;
 			}
@@ -194,11 +194,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				Entity& wall = walls.entities[i];
 				Motion& wallMotion = motion_container.get(wall);
 				float wallLeftBound = 40.f + STUDENT_BB_WIDTH / 2.f;
-				float wallRightBound = 1240.f - STUDENT_BB_WIDTH / 2.f;
+				float wallRightBound = window_width_px - STUDENT_BB_WIDTH / 2.f - 40.f;
 
 				// Moving to the left
 				if (motion.position.x < wallLeftBound) {
-					// motion.velocity.x = 0.f;
 					motion.position.x += 5.f;
 				}
 				if (motion.position.x > wallRightBound) {
@@ -208,28 +207,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 			motion.offGround = offAll;
 		}
-		else {
-			if (motion.position.x < 0.f) {
-				motion.position.x = 0.f;
-				motion.velocity.x = abs(motion.velocity.x);
-			}
-			else if (motion.position.x > window_width_px) {
-				motion.position.x = window_width_px;
-				motion.velocity.x = -abs(motion.velocity.x);
-			}
-			if (motion.position.y < 0.f) {
-				motion.position.y = 0.f;
-			}
-			else if (motion.position.y > window_height_px - STUDENT_BB_HEIGHT / 2.f) {
-				motion.position.y = window_height_px - STUDENT_BB_HEIGHT / 2.f;
-				motion.velocity.y = 0.f;
-				motion.offGround = false;
-			}
-		}
 
 		if (registry.humans.has(motion_container.entities[i]) && !registry.players.has(motion_container.entities[i])) {
-			if (motion.position.x < 0.f ||
-				motion.position.x > window_width_px) {
+			if (motion.position.x < 40.f + STUDENT_BB_HEIGHT / 2.f ||
+				motion.position.x > window_width_px - STUDENT_BB_HEIGHT / 2.f - 40.f) {
 				motion.velocity.x = -motion.velocity.x;
 			}
 		}
@@ -377,7 +358,7 @@ void WorldSystem::restart_game() {
 
 	// Create walls
 	Entity wall0 = createWall(renderer, {40, 500}, 850);
-	Entity wall1 = createWall(renderer, {window_width_px -40, 500}, 850);
+	Entity wall1 = createWall(renderer, {window_width_px - 40, 500}, 850);
 
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, { 200, 500 });
