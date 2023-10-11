@@ -378,7 +378,7 @@ void WorldSystem::restart_game() {
 	// Setting random initial position and constant velocity
 	Motion& student_motion = registry.motions.get(student);
 	student_motion.position =
-		vec2(window_width_px - 200.f,
+		vec2(window_width_px / 2.f,
 			50.f + uniform_dist(rng) * (window_height_px - 100.f));
 	student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 200.f : -200.f;
 
