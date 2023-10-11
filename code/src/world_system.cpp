@@ -509,7 +509,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			motion.velocity[0] += 400;
 		}
 
-		if (key == GLFW_KEY_SPACE && !motion.offGround) {
+		if (key == GLFW_KEY_W && !motion.offGround) {
 			motion.offGround = true;
 			motion.velocity[1] -= 1000;
 		}
@@ -533,7 +533,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 
 	// Debugging
-	if (key == GLFW_KEY_D) {
+	if (key == GLFW_KEY_BACKSLASH) {
 		if (action == GLFW_RELEASE)
 			debugging.in_debug_mode = false;
 		else
