@@ -159,25 +159,30 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				motion.offGround = false;
 			}
 
-			bool offAll = true;
+			//bool offAll = true;
 
-			for (int i = 0; i < platforms.size(); i++) {
-				Entity& platform = platforms.entities[i];
-				Motion& platMotion = motion_container.get(platform);
-				float xPlatLeftBound = platMotion.position.x - platMotion.scale[0] / 2.f;
-				float xPlatRightBound = platMotion.position.x + platMotion.scale[0] / 2.f;
-				float yPlatPos = platMotion.position.y - 85.f;
-				if (motion.velocity.y >= 0 && motion.position.y <= yPlatPos && motion.position.y >= yPlatPos - STUDENT_BB_HEIGHT && 
-					motion.position.x > xPlatLeftBound && motion.position.x < xPlatRightBound) {
+			//for (int i = 0; i < platforms.size(); i++) {
+			//	Entity& platform = platforms.entities[i];
+			//	Motion& platMotion = motion_container.get(platform);
+			//	float xPlatLeftBound = platMotion.position.x - platMotion.scale[0] / 2.f;
+			//	float xPlatRightBound = platMotion.position.x + platMotion.scale[0] / 2.f;
+			//	float yPlatPos = platMotion.position.y - 85.f;
+			//	// Jump onto the platform
+			//	if (motion.velocity.y >= 0 && motion.position.y <= yPlatPos && motion.position.y >= yPlatPos - STUDENT_BB_HEIGHT && 
+			//		motion.position.x > xPlatLeftBound && motion.position.x < xPlatRightBound) {
+ 		//			motion.position.y = yPlatPos;
+			//		motion.velocity.y = 0.f;
+			//		motion.offGround = false;
+			//		offAll = offAll && false;
+			//	}
+			//	else if (motion.offGround == true && motion.velocity.y < 0 && motion.position.y <= yPlatPos && motion.position.y >= yPlatPos - STUDENT_BB_HEIGHT &&
+			//		motion.position.x > xPlatLeftBound && motion.position.x < xPlatRightBound){
+			//		// Blcoked by the platform
+			//		motion.velocity = -motion.velocity;
+			//	}
+			//}
 
- 					motion.position.y = yPlatPos;
-					motion.velocity.y = 0.f;
-					motion.offGround = false;
-					offAll = offAll && false;
-				}
-			}
-
-			motion.offGround = offAll;
+			//motion.offGround = offAll;
 		}
 		else {
 			if (motion.position.x < 0.f) {
@@ -377,6 +382,26 @@ void WorldSystem::handle_collisions() {
 					// !!! TODO: just colliding with other students immunizes them or require keyboard input from user?
 				}
 			}
+			// Handle Player - Platform stand on collisions
+			else if (registry.platforms.has(entity_other)) {
+					Motion& motion_bozo = registry.motions.get(entity);
+					Motion& motion_plat = registry.motions.get(entity_other);
+							float xPlatLeftBound = motion_plat.position.x - motion_plat.scale[0] / 2.f;
+							float xPlatRightBound = motion_plat.position.x + motion_plat.scale[0] / 2.f;
+							float yPlatPos = motion_plat.position.y - 85.f;
+		         			// Stand on platform
+						if (motion_bozo.velocity.y >= 0.f && motion_bozo.position.y <= yPlatPos && motion_bozo.position.y >= yPlatPos - STUDENT_BB_HEIGHT &&
+							motion_bozo.position.x > xPlatLeftBound && motion_bozo.position.x < xPlatRightBound) {
+							// registry.collisions.emplace_with_duplicates(entity_bozo, entity_plat);
+							motion_bozo.position.y = yPlatPos;
+									motion_bozo.velocity.y = 0.f;
+									motion_bozo.offGround = false;
+									// offAll = offAll && false;
+						}
+						else if (motion_bozo.position.x < xPlatLeftBound || motion_bozo.position.x > xPlatRightBound) {
+							motion_bozo.offGround = true;
+						}
+				}			
 		}
 	}
 
@@ -410,7 +435,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 		if (key == GLFW_KEY_SPACE && !motion.offGround) {
 			motion.offGround = true;
-			motion.velocity[1] -= 1000;
+			motion.velocity[1] -= 700;
 		}
 	}
 
