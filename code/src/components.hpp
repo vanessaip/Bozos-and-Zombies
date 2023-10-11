@@ -1,7 +1,8 @@
-#pragma once
+ #pragma once
 #include "common.hpp"
 #include <vector>
 #include <unordered_map>
+#include <cassert>
 #include "../ext/stb_image/stb_image.h"
 
 // Player component
@@ -38,14 +39,23 @@ struct Wall
 
 // All data relevant to the shape and motion of entities
 struct Motion {
-	vec2 position = { 0.f, 0.f };
-	float angle = 0.f;
-	vec2 velocity = { 0.f, 0.f };
-	vec2 scale = { 10.f, 10.f };
+	vec2 position;
+	float angle;
+	vec2 velocity;
+	vec2 scale;
 	// First boolean is reflection on x axis with true for reflected
 	// Second boolean is reflection on y axis with true for reflected
-	vec2 reflect = { false, false };
-	bool offGround = { true };
+	vec2 reflect;
+	bool offGround;
+	Motion(vec2 position = { 0.f, 0.f }, float angle = 0.f, vec2 velocity = {0.f, 0.f}, vec2 scale = {10.f, 10.f}, vec2 reflect = { false, false }, bool offGround = true)
+	{
+		this->position = position;
+		this->angle = angle;
+		this->velocity = velocity;
+		this->scale = scale;
+		this->reflect = reflect;
+		this->offGround = offGround;
+	}
 };
 
 // Stucture to store collision information
@@ -80,6 +90,26 @@ struct DeathTimer
 {
 	float timer_ms = 3000.f;
 	bool direction = 0;
+};
+
+// Keyframe animation stores all keyframes and timing data for a given entity
+struct KeyframeAnimation
+{
+	int num_of_frames = 0;	// total number of keyframes
+	int curr_frame = 0;
+	float timer_ms = 0.f;		// time since keyframe was updated
+	float switch_time = 0.f;	// time when next keyframe should be loaded in
+	bool loop = false;
+	std::vector<Motion> motion_frames;	// keyframes
+
+	KeyframeAnimation(int num_of_frames, float switch_time, bool loop, std::vector<Motion>& frames) 
+	{
+		this->num_of_frames = num_of_frames;
+		this->switch_time = switch_time;
+		this->loop = loop;
+		this->motion_frames = frames;
+	}
+	
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)
