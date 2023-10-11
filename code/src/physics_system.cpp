@@ -28,6 +28,19 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	return false;
 }
 
+//void special_collision(const Entity& entity_bozo, const Entity& entity_plat) {
+//	Motion& motion_bozo = registry.motions.get(entity_bozo);
+//	Motion& motion_plat = registry.motions.get(entity_plat);
+//			float xPlatLeftBound = motion_plat.position.x - motion_plat.scale[0] / 2.f;
+//			float xPlatRightBound = motion_plat.position.x + motion_plat.scale[0] / 2.f;
+//			float yPlatPos = motion_plat.position.y - 85.f;
+//			// Stand on platform
+//		if (motion_bozo.velocity.y >= 0.f && motion_bozo.position.y <= yPlatPos && motion_bozo.position.y >= yPlatPos - STUDENT_BB_HEIGHT &&
+//			motion_bozo.position.x > xPlatLeftBound && motion_bozo.position.x < xPlatRightBound) {
+//			registry.collisions.emplace_with_duplicates(entity_bozo, entity_plat);
+//		}
+//}
+
 void PhysicsSystem::step(float elapsed_ms)
 {
 	// Move fish based on how much time has passed, this is to (partially) avoid
@@ -59,9 +72,12 @@ void PhysicsSystem::step(float elapsed_ms)
 		for(uint j = i+1; j < motion_container.components.size(); j++)
 		{
 			Motion& motion_j = motion_container.components[j];
+			Entity entity_j = motion_container.entities[j];
+			//if (registry.players.has(entity_i) && registry.platforms.has(entity_j)) {
+			//	special_collision(entity_i,entity_j);
+			//}
 			if (collides(motion_i, motion_j))
-			{
-				Entity entity_j = motion_container.entities[j];
+			{				
 				// Create a collisions event
 				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
 				registry.collisions.emplace_with_duplicates(entity_i, entity_j);

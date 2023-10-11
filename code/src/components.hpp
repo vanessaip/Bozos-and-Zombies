@@ -63,7 +63,11 @@ struct Collision
 {
 	// Note, the first object is stored in the ECS container.entities
 	Entity other_entity; // the second object involved in the collision
-	Collision(Entity& other_entity) { this->other_entity = other_entity; };
+//	int collision_type; // 0 is interactive collision, 1 is collision for stand on platform, 2 is for bounce back collision
+	Collision(Entity& other_entity) {
+		this->other_entity = other_entity; 
+//		this->collision_type = collision_type;
+	};
 };
 
 // Data structure for toggling debug mode
