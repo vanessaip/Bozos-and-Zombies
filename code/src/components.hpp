@@ -116,6 +116,14 @@ struct KeyframeAnimation
 	
 };
 
+struct OnVerticalPlatform 
+{
+	Motion* object_motion;
+	Motion* plat_motion;
+	
+	OnVerticalPlatform(Motion* o_motion, Motion* p_motion) : object_motion(o_motion), plat_motion(p_motion) {}
+};
+
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)
 struct ColoredVertex
 {
