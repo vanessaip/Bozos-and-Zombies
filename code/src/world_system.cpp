@@ -5,6 +5,7 @@
 // stlib
 #include <cassert>
 #include <sstream>
+#include <tuple>
 
 #include "physics_system.hpp"
 
@@ -145,6 +146,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// (the containers exchange the last element with the current)
 
 	Motion& bozo_motion = registry.motions.get(player_bozo);
+	std::vector<std::tuple<Motion*, Motion*>> charactersOnMovingPlat = {};
 
 	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i) {
 		Motion& motion = motion_container.components[i];
@@ -190,8 +192,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 					playerRightSide > xPlatLeftBound && playerLeftSide < xPlatRightBound) {
 
 					// Move character with moving platform
-					if (registry.animations.has(platform))
-						motion.position += platMotion.velocity * (elapsed_ms_since_last_update / 1000.f);
+					if (registry.animations.has(platform)) {
+						motion.position.x += platMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
+						charactersOnMovingPlat.push_back(std::make_tuple(&motion, &platMotion)); // track collision if platform is moving down
+					}	
 
 					if(motion.offGround) {
 						Mix_PlayChannel(-1, player_land_sound, 0);
@@ -362,9 +366,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			entity_motion.scale = curr_frame.scale + (next_frame.scale - curr_frame.scale) * (animation.timer_ms / animation.switch_time);
 		if (curr_frame.velocity != next_frame.velocity)
 			entity_motion.velocity = curr_frame.velocity + (next_frame.velocity - curr_frame.velocity) * (animation.timer_ms / animation.switch_time);
-
 	}
-	
+
+	// For all objects that are standing on a platform that is moving down, re-update the character position 
+	for (std::tuple <Motion*, Motion*> tuple : charactersOnMovingPlat) 
+	{
+		Motion& object_motion = *std::get<0>(tuple);
+		Motion& plat_motion = *std::get<1>(tuple);
+
+		if (plat_motion.velocity.y > 0)
+			object_motion.position.y += plat_motion.velocity.y * (elapsed_ms_since_last_update / 1000.f) + 3.f; // +3 tolerance;
+	}
 	// !!! TODO: update timers for dying **zombies** and remove if time drops below zero, similar to the death timer
 
 	return true;
@@ -393,7 +405,7 @@ void WorldSystem::restart_game() {
 	// Create platform(s) at set positions, specify width
 	// TODO(vanesssa): define array of platform dimensions for each level
 	Entity platform0 = createPlatform(renderer, {window_width_px/2, window_height_px-50.f}, window_width_px-60.f);
-	Entity platform1 = createPlatform(renderer, {260,600}, 460.f);
+	Entity platform1 = createPlatform(renderer, {260,600}, 430.f);
 	Entity platform2 = createPlatform(renderer, {window_width_px -460.f,600}, 460.f);
 	Entity platform3 = createPlatform(renderer, { window_width_px - 500.f,300 }, 300.f);
 	Entity platform4 = createPlatform(renderer, {window_width_px/2, 70.f}, window_width_px-60.f);
@@ -409,11 +421,11 @@ void WorldSystem::restart_game() {
 	bozo_motion.velocity = { 0.f, 0.f };
 
 	// Create zombie (one starter zombie per level?)
-	/*Entity zombie = createZombie(renderer, {0,0});*/
+	Entity zombie = createZombie(renderer, {0,0});
 	// Setting random initial position and constant velocity (can keep random zombie position?)
-	/*Motion& zombie_motion = registry.motions.get(zombie);
+	Motion& zombie_motion = registry.motions.get(zombie);
 	zombie_motion.position = vec2(window_width_px - 200.f,
-			50.f + uniform_dist(rng) * (window_height_px - 100.f));*/
+			50.f + uniform_dist(rng) * (window_height_px - 100.f));
 
 	// Create student
 	Entity student = createStudent(renderer, {0,0});
