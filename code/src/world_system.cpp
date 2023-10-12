@@ -185,9 +185,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 					// Move character with moving platform
 					if (registry.animations.has(platform)) {
 						motion.position.x += platMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
-						//registry.onVerticalPlatforms.emplace(platform, OnVerticalPlatform(&motion, &platMotion));
-						//std::tuple<Motion, Motion> tup = std::make_tuple(motion, platMotion);
-						charactersOnMovingPlat.push_back(std::make_tuple(&motion, &platMotion));
+						charactersOnMovingPlat.push_back(std::make_tuple(&motion, &platMotion)); // track collision if platform is moving down
 					}	
 
 					motion.position.y = yPlatTop - STUDENT_BB_HEIGHT / 2.f;
@@ -358,32 +356,15 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			entity_motion.velocity = curr_frame.velocity + (next_frame.velocity - curr_frame.velocity) * (animation.timer_ms / animation.switch_time);
 	}
 
-	// update motions of entities that are on vertically moving platforms
-	for (int i = 0; i < registry.onVerticalPlatforms.components.size(); i++) 
-	{
-		Entity& platform = registry.onVerticalPlatforms.entities[i];
-		OnVerticalPlatform onPlat = registry.onVerticalPlatforms.components[i];
-
-		Motion& object_motion = *onPlat.object_motion;
-		Motion& plat_motion = *onPlat.plat_motion;
-
-		if (plat_motion.velocity.y > 0)
-			object_motion.position.y += plat_motion.velocity.y * (elapsed_ms_since_last_update / 1000.f) + 3.f; // +3 tolerance
-	}
-	
-	for (Entity& entity : registry.onVerticalPlatforms.entities)
-		registry.onVerticalPlatforms.remove(entity);
-	
-
+	// For all objects that are standing on a platform that is moving down, re-update the character position 
 	for (std::tuple <Motion*, Motion*> tuple : charactersOnMovingPlat) 
 	{
 		Motion& object_motion = *std::get<0>(tuple);
 		Motion& plat_motion = *std::get<1>(tuple);
 
-		object_motion.position.y += plat_motion.velocity.y * (elapsed_ms_since_last_update / 1000.f) + 3.f; // +3 tolerance;
+		if (plat_motion.velocity.y > 0)
+			object_motion.position.y += plat_motion.velocity.y * (elapsed_ms_since_last_update / 1000.f) + 3.f; // +3 tolerance;
 	}
-	
-	charactersOnMovingPlat.erase(charactersOnMovingPlat.begin(), charactersOnMovingPlat.end());
 	// !!! TODO: update timers for dying **zombies** and remove if time drops below zero, similar to the death timer
 
 	return true;
