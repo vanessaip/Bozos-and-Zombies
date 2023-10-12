@@ -145,17 +145,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 		// Bounding entities to window
 		if (registry.humans.has(motion_container.entities[i])) {
-			if (motion.position.x < 0.f) {
-				motion.position.x = 0.f;
+			if (motion.position.x < 40.f + BOZO_BB_WIDTH / 2.f) {
+				motion.position.x = 40.f + BOZO_BB_WIDTH / 2.f;
 			}
-			else if (motion.position.x > window_width_px) {
-				motion.position.x = window_width_px;
+			else if (motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f - 40.f) {
+				motion.position.x = window_width_px - BOZO_BB_WIDTH / 2.f - 40.f;
 			}
-			if (motion.position.y < 0.f) {
-				motion.position.y = 0.f;
+			if (motion.position.y < 0.f + BOZO_BB_HEIGHT / 2.f) {
+				motion.position.y = 0.f + BOZO_BB_HEIGHT / 2.f;
 			}
-			else if (motion.position.y > window_height_px - STUDENT_BB_HEIGHT / 2.f) {
-				motion.position.y = window_height_px - STUDENT_BB_HEIGHT / 2.f;
+			else if (motion.position.y > window_height_px - BOZO_BB_HEIGHT / 2.f) {
+				motion.position.y = window_height_px - BOZO_BB_HEIGHT / 2.f;
 				motion.velocity.y = 0.f;
 				motion.offGround = false;
 			}
@@ -165,28 +165,58 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			for (int i = 0; i < platforms.size(); i++) {
 				Entity& platform = platforms.entities[i];
 				Motion& platMotion = motion_container.get(platform);
+
+				float playerRightSide = motion.position.x + STUDENT_BB_WIDTH / 2.f;
+				float playerLeftSide = motion.position.x - STUDENT_BB_WIDTH / 2.f;
+				float playerBottom = motion.position.y + STUDENT_BB_HEIGHT / 2.f;
+				float playerTop = motion.position.y - STUDENT_BB_HEIGHT / 2.f;
+
 				float xPlatLeftBound = platMotion.position.x - platMotion.scale[0] / 2.f;
 				float xPlatRightBound = platMotion.position.x + platMotion.scale[0] / 2.f;
-				float yPlatTop = platMotion.position.y - PLATFORM_HEIGHT / 2.f - STUDENT_BB_HEIGHT / 2.f;
-				float yPlatBottom = platMotion.position.y + PLATFORM_HEIGHT / 2.f + STUDENT_BB_HEIGHT / 2.f;
-				if (motion.velocity.y >= 0 && motion.position.y >= yPlatTop && motion.position.y < yPlatTop + 10.f && 
-					motion.position.x > xPlatLeftBound && motion.position.x < xPlatRightBound) {
+				float yPlatTop = platMotion.position.y - PLATFORM_HEIGHT / 2.f;
+				float yPlatBottom = platMotion.position.y + PLATFORM_HEIGHT / 2.f;
+
+				// Collision with Top of platform
+				if (motion.velocity.y >= 0 && playerBottom >= yPlatTop && playerBottom < yPlatTop + 20.f && 
+					playerRightSide > xPlatLeftBound && playerLeftSide < xPlatRightBound) {
 
 					// Move character with moving platform
 					if (registry.animations.has(platform))
 						motion.position += platMotion.velocity * (elapsed_ms_since_last_update / 1000.f);
 
-					motion.position.y = yPlatTop;
+					motion.position.y = yPlatTop - STUDENT_BB_HEIGHT / 2.f;
 					motion.velocity.y = 0.f;
 					motion.offGround = false;
 					offAll = offAll && false;
 				}
+				
+				// Collision with Bottom of platform
+				if (motion.velocity.y <= 0 && playerTop < yPlatBottom && playerTop > yPlatBottom - 20.f &&
+					playerRightSide > xPlatLeftBound && playerLeftSide < xPlatRightBound) {
 
-				if (motion.velocity.y <= 0 && motion.position.y < yPlatBottom && motion.position.y > yPlatBottom - 10.f &&
-					motion.position.x > xPlatLeftBound && motion.position.x < xPlatRightBound) {
-
-					motion.position.y = yPlatBottom;
+					motion.position.y = yPlatBottom + STUDENT_BB_HEIGHT / 2.f;
 					motion.velocity.y = 0.f;
+				}
+
+				// Collision with Right edge of platform.
+				if (playerLeftSide < xPlatRightBound &&
+					playerLeftSide > xPlatRightBound - 20.f &&
+					playerTop < yPlatBottom &&
+					playerBottom > yPlatTop) {
+
+
+					/*motion.position.y = yPlatBottom;*/
+					motion.position.x = xPlatRightBound + STUDENT_BB_WIDTH / 2.f;
+				}
+
+				if (playerRightSide > xPlatLeftBound &&
+					playerRightSide < xPlatLeftBound + 20.f &&
+					playerTop < yPlatBottom &&
+					playerBottom > yPlatTop) {
+
+
+					/*motion.position.y = yPlatBottom;*/
+					motion.position.x = xPlatLeftBound - STUDENT_BB_WIDTH / 2.f;
 				}
 			}
 
@@ -194,11 +224,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				Entity& wall = walls.entities[i];
 				Motion& wallMotion = motion_container.get(wall);
 				float wallLeftBound = 40.f + STUDENT_BB_WIDTH / 2.f;
-				float wallRightBound = 1240.f - STUDENT_BB_WIDTH / 2.f;
+				float wallRightBound = window_width_px - STUDENT_BB_WIDTH / 2.f - 40.f;
 
 				// Moving to the left
 				if (motion.position.x < wallLeftBound) {
-					// motion.velocity.x = 0.f;
 					motion.position.x += 5.f;
 				}
 				if (motion.position.x > wallRightBound) {
@@ -208,28 +237,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 			motion.offGround = offAll;
 		}
-		else {
-			if (motion.position.x < 0.f) {
-				motion.position.x = 0.f;
-				motion.velocity.x = abs(motion.velocity.x);
-			}
-			else if (motion.position.x > window_width_px) {
-				motion.position.x = window_width_px;
-				motion.velocity.x = -abs(motion.velocity.x);
-			}
-			if (motion.position.y < 0.f) {
-				motion.position.y = 0.f;
-			}
-			else if (motion.position.y > window_height_px - STUDENT_BB_HEIGHT / 2.f) {
-				motion.position.y = window_height_px - STUDENT_BB_HEIGHT / 2.f;
-				motion.velocity.y = 0.f;
-				motion.offGround = false;
-			}
-		}
 
 		if (registry.humans.has(motion_container.entities[i]) && !registry.players.has(motion_container.entities[i])) {
-			if (motion.position.x < 0.f ||
-				motion.position.x > window_width_px) {
+			if (motion.position.x < 40.f + STUDENT_BB_HEIGHT / 2.f ||
+				motion.position.x > window_width_px - STUDENT_BB_HEIGHT / 2.f - 40.f) {
 				motion.velocity.x = -motion.velocity.x;
 			}
 		}
@@ -377,7 +388,7 @@ void WorldSystem::restart_game() {
 
 	// Create walls
 	Entity wall0 = createWall(renderer, {40, 500}, 850);
-	Entity wall1 = createWall(renderer, {window_width_px -40, 500}, 850);
+	Entity wall1 = createWall(renderer, {window_width_px - 40, 500}, 850);
 
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, { 200, 500 });
@@ -386,18 +397,18 @@ void WorldSystem::restart_game() {
 	bozo_motion.velocity = { 0.f, 0.f };
 
 	// Create zombie (one starter zombie per level?)
-	Entity zombie = createZombie(renderer, {0,0});
+	/*Entity zombie = createZombie(renderer, {0,0});*/
 	// Setting random initial position and constant velocity (can keep random zombie position?)
-	Motion& zombie_motion = registry.motions.get(zombie);
+	/*Motion& zombie_motion = registry.motions.get(zombie);
 	zombie_motion.position = vec2(window_width_px - 200.f,
-			50.f + uniform_dist(rng) * (window_height_px - 100.f));
+			50.f + uniform_dist(rng) * (window_height_px - 100.f));*/
 
 	// Create student
 	Entity student = createStudent(renderer, {0,0});
 	// Setting random initial position and constant velocity
 	Motion& student_motion = registry.motions.get(student);
 	student_motion.position =
-		vec2(window_width_px - 200.f,
+		vec2(window_width_px / 2.f,
 			50.f + uniform_dist(rng) * (window_height_px - 100.f));
 	student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 200.f : -200.f;
 
@@ -509,9 +520,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			motion.velocity[0] += 400;
 		}
 
-		if (key == GLFW_KEY_SPACE && !motion.offGround) {
+		if (key == GLFW_KEY_W && !motion.offGround) {
 			motion.offGround = true;
-			motion.velocity[1] -= 1000;
+			motion.velocity[1] -= 700;
 		}
 	}
 
@@ -533,7 +544,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 
 	// Debugging
-	if (key == GLFW_KEY_D) {
+	if (key == GLFW_KEY_BACKSLASH) {
 		if (action == GLFW_RELEASE)
 			debugging.in_debug_mode = false;
 		else
