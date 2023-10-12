@@ -92,13 +92,13 @@ GLFWwindow* WorldSystem::create_window() {
 		return nullptr;
 	}
 
-	background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
+	background_music = Mix_LoadMUS(audio_path("soundtrack.wav").c_str());
 	player_death_sound = Mix_LoadWAV(audio_path("player_death.wav").c_str());
 	salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav").c_str());
 
 	if (background_music == nullptr || player_death_sound == nullptr || salmon_eat_sound == nullptr) {
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-			audio_path("music.wav").c_str(),
+			audio_path("soundtrack.wav").c_str(),
 			audio_path("player_death.wav").c_str(),
 			audio_path("salmon_eat.wav").c_str());
 		return nullptr;
@@ -112,6 +112,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	// Playing background music indefinitely
 	Mix_PlayMusic(background_music, -1);
 	fprintf(stderr, "Loaded music\n");
+	Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
 
 	// Set all states to default
     restart_game();
