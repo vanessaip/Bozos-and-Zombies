@@ -25,6 +25,8 @@ WorldSystem::~WorldSystem() {
 		Mix_FreeChunk(player_death_sound);
 	if (salmon_eat_sound != nullptr)
 		Mix_FreeChunk(salmon_eat_sound);
+	if (player_jump_sound != nullptr)
+		Mix_FreeChunk(player_jump_sound);
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -95,8 +97,9 @@ GLFWwindow* WorldSystem::create_window() {
 	background_music = Mix_LoadMUS(audio_path("soundtrack.wav").c_str());
 	player_death_sound = Mix_LoadWAV(audio_path("player_death.wav").c_str());
 	salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav").c_str());
+	player_jump_sound = Mix_LoadWAV(audio_path("player_jump.wav").c_str());
 
-	if (background_music == nullptr || player_death_sound == nullptr || salmon_eat_sound == nullptr) {
+	if (background_music == nullptr || player_death_sound == nullptr || salmon_eat_sound == nullptr || player_jump_sound == nullptr) {
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("soundtrack.wav").c_str(),
 			audio_path("player_death.wav").c_str(),
@@ -524,6 +527,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		if (key == GLFW_KEY_W && !motion.offGround) {
 			motion.offGround = true;
 			motion.velocity[1] -= 700;
+			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 	}
 
