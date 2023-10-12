@@ -21,8 +21,8 @@ WorldSystem::~WorldSystem() {
 	// Destroy music components
 	if (background_music != nullptr)
 		Mix_FreeMusic(background_music);
-	if (salmon_dead_sound != nullptr)
-		Mix_FreeChunk(salmon_dead_sound);
+	if (player_death_sound != nullptr)
+		Mix_FreeChunk(player_death_sound);
 	if (salmon_eat_sound != nullptr)
 		Mix_FreeChunk(salmon_eat_sound);
 	Mix_CloseAudio();
@@ -93,13 +93,13 @@ GLFWwindow* WorldSystem::create_window() {
 	}
 
 	background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
-	salmon_dead_sound = Mix_LoadWAV(audio_path("salmon_dead.wav").c_str());
+	player_death_sound = Mix_LoadWAV(audio_path("player_death.wav").c_str());
 	salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav").c_str());
 
-	if (background_music == nullptr || salmon_dead_sound == nullptr || salmon_eat_sound == nullptr) {
+	if (background_music == nullptr || player_death_sound == nullptr || salmon_eat_sound == nullptr) {
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("music.wav").c_str(),
-			audio_path("salmon_dead.wav").c_str(),
+			audio_path("player_death.wav").c_str(),
 			audio_path("salmon_eat.wav").c_str());
 		return nullptr;
 	}
@@ -443,7 +443,7 @@ void WorldSystem::handle_collisions() {
 					}
 					else { timer.direction = 1; }
 
-					Mix_PlayChannel(-1, salmon_dead_sound, 0);
+					Mix_PlayChannel(-1, player_death_sound, 0);
 
 				}
 			}
