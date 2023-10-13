@@ -14,8 +14,9 @@ For milestone 1, our team met all our goals that aligned with the milestone deli
 - Entry point: common.cpp Line 4
 
 ## Key-frame/State Interpolations
-
--
+- in components.hpp line 100, we define a KeyframeAnimation component that stores frames, timer info, etc.
+- in world_system.cpp line 602, we define a function to setup motion frames for entities
+- in world_system.cpp line 323, we interpolate between frames over time for each entity that has a KeyframeAnimation component
 
 # Gameplay
 
