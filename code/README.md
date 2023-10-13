@@ -1,3 +1,7 @@
+# Milestone 1 Proposal Alignment
+
+# Milestone 1 Deliverables
+
 # Rendering
 
 ## Textured Geometry
