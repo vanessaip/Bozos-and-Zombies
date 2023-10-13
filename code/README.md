@@ -5,8 +5,17 @@ For milestone 1, our team met all our goals that aligned with the milestone deli
 
 ## Textured Geometry
 
-- walls, platforms, player sprite, npc sprite, zombie sprite
-- Entry point:
+- walls, platforms, player sprite, npc sprite, zombie sprite, background (each are entities rendered with sprite textures)
+Entry points:
+- added new sprite textures under data/textures/ for each entity type
+- components.hpp: 
+  - defined (empty) Components for Player, Zombie, Human, Platform, Wall, Background
+  - updated TEXTURE_ASSET_ID enum to include new assets
+- render_system.hpp: updated texture_paths with file names of new textures
+- tiny_ecs_registry.hpp: added `ComponentContainer` for each new type to the registry -X
+- world_init.hpp: defined dimensions for each sprite
+- world_init.cpp: defined functions to initialize each Entity type with the appropriate Components and appropriate constants for `RenderRequest` 
+- world_system.cpp: calls initializer for each Entity type in `restart()` using painter's algorithm (rendering background entities first) and with appropriate starting position.
 
 ## Basic 2D Transformations
 
