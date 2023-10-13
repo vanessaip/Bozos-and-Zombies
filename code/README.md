@@ -37,7 +37,11 @@ For milestone 1, our team met all our goals that aligned with the milestone deli
   <br>
   <br>
   Entry points:
-- platform collisions are implemented in a for loop in world_system.cpp 176 to 237 which uses bounding boxes to check every platform for intersection with the player entity's bounding box.
+- Player - Platform/Wall: platform collisions are implemented in a for loop in world_system.cpp 176 to 237 which uses bounding boxes to check every platform for intersection with the player entity's bounding box(world_system.cpp line176-254).
+
+- Player - zombie: When player collides with zombie, there will be a little jump animation and timer will be set(world_system.cpp line456-482), player will rotate based on the direction of the collision happens(world_system.cpp line292-309).
+
+- Player - npc: The template(world_system.cpp line486-491).
 
 # Stability
 
