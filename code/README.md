@@ -1,7 +1,3 @@
-# Milestone 1 Proposal Alignment
-
-# Milestone 1 Deliverables
-
 # Rendering
 
 ## Textured Geometry
@@ -63,3 +59,8 @@
 - world_system.cpp Line 191 detects the intersection of the bottom of the player's bounding box with the top of the platform's bounding box and sets the offGround member to false. Changes back to true once bottom of the player's bounding box is no longer in the plane of any platform's top bounding box.
 
 ## [23] Audio Feedback
+- in world_system.cpp line 100-113, we initialize and load the WAV audio files, and do some basic error catching.
+- in world_system.cpp line 23-33, we destroy the audio components in the WorldSystem destructor.
+- in world_system.cpp line 200, we detect when the player has just landed on the top of a playform, and play a landing noise
+- in world_system.cpp line 550, we play a jump sound the the player jumps
+- in world_system.cpp line 481, we play a death sound as the play is killed.
