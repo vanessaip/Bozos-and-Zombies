@@ -1,3 +1,6 @@
+# Milestone 1 Proposal Alignment
+For milestone 1, our team met all our goals that aligned with the milestone deliverable requirements. Extra work beyond the scope that we specified in the proposal was not delivered, specifically desigining one level and introducing a simple throwable object. As these features are not required until Milestone 2, we decided to move the work forward and address them in the coming weeks.
+# Milestone 1 Deliverables
 # Rendering
 
 ## Textured Geometry
