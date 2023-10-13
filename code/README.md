@@ -28,8 +28,18 @@ For milestone 1, our team met all our goals that aligned with the milestone deli
 - world_system.pcp Line 529
 
 ## Random/coded action
+- NPC: 
+  The student spawns at a random location on the screen and a constant velocity towards left or right (world_system.cpp 431 - 437).
+  Once the student collides with the left or right wall, it switches direction. (world_system.cpp 257 - 262).
+- Zombie: 
+  The zombie spawns on the right side of the screen at a random height with a constant velocity (world_system.cpp 424 - 428).
+  The zombie always moves towards and follows Bozo's position (world_system.cpp 271 - 282)
 
 ## Well-defined game-space boundaries
+- Restrict window boundaries that make sure that the main player (Bozo) doesn't exit the game space (world_system.cpp 158 - 172)
+- Restrict window boundaries that make sure that the NPC doesn't exit the game space (world_system.cpp 239 - 255)
+- Remove any non moving entities when they exit the boundaries. This logic will be used as we move the camera with the player (world_system.cpp 263-268).
+
 
 ## Correct collision processing
 
