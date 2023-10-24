@@ -83,8 +83,10 @@ GLFWwindow* WorldSystem::create_window() {
 	glfwSetWindowUserPointer(window, this);
 	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
 	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	auto mouse_button_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_button(_0, _1, _2); };
 	glfwSetKeyCallback(window, key_redirect);
 	glfwSetCursorPosCallback(window, cursor_pos_redirect);
+	glfwSetMouseButtonCallback(window, mouse_button_redirect);
 
 	//////////////////////////////////////
 	// Loading music and sounds with SDL
@@ -131,7 +133,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Points: " << points;
+	title_ss << "Books: " << points;
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
 	// Remove debug info from the last step
@@ -440,8 +442,11 @@ void WorldSystem::restart_game() {
 	Entity book = createBook(renderer, { 500, 500 });
 	Motion& book_motion = registry.motions.get(book);
 	book_motion.velocity = { 0.f, 0.f };
+	book_motion.offGround = false;
 
 	setup_keyframes(renderer);
+
+	points = 0;
 }
 
 // Compute collisions between entities
@@ -500,14 +505,16 @@ void WorldSystem::handle_collisions() {
 			// Checking Player - Book collisions
 			else if (registry.books.has(entity_other)) {
 				bool& offHand = registry.books.get(entity_other).offHand;
-				if (offHand == true) {
-					offHand = false;
-				}
 				Motion& book_motion = registry.motions.get(entity_other);
 				Motion& motion_player = registry.motions.get(entity);
-				book_motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
-				book_motion.position.y = motion_player.position.y;
-				++points;
+				if (book_motion.offGround == false) {
+					if (offHand == true) {
+						offHand = false;
+						++points;
+					}
+					book_motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
+					book_motion.position.y = motion_player.position.y;
+				}
 			}
 		}
 	}
@@ -585,13 +592,24 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE SALMON ROTATION HERE
-	// xpos and ypos are relative to the top-left of the window, the salmon's
-	// default facing direction is (1, 0)
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+	
 	(vec2)mouse_position; // dummy to avoid compiler warning
+}
+
+void WorldSystem::on_mouse_button(int button, int action, int mod) {
+    auto& booksRegistry = registry.books;
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+		Entity entity = booksRegistry.entities[0];
+	    if (registry.books.has(entity)) {
+			Book& book = registry.books.get(entity);
+			Motion& motion = registry.motions.get(entity);
+			motion.offGround = true;
+			motion.velocity.x = 500.f;
+
+			book.offHand = true;
+			--points;
+		}
+	}
 }
 
 // defines keyframes for entities that are animated
