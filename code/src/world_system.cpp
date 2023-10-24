@@ -156,11 +156,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 		// Bounding entities to window
 		if (registry.humans.has(motion_container.entities[i])) {
-			if (motion.position.x < 40.f + BOZO_BB_WIDTH / 2.f) {
-				motion.position.x = 40.f + BOZO_BB_WIDTH / 2.f;
+			if (motion.position.x < 40.f + BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0) {
+				motion.velocity.x = 0;
 			}
-			else if (motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f - 40.f) {
-				motion.position.x = window_width_px - BOZO_BB_WIDTH / 2.f - 40.f;
+			else if (motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f - 40.f && motion.velocity.x > 0) {
+				motion.velocity.x = 0;
 			}
 			if (motion.position.y < 0.f + BOZO_BB_HEIGHT / 2.f) {
 				motion.position.y = 0.f + BOZO_BB_HEIGHT / 2.f;
@@ -233,21 +233,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 					/*motion.position.y = yPlatBottom;*/
 					motion.position.x = xPlatLeftBound - STUDENT_BB_WIDTH / 2.f;
-				}
-			}
-
-			for (int i = 0; i < walls.size(); i++) {
-				Entity& wall = walls.entities[i];
-				Motion& wallMotion = motion_container.get(wall);
-				float wallLeftBound = 40.f + STUDENT_BB_WIDTH / 2.f;
-				float wallRightBound = window_width_px - STUDENT_BB_WIDTH / 2.f - 40.f;
-
-				// Moving to the left
-				if (motion.position.x < wallLeftBound) {
-					motion.position.x += 5.f;
-				}
-				if (motion.position.x > wallRightBound) {
-					motion.position.x -= 5.f;
 				}
 			}
 
@@ -492,27 +477,7 @@ void WorldSystem::handle_collisions() {
 
 					// !!! TODO: just colliding with other students immunizes them or require keyboard input from user?
 				}
-			}
-			// Handle Player - Platform stand on collisions
-			//else if (registry.platforms.has(entity_other)) {
-			//		Motion& motion_bozo = registry.motions.get(entity);
-			//		Motion& motion_plat = registry.motions.get(entity_other);
-			//				float xPlatLeftBound = motion_plat.position.x - motion_plat.scale[0] / 2.f;
-			//				float xPlatRightBound = motion_plat.position.x + motion_plat.scale[0] / 2.f;
-			//				float yPlatPos = motion_plat.position.y - 85.f;
-		    //        			// Stand on platform
-			//			if (motion_bozo.velocity.y >= 0.f && motion_bozo.position.y <= yPlatPos && motion_bozo.position.y >= yPlatPos - STUDENT_BB_HEIGHT &&
-			//				motion_bozo.position.x > xPlatLeftBound && motion_bozo.position.x < xPlatRightBound) {
-			//				// registry.collisions.emplace_with_duplicates(entity_bozo, entity_plat);
-			//				motion_bozo.position.y = yPlatPos;
-			//						motion_bozo.velocity.y = 0.f;
-			//						motion_bozo.offGround = false;
-			//						// offAll = offAll && false;
-			//			}
-			//			else if (motion_bozo.position.x < xPlatLeftBound || motion_bozo.position.x > xPlatRightBound) {
-			//				motion_bozo.offGround = true;
-			//			}
-			//	}			
+			}		
 		}
 	}
 
@@ -553,10 +518,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	if (action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo))) {
 		if (key == GLFW_KEY_A) {
-			motion.velocity[0] += 400;
+			motion.velocity[0] = 0;
 		}
 		if (key == GLFW_KEY_D) {
-			motion.velocity[0] -= 400;
+			motion.velocity[0] = 0;
 		}
 	}
 
