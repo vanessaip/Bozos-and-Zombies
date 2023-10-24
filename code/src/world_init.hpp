@@ -28,5 +28,7 @@ Entity createPlatform(RenderSystem* renderer, vec2 position, float width);
 Entity createWall(RenderSystem* renderer, vec2 position, float height);
 // render background as a sprite
 Entity createBackground(RenderSystem* renderer);
+// book
+Entity createBook(RenderSystem* renderer, vec2 pos);
 
 

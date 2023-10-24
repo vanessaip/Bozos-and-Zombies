@@ -436,6 +436,11 @@ void WorldSystem::restart_game() {
 			50.f + uniform_dist(rng) * (window_height_px - 100.f));
 	student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 200.f : -200.f;
 
+	// Create book
+	Entity book = createBook(renderer, { 0, 0 });
+	Motion& book_motion = registry.motions.get(book);
+	book_motion.velocity = { 0.f, 0.f };
+
 	setup_keyframes(renderer);
 }
 
