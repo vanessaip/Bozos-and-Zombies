@@ -212,7 +212,7 @@ Entity createBook(RenderSystem* renderer, vec2 position)
 	motion.scale = vec2({ BOZO_BB_WIDTH * 1.5, BOZO_BB_HEIGHT });
 
 	// Create an (empty) Book component to be able to refer to all books
-	registry.humans.emplace(entity);
+	registry.books.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::BOOK,

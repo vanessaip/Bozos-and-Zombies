@@ -39,7 +39,7 @@ struct Wall
 
 struct Book
 {
-
+	bool offHand = true;
 };
 
 // All data relevant to the shape and motion of entities

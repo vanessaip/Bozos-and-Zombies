@@ -437,7 +437,7 @@ void WorldSystem::restart_game() {
 	student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 200.f : -200.f;
 
 	// Create book
-	Entity book = createBook(renderer, { 0, 0 });
+	Entity book = createBook(renderer, { 500, 500 });
 	Motion& book_motion = registry.motions.get(book);
 	book_motion.velocity = { 0.f, 0.f };
 
@@ -493,31 +493,22 @@ void WorldSystem::handle_collisions() {
 					// chew, count points, and set the LightUp timer
 					registry.remove_all_components_of(entity_other);
 					Mix_PlayChannel(-1, salmon_eat_sound, 0);
-					++points;
 
 					// !!! TODO: just colliding with other students immunizes them or require keyboard input from user?
 				}
 			}
-			// Handle Player - Platform stand on collisions
-			//else if (registry.platforms.has(entity_other)) {
-			//		Motion& motion_bozo = registry.motions.get(entity);
-			//		Motion& motion_plat = registry.motions.get(entity_other);
-			//				float xPlatLeftBound = motion_plat.position.x - motion_plat.scale[0] / 2.f;
-			//				float xPlatRightBound = motion_plat.position.x + motion_plat.scale[0] / 2.f;
-			//				float yPlatPos = motion_plat.position.y - 85.f;
-		    //        			// Stand on platform
-			//			if (motion_bozo.velocity.y >= 0.f && motion_bozo.position.y <= yPlatPos && motion_bozo.position.y >= yPlatPos - STUDENT_BB_HEIGHT &&
-			//				motion_bozo.position.x > xPlatLeftBound && motion_bozo.position.x < xPlatRightBound) {
-			//				// registry.collisions.emplace_with_duplicates(entity_bozo, entity_plat);
-			//				motion_bozo.position.y = yPlatPos;
-			//						motion_bozo.velocity.y = 0.f;
-			//						motion_bozo.offGround = false;
-			//						// offAll = offAll && false;
-			//			}
-			//			else if (motion_bozo.position.x < xPlatLeftBound || motion_bozo.position.x > xPlatRightBound) {
-			//				motion_bozo.offGround = true;
-			//			}
-			//	}			
+			// Checking Player - Book collisions
+			else if (registry.books.has(entity_other)) {
+				bool& offHand = registry.books.get(entity_other).offHand;
+				if (offHand == true) {
+					offHand = false;
+				}
+				Motion& book_motion = registry.motions.get(entity_other);
+				Motion& motion_player = registry.motions.get(entity);
+				book_motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
+				book_motion.position.y = motion_player.position.y;
+				++points;
+			}
 		}
 	}
 
