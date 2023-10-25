@@ -1,6 +1,7 @@
 // internal
 #include "render_system.hpp"
 #include <SDL.h>
+#include <iostream>
 
 #include "tiny_ecs_registry.hpp"
 
@@ -189,7 +190,7 @@ void RenderSystem::drawToScreen()
 
 // Render our game world
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
-void RenderSystem::draw()
+void RenderSystem::draw(float elapsed_time_ms)
 {
 	// Getting size of window
 	int w, h;
@@ -210,7 +211,7 @@ void RenderSystem::draw()
 							  // and alpha blending, one would have to sort
 							  // sprites back to front
 	gl_has_errors();
-	mat3 projection_2D = createProjectionMatrix();
+	mat3 projection_2D = createProjectionMatrix(elapsed_time_ms);
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
@@ -229,15 +230,83 @@ void RenderSystem::draw()
 	gl_has_errors();
 }
 
-mat3 RenderSystem::createProjectionMatrix()
+mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 {
-	// Fake projection matrix, scales with respect to window coordinates
-	float left = 0.f;
-	float top = 0.f;
+	//TODO: when level is designed, ensure camera does not move beyond level boundaries
+	// e.g. something like left = max(nextLeft, level_left_boundary)
+
+	// Set projection matrix to define camera bounds
+	float left = camera.left;
+	float top = camera.top;
+	float right = camera.right; 
+	float bottom = camera.bottom;
+
+	Motion& playerMotion = registry.motions.get(registry.players.entities[0]);
+
+	// handle x-position of camera
+	if (playerMotion.velocity.x > 0) {
+		camera.xOffset = 200.f;
+		if (!lastPlayerDirectionIsPos)
+		{
+			lastPlayerDirectionIsPos = true;
+			camera.shiftHorizontal = true;
+			camera.timer_ms_x = 0;
+		}
+	}
+	else if (playerMotion.velocity.x < 0) {
+		camera.xOffset = -200.f;
+		if (lastPlayerDirectionIsPos)
+		{
+			lastPlayerDirectionIsPos = false;
+			camera.shiftHorizontal = true;
+			camera.timer_ms_x = 0;
+		}
+	}
+	else
+		lastRestingPlayerPos = playerMotion.position;
+		
+	if (camera.shiftHorizontal && abs(lastRestingPlayerPos.x - playerMotion.position.x) < 32.f) 
+	{
+		// Don't adjust camera if little steps are taken to allow small position adjustments without disorienting the user
+	}
+	else 
+	{
+		// inerpolate camera "position" to get smooth movement
+		float nextLeft = (playerMotion.position.x + playerMotion.velocity.x * 2.f * elapsed_time_ms / 1000.f - (window_width_px / 2.0)) + camera.xOffset;
+		left = left + (nextLeft - left) * (camera.timer_ms_x / camera.timer_stop_ms);
+		right = left + window_width_px;
+
+		camera.timer_ms_x += elapsed_time_ms;
+		camera.shiftHorizontal = false;
+	}
+
+	// handle y-position changes
+	float nextTop = (playerMotion.position.y - (window_height_px / 2.0));
+	float verticalDiff = abs(nextTop - top);
+
+	if (verticalDiff > (window_height_px / 3.f - 60.f))  // this comparison depends on how we set up the level (may need to adjust)
+		camera.shiftVertical = true;
+
+	if (camera.shiftVertical)
+	{
+		top = top + (nextTop - top) * (camera.timer_ms_y / camera.timer_stop_ms); // interpolate for smooth movement
+		camera.timer_ms_y += 2.f * elapsed_time_ms;
+		
+		if (camera.timer_ms_y / camera.timer_stop_ms >= 1 || verticalDiff < 1)  // takes too long if we wait for it to be exactly 0
+		{
+			top = nextTop;
+			camera.shiftVertical = false;
+			camera.timer_ms_y = 0.f;
+		}
+		bottom = top + window_height_px;
+	}
+
+	camera.left = left;
+	camera.top = top;
+	camera.right = right;
+	camera.bottom = bottom;
 
 	gl_has_errors();
-	float right = (float) window_width_px;
-	float bottom = (float) window_height_px;
 
 	float sx = 2.f / (right - left);
 	float sy = 2.f / (top - bottom);
