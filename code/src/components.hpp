@@ -141,6 +141,28 @@ struct Mesh
 	std::vector<uint16_t> vertex_indices;
 };
 
+struct Camera
+{
+	float left;
+	float top;
+	float right;
+	float bottom;
+	float timer_ms_x = 0.f;
+	float timer_ms_y = 0.f;
+	float timer_stop_ms = 9000.f;
+	float xOffset = 0.f;
+	float yOffset = 0.f;
+	bool shiftHorizontal = false;
+	bool shiftVertical = false;
+
+	Camera(float l, float t, float r, float b) {
+		left = l;
+		top = t;
+		right = r;
+		bottom = b;
+	}
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
