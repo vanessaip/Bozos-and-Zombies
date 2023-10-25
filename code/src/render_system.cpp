@@ -232,9 +232,6 @@ void RenderSystem::draw(float elapsed_time_ms)
 
 mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 {
-	//TODO: when level is designed, ensure camera does not move beyond level boundaries
-	// e.g. something like left = max(nextLeft, level_left_boundary)
-
 	// Set projection matrix to define camera bounds
 	float left = camera.left;
 	float top = camera.top;
@@ -245,7 +242,7 @@ mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 
 	// handle x-position of camera
 	if (playerMotion.velocity.x > 0) {
-		camera.xOffset = 200.f;
+		camera.xOffset = 100.f;
 		if (!lastPlayerDirectionIsPos)
 		{
 			lastPlayerDirectionIsPos = true;
@@ -254,7 +251,7 @@ mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 		}
 	}
 	else if (playerMotion.velocity.x < 0) {
-		camera.xOffset = -200.f;
+		camera.xOffset = -100.f;
 		if (lastPlayerDirectionIsPos)
 		{
 			lastPlayerDirectionIsPos = false;
@@ -272,19 +269,18 @@ mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 	else 
 	{
 		// inerpolate camera "position" to get smooth movement
-		float nextLeft = (playerMotion.position.x + playerMotion.velocity.x * 2.f * elapsed_time_ms / 1000.f - (window_width_px / 2.0)) + camera.xOffset;
+		float nextLeft = (playerMotion.position.x + playerMotion.velocity.x * 2.f * elapsed_time_ms / 1000.f - (screen_width_px / 2.0)) + camera.xOffset;
 		left = left + (nextLeft - left) * (camera.timer_ms_x / camera.timer_stop_ms);
-		right = left + window_width_px;
 
 		camera.timer_ms_x += elapsed_time_ms;
 		camera.shiftHorizontal = false;
 	}
 
 	// handle y-position changes
-	float nextTop = (playerMotion.position.y - (window_height_px / 2.0));
+	float nextTop = (playerMotion.position.y - (screen_height_px / 2.0));
 	float verticalDiff = abs(nextTop - top);
 
-	if (verticalDiff > (window_height_px / 3.f - 60.f))  // this comparison depends on how we set up the level (may need to adjust)
+	if (verticalDiff > (screen_height_px / 3.f - 60.f))  // this comparison depends on how we set up the level (may need to adjust)
 		camera.shiftVertical = true;
 
 	if (camera.shiftVertical)
@@ -298,8 +294,18 @@ mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 			camera.shiftVertical = false;
 			camera.timer_ms_y = 0.f;
 		}
-		bottom = top + window_height_px;
 	}
+
+	// bound camera to level boundaries
+	left = max<float>(left, 0);
+	right = min<float>(left + screen_width_px, window_width_px * 1.f);
+	if (right == window_width_px * 1.f)
+		left = right - screen_width_px;
+	
+	top = max(top, 0.f);
+	bottom = min<float>(top + screen_height_px, window_height_px * 1.f);
+	if (bottom == window_height_px * 1.f)
+		top = bottom - screen_height_px;
 
 	camera.left = left;
 	camera.top = top;
@@ -313,4 +319,12 @@ mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
 	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
+}
+
+void RenderSystem::resetCamera() 
+{
+	camera.left = 0.f;
+	camera.top = 0.f;
+	camera.right = screen_width_px;
+	camera.bottom = screen_height_px;
 }

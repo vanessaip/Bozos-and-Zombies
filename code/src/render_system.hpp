@@ -20,7 +20,7 @@ class RenderSystem {
 	std::array<GLuint, texture_count> texture_gl_handles;
 	std::array<ivec2, texture_count> texture_dimensions;
 	
-	Camera camera = Camera(0.f, 0.f, window_width_px, window_height_px);
+	Camera camera = Camera(0.f, 0.f, screen_width_px, screen_height_px);
 	vec2 lastRestingPlayerPos;
 	bool lastPlayerDirectionIsPos = true; // true = +x, false = -x
 
@@ -79,6 +79,8 @@ public:
 	void draw(float elapsed_time_ms);
 
 	mat3 createProjectionMatrix(float elapsed_time_ms);
+
+	void resetCamera();
 
 private:
 	// Internal drawing functions for each entity type
