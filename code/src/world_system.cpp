@@ -156,7 +156,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 		// Bounding entities to window
 		if (registry.humans.has(motion_container.entities[i])) {
-			if (motion.position.x < 40.f + BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0) {
+			/*if (motion.position.x < 40.f + BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0) {
 				motion.velocity.x = 0;
 			}
 			else if (motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f - 40.f && motion.velocity.x > 0) {
@@ -169,71 +169,78 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				motion.position.y = window_height_px - BOZO_BB_HEIGHT / 2.f;
 				motion.velocity.y = 0.f;
 				motion.offGround = false;
-			}
+			}*/
 
 			bool offAll = true;
 
+			std::vector<Entity> blocks;
 			for (int i = 0; i < platforms.size(); i++) {
-				Entity& platform = platforms.entities[i];
-				Motion& platMotion = motion_container.get(platform);
+				blocks.push_back(platforms.entities[i]);
+			}
+			for (int i = 0; i < walls.size(); i++) {
+				blocks.push_back(walls.entities[i]);
+			}
 
-				float playerRightSide = motion.position.x + STUDENT_BB_WIDTH / 2.f;
-				float playerLeftSide = motion.position.x - STUDENT_BB_WIDTH / 2.f;
-				float playerBottom = motion.position.y + STUDENT_BB_HEIGHT / 2.f;
-				float playerTop = motion.position.y - STUDENT_BB_HEIGHT / 2.f;
+			for (int i = 0; i < blocks.size(); i++) {
+				Motion& blockMotion = motion_container.get(blocks[i]);
 
-				float xPlatLeftBound = platMotion.position.x - platMotion.scale[0] / 2.f;
-				float xPlatRightBound = platMotion.position.x + platMotion.scale[0] / 2.f;
-				float yPlatTop = platMotion.position.y - PLATFORM_HEIGHT / 2.f;
-				float yPlatBottom = platMotion.position.y + PLATFORM_HEIGHT / 2.f;
+				float entityRightSide = motion.position.x + motion.scale[0] / 2.f;
+				float entityLeftSide = motion.position.x - motion.scale[0] / 2.f;
+				float entityBottom = motion.position.y + motion.scale[1] / 2.f;
+				float entityTop = motion.position.y - motion.scale[1] / 2.f;
 
-				// Collision with Top of platform
-				if (motion.velocity.y >= 0 && playerBottom >= yPlatTop && playerBottom < yPlatTop + 20.f && 
-					playerRightSide > xPlatLeftBound && playerLeftSide < xPlatRightBound) {
+				float xBlockLeftBound = blockMotion.position.x - blockMotion.scale[0] / 2.f;
+				float xBlockRightBound = blockMotion.position.x + blockMotion.scale[0] / 2.f;
+				float yBlockTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
+				float yBlockBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
 
-					// Move character with moving platform
-					if (registry.animations.has(platform)) {
-						motion.position.x += platMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
-						charactersOnMovingPlat.push_back(std::make_tuple(&motion, &platMotion)); // track collision if platform is moving down
+				// Collision with Top of block
+				if (motion.velocity.y >= 0 && entityBottom >= yBlockTop && entityBottom < yBlockTop + 20.f &&
+					entityRightSide > xBlockLeftBound && entityLeftSide < xBlockRightBound) {
+
+					// Move character with moving block
+					if (registry.animations.has(blocks[i])) {
+						motion.position.x += blockMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
+						charactersOnMovingPlat.push_back(std::make_tuple(&motion, &blockMotion)); // track collision if platform is moving down
 					}	
 
 					if(motion.offGround) {
 						Mix_PlayChannel(-1, player_land_sound, 0);
 					}
-					motion.position.y = yPlatTop - STUDENT_BB_HEIGHT / 2.f;
+					motion.position.y = yBlockTop - motion.scale[1] / 2.f;
 					motion.velocity.y = 0.f;
 					motion.offGround = false;
 					offAll = offAll && false;
 				}
-				
-				// Collision with Bottom of platform
-				if (motion.velocity.y <= 0 && playerTop < yPlatBottom && playerTop > yPlatBottom - 20.f &&
-					playerRightSide > xPlatLeftBound && playerLeftSide < xPlatRightBound) {
+					
+				// Collision with Bottom of block
+				if (motion.velocity.y <= 0 && entityTop < yBlockBottom && entityTop > yBlockBottom - 20.f &&
+					entityRightSide > xBlockLeftBound && entityLeftSide < xBlockRightBound) {
 
-					motion.position.y = yPlatBottom + STUDENT_BB_HEIGHT / 2.f;
+					motion.position.y = yBlockBottom + motion.scale[1] / 2.f;
 					motion.velocity.y = 0.f;
 				}
 
-				// Collision with Right edge of platform.
-				if (playerLeftSide < xPlatRightBound &&
-					playerLeftSide > xPlatRightBound - 20.f &&
-					playerTop < yPlatBottom &&
-					playerBottom > yPlatTop) {
+				// Collision with Right edge of block
+				if (entityLeftSide < xBlockRightBound &&
+					entityLeftSide > xBlockRightBound - 20.f &&
+					entityTop < yBlockBottom &&
+					entityBottom > yBlockTop) {
 
-
-					/*motion.position.y = yPlatBottom;*/
-					motion.position.x = xPlatRightBound + STUDENT_BB_WIDTH / 2.f;
+					/*motion.position.y = yBlockBottom;*/
+					motion.position.x = xBlockRightBound + motion.scale[0] / 2.f;
 				}
 
-				if (playerRightSide > xPlatLeftBound &&
-					playerRightSide < xPlatLeftBound + 20.f &&
-					playerTop < yPlatBottom &&
-					playerBottom > yPlatTop) {
+				if (entityRightSide > xBlockLeftBound &&
+					entityRightSide < xBlockLeftBound + 20.f &&
+					entityTop < yBlockBottom &&
+					entityBottom > yBlockTop) {
 
 
-					/*motion.position.y = yPlatBottom;*/
-					motion.position.x = xPlatLeftBound - STUDENT_BB_WIDTH / 2.f;
+					/*motion.position.y = yBlockBottom;*/
+					motion.position.x = xBlockLeftBound - motion.scale[0] / 2.f;
 				}
+			
 			}
 
 			motion.offGround = offAll;
@@ -518,10 +525,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	if (action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo))) {
 		if (key == GLFW_KEY_A) {
-			motion.velocity[0] = 0;
+			motion.velocity[0] += 400;
 		}
 		if (key == GLFW_KEY_D) {
-			motion.velocity[0] = 0;
+			motion.velocity[0] -= 400;
 		}
 	}
 
