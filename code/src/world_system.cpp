@@ -156,7 +156,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 		// Bounding entities to window
 		if (registry.humans.has(motion_container.entities[i])) {
-			if (motion.position.x < BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0) {
+			if (motion.position.x < 40.f + BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0) {
 				motion.velocity.x = 0;
 			}
 			else if (motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f && motion.velocity.x > 0) {
@@ -225,20 +225,24 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				if (entityLeftSide < xBlockRightBound &&
 					entityLeftSide > xBlockRightBound - 20.f &&
 					entityTop < yBlockBottom &&
-					entityBottom > yBlockTop) {
+					entityBottom > yBlockTop && motion.velocty.x > 0) {
 
 					/*motion.position.y = yBlockBottom;*/
-					motion.position.x = xBlockRightBound + motion.scale[0] / 2.f;
+					// motion.position.x = xBlockRightBound + motion.scale[0] / 2.f;
+					player.keyPresses[0] = false;
+					player.keyPresses[1] = false;
 				}
 
 				if (entityRightSide > xBlockLeftBound &&
 					entityRightSide < xBlockLeftBound + 20.f &&
 					entityTop < yBlockBottom &&
-					entityBottom > yBlockTop) {
+					entityBottom > yBlockTop && motion.velocty.x < 0) {
 
 
 					/*motion.position.y = yBlockBottom;*/
-					motion.position.x = xBlockLeftBound - motion.scale[0] / 2.f;
+					// motion.position.x = xBlockLeftBound - motion.scale[0] / 2.f;
+					player.keyPresses[0] = false;
+					player.keyPresses[1] = false;
 				}
 			
 			}
@@ -510,10 +514,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	if (action == GLFW_PRESS && (!registry.deathTimers.has(player_bozo))) {
 		if (key == GLFW_KEY_A) {
-			motion.velocity[0] -= 400;
+			player.keyPresses[0] = true;
+			// motion.velocity[0] -= 400;
 		}
 		if (key == GLFW_KEY_D) {
-			motion.velocity[0] += 400;
+			player.keyPresses[1] = true;
+			// motion.velocity[0] += 400;
 		}
 
 		if (key == GLFW_KEY_W && !motion.offGround) {
@@ -525,10 +531,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	if (action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo))) {
 		if (key == GLFW_KEY_A) {
-			motion.velocity[0] = 0;
+			player.keyPresses[0] = false;
 		}
 		if (key == GLFW_KEY_D) {
-			motion.velocity[0] = 0;
+			player.keyPresses[1] = false;
 		}
 	}
 
