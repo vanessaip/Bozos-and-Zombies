@@ -57,19 +57,6 @@ void PhysicsSystem::step(float elapsed_ms)
 			motion.velocity[1] += PhysicsSystem::GRAVITY;
 		}
 
-		if (registry.players.has(entity) && !registry.deathTimers.has(entity)) {
-			Player& player = registry.players.get(entity);
-			motion.velocity[0] = 0;
-			motion.velocity[1] = 0;
-
-			if (player.keyPresses[0]) {
-				motion.velocity[0] -= 400;
-			}
-			if (player.keyPresses[1]) {
-				motion.velocity[0] += 400;
-			}
-		}
-
 		motion.position[0] += motion.velocity[0] * step_seconds;
 		motion.position[1] += motion.velocity[1] * step_seconds;
 	}

@@ -145,6 +145,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
 
+	Player& player = registry.players.get(player_bozo);
+
 	Motion& bozo_motion = registry.motions.get(player_bozo);
 	std::vector<std::tuple<Motion*, Motion*>> charactersOnMovingPlat = {};
 
@@ -156,6 +158,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 		// Bounding entities to window
 		if (registry.humans.has(motion_container.entities[i])) {
+			if (registry.players.has(motion_container.entities[i]) && !registry.deathTimers.has(motion_container.entities[i])) {
+				motion.velocity[0] = 0;
+
+				if (player.keyPresses[0]) {
+					motion.velocity[0] -= 400;
+				}
+				if (player.keyPresses[1]) {
+					motion.velocity[0] += 400;
+				}
+			}
+
 			if (motion.position.x < 40.f + BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0) {
 				motion.velocity.x = 0;
 			}
@@ -225,24 +238,22 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				if (entityLeftSide < xBlockRightBound &&
 					entityLeftSide > xBlockRightBound - 20.f &&
 					entityTop < yBlockBottom &&
-					entityBottom > yBlockTop && motion.velocty.x > 0) {
+					entityBottom > yBlockTop && player.keyPresses[0]) {
 
 					/*motion.position.y = yBlockBottom;*/
-					// motion.position.x = xBlockRightBound + motion.scale[0] / 2.f;
-					player.keyPresses[0] = false;
-					player.keyPresses[1] = false;
+					/*motion.position.x = xBlockRightBound + motion.scale[0] / 2.f;*/
+					motion.velocity.x = 0;
 				}
 
 				if (entityRightSide > xBlockLeftBound &&
 					entityRightSide < xBlockLeftBound + 20.f &&
 					entityTop < yBlockBottom &&
-					entityBottom > yBlockTop && motion.velocty.x < 0) {
+					entityBottom > yBlockTop && player.keyPresses[1]) {
 
 
 					/*motion.position.y = yBlockBottom;*/
-					// motion.position.x = xBlockLeftBound - motion.scale[0] / 2.f;
-					player.keyPresses[0] = false;
-					player.keyPresses[1] = false;
+					/*motion.position.x = xBlockLeftBound - motion.scale[0] / 2.f;*/
+					motion.velocity.x = 0;
 				}
 			
 			}
