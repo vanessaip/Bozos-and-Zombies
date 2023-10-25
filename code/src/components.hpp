@@ -8,6 +8,8 @@
 // Player component
 struct Player
 {
+	// order is left, right
+	vec2 keyPresses = { false, false };
 };
 
 // Zombies can turn Humans into Zombies

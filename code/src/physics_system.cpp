@@ -53,7 +53,6 @@ void PhysicsSystem::step(float elapsed_ms)
 		Entity entity = motion_container.entities[i];
 		float step_seconds = elapsed_ms / 1000.f;
 
-
 		if (registry.humans.has(entity) && motion.offGround) {
 			motion.velocity[1] += PhysicsSystem::GRAVITY;
 		}
