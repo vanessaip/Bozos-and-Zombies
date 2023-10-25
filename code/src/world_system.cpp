@@ -156,10 +156,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 		// Bounding entities to window
 		if (registry.humans.has(motion_container.entities[i])) {
-			/*if (motion.position.x < 40.f + BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0) {
+			if (motion.position.x < BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0) {
 				motion.velocity.x = 0;
 			}
-			else if (motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f - 40.f && motion.velocity.x > 0) {
+			else if (motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f && motion.velocity.x > 0) {
 				motion.velocity.x = 0;
 			}
 			if (motion.position.y < 0.f + BOZO_BB_HEIGHT / 2.f) {
@@ -169,7 +169,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				motion.position.y = window_height_px - BOZO_BB_HEIGHT / 2.f;
 				motion.velocity.y = 0.f;
 				motion.offGround = false;
-			}*/
+			}
 
 			bool offAll = true;
 
@@ -525,10 +525,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	if (action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo))) {
 		if (key == GLFW_KEY_A) {
-			motion.velocity[0] += 400;
+			motion.velocity[0] = 0;
 		}
 		if (key == GLFW_KEY_D) {
-			motion.velocity[0] -= 400;
+			motion.velocity[0] = 0;
 		}
 	}
 
