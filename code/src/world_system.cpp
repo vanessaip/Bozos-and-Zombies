@@ -41,7 +41,7 @@ WorldSystem::~WorldSystem() {
 
 // Debugging
 namespace {
-	void glfw_err_cb(int error, const char *desc) {
+	void glfw_err_cb(int error, const char* desc) {
 		fprintf(stderr, "%d: %s", error, desc);
 	}
 }
@@ -126,7 +126,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
 
 	// Set all states to default
-    restart_game();
+	restart_game();
 }
 
 // Update our game world
@@ -138,7 +138,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
-	    registry.remove_all_components_of(registry.debugComponents.entities.back());
+		registry.remove_all_components_of(registry.debugComponents.entities.back());
 
 	// Removing out of screen entities
 	auto& motion_container = registry.motions;
@@ -154,15 +154,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		Motion& motion = motion_container.components[i];
 
 		auto& platforms = registry.platforms;
-		auto& walls = registry.walls;
 
 		// Bounding entities to window
 		if (registry.humans.has(motion_container.entities[i])) {
-			if (motion.position.x < 40.f + BOZO_BB_WIDTH / 2.f) {
-				motion.position.x = 40.f + BOZO_BB_WIDTH / 2.f;
+			if (motion.position.x < 40.f + BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0) {
+				motion.velocity.x = 0;
 			}
-			else if (motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f - 40.f) {
-				motion.position.x = window_width_px - BOZO_BB_WIDTH / 2.f - 40.f;
+			else if (motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f - 40.f && motion.velocity.x > 0) {
+				motion.velocity.x = 0;
 			}
 			if (motion.position.y < 0.f + BOZO_BB_HEIGHT / 2.f) {
 				motion.position.y = 0.f + BOZO_BB_HEIGHT / 2.f;
@@ -190,16 +189,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				float yPlatBottom = platMotion.position.y + PLATFORM_HEIGHT / 2.f;
 
 				// Collision with Top of platform
-				if (motion.velocity.y >= 0 && playerBottom >= yPlatTop && playerBottom < yPlatTop + 20.f && 
+				if (motion.velocity.y >= 0 && playerBottom >= yPlatTop && playerBottom < yPlatTop + 20.f &&
 					playerRightSide > xPlatLeftBound && playerLeftSide < xPlatRightBound) {
 
 					// Move character with moving platform
 					if (registry.animations.has(platform)) {
 						motion.position.x += platMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
 						charactersOnMovingPlat.push_back(std::make_tuple(&motion, &platMotion)); // track collision if platform is moving down
-					}	
+					}
 
-					if(motion.offGround) {
+					if (motion.offGround) {
 						Mix_PlayChannel(-1, player_land_sound, 0);
 					}
 					motion.position.y = yPlatTop - STUDENT_BB_HEIGHT / 2.f;
@@ -207,7 +206,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 					motion.offGround = false;
 					offAll = offAll && false;
 				}
-				
+
 				// Collision with Bottom of platform
 				if (motion.velocity.y <= 0 && playerTop < yPlatBottom && playerTop > yPlatBottom - 20.f &&
 					playerRightSide > xPlatLeftBound && playerLeftSide < xPlatRightBound) {
@@ -235,21 +234,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 					/*motion.position.y = yPlatBottom;*/
 					motion.position.x = xPlatLeftBound - STUDENT_BB_WIDTH / 2.f;
-				}
-			}
-
-			for (int i = 0; i < walls.size(); i++) {
-				Entity& wall = walls.entities[i];
-				Motion& wallMotion = motion_container.get(wall);
-				float wallLeftBound = 40.f + STUDENT_BB_WIDTH / 2.f;
-				float wallRightBound = window_width_px - STUDENT_BB_WIDTH / 2.f - 40.f;
-
-				// Moving to the left
-				if (motion.position.x < wallLeftBound) {
-					motion.position.x += 5.f;
-				}
-				if (motion.position.x > wallRightBound) {
-					motion.position.x -= 5.f;
 				}
 			}
 
@@ -285,9 +269,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// Processing the player state
 	assert(registry.screenStates.components.size() <= 1);
-    ScreenState &screen = registry.screenStates.components[0];
+	ScreenState& screen = registry.screenStates.components[0];
 
-    float min_timer_ms = 3000.f;
+	float min_timer_ms = 3000.f;
 	float min_angle = asin(-1);
 	float max_angle = asin(1);
 
@@ -296,17 +280,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		DeathTimer& timer = registry.deathTimers.get(entity);
 		Motion& motion = registry.motions.get(entity);
 		timer.timer_ms -= elapsed_ms_since_last_update;
-		if(timer.timer_ms < min_timer_ms){
+		if (timer.timer_ms < min_timer_ms) {
 			min_timer_ms = timer.timer_ms;
 			if (timer.direction == 0) {
 				if (motion.angle > min_angle) {
 					motion.angle += asin(-1) / 50;
-				}	
+				}
 			}
 			else {
 				if (motion.angle < max_angle) {
-                    motion.angle += asin(1) / 50;
-				}			
+					motion.angle += asin(1) / 50;
+				}
 			}
 		}
 
@@ -314,13 +298,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		if (timer.timer_ms < 0) {
 			registry.deathTimers.remove(entity);
 			screen.screen_darken_factor = 0;
-            restart_game();
+			restart_game();
 			return true;
 		}
 	}
 	// reduce window brightness if any of the present salmons is dying
 	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
-	
+
 	// update keyframe animated entity motions
 	for (Entity entity : registry.animations.entities)
 	{
@@ -334,7 +318,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			animation.curr_frame++;
 			updateVelocity = true; // update velocity only when frame switch has occurred
 		}
-		
+
 		// ensure we set next frame to first frame if looping animation
 		int next = animation.loop ? (animation.curr_frame + 1) % (animation.num_of_frames) : (animation.curr_frame + 1);
 		if (next >= animation.num_of_frames) {
@@ -354,8 +338,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		if (updateVelocity) {
 			entity_motion.velocity =
 			{
-				(next_frame.position.x - curr_frame.position.x) / (animation.switch_time/1000.f),
-				(next_frame.position.y - curr_frame.position.y) / (animation.switch_time/1000.f),
+				(next_frame.position.x - curr_frame.position.x) / (animation.switch_time / 1000.f),
+				(next_frame.position.y - curr_frame.position.y) / (animation.switch_time / 1000.f),
 			};
 		}
 
@@ -371,7 +355,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	}
 
 	// For all objects that are standing on a platform that is moving down, re-update the character position 
-	for (std::tuple <Motion*, Motion*> tuple : charactersOnMovingPlat) 
+	for (std::tuple <Motion*, Motion*> tuple : charactersOnMovingPlat)
 	{
 		Motion& object_motion = *std::get<0>(tuple);
 		Motion& plat_motion = *std::get<1>(tuple);
@@ -382,7 +366,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// !!! TODO: update timers for dying **zombies** and remove if time drops below zero, similar to the death timer
 
 	return true;
-}	
+}
 
 // Reset the world state to its initial state
 void WorldSystem::restart_game() {
@@ -396,7 +380,7 @@ void WorldSystem::restart_game() {
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
-	    registry.remove_all_components_of(registry.motions.entities.back());
+		registry.remove_all_components_of(registry.motions.entities.back());
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();
@@ -406,31 +390,31 @@ void WorldSystem::restart_game() {
 
 	// Create platform(s) at set positions, specify width
 	// TODO(vanesssa): define array of platform dimensions for each level
-	Entity platform0 = createPlatform(renderer, {window_width_px/2, window_height_px-50.f}, window_width_px-60.f);
-	Entity platform1 = createPlatform(renderer, {260,600}, 430.f);
-	Entity platform2 = createPlatform(renderer, {window_width_px -460.f,600}, 460.f);
+	Entity platform0 = createPlatform(renderer, { window_width_px / 2, window_height_px - 50.f }, window_width_px - 60.f);
+	Entity platform1 = createPlatform(renderer, { 260,600 }, 430.f);
+	Entity platform2 = createPlatform(renderer, { window_width_px - 460.f,600 }, 460.f);
 	Entity platform3 = createPlatform(renderer, { window_width_px - 500.f,300 }, 300.f);
-	Entity platform4 = createPlatform(renderer, {window_width_px/2, 70.f}, window_width_px-60.f);
+	Entity platform4 = createPlatform(renderer, { window_width_px / 2, 70.f }, window_width_px - 60.f);
 
 	// Create walls
-	Entity wall0 = createWall(renderer, {40, 500}, 850);
-	Entity wall1 = createWall(renderer, {window_width_px - 40, 500}, 850);
+	Entity wall0 = createWall(renderer, { 40, 500 }, 850);
+	Entity wall1 = createWall(renderer, { window_width_px - 40, 500 }, 850);
 
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, { 200, 500 });
-	registry.colors.insert(player_bozo, {1, 0.8f, 0.8f});
+	registry.colors.insert(player_bozo, { 1, 0.8f, 0.8f });
 	Motion& bozo_motion = registry.motions.get(player_bozo);
 	bozo_motion.velocity = { 0.f, 0.f };
 
 	// Create zombie (one starter zombie per level?)
-	Entity zombie = createZombie(renderer, {0,0});
+	Entity zombie = createZombie(renderer, { 0,0 });
 	// Setting random initial position and constant velocity (can keep random zombie position?)
 	Motion& zombie_motion = registry.motions.get(zombie);
 	zombie_motion.position = vec2(window_width_px - 200.f,
-			50.f + uniform_dist(rng) * (window_height_px - 100.f));
+		50.f + uniform_dist(rng) * (window_height_px - 100.f));
 
 	// Create student
-	Entity student = createStudent(renderer, {0,0});
+	Entity student = createStudent(renderer, { 0,0 });
 	// Setting random initial position and constant velocity
 	Motion& student_motion = registry.motions.get(student);
 	student_motion.position =
@@ -498,7 +482,6 @@ void WorldSystem::handle_collisions() {
 					// chew, count points, and set the LightUp timer
 					registry.remove_all_components_of(entity_other);
 					Mix_PlayChannel(-1, salmon_eat_sound, 0);
-
 					// !!! TODO: just colliding with other students immunizes them or require keyboard input from user?
 				}
 			}
@@ -556,10 +539,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	if (action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo))) {
 		if (key == GLFW_KEY_A) {
-			motion.velocity[0] += 400;
+			motion.velocity[0] = 0;
 		}
 		if (key == GLFW_KEY_D) {
-			motion.velocity[0] -= 400;
+			motion.velocity[0] = 0;
 		}
 	}
 
@@ -592,15 +575,15 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
-	
+
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
 void WorldSystem::on_mouse_button(int button, int action, int mod) {
-    auto& booksRegistry = registry.books;
+	auto& booksRegistry = registry.books;
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
 		Entity entity = booksRegistry.entities[0];
-	    if (registry.books.has(entity)) {
+		if (registry.books.has(entity)) {
 			Book& book = registry.books.get(entity);
 			Motion& motion = registry.motions.get(entity);
 			motion.offGround = true;
