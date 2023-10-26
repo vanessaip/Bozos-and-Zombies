@@ -410,22 +410,39 @@ void WorldSystem::restart_game() {
 	renderer->resetCamera();
 
 	// Create background first (painter's algorithm for rendering)
+	// base colour
 	Entity background = createBackground(renderer);
+
+	// egg
+	Entity egg0 = createBackground(renderer, {window_width_px/2-80.f, window_height_px*0.4}, {250.f,250.f}, TEXTURE_ASSET_ID::EGG0);
 
 	// Create platform(s) at set positions, specify width
 	// TODO(vanesssa): define array of platform dimensions for each level
-	Entity platform0 = createPlatform(renderer, {window_width_px/2, window_height_px-50.f}, window_width_px-60.f);
-	Entity platform1 = createPlatform(renderer, {260,600}, 430.f);
-	Entity platform2 = createPlatform(renderer, {window_width_px -460.f,600}, 460.f);
-	Entity platform3 = createPlatform(renderer, { window_width_px - 500.f,300 }, 300.f);
-	Entity platform4 = createPlatform(renderer, {window_width_px/2, 70.f}, window_width_px-60.f);
+	uint center_x = window_width_px/2;
+	// floors
+	std::vector<Entity> platform0 = createPlatforms(renderer, {center_x-PLATFORM_WIDTH*7.5, window_height_px-12.f}, 16);
+	std::vector<Entity> platform1 = createPlatforms(renderer, {PLATFORM_WIDTH*4,window_height_px*0.8}, 8);
+	std::vector<Entity> platform2 = createPlatforms(renderer, {window_width_px-PLATFORM_WIDTH*6,window_height_px*0.8}, 2);
+	std::vector<Entity> platform3 = createPlatforms(renderer, {110.f,window_height_px*0.6}, 7);
+	std::vector<Entity> platform4 = createPlatforms(renderer, {window_width_px-PLATFORM_WIDTH*7-80.f, window_height_px*0.6}, 7);
+	std::vector<Entity> platform5 = createPlatforms(renderer, {110.f,window_height_px*0.4}, 7);
+	std::vector<Entity> platform6 = createPlatforms(renderer, {window_width_px-PLATFORM_WIDTH*10-80.f, window_height_px*0.4}, 10);
+	std::vector<Entity> platform7 = createPlatforms(renderer, {110.f,window_height_px*0.2}, 25);
+
+	// stairs
+	std::vector<Entity> step0 = createSteps(renderer, {PLATFORM_WIDTH*12-20.f,window_height_px*0.8}, 5, 3, false);
+	std::vector<Entity> step1 = createSteps(renderer, {window_width_px-PLATFORM_WIDTH*6-STEP_WIDTH*6,window_height_px*0.8+PLATFORM_HEIGHT*4}, 5, 2, true);
 
 	// Create walls
-	Entity wall0 = createWall(renderer, {40, 500}, 850);
-	Entity wall1 = createWall(renderer, {window_width_px - 40, 500}, 850);
+	Entity wall0 = createWall(renderer, {320.f, window_height_px*0.9+10.f}, window_height_px*0.2-10.f);
+	Entity wall1 = createWall(renderer, {window_width_px-320.f, window_height_px*0.9+10.f}, window_height_px*0.2-10.f);
+	Entity wall2 = createWall(renderer, {180.f, window_height_px*0.7+15.f}, window_height_px*0.2);
+	Entity wall3 = createWall(renderer, {window_width_px-220.f, window_height_px*0.7+15.f}, window_height_px*0.2);
+	Entity wall4 = createWall(renderer, {80.f, window_height_px*0.4-20.f}, window_height_px*0.4+70.f);
+	Entity wall5 = createWall(renderer, {window_width_px-100.f, window_height_px*0.4-20}, window_height_px*0.4+70.f);
 
 	// Create a new Bozo player
-	player_bozo = createBozo(renderer, { 200, 500 });
+	player_bozo = createBozo(renderer, { 500, window_height_px*0.8-50.f });
 	registry.colors.insert(player_bozo, {1, 0.8f, 0.8f});
 	Motion& bozo_motion = registry.motions.get(player_bozo);
 	bozo_motion.velocity = { 0.f, 0.f };
