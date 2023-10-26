@@ -189,7 +189,7 @@ Entity createWall(RenderSystem* renderer, vec2 position, float height)
 	return entity;
 }
 
-Entity createBackground(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID texture)
+Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, vec2 position, vec2 scale)
 {
 	auto entity = Entity();
 

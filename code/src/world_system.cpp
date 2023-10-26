@@ -413,8 +413,11 @@ void WorldSystem::restart_game() {
 	// base colour
 	Entity background = createBackground(renderer);
 
+	// indoor background
+	Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
+
 	// egg
-	Entity egg0 = createBackground(renderer, {window_width_px/2-80.f, window_height_px*0.4}, {250.f,250.f}, TEXTURE_ASSET_ID::EGG0);
+	Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, {window_width_px/2-80.f, window_height_px*0.4}, {250.f,250.f});
 
 	// Create platform(s) at set positions, specify width
 	// TODO(vanesssa): define array of platform dimensions for each level

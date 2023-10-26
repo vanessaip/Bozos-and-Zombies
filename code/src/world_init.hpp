@@ -34,6 +34,6 @@ std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, uint num_
 // walls
 Entity createWall(RenderSystem* renderer, vec2 position, float height);
 // render background as a sprite
-Entity createBackground(RenderSystem* renderer, vec2 position = { window_width_px/2, window_height_px/2 }, vec2 scale = { window_width_px, window_height_px }, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::BACKGROUND);
+Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::BACKGROUND, vec2 position = { window_width_px/2, window_height_px/2 }, vec2 scale = { window_width_px, window_height_px });
 
 

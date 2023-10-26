@@ -37,12 +37,13 @@ class RenderSystem {
 		textures_path("student.png"),
 		textures_path("zombie.png"),
 		textures_path("bozo.png"),
-		textures_path("background_temp.png"),
+		textures_path("business-background.png"),
 		textures_path("Tile_40.png"),	// platform
 		textures_path("Tile_04.png"),	// step left section
 		textures_path("Tile_02.png"),	// step middle section
 		textures_path("Tiles_74.png"),	// wall
 		textures_path("egg.png"),
+		textures_path("2-2.png"),
 		};
 
 	std::array<GLuint, effect_count> effects;
