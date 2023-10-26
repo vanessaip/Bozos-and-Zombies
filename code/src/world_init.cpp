@@ -182,14 +182,14 @@ Entity createWall(RenderSystem* renderer, vec2 position, float height)
 	registry.walls.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::PLATFORM,
+		{TEXTURE_ASSET_ID::WALL,
 		 EFFECT_ASSET_ID::TEXTURED,
 		 GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
 
-Entity createBackground(RenderSystem* renderer)
+Entity createBackground(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID texture)
 {
 	auto entity = Entity();
 
@@ -201,16 +201,16 @@ Entity createBackground(RenderSystem* renderer)
 	auto& motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.position = { window_width_px/2, window_height_px/2 }; //TODO(vanessa): need to ensure all backgrounds are the same dimensions 
+	motion.position = position; //TODO(vanessa): need to ensure all backgrounds are the same dimensions 
 
 	// Setting initial values
-	motion.scale = vec2({ window_width_px, window_height_px });
+	motion.scale = scale;
 
 	// Create a Background component
 	registry.backgrounds.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::BACKGROUND,
+		{ texture,
 		 EFFECT_ASSET_ID::TEXTURED,
 		 GEOMETRY_BUFFER_ID::SPRITE });
 
