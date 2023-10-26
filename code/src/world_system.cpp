@@ -608,20 +608,27 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 }
 
 // defines keyframes for entities that are animated
-void WorldSystem::setup_keyframes(RenderSystem* renderer)
+void WorldSystem::setup_keyframes(RenderSystem* rendered)
 {
 	// Example use case
 
-	Entity moving_plat = createPlatform(renderer, { 0.f, 0.f }, 150.f);
-	Motion m1 = Motion(vec2(window_width_px - 150, 300));
-	Motion m2 = Motion(vec2(window_width_px - 150, 600));
+	// TODO(vanessa): currently all platforms using same Motion frames are stacked on top of each other, fix to make adjacent
+	// 					need to add walls or some other method of preventing characters from going under moving platforms
+	//					reconcile behaviour of moving platforms passing through static platforms
+	std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
+	Motion m1 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.8));
+	Motion m2 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.4));
 	std::vector<Motion> frames = { m1, m2 };
-	registry.animations.emplace(moving_plat, KeyframeAnimation((int)frames.size(), 3000.f, true, frames));
+	for (uint i = 0; i < moving_plat.size(); i++) {
+		Entity currplat = moving_plat[i];
+		registry.animations.emplace(currplat, (int)frames.size(), 3000.f, true, frames);
+	}
 
-	Entity moving_plat2 = createPlatform(renderer, { 0.f, 0.f }, 150.f);
-	Motion m3 = Motion(vec2(150, 300));
-	Motion m4 = Motion(vec2(500, 300));
+	std::vector<Entity> moving_plat2 = createPlatforms(renderer, { 0.f, 0.f }, 7);
+	Motion m3 = Motion(vec2(PLATFORM_WIDTH*6, window_height_px*0.8));
+	Motion m4 = Motion(vec2(PLATFORM_WIDTH*6, window_height_px*0.4));
 	std::vector<Motion> frames2 = { m3, m4 };
-	registry.animations.emplace(moving_plat2, KeyframeAnimation((int)frames.size(), 2000.f, true, frames2));
-
+	for (uint i = 0; i < moving_plat2.size(); i++) {
+		registry.animations.emplace(moving_plat2[i], KeyframeAnimation((int)frames2.size(), 2000.f, true, frames2));
+	}
 }
