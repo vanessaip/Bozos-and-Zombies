@@ -8,6 +8,8 @@
 // Player component
 struct Player
 {
+	// order is left, right
+	vec2 keyPresses = { false, false };
 };
 
 // Zombies can turn Humans into Zombies
@@ -142,6 +144,28 @@ struct Mesh
 	vec2 original_size = {1,1};
 	std::vector<ColoredVertex> vertices;
 	std::vector<uint16_t> vertex_indices;
+};
+
+struct Camera
+{
+	float left;
+	float top;
+	float right;
+	float bottom;
+	float timer_ms_x = 0.f;
+	float timer_ms_y = 0.f;
+	float timer_stop_ms = 9000.f;
+	float xOffset = 0.f;
+	float yOffset = 0.f;
+	bool shiftHorizontal = false;
+	bool shiftVertical = false;
+
+	Camera(float l, float t, float r, float b) {
+		left = l;
+		top = t;
+		right = r;
+		bottom = b;
+	}
 };
 
 /**

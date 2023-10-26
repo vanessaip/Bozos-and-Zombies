@@ -50,7 +50,7 @@ int main()
 
 		world_system.handle_collisions();
 
-		render_system.draw();
+		render_system.draw(elapsed_ms);
 	}
 
 	return EXIT_SUCCESS;
