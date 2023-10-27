@@ -276,13 +276,19 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			}
 		}
 
-		// Adding book in hand behaviour
+		// Add book behaviour
 		if (registry.books.has(motion_container.entities[i])) {
 			Book& book = registry.books.get(motion_container.entities[i]);
 			Motion motion_player = registry.motions.get(player_bozo);
+			// If book is in hand, we consider it as on ground and always go with player
 			if (book.offHand == false) {
+				motion.offGround = false;
 				motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
 				motion.position.y = motion_player.position.y;
+			}
+			// If book is on ground, it's velocity should always be 0
+			if (motion.offGround == false) {
+				motion.velocity = { 0.f, 0.f };
 			}
 		}
 
