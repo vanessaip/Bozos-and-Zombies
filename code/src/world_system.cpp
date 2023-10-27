@@ -531,7 +531,6 @@ void WorldSystem::handle_collisions() {
 			else if (registry.books.has(entity_other)) {
 				bool& offHand = registry.books.get(entity_other).offHand;
 				Motion& motion_book = registry.motions.get(entity_other);
-				Motion& motion_player = registry.motions.get(entity);
 				if (motion_book.offGround == false && offHand == true) {
 					offHand = false;
 					++points;
@@ -627,7 +626,7 @@ void WorldSystem::on_mouse_button(int button, int action, int mod) {
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
 		auto& booksRegistry = registry.books;
 		for (int i = 0; i < booksRegistry.size(); i++) {
-			Entity entity = booksRegistry.entities[0];
+			Entity entity = booksRegistry.entities[i];
 			Book& book = registry.books.get(entity);
 			if (book.offHand == false) {
 				Motion& motion_book = registry.motions.get(entity);
