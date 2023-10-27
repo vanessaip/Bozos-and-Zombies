@@ -156,18 +156,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		auto& platforms = registry.platforms;
 		auto& walls = registry.walls;
 
+		if (registry.players.has(motion_container.entities[i]) && !registry.deathTimers.has(motion_container.entities[i])) {
+			motion.velocity[0] = 0;
+
+			if (player.keyPresses[0]) {
+				motion.velocity[0] -= 400;
+			}
+			if (player.keyPresses[1]) {
+				motion.velocity[0] += 400;
+			}
+		}
 		// Bounding entities to window
 		if (registry.humans.has(motion_container.entities[i])) {
-			if (registry.players.has(motion_container.entities[i]) && !registry.deathTimers.has(motion_container.entities[i])) {
-				motion.velocity[0] = 0;
-
-				if (player.keyPresses[0]) {
-					motion.velocity[0] -= 400;
-				}
-				if (player.keyPresses[1]) {
-					motion.velocity[0] += 400;
-				}
-			}
 
 			if (motion.position.x < 40.f + BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0) {
 				motion.velocity.x = 0;
@@ -286,6 +286,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			motion.velocity.x = direction.x * speed;
 			motion.velocity.y = direction.y * speed;
 		}
+
+		// If entity if a player effect, for example bozo_pointer, move it along with the player
+		if (registry.playerEffects.has(motion_container.entities[i])) {
+			motion.position.x = bozo_motion.position.x;
+			motion.position.y = bozo_motion.position.y;
+		}
+
 	}
 
 	// Processing the player state
@@ -588,6 +595,13 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	
+	if (!registry.deathTimers.has(player_bozo)) {
+		Motion& motion = registry.motions.get(player_bozo_pointer);
+		float radians = atan2(mouse_position.y - motion.position.y, mouse_position.x - motion.position.x);
+		// printf("Radians: %f\n", radians);
+		motion.angle = radians;
+	}
+
 
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }

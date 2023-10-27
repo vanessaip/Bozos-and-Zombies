@@ -51,7 +51,7 @@ Entity createBozoPointer(RenderSystem* renderer, vec2 pos)
 	// Setting initial values
 	motion.scale = vec2({ BOZO_POINTER_BB_WIDTH, BOZO_POINTER_BB_HEIGHT });
 
-	// Create and (empty) Bozo component to be able to refer to all players
+	registry.playerEffects.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::BOZO_POINTER,

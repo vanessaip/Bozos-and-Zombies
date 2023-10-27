@@ -12,6 +12,11 @@ struct Player
 	vec2 keyPresses = { false, false };
 };
 
+struct PlayerEffects
+{
+	
+};
+
 // Zombies can turn Humans into Zombies
 struct Zombie
 {

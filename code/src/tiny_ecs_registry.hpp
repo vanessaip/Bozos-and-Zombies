@@ -17,6 +17,7 @@ public:
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
 	ComponentContainer<Player> players;
+	ComponentContainer<PlayerEffects> playerEffects;
 	ComponentContainer<Mesh*> meshPtrs;
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<ScreenState> screenStates;
@@ -38,6 +39,7 @@ public:
 		registry_list.push_back(&motions);
 		registry_list.push_back(&collisions);
 		registry_list.push_back(&players);
+		registry_list.push_back(&playerEffects);
 		registry_list.push_back(&meshPtrs);
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&screenStates);
