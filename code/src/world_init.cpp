@@ -14,7 +14,7 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	
+
 	// Setting initial values
 	motion.scale = vec2({ BOZO_BB_WIDTH, BOZO_BB_HEIGHT });
 
@@ -157,7 +157,7 @@ Entity createBackground(RenderSystem* renderer)
 	auto& motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.position = { window_width_px/2, window_height_px/2 }; //TODO(vanessa): need to ensure all backgrounds are the same dimensions 
+	motion.position = { window_width_px / 2, window_height_px / 2 }; //TODO(vanessa): need to ensure all backgrounds are the same dimensions 
 
 	// Setting initial values
 	motion.scale = vec2({ window_width_px, window_height_px });
@@ -180,7 +180,7 @@ Entity createLine(vec2 position, vec2 scale)
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT});
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT });
 
 	// Create motion
 	Motion& motion = registry.motions.emplace(entity);
@@ -209,7 +209,7 @@ Entity createBook(RenderSystem* renderer, vec2 position)
 	motion.position = position;
 
 	// Setting initial values, scale the same with player
-	motion.scale = vec2({ BOZO_BB_WIDTH * 1.5, BOZO_BB_HEIGHT });
+	motion.scale = vec2({ 102.f * 0.8, 84.f * 0.8 });
 
 	// Create an (empty) Book component to be able to refer to all books
 	registry.books.emplace(entity);

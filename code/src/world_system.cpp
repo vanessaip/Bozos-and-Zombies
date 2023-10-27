@@ -159,7 +159,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		auto& walls = registry.walls;
 
 		// Bounding entities to window
-		if (registry.humans.has(motion_container.entities[i])) {
+		if (registry.humans.has(motion_container.entities[i]) || registry.books.has(motion_container.entities[i])) {
 			if (registry.players.has(motion_container.entities[i]) && !registry.deathTimers.has(motion_container.entities[i])) {
 				motion.velocity[0] = 0;
 
@@ -273,6 +273,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			if (motion.position.x + abs(motion.scale.x) < 0.f) {
 				if (!registry.players.has(motion_container.entities[i])) // don't remove the player
 					registry.remove_all_components_of(motion_container.entities[i]);
+			}
+		}
+
+		// Adding book in hand behaviour
+		if (registry.books.has(motion_container.entities[i])) {
+			Book& book = registry.books.get(motion_container.entities[i]);
+			Motion motion_player = registry.motions.get(player_bozo);
+			if (book.offHand == false) {
+				motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
+				motion.position.y = motion_player.position.y;
 			}
 		}
 
@@ -514,15 +524,11 @@ void WorldSystem::handle_collisions() {
 			// Checking Player - Book collisions
 			else if (registry.books.has(entity_other)) {
 				bool& offHand = registry.books.get(entity_other).offHand;
-				Motion& book_motion = registry.motions.get(entity_other);
+				Motion& motion_book = registry.motions.get(entity_other);
 				Motion& motion_player = registry.motions.get(entity);
-				if (book_motion.offGround == false) {
-					if (offHand == true) {
-						offHand = false;
-						++points;
-					}
-					book_motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
-					book_motion.position.y = motion_player.position.y;
+				if (motion_book.offGround == false && offHand == true) {
+					offHand = false;
+					++points;
 				}
 			}
 		}
