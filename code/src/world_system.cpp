@@ -430,6 +430,7 @@ void WorldSystem::restart_game() {
 	Motion& bozo_motion = registry.motions.get(player_bozo);
 	bozo_motion.velocity = { 0.f, 0.f };
 
+	player_bozo_pointer = createBozoPointer(renderer, { 200, 500 });
 	// Create zombie (one starter zombie per level?)
 	Entity zombie = createZombie(renderer, {0,0});
 	// Setting random initial position and constant velocity (can keep random zombie position?)
@@ -586,6 +587,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// xpos and ypos are relative to the top-left of the window, the salmon's
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	
 
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }

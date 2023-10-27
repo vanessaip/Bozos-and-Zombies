@@ -11,11 +11,15 @@ const float ZOMBIE_BB_WIDTH = 80.f;
 const float ZOMBIE_BB_HEIGHT = 160.f;
 const float BOZO_BB_WIDTH = 100.f;
 const float BOZO_BB_HEIGHT = 160.f;
+const float BOZO_POINTER_BB_WIDTH = 170.f;
+const float BOZO_POINTER_BB_HEIGHT = 170.f;
 const float PLATFORM_HEIGHT = 20.f;
 const float WALL_WIDTH = 20.f;
 
 // the player
 Entity createBozo(RenderSystem* renderer, vec2 pos);
+// the pointer
+Entity createBozoPointer(RenderSystem* renderer, vec2 pos);
 // the prey
 Entity createStudent(RenderSystem* renderer, vec2 position);
 // the enemy

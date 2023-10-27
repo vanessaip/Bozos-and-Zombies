@@ -58,6 +58,7 @@ private:
 	RenderSystem* renderer;
 	float current_speed;
 	Entity player_bozo;
+	Entity player_bozo_pointer;
 
 	// music references
 	Mix_Music* background_music;

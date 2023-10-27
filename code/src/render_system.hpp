@@ -37,6 +37,7 @@ class RenderSystem {
 		textures_path("student.png"),
 		textures_path("zombie.png"),
 		textures_path("bozo.png"),
+		textures_path("bozo_pointer.png"),
 		textures_path("background_temp.png"),
 		textures_path("platform.png")};
 
