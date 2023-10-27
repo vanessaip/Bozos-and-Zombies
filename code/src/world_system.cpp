@@ -624,25 +624,28 @@ void WorldSystem::on_mouse_button(int button, int action, int mod) {
 		return;
 	}
 
-	auto& booksRegistry = registry.books;
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-		Entity entity = booksRegistry.entities[0];
-		if (registry.books.has(entity)) {
+		auto& booksRegistry = registry.books;
+		for (int i = 0; i < booksRegistry.size(); i++) {
+			Entity entity = booksRegistry.entities[0];
 			Book& book = registry.books.get(entity);
-			Motion& motion_book = registry.motions.get(entity);
-			Motion& motion_bozo = registry.motions.get(player_bozo);
+			if (book.offHand == false) {
+				Motion& motion_book = registry.motions.get(entity);
+				Motion& motion_bozo = registry.motions.get(player_bozo);
 
-			double xpos, ypos;
-			glfwGetCursorPos(window, &xpos, &ypos);
-			vec2& position = motion_bozo.position;
-			double direction = atan2(ypos - position[1], xpos - position[0]);
+				double xpos, ypos;
+				glfwGetCursorPos(window, &xpos, &ypos);
+				vec2& position = motion_bozo.position;
+				double direction = atan2(ypos - position[1], xpos - position[0]);
 
-			motion_book.velocity.x = 500.f * cos(direction);
-			motion_book.velocity.y = 500.f * sin(direction);
+				motion_book.velocity.x = 500.f * cos(direction);
+				motion_book.velocity.y = 500.f * sin(direction);
 
-			motion_book.offGround = true;
-			book.offHand = true;
-			--points;
+				motion_book.offGround = true;
+				book.offHand = true;
+				--points;
+				break;
+			}
 		}
 	}
 }
