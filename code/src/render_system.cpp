@@ -62,8 +62,8 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		gl_has_errors();
 
 		assert(registry.renderRequests.has(entity));
-		GLuint texture_id =
-			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+		GLuint texture_id = texture_gl_handles[(GLuint)render_request.used_texture];
+		ivec2 texture_dim = texture_dimensions[(GLuint)render_request.used_texture];
 
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
@@ -230,6 +230,24 @@ void RenderSystem::draw(float elapsed_time_ms)
 	gl_has_errors();
 }
 
+void RenderSystem::step(float elapsed_time_ms) {
+	for (int i = 0; i < registry.spriteSheets.components.size(); i++) {
+		SpriteSheet& sheet = registry.spriteSheets.components[i];
+		sheet.timer_ms += elapsed_time_ms;
+
+		if (sheet.timer_ms > sheet.switchTime_ms) {
+			sheet.xOffset += sheet.spriteWidth;
+			sheet.timer_ms = 0;
+
+			if (sheet.xOffset + sheet.spriteWidth > 1)
+				sheet.xOffset = 0.f;
+
+			std::cout << "left = " << sheet.xOffset << "\n";
+			updateSpriteSheetGeometryBugger(sheet);
+		}
+	}
+}
+
 mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 {
 	// Set projection matrix to define camera bounds
@@ -327,4 +345,27 @@ void RenderSystem::resetCamera()
 	camera.top = 0.f;
 	camera.right = screen_width_px;
 	camera.bottom = screen_height_px;
+}
+
+ivec2& RenderSystem::getTextureDimensions(TEXTURE_ASSET_ID textureId) {
+	return texture_dimensions[(GLuint)textureId];
+}
+
+void RenderSystem::updateSpriteSheetGeometryBugger(SpriteSheet& sheet) {
+	assert(sheet.spriteWidth > 0);
+
+	std::vector<TexturedVertex> textured_vertices(4);
+	textured_vertices[0].position = { -1.f / 2, +1.f / 2, 0.f };
+	textured_vertices[1].position = { +1.f / 2, +1.f / 2, 0.f };
+	textured_vertices[2].position = { +1.f / 2, -1.f / 2, 0.f };
+	textured_vertices[3].position = { -1.f / 2, -1.f / 2, 0.f };
+
+	textured_vertices[0].texcoord = { sheet.xOffset, 1.f };
+	textured_vertices[1].texcoord = { sheet.xOffset + sheet.spriteWidth, 1.f };
+	textured_vertices[2].texcoord = { sheet.xOffset + sheet.spriteWidth, 0.f };
+	textured_vertices[3].texcoord = { sheet.xOffset, 0.f };
+
+	// Counterclockwise as it's the default opengl front winding direction.
+	const std::vector<uint16_t> textured_indices = { 0, 3, 1, 1, 3, 2 };
+	bindVBOandIBO(sheet.bufferId, textured_vertices, textured_indices);
 }

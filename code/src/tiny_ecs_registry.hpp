@@ -12,6 +12,7 @@ class ECSRegistry
 public:
 	// Manually created list of all components this game has
 	// TODO: A1 add a LightUp component
+	ComponentContainer<SpriteSheet> spriteSheets;
 	ComponentContainer<KeyframeAnimation> animations;
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<Motion> motions;
@@ -33,6 +34,7 @@ public:
 	ECSRegistry()
 	{
 		// TODO: A1 add a LightUp component
+		registry_list.push_back(&spriteSheets);
 		registry_list.push_back(&animations);
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);

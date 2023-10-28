@@ -211,7 +211,8 @@ enum class GEOMETRY_BUFFER_ID {
 	SPRITE = SALMON + 1,
 	DEBUG_LINE = SPRITE + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
-	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
+	SPRITE_SHEET_BOZO = SCREEN_TRIANGLE + 1,
+	GEOMETRY_COUNT = SPRITE_SHEET_BOZO + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
@@ -219,5 +220,33 @@ struct RenderRequest {
 	TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
+};
+
+struct SpriteSheet
+{
+	float xOffset = 0.f;
+	float yOffset = 0.f;
+	float spriteWidth = -1.f;
+	float numOfSprites;
+	float timer_ms = 0.f;
+	float switchTime_ms;
+	vec2 textureDimensions;
+	TEXTURE_ASSET_ID textureId;
+	GEOMETRY_BUFFER_ID bufferId;
+
+	SpriteSheet(TEXTURE_ASSET_ID tId, GEOMETRY_BUFFER_ID bId, float sWidth, float num, float switchTime)
+	{
+		textureId = tId;
+		bufferId = bId;
+		numOfSprites = num;
+		switchTime_ms = switchTime;
+
+		spriteWidth = 1.f / numOfSprites;
+	}
+
+	void updateDimensions(float x, float y) {
+		textureDimensions = vec2(x, y);
+		spriteWidth = textureDimensions.x / (numOfSprites * 1.f);
+	}
 };
 

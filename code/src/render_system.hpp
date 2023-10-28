@@ -36,7 +36,7 @@ class RenderSystem {
 	const std::array<std::string, texture_count> texture_paths = {
 		textures_path("student.png"),
 		textures_path("zombie.png"),
-		textures_path("bozo.png"),
+		textures_path("bozo_run.png"),
 		textures_path("background_temp.png"),
 		textures_path("platform.png")};
 
@@ -46,7 +46,7 @@ class RenderSystem {
 		shader_path("coloured"),
 		// shader_path("salmon"),
 		shader_path("textured"),
-		shader_path("water") };
+		shader_path("water")};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
 	std::array<GLuint, geometry_count> index_buffers;
@@ -67,6 +67,9 @@ public:
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
 
 	void initializeGlGeometryBuffers();
+	
+	void updateSpriteSheetGeometryBugger(SpriteSheet& sheet);
+
 	// Initialize the screen texture used as intermediate render target
 	// The draw loop first renders to this texture, then it is used for the water
 	// shader
@@ -78,9 +81,13 @@ public:
 	// Draw all entities
 	void draw(float elapsed_time_ms);
 
+	void step(float elapsed_time_ms);
+
 	mat3 createProjectionMatrix(float elapsed_time_ms);
 
 	void resetCamera();
+
+	ivec2& getTextureDimensions(TEXTURE_ASSET_ID textureId);
 
 private:
 	// Internal drawing functions for each entity type

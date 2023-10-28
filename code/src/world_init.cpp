@@ -21,11 +21,12 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 	// Create and (empty) Bozo component to be able to refer to all players
 	registry.players.emplace(entity);
 	registry.humans.emplace(entity); // zombies will target all entities with human component
+	registry.spriteSheets.emplace(entity, SpriteSheet(TEXTURE_ASSET_ID::BOZO, GEOMETRY_BUFFER_ID::SPRITE_SHEET_BOZO, 0.167, 6, 100.f));
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::BOZO,
 			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			GEOMETRY_BUFFER_ID::SPRITE_SHEET_BOZO });
 
 	return entity;
 }
