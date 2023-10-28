@@ -424,6 +424,10 @@ void WorldSystem::restart_game() {
 	Entity wall0 = createWall(renderer, {40, 500}, 850);
 	Entity wall1 = createWall(renderer, {window_width_px - 40, 500}, 850);
 
+	// Create spikes
+	Entity spike1 = createSpike(renderer, {50, 500});
+	registry.colors.insert(spike1, { 1, 0, 0 });
+
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, { 200, 500 });
 	registry.colors.insert(player_bozo, {1, 0.8f, 0.8f});
@@ -502,7 +506,13 @@ void WorldSystem::handle_collisions() {
 
 					// !!! TODO: just colliding with other students immunizes them or require keyboard input from user?
 				}
-			}		
+			} else if (registry.spikes.has(entity_other)) {
+				// Action to take when the player collides with a spike
+				if (!registry.deathTimers.has(entity)) {
+					registry.deathTimers.emplace(entity);
+					Mix_PlayChannel(-1, player_death_sound, 0);
+				}
+			}
 		}
 	}
 

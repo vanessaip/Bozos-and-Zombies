@@ -39,6 +39,11 @@ struct Wall
 
 };
 
+struct Spike
+{
+
+};
+
 // All data relevant to the shape and motion of entities
 struct Motion {
 	vec2 position;
@@ -199,16 +204,16 @@ const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
-	// SALMON = COLOURED + 1, // can reuse if we end up having meshes
-	TEXTURED = COLOURED + 1,
+	SPIKE = COLOURED + 1, // can reuse if we end up having meshes
+	TEXTURED = SPIKE + 1,
 	WATER = TEXTURED + 1,
 	EFFECT_COUNT = WATER + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
-	SALMON = 0,
-	SPRITE = SALMON + 1,
+	SPIKE = 0,
+	SPRITE = SPIKE + 1,
 	DEBUG_LINE = SPRITE + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
 	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
