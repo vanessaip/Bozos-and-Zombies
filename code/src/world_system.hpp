@@ -39,6 +39,8 @@ public:
 	bool is_over()const;
 
 	void updateZombieMovement(Motion& motion, Motion& bozo_motion);
+
+	void updateClimbing(Motion& motion, vec4 entityBB, ComponentContainer<Motion>& motion_container);
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);

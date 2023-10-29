@@ -170,10 +170,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 		auto& platforms = registry.platforms;
 		auto& walls = registry.walls;
+		auto& climables = registry.climbables;
 
 		// Bounding entities to window
 		if (registry.humans.has(motion_container.entities[i]) || registry.zombies.has(motion_container.entities[i]))
 		{
+			float entityRightSide = motion.position.x + motion.scale[0] / 2.f;
+			float entityLeftSide = motion.position.x - motion.scale[0] / 2.f;
+			float entityBottom = motion.position.y + motion.scale[1] / 2.f;
+			float entityTop = motion.position.y - motion.scale[1] / 2.f;
+
+			vec4 entityBB = { entityRightSide, entityLeftSide, entityBottom, entityTop };
+
 			if (registry.players.has(motion_container.entities[i]) && !registry.deathTimers.has(motion_container.entities[i]))
 			{
 				motion.velocity[0] = 0;
@@ -223,45 +231,41 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			{
 				Motion& blockMotion = motion_container.get(blocks[i]);
 
-				float entityRightSide = motion.position.x + motion.scale[0] / 2.f;
-				float entityLeftSide = motion.position.x - motion.scale[0] / 2.f;
-				float entityBottom = motion.position.y + motion.scale[1] / 2.f;
-				float entityTop = motion.position.y - motion.scale[1] / 2.f;
-
 				float xBlockLeftBound = blockMotion.position.x - blockMotion.scale[0] / 2.f;
 				float xBlockRightBound = blockMotion.position.x + blockMotion.scale[0] / 2.f;
 				float yBlockTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
 				float yBlockBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
 
-				// Collision with Top of block
-				if (motion.velocity.y >= 0 && entityBottom >= yBlockTop && entityBottom < yBlockTop + 20.f &&
-					entityRightSide > xBlockLeftBound && entityLeftSide < xBlockRightBound)
-				{
-
-					// Move character with moving block
-					if (registry.animations.has(blocks[i]))
+				// Add this check so that the player can pass through platforms when on a ladder
+				if (!motion.climbing) {
+					// Collision with Top of block
+					if (motion.velocity.y >= 0 && entityBottom >= yBlockTop && entityBottom < yBlockTop + 20.f &&
+						entityRightSide > xBlockLeftBound && entityLeftSide < xBlockRightBound)
 					{
-						motion.position.x += blockMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
-						charactersOnMovingPlat.push_back(std::make_tuple(&motion, &blockMotion)); // track collision if platform is moving down
+						// Move character with moving block
+						if (registry.animations.has(blocks[i]))
+						{
+							motion.position.x += blockMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
+							charactersOnMovingPlat.push_back(std::make_tuple(&motion, &blockMotion)); // track collision if platform is moving down
+						}
+
+						if (motion.offGround)
+						{
+							Mix_PlayChannel(-1, player_land_sound, 0);
+						}
+						motion.position.y = yBlockTop - motion.scale[1] / 2.f;
+						motion.velocity.y = 0.f;
+						motion.offGround = false;
+						offAll = offAll && false;
 					}
 
-					if (motion.offGround)
+					// Collision with Bottom of block
+					if (motion.velocity.y <= 0 && entityTop < yBlockBottom && entityTop > yBlockBottom - 20.f &&
+						entityRightSide > xBlockLeftBound && entityLeftSide < xBlockRightBound)
 					{
-						Mix_PlayChannel(-1, player_land_sound, 0);
+						motion.position.y = yBlockBottom + motion.scale[1] / 2.f;
+						motion.velocity.y = 0.f;
 					}
-					motion.position.y = yBlockTop - motion.scale[1] / 2.f;
-					motion.velocity.y = 0.f;
-					motion.offGround = false;
-					offAll = offAll && false;
-				}
-
-				// Collision with Bottom of block
-				if (motion.velocity.y <= 0 && entityTop < yBlockBottom && entityTop > yBlockBottom - 20.f &&
-					entityRightSide > xBlockLeftBound && entityLeftSide < xBlockRightBound)
-				{
-
-					motion.position.y = yBlockBottom + motion.scale[1] / 2.f;
-					motion.velocity.y = 0.f;
 				}
 
 				// Collision with Right edge of block
@@ -270,9 +274,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 					entityTop < yBlockBottom &&
 					entityBottom > yBlockTop && player.keyPresses[0])
 				{
-
-					/*motion.position.y = yBlockBottom;*/
-					/*motion.position.x = xBlockRightBound + motion.scale[0] / 2.f;*/
 					motion.velocity.x = 0;
 				}
 
@@ -281,14 +282,20 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 					entityTop < yBlockBottom &&
 					entityBottom > yBlockTop && player.keyPresses[1])
 				{
-
-					/*motion.position.y = yBlockBottom;*/
-					/*motion.position.x = xBlockLeftBound - motion.scale[0] / 2.f;*/
 					motion.velocity.x = 0;
 				}
 			}
 
-			motion.offGround = offAll;
+			if (motion.climbing) {
+				motion.offGround = false;
+			}
+			else {
+				motion.offGround = offAll;
+			}
+			
+			if (registry.humans.has(motion_container.entities[i])) {
+				updateClimbing(motion, entityBB, motion_container);
+			}
 		}
 
 		if (registry.humans.has(motion_container.entities[i]) && !registry.players.has(motion_container.entities[i]))
@@ -476,9 +483,50 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion) {
 	}
 }
 
+void WorldSystem::updateClimbing(Motion& motion, vec4 entityBB, ComponentContainer<Motion>& motion_container) {
+	Player& player = registry.players.get(player_bozo);
+	auto& climbables = registry.climbables;
+
+	bool touchingClimbable = false;
+
+	// This is so that the player can descend the ladder if standing on top
+	float entityBottom = motion.position.y + motion.scale[1] / 2.f;
+
+	for (int i = 0; i < climbables.size(); i++) {
+		Motion& blockMotion = motion_container.get(climbables.entities[i]);
+
+		float xLeftBound = blockMotion.position.x - motion.scale[0] / 2.f;
+		float xRightBound = blockMotion.position.x + motion.scale[0] / 2.f;
+		float yTop = blockMotion.position.y - motion.scale[1] / 2.f;
+		float yBottom = blockMotion.position.y + motion.scale[1] / 2.f;
+
+		if (motion.position.x  < xRightBound && motion.position.x > xLeftBound && entityBottom < yBottom && entityBottom > yTop) {
+			touchingClimbable = touchingClimbable || true;
+		}
+	}
+
+	if (touchingClimbable) {
+		if (player.keyPresses[2] || player.keyPresses[3] || motion.climbing) {
+			motion.velocity.y = 0;
+			if (player.keyPresses[2]) {
+				motion.climbing = true;
+				motion.velocity.y -= 200;
+			}
+			if (player.keyPresses[3]) {
+				motion.climbing = true;
+				motion.velocity.y += 200;
+			}
+		}
+	}
+	else {
+		motion.climbing = false;
+	}
+}
+
 // Reset the world state to its initial state
 void WorldSystem::restart_game()
 {
+	int curr_level = 0;
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 	printf("Restarting\n");
@@ -541,8 +589,8 @@ void WorldSystem::restart_game()
 	std::vector<Entity> ladder5 = createClimbable(renderer, {window_width_px-PLATFORM_WIDTH*9, window_height_px*0.2}, 5);
 
 	// Create spikes
-	Entity spike1 = createSpike(renderer, {300, 583});
-registry.colors.insert(spike1, { 0.5f, 0.5f, 0.5f });
+	Entity spike1 = createSpike(renderer, {300, 623});
+	registry.colors.insert(spike1, { 0.5f, 0.5f, 0.5f });
 
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, { 500, window_height_px*0.8-50.f });
@@ -551,11 +599,11 @@ registry.colors.insert(spike1, { 0.5f, 0.5f, 0.5f });
 	bozo_motion.velocity = { 0.f, 0.f };
 
 	// Create zombie (one starter zombie per level?)
-	Entity zombie = createZombie(renderer, { 0, 0 });
+	Entity zombie = createZombie(renderer, ZOMBIE_START_POS[curr_level]);
 	// Setting random initial position and constant velocity (can keep random zombie position?)
-	Motion& zombie_motion = registry.motions.get(zombie);
+	/*Motion& zombie_motion = registry.motions.get(zombie);
 	zombie_motion.position = vec2(window_width_px - 200.f,
-		50.f + uniform_dist(rng) * (window_height_px - 100.f));
+		50.f + uniform_dist(rng) * (window_height_px - 100.f));*/
 
 	// Create student
 	Entity student = createStudent(renderer, { 0, 0 });
@@ -698,18 +746,24 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		if (key == GLFW_KEY_A)
 		{
 			player.keyPresses[0] = true;
-			// motion.velocity[0] -= 400;
 		}
 		if (key == GLFW_KEY_D)
 		{
 			player.keyPresses[1] = true;
-			// motion.velocity[0] += 400;
 		}
 
-		if (key == GLFW_KEY_W && !motion.offGround)
+		if (key == GLFW_KEY_W) {
+			player.keyPresses[2] = true;
+		}
+
+		if (key == GLFW_KEY_S) {
+			player.keyPresses[3] = true;
+		}
+
+		if (key == GLFW_KEY_SPACE && !motion.offGround)
 		{
 			motion.offGround = true;
-			motion.velocity[1] -= 700;
+			motion.velocity[1] -= 400;
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 	}
@@ -723,6 +777,14 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		if (key == GLFW_KEY_D)
 		{
 			player.keyPresses[1] = false;
+		}
+		if (key == GLFW_KEY_W)
+		{
+			player.keyPresses[2] = false;
+		}
+		if (key == GLFW_KEY_S)
+		{
+			player.keyPresses[3] = false;
 		}
 	}
 
@@ -777,7 +839,7 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 	// TODO(vanessa): currently all platforms using same Motion frames are stacked on top of each other, fix to make adjacent
 	// 					need to add walls or some other method of preventing characters from going under moving platforms
 	//					reconcile behaviour of moving platforms passing through static platforms
-	std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
+	/*std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
 	Motion m1 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.8));
 	Motion m2 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.2));
 	std::vector<Motion> frames = { m1, m2 };
@@ -792,5 +854,5 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 	std::vector<Motion> frames2 = { m3, m4 };
 	for (uint i = 0; i < moving_plat2.size(); i++) {
 		registry.animations.emplace(moving_plat2[i], KeyframeAnimation((int)frames2.size(), 2000.f, true, frames2));
-	}
+	}*/
 }
