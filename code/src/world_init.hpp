@@ -16,7 +16,7 @@ const float PLATFORM_WIDTH = 50.f;
 const float WALL_WIDTH = 20.f;
 const float STEP_HEIGHT = 30.f;
 const float STEP_WIDTH = 30.f;
-const vec2 CLIMBABLE_DIM = {22.f, 32.f};
+const vec2 CLIMBABLE_DIM = { 22.f, 32.f };
 
 // the player
 Entity createBozo(RenderSystem* renderer, vec2 pos);
@@ -39,8 +39,9 @@ std::vector<Entity> createClimbable(RenderSystem* renderer, vec2 top_position, u
 // spikes
 Entity createSpike(RenderSystem* renderer, vec2 pos);
 // background
-Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::BACKGROUND, vec2 position = { window_width_px/2, window_height_px/2 }, vec2 scale = { window_width_px, window_height_px });
-
+Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::BACKGROUND, vec2 position = { window_width_px / 2, window_height_px / 2 }, vec2 scale = { window_width_px, window_height_px });
+// book
+Entity createBook(RenderSystem* renderer, vec2 position);
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 

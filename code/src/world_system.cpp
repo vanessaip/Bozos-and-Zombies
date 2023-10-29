@@ -89,12 +89,12 @@ GLFWwindow* WorldSystem::create_window()
 	// Input is handled using GLFW, for more info see
 	// http://www.glfw.org/docs/latest/input_guide.html
 	glfwSetWindowUserPointer(window, this);
-	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3)
-		{ ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
-	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1)
-		{ ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
+	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	auto mouse_button_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_button(_0, _1, _2); };
 	glfwSetKeyCallback(window, key_redirect);
 	glfwSetCursorPosCallback(window, cursor_pos_redirect);
+	glfwSetMouseButtonCallback(window, mouse_button_redirect);
 
 	//////////////////////////////////////
 	// Loading music and sounds with SDL
@@ -146,7 +146,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Points: " << points;
+	title_ss << "Books: " << points;
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
 	// Remove debug info from the last step
@@ -177,12 +177,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		auto& platforms = registry.platforms;
 		auto& walls = registry.walls;
 		auto& climables = registry.climbables;
-		
+
 		bool isHuman = registry.humans.has(motion_container.entities[i]);
 		bool isZombie = registry.zombies.has(motion_container.entities[i]);
+		bool isBook = registry.books.has(motion_container.entities[i]);
 
 		// Bounding entities to window
-		if (isHuman|| isZombie)
+		if (isHuman || isZombie || isBook)
 		{
 			float entityRightSide = motion.position.x + abs(motion.scale[0]) / 2.f;
 			float entityLeftSide = motion.position.x - abs(motion.scale[0]) / 2.f;
@@ -312,7 +313,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			else {
 				motion.offGround = offAll;
 			}
-			
+
 			if (registry.humans.has(motion_container.entities[i])) {
 				updateClimbing(motion, entityBB, motion_container);
 			}
@@ -335,9 +336,24 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			}
 		}
 
-		// If entity is a zombie, update the Zombie's position to follow the player
-		if (registry.zombies.has(motion_container.entities[i]))
-		{
+		// Add book behaviour
+		if (registry.books.has(motion_container.entities[i])) {
+			Book& book = registry.books.get(motion_container.entities[i]);
+			Motion motion_player = registry.motions.get(player_bozo);
+			// If book is in hand, we consider it as on ground and always go with player
+			if (book.offHand == false) {
+				motion.offGround = false;
+				motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
+				motion.position.y = motion_player.position.y;
+			}
+			// If book is on ground, it's velocity should always be 0
+			if (motion.offGround == false) {
+				motion.velocity = { 0.f, 0.f };
+			}
+		}
+
+		// If entity is a zombie, update its direction to always move towards Bozo
+		if (registry.zombies.has(motion_container.entities[i])) {
 			updateZombieMovement(motion, bozo_motion, motion_container.entities[i]);
 		}
 	}
@@ -528,7 +544,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		if (zombie_level == 0) {
 			zombie_level++;
 		}
-		
+
 		// Move toward the target_ladder
 		float target_ladder = getClosestLadder(zombie_level, bozo_motion);
 
@@ -584,7 +600,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		zombieSheet.updateAnimation(ANIMATION_MODE::ATTACK);
 	else
 		zombieSheet.updateAnimation(ANIMATION_MODE::RUN);
-	
+
 }
 
 int WorldSystem::checkLevel(Motion& motion) {
@@ -697,61 +713,61 @@ void WorldSystem::restart_game()
 	Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
 
 	// egg
-	Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, {window_width_px/2-80.f, window_height_px*0.4}, {250.f,250.f});
+	Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f,250.f });
 
 	// Create platform(s) at set positions, specify width
 	// TODO(vanesssa): define array of platform dimensions for each level
-	uint center_x = window_width_px/2;
+	uint center_x = window_width_px / 2;
 	// floors
-	std::vector<Entity> platform0 = createPlatforms(renderer, {center_x-PLATFORM_WIDTH*7.5, window_height_px-12.f}, 16);
-	std::vector<Entity> platform1 = createPlatforms(renderer, {PLATFORM_WIDTH*4,window_height_px*0.8}, 8);
-	std::vector<Entity> platform2 = createPlatforms(renderer, {window_width_px-PLATFORM_WIDTH*6,window_height_px*0.8}, 2);
-	std::vector<Entity> platform3 = createPlatforms(renderer, {110.f,window_height_px*0.6}, 7);
-	std::vector<Entity> platform4 = createPlatforms(renderer, {window_width_px-PLATFORM_WIDTH*7-80.f, window_height_px*0.6}, 7);
-	std::vector<Entity> platform5 = createPlatforms(renderer, {110.f,window_height_px*0.4}, 7);
-	std::vector<Entity> platform6 = createPlatforms(renderer, {window_width_px-PLATFORM_WIDTH*10-80.f, window_height_px*0.4}, 10);
-	std::vector<Entity> platform7 = createPlatforms(renderer, {110.f,window_height_px*0.2}, 25);
+	std::vector<Entity> platform0 = createPlatforms(renderer, { center_x - PLATFORM_WIDTH * 7.5, window_height_px - 12.f }, 16);
+	std::vector<Entity> platform1 = createPlatforms(renderer, { PLATFORM_WIDTH * 4,window_height_px * 0.8 }, 8);
+	std::vector<Entity> platform2 = createPlatforms(renderer, { window_width_px - PLATFORM_WIDTH * 6,window_height_px * 0.8 }, 2);
+	std::vector<Entity> platform3 = createPlatforms(renderer, { 110.f,window_height_px * 0.6 }, 7);
+	std::vector<Entity> platform4 = createPlatforms(renderer, { window_width_px - PLATFORM_WIDTH * 7 - 80.f, window_height_px * 0.6 }, 7);
+	std::vector<Entity> platform5 = createPlatforms(renderer, { 110.f,window_height_px * 0.4 }, 7);
+	std::vector<Entity> platform6 = createPlatforms(renderer, { window_width_px - PLATFORM_WIDTH * 10 - 80.f, window_height_px * 0.4 }, 10);
+	std::vector<Entity> platform7 = createPlatforms(renderer, { 110.f,window_height_px * 0.2 }, 25);
 
-	floor_positions = { 
-		window_height_px - 12.f, 
-		window_height_px * 0.8 , 
-		window_height_px * 0.6 , 
-		window_height_px * 0.4, 
+	floor_positions = {
+		window_height_px - 12.f,
+		window_height_px * 0.8 ,
+		window_height_px * 0.6 ,
+		window_height_px * 0.4,
 		window_height_px * 0.2 };
 
 	// stairs
-	std::vector<Entity> step0 = createSteps(renderer, {PLATFORM_WIDTH*12-20.f,window_height_px*0.8}, 5, 3, false);
-	std::vector<Entity> step1 = createSteps(renderer, {window_width_px-PLATFORM_WIDTH*6-STEP_WIDTH*6,window_height_px*0.8+PLATFORM_HEIGHT*4}, 5, 2, true);
+	std::vector<Entity> step0 = createSteps(renderer, { PLATFORM_WIDTH * 12 - 20.f,window_height_px * 0.8 }, 5, 3, false);
+	std::vector<Entity> step1 = createSteps(renderer, { window_width_px - PLATFORM_WIDTH * 6 - STEP_WIDTH * 6,window_height_px * 0.8 + PLATFORM_HEIGHT * 4 }, 5, 2, true);
 
 	// Create walls
-	Entity wall0 = createWall(renderer, {320.f, window_height_px*0.9+10.f}, window_height_px*0.2-10.f);
-	Entity wall1 = createWall(renderer, {window_width_px-320.f, window_height_px*0.9+10.f}, window_height_px*0.2-10.f);
-	Entity wall2 = createWall(renderer, {180.f, window_height_px*0.7+15.f}, window_height_px*0.2);
-	Entity wall3 = createWall(renderer, {window_width_px-220.f, window_height_px*0.7+15.f}, window_height_px*0.2);
-	Entity wall4 = createWall(renderer, {80.f, window_height_px*0.4-20.f}, window_height_px*0.4+70.f);
-	Entity wall5 = createWall(renderer, {window_width_px-100.f, window_height_px*0.4-20}, window_height_px*0.4+70.f);
+	Entity wall0 = createWall(renderer, { 320.f, window_height_px * 0.9 + 10.f }, window_height_px * 0.2 - 10.f);
+	Entity wall1 = createWall(renderer, { window_width_px - 320.f, window_height_px * 0.9 + 10.f }, window_height_px * 0.2 - 10.f);
+	Entity wall2 = createWall(renderer, { 180.f, window_height_px * 0.7 + 15.f }, window_height_px * 0.2);
+	Entity wall3 = createWall(renderer, { window_width_px - 220.f, window_height_px * 0.7 + 15.f }, window_height_px * 0.2);
+	Entity wall4 = createWall(renderer, { 80.f, window_height_px * 0.4 - 20.f }, window_height_px * 0.4 + 70.f);
+	Entity wall5 = createWall(renderer, { window_width_px - 100.f, window_height_px * 0.4 - 20 }, window_height_px * 0.4 + 70.f);
 
 	// Create climbables
-	std::vector<Entity> ladder0 = createClimbable(renderer, {PLATFORM_WIDTH*9, window_height_px*0.8}, 5);
-	std::vector<Entity> ladder1 = createClimbable(renderer, {PLATFORM_WIDTH*7, window_height_px*0.6}, 5);
-	std::vector<Entity> ladder2 = createClimbable(renderer, {window_width_px-PLATFORM_WIDTH*6, window_height_px*0.6}, 5);
-	std::vector<Entity> ladder3 = createClimbable(renderer, {PLATFORM_WIDTH*4, window_height_px*0.2}, 10);
-	std::vector<Entity> ladder4 = createClimbable(renderer, {window_width_px-PLATFORM_WIDTH*4, window_height_px*0.4}, 5);
-	std::vector<Entity> ladder5 = createClimbable(renderer, {window_width_px-PLATFORM_WIDTH*9, window_height_px*0.2}, 5);
+	std::vector<Entity> ladder0 = createClimbable(renderer, { PLATFORM_WIDTH * 9, window_height_px * 0.8 }, 5);
+	std::vector<Entity> ladder1 = createClimbable(renderer, { PLATFORM_WIDTH * 7, window_height_px * 0.6 }, 5);
+	std::vector<Entity> ladder2 = createClimbable(renderer, { window_width_px - PLATFORM_WIDTH * 6, window_height_px * 0.6 }, 5);
+	std::vector<Entity> ladder3 = createClimbable(renderer, { PLATFORM_WIDTH * 4, window_height_px * 0.2 }, 10);
+	std::vector<Entity> ladder4 = createClimbable(renderer, { window_width_px - PLATFORM_WIDTH * 4, window_height_px * 0.4 }, 5);
+	std::vector<Entity> ladder5 = createClimbable(renderer, { window_width_px - PLATFORM_WIDTH * 9, window_height_px * 0.2 }, 5);
 
-	ladder_positions = { 
-		{PLATFORM_WIDTH * 9}, 
-		{PLATFORM_WIDTH * 7, window_width_px - PLATFORM_WIDTH * 6}, 
-		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 4}, 
+	ladder_positions = {
+		{PLATFORM_WIDTH * 9},
+		{PLATFORM_WIDTH * 7, window_width_px - PLATFORM_WIDTH * 6},
+		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 4},
 		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 9 } };
 
 	// Create spikes
-	Entity spike1 = createSpike(renderer, {260, 625});
+	Entity spike1 = createSpike(renderer, { 260, 625 });
 	registry.colors.insert(spike1, { 0.5f, 0.5f, 0.5f });
 
 	// Create a new Bozo player
-	player_bozo = createBozo(renderer, { 500, window_height_px*0.8-50.f });
-	registry.colors.insert(player_bozo, {1, 0.8f, 0.8f});
+	player_bozo = createBozo(renderer, { 500, window_height_px * 0.8 - 50.f });
+	registry.colors.insert(player_bozo, { 1, 0.8f, 0.8f });
 	Motion& bozo_motion = registry.motions.get(player_bozo);
 	bozo_motion.velocity = { 0.f, 0.f };
 
@@ -769,7 +785,15 @@ void WorldSystem::restart_game()
 			50.f + uniform_dist(rng) * (window_height_px - 100.f));
 	student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 200.f : -200.f;*/
 
+	// Create book
+	Entity book = createBook(renderer, { 500, 500 });
+	Motion& book_motion = registry.motions.get(book);
+	book_motion.velocity = { 0.f, 0.f };
+	book_motion.offGround = false;
+
 	setup_keyframes(renderer);
+
+	points = 0;
 }
 
 // Compute collisions between entities
@@ -830,9 +854,15 @@ void WorldSystem::handle_collisions()
 					// chew, count points, and set the LightUp timer
 					registry.remove_all_components_of(entity_other);
 					Mix_PlayChannel(-1, salmon_eat_sound, 0);
-					++points;
-
 					// !!! TODO: just colliding with other students immunizes them or require keyboard input from user?
+				}
+			}
+			else if (registry.books.has(entity_other)) {
+				bool& offHand = registry.books.get(entity_other).offHand;
+				Motion& motion_book = registry.motions.get(entity_other);
+				if (motion_book.offGround == false && offHand == true) {
+					offHand = false;
+					++points;
 				}
 			}
 		}
@@ -984,6 +1014,37 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
+void WorldSystem::on_mouse_button(int button, int action, int mod) {
+	if (registry.deathTimers.has(player_bozo)) {
+		return;
+	}
+
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+		auto& booksRegistry = registry.books;
+		for (int i = 0; i < booksRegistry.size(); i++) {
+			Entity entity = booksRegistry.entities[i];
+			Book& book = registry.books.get(entity);
+			if (book.offHand == false) {
+				Motion& motion_book = registry.motions.get(entity);
+				Motion& motion_bozo = registry.motions.get(player_bozo);
+
+				double xpos, ypos;
+				glfwGetCursorPos(window, &xpos, &ypos);
+				vec2& position = motion_bozo.position;
+				double direction = atan2(ypos - position[1], xpos - position[0]);
+
+				motion_book.velocity.x = 500.f * cos(direction);
+				motion_book.velocity.y = 500.f * sin(direction);
+
+				motion_book.offGround = true;
+				book.offHand = true;
+				--points;
+				break;
+			}
+		}
+	}
+}
+
 // defines keyframes for entities that are animated
 void WorldSystem::setup_keyframes(RenderSystem* rendered)
 {
@@ -1003,8 +1064,8 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 	}
 
 	std::vector<Entity> moving_plat2 = createPlatforms(renderer, { 0.f, 0.f }, 7);
-	Motion m3 = Motion(vec2(PLATFORM_WIDTH*6, window_height_px*0.8));
-	Motion m4 = Motion(vec2(PLATFORM_WIDTH*6, window_height_px*0.2));
+	Motion m3 = Motion(vec2(PLATFORM_WIDTH * 6, window_height_px * 0.8));
+	Motion m4 = Motion(vec2(PLATFORM_WIDTH * 6, window_height_px * 0.2));
 	std::vector<Motion> frames2 = { m3, m4 };
 
 	for (uint i = 0; i < moving_plat2.size(); i++) {

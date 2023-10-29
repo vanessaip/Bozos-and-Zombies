@@ -19,7 +19,7 @@ class RenderSystem {
 	 */
 	std::array<GLuint, texture_count> texture_gl_handles;
 	std::array<ivec2, texture_count> texture_dimensions;
-	
+
 	Camera camera = Camera(0.f, 0.f, screen_width_px, screen_height_px);
 	vec2 lastRestingPlayerPos;
 	bool lastPlayerDirectionIsPos = true; // true = +x, false = -x
@@ -29,7 +29,7 @@ class RenderSystem {
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
 		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPIKE, mesh_path("spike.obj"))
-		  // specify meshes of other assets here
+		// specify meshes of other assets here
 	};
 
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -47,7 +47,8 @@ class RenderSystem {
 		textures_path("Ladder1.png"),
 		textures_path("Ladder2.png"),
 		textures_path("Ladder3.png"),
-		};
+		textures_path("book.png"),
+	};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -85,7 +86,7 @@ public:
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
 
 	void initializeGlGeometryBuffers();
-	
+
 	void updateSpriteSheetGeometryBuffer(SpriteSheet& sheet);
 
 	// Initialize the screen texture used as intermediate render target
@@ -106,7 +107,7 @@ public:
 	mat3 createProjectionMatrix(float elapsed_time_ms);
 
 	void resetCamera();
-	
+
 	void resetSpriteSheetTracker();
 
 private:

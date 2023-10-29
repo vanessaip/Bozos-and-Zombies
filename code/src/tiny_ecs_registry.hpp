@@ -31,6 +31,7 @@ public:
 	ComponentContainer<Wall> walls;
 	ComponentContainer<Spike> spikes;
 	ComponentContainer<Climbable> climbables;
+	ComponentContainer<Book> books;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -56,6 +57,7 @@ public:
 		registry_list.push_back(&walls);
 		registry_list.push_back(&spikes);
 		registry_list.push_back(&climbables);
+		registry_list.push_back(&books);
 	}
 
 	void clear_all_components() {

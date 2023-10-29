@@ -45,6 +45,11 @@ struct Climbable
 
 };
 
+struct Book
+{
+	bool offHand = true;
+};
+
 // All data relevant to the shape and motion of entities
 struct Motion
 {
@@ -220,7 +225,8 @@ enum class TEXTURE_ASSET_ID
 	LADDER1 = BACKGROUND_INDOOR + 1,
 	LADDER2 = LADDER1 + 1,
 	LADDER3 = LADDER2 + 1,
-	TEXTURE_COUNT = LADDER3 + 1
+	BOOK = LADDER3 + 1,
+	TEXTURE_COUNT = BOOK + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

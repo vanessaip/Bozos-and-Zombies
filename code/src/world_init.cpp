@@ -14,7 +14,7 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	
+
 	// Setting initial values
 	motion.scale = vec2({ BOZO_BB_WIDTH, BOZO_BB_HEIGHT });
 
@@ -147,22 +147,23 @@ std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, uint num_
 	vec2 curr_pos = left_pos;
 	for (uint i = 0; i < num_steps; i++) {
 		if (left) {
-			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, {STEP_WIDTH, STEP_HEIGHT});
+			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, { STEP_WIDTH, STEP_HEIGHT });
 			Motion& m = registry.motions.get(s0);
 			m.reflect.x = true; // TODO(vanessa): shouldn't it be reflect y?
 			steps.push_back(s0);
 			curr_pos.x += STEP_WIDTH;
 		}
-		for (uint j = 0; j < step_blocks-1; j++) {
-			Entity s = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP1, {STEP_WIDTH, STEP_HEIGHT});
+		for (uint j = 0; j < step_blocks - 1; j++) {
+			Entity s = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP1, { STEP_WIDTH, STEP_HEIGHT });
 			steps.push_back(s);
 			curr_pos.x += STEP_WIDTH;
 		}
 		if (!left) {
-			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, {STEP_WIDTH, STEP_HEIGHT});
+			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, { STEP_WIDTH, STEP_HEIGHT });
 			steps.push_back(s0);
 			curr_pos.y += STEP_HEIGHT;
-		} else {
+		}
+		else {
 			curr_pos.x -= STEP_WIDTH;
 			curr_pos.y -= STEP_HEIGHT;
 		}
@@ -192,7 +193,7 @@ Entity createWall(RenderSystem* renderer, vec2 position, float height)
 	registry.walls.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{TEXTURE_ASSET_ID::WALL,
+		{ TEXTURE_ASSET_ID::WALL,
 		 EFFECT_ASSET_ID::TEXTURED,
 		 GEOMETRY_BUFFER_ID::SPRITE });
 
@@ -206,9 +207,11 @@ std::vector<Entity> createClimbable(RenderSystem* renderer, vec2 top_position, u
 	for (uint i = 0; i < num_sections; i++) {
 		if (i == 0) {
 			texture = TEXTURE_ASSET_ID::LADDER1;
-		} else if (i == num_sections-1) {
+		}
+		else if (i == num_sections - 1) {
 			texture = TEXTURE_ASSET_ID::LADDER3;
-		} else {
+		}
+		else {
 			texture = TEXTURE_ASSET_ID::LADDER2;
 		}
 
@@ -231,11 +234,11 @@ std::vector<Entity> createClimbable(RenderSystem* renderer, vec2 top_position, u
 		registry.climbables.emplace(entity);
 		registry.renderRequests.insert(
 			entity,
-			{texture,
+			{ texture,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 	}
-	
+
 	return sections;
 }
 
@@ -274,7 +277,7 @@ Entity createLine(vec2 position, vec2 scale)
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT});
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT });
 
 	// Create motion
 	Motion& motion = registry.motions.emplace(entity);
@@ -309,6 +312,35 @@ Entity createSpike(RenderSystem* renderer, vec2 pos)
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
 			EFFECT_ASSET_ID::SPIKE,
 			GEOMETRY_BUFFER_ID::SPIKE });
+
+	return entity;
+}
+
+Entity createBook(RenderSystem* renderer, vec2 position)
+{
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.position = position;
+
+	// Setting initial values, scale the same with player
+	motion.scale = vec2({ 102.f * 0.4, 84.f * 0.4 });
+
+	// Create an (empty) Book component to be able to refer to all books
+	registry.books.emplace(entity);
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::BOOK,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
