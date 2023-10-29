@@ -402,7 +402,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// !!! TODO: update timers for dying **zombies** and remove if time drops below zero, similar to the death timer
 
 	// update animation mode
-	std::cout << "velocity.x = " << bozo_motion.velocity.x << " | offground = " << bozo_motion.offGround << "\n";
 	SpriteSheet& spriteSheet = registry.spriteSheets.get(player_bozo);
 	if (bozo_motion.velocity.x != 0.f && !bozo_motion.offGround)
 		spriteSheet.updateAnimation(ANIMATION_MODE::RUN);
