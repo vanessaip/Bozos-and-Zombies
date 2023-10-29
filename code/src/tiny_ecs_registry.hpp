@@ -28,6 +28,7 @@ public:
 	ComponentContainer<Platform> platforms;
 	ComponentContainer<Background> backgrounds;
 	ComponentContainer<Wall> walls;
+	ComponentContainer<Climbable> climbables;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -50,6 +51,7 @@ public:
 		registry_list.push_back(&platforms);
 		registry_list.push_back(&backgrounds);
 		registry_list.push_back(&walls);
+		registry_list.push_back(&climbables);
 	}
 
 	void clear_all_components() {
