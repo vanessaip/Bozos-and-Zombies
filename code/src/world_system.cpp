@@ -198,11 +198,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 				if (player.keyPresses[0])
 				{
-					motion.velocity[0] -= 400;
+					motion.velocity[0] -= 200;
 				}
 				if (player.keyPresses[1])
 				{
-					motion.velocity[0] += 400;
+					motion.velocity[0] += 200;
 				}
 			}
 
@@ -519,21 +519,24 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	int bozo_level = checkLevel(bozo_motion);
 	int zombie_level = checkLevel(motion);
 
-	if (zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1)) {
+	if ((zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1))) {
 		// Zombie is on the same level as bozo
 		motion.climbing = false;
 		float direction = -1;
 		if ((bozo_motion.position.x - motion.position.x) > 0) {
 			direction = 1;
 		}
-		float speed = 200.f;
+		float speed = 100.f;
 		motion.velocity.x = direction * speed;
 
-		if (motion.velocity.x > 0) {
-			motion.reflect[0] = true;
-		}
-		else {
-			motion.reflect[0] = false;
+		// If the zombie hasn't gotten to the player yet, set the appropriate direction the zombie is facing
+		if (abs(motion.position.x - bozo_motion.position.x) > 5) {
+			if (motion.velocity.x > 0) {
+				motion.reflect[0] = true;
+			}
+			else {
+				motion.reflect[0] = false;
+			}
 		}
 	}
 	else if (zombie_level < bozo_level) {
@@ -546,18 +549,17 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		float target_ladder = getClosestLadder(zombie_level, bozo_motion);
 
 		if ((target_ladder - motion.position.x) > 0) {
-			motion.velocity.x = 200.f;
+			motion.velocity.x = 100.f;
 		}
 		else {
-			motion.velocity.x = -200.f;
+			motion.velocity.x = -100.f;
 		}
 
 		// When at the ladder, start ascending
 		if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f)) {
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
-			motion.velocity.y = 0;
-			motion.velocity.y = -200.f;
+			motion.velocity.y = -100.f;
 			motion.climbing = true;
 		}
 		else {
@@ -568,21 +570,20 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	else {
 		// Zombie is a level above bozo and needs to climb down
 		// Move toward the target_ladder
-		float target_ladder = getClosestLadder(zombie_level, bozo_motion);
+		float target_ladder = getClosestLadder(zombie_level - 1, bozo_motion);
 
 		if ((target_ladder - motion.position.x) > 0) {
-			motion.velocity.x = 200.f;
+			motion.velocity.x = 100.f;
 		}
 		else {
-			motion.velocity.x = -200.f;
+			motion.velocity.x = -100.f;
 		}
 
 		// When at the ladder, start descending
 		if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f)) {
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
-			motion.velocity.y = 0;
-			motion.velocity.y = +200.f;
+			motion.velocity.y = 200.f;
 			motion.climbing = true;
 		}
 		else {
@@ -603,16 +604,17 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 }
 
 int WorldSystem::checkLevel(Motion& motion) {
-	if (motion.position.y < floor_positions[0] && motion.position.y > floor_positions[1]) {
+	float entityBottom = motion.position.y + abs(motion.scale[1]) / 2.f;
+	if (entityBottom < floor_positions[0] && entityBottom > floor_positions[1]) {
 		return 0;
 	}
-	else if (motion.position.y < floor_positions[1] && motion.position.y > floor_positions[2]) {
+	else if (entityBottom < floor_positions[1] && entityBottom > floor_positions[2]) {
 		return 1;
 	}
-	else if (motion.position.y < floor_positions[2] && motion.position.y > floor_positions[3]) {
+	else if (entityBottom < floor_positions[2] && entityBottom > floor_positions[3]) {
 		return 2;
 	}
-	else if (motion.position.y < floor_positions[3] && motion.position.y > floor_positions[4]) {
+	else if (entityBottom < floor_positions[3] && entityBottom > floor_positions[4]) {
 		return 3;
 	}
 	else {
@@ -944,7 +946,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		if (key == GLFW_KEY_SPACE && !motion.offGround)
 		{
 			motion.offGround = true;
-			motion.velocity[1] -= 400;
+			motion.velocity[1] -= 200;
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 	}
@@ -1051,9 +1053,9 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 	// TODO(vanessa): currently all platforms using same Motion frames are stacked on top of each other, fix to make adjacent
 	// 					need to add walls or some other method of preventing characters from going under moving platforms
 	//					reconcile behaviour of moving platforms passing through static platforms
-	std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
-	Motion m1 = Motion(vec2(window_width_px - PLATFORM_WIDTH * 5, window_height_px * 0.8));
-	Motion m2 = Motion(vec2(window_width_px - PLATFORM_WIDTH * 5, window_height_px * 0.2));
+	/*std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
+	Motion m1 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.8));
+	Motion m2 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.2));
 	std::vector<Motion> frames = { m1, m2 };
 
 	for (uint i = 0; i < moving_plat.size(); i++) {
@@ -1068,5 +1070,5 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 
 	for (uint i = 0; i < moving_plat2.size(); i++) {
 		registry.keyframeAnimations.emplace(moving_plat2[i], KeyframeAnimation((int)frames.size(), 2000.f, true, frames2));
-	}
+	}*/
 }
