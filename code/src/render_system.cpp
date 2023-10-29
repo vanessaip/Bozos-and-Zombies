@@ -30,8 +30,22 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	gl_has_errors();
 
 	assert(render_request.used_geometry != GEOMETRY_BUFFER_ID::GEOMETRY_COUNT);
-	const GLuint vbo = vertex_buffers[(GLuint)render_request.used_geometry];
-	const GLuint ibo = index_buffers[(GLuint)render_request.used_geometry];
+	
+	GLuint vbo; 
+	GLuint ibo;
+	if (render_request.used_geometry == GEOMETRY_BUFFER_ID::SPRITE_SHEET)
+	{
+		assert(registry.spriteSheets.has(entity));
+		const SpriteSheet& spriteSheet = registry.spriteSheets.get(entity);
+		vbo = spriteSheet.bufferId + 1;
+		ibo = vertex_buffers.size() + vbo;
+	}
+	else 
+	{
+		vbo = vertex_buffers[(GLuint)render_request.used_geometry];
+		ibo = index_buffers[(GLuint)render_request.used_geometry];
+	}
+
 
 	// Setting vertex and index buffers
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -62,8 +76,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		gl_has_errors();
 
 		assert(registry.renderRequests.has(entity));
-		GLuint texture_id =
-			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+		GLuint texture_id = texture_gl_handles[(GLuint)render_request.used_texture];
 
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
@@ -229,6 +242,23 @@ void RenderSystem::draw(float elapsed_time_ms)
 	gl_has_errors();
 }
 
+void RenderSystem::step(float elapsed_time_ms) {
+	for (int i = 0; i < registry.spriteSheets.components.size(); i++) {
+		SpriteSheet& sheet = registry.spriteSheets.components[i];
+		sheet.timer_ms += elapsed_time_ms;
+
+		if (sheet.timer_ms > sheet.switchTime_ms) {
+			sheet.offset.x += sheet.spriteDim.x;
+			sheet.timer_ms = 0;
+
+			if (sheet.offset.x / sheet.spriteDim.x >= sheet.getCurrentSpriteCount())
+				sheet.offset.x = 0.f;
+
+			updateSpriteSheetGeometryBuffer(sheet);
+		}
+	}
+}
+
 mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 {
 	// Set projection matrix to define camera bounds
@@ -326,4 +356,63 @@ void RenderSystem::resetCamera()
 	camera.top = 0.f;
 	camera.right = screen_width_px;
 	camera.bottom = screen_height_px;
+}
+
+void RenderSystem::resetSpriteSheetTracker() {
+	RenderSystem::spriteSheetBuffersCount = geometry_count;
+}
+
+template <class T>
+void RenderSystem::bindVBOandIBO(uint gid, std::vector<T> vertices, std::vector<uint16_t> indices) {
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[gid]);
+	glBufferData(GL_ARRAY_BUFFER,
+		sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+	gl_has_errors();
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffers[gid]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+		sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
+	gl_has_errors();
+}
+
+void RenderSystem::initializeSpriteSheet(Entity& entity, ANIMATION_MODE defaultMode, std::vector<int> spriteCounts, float switchTime, vec2 trunc) {
+	GLuint id = RenderSystem::spriteSheetBuffersCount + 1;
+	RenderSystem::spriteSheetBuffersCount++;
+
+	SpriteSheet& sheet = registry.spriteSheets.emplace(entity, SpriteSheet(id, defaultMode, spriteCounts, switchTime, trunc));
+
+	std::vector<TexturedVertex> textured_vertices(4);
+	textured_vertices[0].position = { -1.f / 2, +1.f / 2, 0.f };
+	textured_vertices[1].position = { +1.f / 2, +1.f / 2, 0.f };
+	textured_vertices[2].position = { +1.f / 2, -1.f / 2, 0.f };
+	textured_vertices[3].position = { -1.f / 2, -1.f / 2, 0.f };
+
+	textured_vertices[0].texcoord = { sheet.offset.x, sheet.offset.y + sheet.spriteDim.y };
+	textured_vertices[1].texcoord = { sheet.offset.x + sheet.spriteDim.x - sheet.truncation.x, sheet.offset.y + sheet.spriteDim.y };
+	textured_vertices[2].texcoord = { sheet.offset.x + sheet.spriteDim.x - sheet.truncation.x, sheet.offset.y + sheet.truncation.y };
+	textured_vertices[3].texcoord = { sheet.offset.x, sheet.offset.y + sheet.truncation.y };
+
+	// Counterclockwise as it's the default opengl front winding direction.
+	const std::vector<uint16_t> textured_indices = { 0, 3, 1, 1, 3, 2 };
+	bindVBOandIBO(sheet.bufferId, textured_vertices, textured_indices);
+}
+
+void RenderSystem::updateSpriteSheetGeometryBuffer(SpriteSheet& sheet) {
+	assert(sheet.spriteDim.x > 0);
+	assert(sheet.spriteDim.y > 0);
+
+	std::vector<TexturedVertex> textured_vertices(4);
+	textured_vertices[0].position = { -1.f / 2, +1.f / 2, 0.f };
+	textured_vertices[1].position = { +1.f / 2, +1.f / 2, 0.f };
+	textured_vertices[2].position = { +1.f / 2, -1.f / 2, 0.f };
+	textured_vertices[3].position = { -1.f / 2, -1.f / 2, 0.f };
+
+	textured_vertices[0].texcoord = { sheet.offset.x, sheet.offset.y + sheet.spriteDim.y };
+	textured_vertices[1].texcoord = { sheet.offset.x + sheet.spriteDim.x - sheet.truncation.x, sheet.offset.y + sheet.spriteDim.y };
+	textured_vertices[2].texcoord = { sheet.offset.x + sheet.spriteDim.x - sheet.truncation.x, sheet.offset.y + sheet.truncation.y };
+	textured_vertices[3].texcoord = { sheet.offset.x, sheet.offset.y + sheet.truncation.y };
+
+	// Counterclockwise as it's the default opengl front winding direction.
+	const std::vector<uint16_t> textured_indices = { 0, 3, 1, 1, 3, 2 };
+	bindVBOandIBO(sheet.bufferId, textured_vertices, textured_indices);
 }

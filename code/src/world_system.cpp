@@ -6,6 +6,7 @@
 #include <cassert>
 #include <sstream>
 #include <tuple>
+#include <iostream>
 
 #include "physics_system.hpp"
 
@@ -164,6 +165,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	Motion& bozo_motion = registry.motions.get(player_bozo);
 	std::vector<std::tuple<Motion*, Motion*>> charactersOnMovingPlat = {};
 
+	if (bozo_motion.velocity.x > 0)
+		bozo_motion.scale.x = BOZO_BB_WIDTH;
+	else if (bozo_motion.velocity.x < 0)
+		bozo_motion.scale.x = -BOZO_BB_WIDTH;
+
 	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i)
 	{
 		Motion& motion = motion_container.components[i];
@@ -223,8 +229,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			{
 				Motion& blockMotion = motion_container.get(blocks[i]);
 
-				float entityRightSide = motion.position.x + motion.scale[0] / 2.f;
-				float entityLeftSide = motion.position.x - motion.scale[0] / 2.f;
+				float entityRightSide = motion.position.x + abs(motion.scale[0]) / 2.f;
+				float entityLeftSide = motion.position.x - abs(motion.scale[0]) / 2.f;
 				float entityBottom = motion.position.y + motion.scale[1] / 2.f;
 				float entityTop = motion.position.y - motion.scale[1] / 2.f;
 
@@ -239,7 +245,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				{
 
 					// Move character with moving block
-					if (registry.animations.has(blocks[i]))
+					if (registry.keyframeAnimations.has(blocks[i]))
 					{
 						motion.position.x += blockMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
 						charactersOnMovingPlat.push_back(std::make_tuple(&motion, &blockMotion)); // track collision if platform is moving down
@@ -321,6 +327,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			float speed = 100.f;
 			motion.velocity.x = direction.x * speed;
 			motion.velocity.y = direction.y * speed;
+
+			// update sprite animation depending on distance to player
+			Entity& zombie = motion_container.entities[i];
+			SpriteSheet& zombieSheet = registry.spriteSheets.get(zombie);
+			if (length < 75.f)
+				zombieSheet.updateAnimation(ANIMATION_MODE::ATTACK);
+			else
+				zombieSheet.updateAnimation(ANIMATION_MODE::RUN);
 		}
 	}
 
@@ -408,10 +422,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
 
 	// update keyframe animated entity motions
-	for (Entity entity : registry.animations.entities)
+	for (Entity entity : registry.keyframeAnimations.entities)
 	{
 		bool updateVelocity = false;
-		KeyframeAnimation& animation = registry.animations.get(entity);
+		KeyframeAnimation& animation = registry.keyframeAnimations.get(entity);
 		animation.timer_ms += elapsed_ms_since_last_update;
 
 		// update frame when time limit is reached
@@ -470,6 +484,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 	// !!! TODO: update timers for dying **zombies** and remove if time drops below zero, similar to the death timer
 
+	// update animation mode
+	SpriteSheet& spriteSheet = registry.spriteSheets.get(player_bozo);
+	if (bozo_motion.velocity.x != 0.f && !bozo_motion.offGround)
+		spriteSheet.updateAnimation(ANIMATION_MODE::RUN);
+	else if (bozo_motion.velocity.x == 0 || bozo_motion.offGround)
+		spriteSheet.updateAnimation(ANIMATION_MODE::IDLE);
+
 	return true;
 }
 
@@ -483,6 +504,8 @@ void WorldSystem::restart_game()
 	// Reset the game speed
 	current_speed = 1.f;
 
+	// Reset sprite sheet buffer index
+
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
@@ -493,6 +516,7 @@ void WorldSystem::restart_game()
 
 	// reset camera on restart
 	renderer->resetCamera();
+	renderer->resetSpriteSheetTracker();
 
 	// Create background first (painter's algorithm for rendering)
 	// base colour
@@ -778,16 +802,18 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 	Motion m1 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.8));
 	Motion m2 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.2));
 	std::vector<Motion> frames = { m1, m2 };
+
 	for (uint i = 0; i < moving_plat.size(); i++) {
 		Entity currplat = moving_plat[i];
-		registry.animations.emplace(currplat, (int)frames.size(), 3000.f, true, frames);
+		registry.keyframeAnimations.emplace(currplat, KeyframeAnimation((int)frames.size(), 3000.f, true, frames));
 	}
 
 	std::vector<Entity> moving_plat2 = createPlatforms(renderer, { 0.f, 0.f }, 7);
 	Motion m3 = Motion(vec2(PLATFORM_WIDTH*6, window_height_px*0.8));
 	Motion m4 = Motion(vec2(PLATFORM_WIDTH*6, window_height_px*0.2));
 	std::vector<Motion> frames2 = { m3, m4 };
+
 	for (uint i = 0; i < moving_plat2.size(); i++) {
-		registry.animations.emplace(moving_plat2[i], KeyframeAnimation((int)frames2.size(), 2000.f, true, frames2));
+		registry.keyframeAnimations.emplace(moving_plat2[i], KeyframeAnimation((int)frames.size(), 2000.f, true, frames2));
 	}
 }

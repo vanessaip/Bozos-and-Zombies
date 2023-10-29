@@ -34,9 +34,9 @@ class RenderSystem {
 
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, texture_count> texture_paths = {
-		textures_path("student.png"),
-		textures_path("zombie.png"),
-		textures_path("bozo.png"),
+		textures_path("student_sprite_sheet.png"),
+		textures_path("zombie_sprite_sheet.png"),
+		textures_path("bozo_sprite_sheet.png"),
 		textures_path("business-background.png"),
 		textures_path("Tile_40.png"),	// platform
 		textures_path("Tile_04.png"),	// step left section
@@ -57,16 +57,25 @@ class RenderSystem {
 		shader_path("textured"),
 		shader_path("water") };
 
-	std::array<GLuint, geometry_count> vertex_buffers;
-	std::array<GLuint, geometry_count> index_buffers;
+	// TODO (Justin): update size of array if we exceed 50 sprite sheet entities 
+	std::array<GLuint, 50> vertex_buffers;
+	std::array<GLuint, 50> index_buffers;
 	std::array<Mesh, geometry_count> meshes;
 
+	// vertex and index buffers for sprite sheets
+	std::vector<GLuint> sprite_vertex_buffers;
+	std::vector<GLuint> sprite_index_buffers;
+
 public:
+	uint RenderSystem::spriteSheetBuffersCount = 0;
 	// Initialize the window
 	bool init(GLFWwindow* window);
 
 	template <class T>
 	void bindVBOandIBO(GEOMETRY_BUFFER_ID gid, std::vector<T> vertices, std::vector<uint16_t> indices);
+
+	template <class T>
+	void bindVBOandIBO(uint gid, std::vector<T> vertices, std::vector<uint16_t> indices);
 
 	void initializeGlTextures();
 
@@ -76,6 +85,9 @@ public:
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
 
 	void initializeGlGeometryBuffers();
+	
+	void updateSpriteSheetGeometryBuffer(SpriteSheet& sheet);
+
 	// Initialize the screen texture used as intermediate render target
 	// The draw loop first renders to this texture, then it is used for the water
 	// shader
@@ -87,9 +99,15 @@ public:
 	// Draw all entities
 	void draw(float elapsed_time_ms);
 
+	void step(float elapsed_time_ms);
+
+	void initializeSpriteSheet(Entity& entity, ANIMATION_MODE defaultMode, std::vector<int> spriteCounts, float switchTime, vec2 trunc);
+
 	mat3 createProjectionMatrix(float elapsed_time_ms);
 
 	void resetCamera();
+	
+	void resetSpriteSheetTracker();
 
 private:
 	// Internal drawing functions for each entity type

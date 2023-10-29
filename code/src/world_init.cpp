@@ -21,11 +21,14 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 	// Create and (empty) Bozo component to be able to refer to all players
 	registry.players.emplace(entity);
 	registry.humans.emplace(entity); // zombies will target all entities with human component
+
+	std::vector<int> spriteCounts = { 4, 6, 6 };
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.05f, 0.1f));
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::BOZO,
 			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			GEOMETRY_BUFFER_ID::SPRITE_SHEET });
 
 	return entity;
 }
@@ -50,11 +53,15 @@ Entity createStudent(RenderSystem* renderer, vec2 position)
 
 	// Create an (empty) Student component to be able to refer to all students
 	registry.humans.emplace(entity);
+
+	std::vector<int> spriteCounts = { 4, 6, 6 };
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.05f, 0.1f));
+
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::STUDENT,
 			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			GEOMETRY_BUFFER_ID::SPRITE_SHEET });
 
 	return entity;
 }
@@ -78,11 +85,14 @@ Entity createZombie(RenderSystem* renderer, vec2 position)
 
 	// Create and (empty) Zombie component to be able to refer to all zombies
 	registry.zombies.emplace(entity);
+	std::vector<int> spriteCounts = { 8, 6, 5 };
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 75.f, vec2(0.01f, 0.1f));
+
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::ZOMBIE,
 		 EFFECT_ASSET_ID::TEXTURED,
-		 GEOMETRY_BUFFER_ID::SPRITE });
+		 GEOMETRY_BUFFER_ID::SPRITE_SHEET });
 
 	return entity;
 }
