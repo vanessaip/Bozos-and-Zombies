@@ -19,7 +19,7 @@ class RenderSystem {
 	 */
 	std::array<GLuint, texture_count> texture_gl_handles;
 	std::array<ivec2, texture_count> texture_dimensions;
-	
+
 	Camera camera = Camera(0.f, 0.f, screen_width_px, screen_height_px);
 	vec2 lastRestingPlayerPos;
 	bool lastPlayerDirectionIsPos = true; // true = +x, false = -x
@@ -28,37 +28,55 @@ class RenderSystem {
 	// Associated id with .obj path
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
-		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SALMON, mesh_path("salmon.obj"))
-		  // specify meshes of other assets here
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPIKE, mesh_path("spike.obj"))
+		// specify meshes of other assets here
 	};
 
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, texture_count> texture_paths = {
-		textures_path("student.png"),
-		textures_path("zombie.png"),
-		textures_path("bozo.png"),
-		textures_path("background_temp.png"),
-		textures_path("platform.png"),
-		textures_path("book.png") };
+		textures_path("student_sprite_sheet.png"),
+		textures_path("zombie_sprite_sheet.png"),
+		textures_path("bozo_sprite_sheet.png"),
+		textures_path("business-background.png"),
+		textures_path("Tile_40.png"),	// platform
+		textures_path("Tile_04.png"),	// step left section
+		textures_path("Tile_02.png"),	// step middle section
+		textures_path("Tiles_74.png"),	// wall
+		textures_path("egg.png"),
+		textures_path("2-2.png"),
+		textures_path("Ladder1.png"),
+		textures_path("Ladder2.png"),
+		textures_path("Ladder3.png"),
+		textures_path("book.png"),
+	};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, effect_count> effect_paths = {
 		shader_path("coloured"),
-		// shader_path("salmon"),
+		shader_path("spike"),
 		shader_path("textured"),
 		shader_path("water") };
 
-	std::array<GLuint, geometry_count> vertex_buffers;
-	std::array<GLuint, geometry_count> index_buffers;
+	// TODO (Justin): update size of array if we exceed 50 sprite sheet entities 
+	std::array<GLuint, 50> vertex_buffers;
+	std::array<GLuint, 50> index_buffers;
 	std::array<Mesh, geometry_count> meshes;
 
+	// vertex and index buffers for sprite sheets
+	std::vector<GLuint> sprite_vertex_buffers;
+	std::vector<GLuint> sprite_index_buffers;
+
 public:
+	uint RenderSystem::spriteSheetBuffersCount = 0;
 	// Initialize the window
 	bool init(GLFWwindow* window);
 
 	template <class T>
 	void bindVBOandIBO(GEOMETRY_BUFFER_ID gid, std::vector<T> vertices, std::vector<uint16_t> indices);
+
+	template <class T>
+	void bindVBOandIBO(uint gid, std::vector<T> vertices, std::vector<uint16_t> indices);
 
 	void initializeGlTextures();
 
@@ -68,6 +86,9 @@ public:
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
 
 	void initializeGlGeometryBuffers();
+
+	void updateSpriteSheetGeometryBuffer(SpriteSheet& sheet);
+
 	// Initialize the screen texture used as intermediate render target
 	// The draw loop first renders to this texture, then it is used for the water
 	// shader
@@ -79,9 +100,15 @@ public:
 	// Draw all entities
 	void draw(float elapsed_time_ms);
 
+	void step(float elapsed_time_ms);
+
+	void initializeSpriteSheet(Entity& entity, ANIMATION_MODE defaultMode, std::vector<int> spriteCounts, float switchTime, vec2 trunc);
+
 	mat3 createProjectionMatrix(float elapsed_time_ms);
 
 	void resetCamera();
+
+	void resetSpriteSheetTracker();
 
 private:
 	// Internal drawing functions for each entity type
