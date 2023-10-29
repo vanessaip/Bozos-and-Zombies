@@ -180,7 +180,6 @@ RenderSystem::~RenderSystem()
 {
 	// Don't need to free gl resources since they last for as long as the program,
 	// but it's polite to clean after yourself.
-	// TODO delete sprite sheet buffers
 	glDeleteBuffers((GLsizei)vertex_buffers.size(), vertex_buffers.data());
 	glDeleteBuffers((GLsizei)index_buffers.size(), index_buffers.data());
 	glDeleteTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());

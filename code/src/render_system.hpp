@@ -57,6 +57,7 @@ class RenderSystem {
 		shader_path("textured"),
 		shader_path("water") };
 
+	// TODO (Justin): update size of array if we exceed 50 sprite sheet entities 
 	std::array<GLuint, 50> vertex_buffers;
 	std::array<GLuint, 50> index_buffers;
 	std::array<Mesh, geometry_count> meshes;
@@ -74,9 +75,7 @@ public:
 	void bindVBOandIBO(GEOMETRY_BUFFER_ID gid, std::vector<T> vertices, std::vector<uint16_t> indices);
 
 	template <class T>
-	void bindSpriteSheetVBO(uint gid, std::vector<T> vertices);
-	template <class T>
-	void bindSpriteSheetVBOandIBO(uint gid, std::vector<T> vertices, std::vector<uint16_t> indices);
+	void bindVBOandIBO(uint gid, std::vector<T> vertices, std::vector<uint16_t> indices);
 
 	void initializeGlTextures();
 
@@ -87,7 +86,7 @@ public:
 
 	void initializeGlGeometryBuffers();
 	
-	void updateSpriteSheetGeometryBugger(SpriteSheet& sheet);
+	void updateSpriteSheetGeometryBuffer(SpriteSheet& sheet);
 
 	// Initialize the screen texture used as intermediate render target
 	// The draw loop first renders to this texture, then it is used for the water
@@ -102,7 +101,7 @@ public:
 
 	void step(float elapsed_time_ms);
 
-	void RenderSystem::initializeSpriteSheet(Entity& entity, ANIMATION_MODE defaultMode, std::vector<int> spriteCounts, float switchTime, vec2 trunc);
+	void initializeSpriteSheet(Entity& entity, ANIMATION_MODE defaultMode, std::vector<int> spriteCounts, float switchTime, vec2 trunc);
 
 	mat3 createProjectionMatrix(float elapsed_time_ms);
 

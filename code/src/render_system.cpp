@@ -77,7 +77,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		assert(registry.renderRequests.has(entity));
 		GLuint texture_id = texture_gl_handles[(GLuint)render_request.used_texture];
-		ivec2 texture_dim = texture_dimensions[(GLuint)render_request.used_texture];
 
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
@@ -255,7 +254,7 @@ void RenderSystem::step(float elapsed_time_ms) {
 			if (sheet.offset.x / sheet.spriteDim.x >= sheet.getCurrentSpriteCount())
 				sheet.offset.x = 0.f;
 
-			updateSpriteSheetGeometryBugger(sheet);
+			updateSpriteSheetGeometryBuffer(sheet);
 		}
 	}
 }
@@ -364,15 +363,7 @@ void RenderSystem::resetSpriteSheetTracker() {
 }
 
 template <class T>
-void RenderSystem::bindSpriteSheetVBO(uint gid, std::vector<T> vertices) {
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[gid]);
-	glBufferData(GL_ARRAY_BUFFER,
-		sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-	gl_has_errors();
-}
-
-template <class T>
-void RenderSystem::bindSpriteSheetVBOandIBO(uint gid, std::vector<T> vertices, std::vector<uint16_t> indices) {
+void RenderSystem::bindVBOandIBO(uint gid, std::vector<T> vertices, std::vector<uint16_t> indices) {
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[gid]);
 	glBufferData(GL_ARRAY_BUFFER,
 		sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
@@ -403,10 +394,10 @@ void RenderSystem::initializeSpriteSheet(Entity& entity, ANIMATION_MODE defaultM
 
 	// Counterclockwise as it's the default opengl front winding direction.
 	const std::vector<uint16_t> textured_indices = { 0, 3, 1, 1, 3, 2 };
-	bindSpriteSheetVBOandIBO(sheet.bufferId, textured_vertices, textured_indices);
+	bindVBOandIBO(sheet.bufferId, textured_vertices, textured_indices);
 }
 
-void RenderSystem::updateSpriteSheetGeometryBugger(SpriteSheet& sheet) {
+void RenderSystem::updateSpriteSheetGeometryBuffer(SpriteSheet& sheet) {
 	assert(sheet.spriteDim.x > 0);
 	assert(sheet.spriteDim.y > 0);
 
@@ -423,5 +414,5 @@ void RenderSystem::updateSpriteSheetGeometryBugger(SpriteSheet& sheet) {
 
 	// Counterclockwise as it's the default opengl front winding direction.
 	const std::vector<uint16_t> textured_indices = { 0, 3, 1, 1, 3, 2 };
-	bindSpriteSheetVBOandIBO(sheet.bufferId, textured_vertices, textured_indices);
+	bindVBOandIBO(sheet.bufferId, textured_vertices, textured_indices);
 }

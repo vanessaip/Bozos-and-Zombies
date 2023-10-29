@@ -24,7 +24,6 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 
 	std::vector<int> spriteCounts = { 4, 6, 6 };
 	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.05f, 0.1f));
-	//registry.spriteSheets.emplace(entity, SpriteSheet(5, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.05f, 0.1f)));
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::BOZO,
@@ -88,8 +87,6 @@ Entity createZombie(RenderSystem* renderer, vec2 position)
 	registry.zombies.emplace(entity);
 	std::vector<int> spriteCounts = { 8, 6, 5 };
 	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 75.f, vec2(0.01f, 0.1f));
-	//registry.spriteSheets.emplace(entity, SpriteSheet(7, ANIMATION_MODE::RUN, spriteCounts, 75.f, vec2(0.01f, 0.1f)));
-
 
 	registry.renderRequests.insert(
 		entity,
