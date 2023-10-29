@@ -206,8 +206,8 @@ Entity createSpike(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 300.f;
-	motion.scale.x *= -1; // point front to the right
+	motion.scale = mesh.original_size * 25.f;
+	motion.scale.y *= -1.25;
 
 	registry.spikes.emplace(entity);
 	registry.renderRequests.insert(

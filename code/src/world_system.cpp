@@ -425,8 +425,8 @@ void WorldSystem::restart_game() {
 	Entity wall1 = createWall(renderer, {window_width_px - 40, 500}, 850);
 
 	// Create spikes
-	Entity spike1 = createSpike(renderer, {50, 500});
-	registry.colors.insert(spike1, { 1, 0, 0 });
+	Entity spike1 = createSpike(renderer, {300, 583});
+registry.colors.insert(spike1, { 0.5f, 0.5f, 0.5f });
 
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, { 200, 500 });
@@ -467,7 +467,7 @@ void WorldSystem::handle_collisions() {
 			//Player& player = registry.players.get(entity);
 
 			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
-			if (registry.zombies.has(entity_other)) {
+			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other))) {
 				// initiate death unless already dying
 				if (!registry.deathTimers.has(entity)) {
 					// Scream, reset timer, and make the player [dying animation]
@@ -505,12 +505,6 @@ void WorldSystem::handle_collisions() {
 					++points;
 
 					// !!! TODO: just colliding with other students immunizes them or require keyboard input from user?
-				}
-			} else if (registry.spikes.has(entity_other)) {
-				// Action to take when the player collides with a spike
-				if (!registry.deathTimers.has(entity)) {
-					registry.deathTimers.emplace(entity);
-					Mix_PlayChannel(-1, player_death_sound, 0);
 				}
 			}
 		}

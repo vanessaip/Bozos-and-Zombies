@@ -6,3 +6,4 @@ code/ext/project_path.hpp
 /code/out/build/x64-Debug/
 /code/ext/project_path.hpp
 build/
+CppProperties.json
