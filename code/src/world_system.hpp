@@ -37,6 +37,8 @@ public:
 
 	// Should the game be over ?
 	bool is_over()const;
+
+	void updateZombieMovement(Motion& motion, Motion& bozo_motion);
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);

@@ -15,7 +15,8 @@ vec2 get_bounding_box(const Motion& motion)
 // if the center point of either object is inside the other's bounding-box-circle. You can
 // surely implement a more accurate detection
 bool collides(const Motion& motion1, const Motion& motion2)
-{
+{	
+
 	vec2 dp = motion1.position - motion2.position;
 	float dist_squared = dot(dp,dp);
 	const vec2 other_bonding_box = get_bounding_box(motion1) / 2.f;
@@ -53,7 +54,7 @@ void PhysicsSystem::step(float elapsed_ms)
 		Entity entity = motion_container.entities[i];
 		float step_seconds = elapsed_ms / 1000.f;
 
-		if (registry.humans.has(entity) && motion.offGround) {
+		if ((registry.humans.has(entity) || registry.zombies.has(entity)) && motion.offGround) {
 			motion.velocity[1] += PhysicsSystem::GRAVITY;
 		}
 

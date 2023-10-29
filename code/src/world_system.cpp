@@ -172,7 +172,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		auto& walls = registry.walls;
 
 		// Bounding entities to window
-		if (registry.humans.has(motion_container.entities[i]))
+		if (registry.humans.has(motion_container.entities[i]) || registry.zombies.has(motion_container.entities[i]))
 		{
 			if (registry.players.has(motion_container.entities[i]) && !registry.deathTimers.has(motion_container.entities[i]))
 			{
@@ -308,19 +308,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			}
 		}
 
-		// If entity is a zombie, update its direction to always move towards Bozo
+		// If entity is a zombie, update the Zombie's position to follow the player
 		if (registry.zombies.has(motion_container.entities[i]))
 		{
-			vec2 direction = bozo_motion.position - motion.position;
-			float length = sqrt(direction.x * direction.x + direction.y * direction.y);
-			if (length != 0)
-			{ // prevent division by zero
-				direction.x /= length;
-				direction.y /= length;
-			}
-			float speed = 100.f;
-			motion.velocity.x = direction.x * speed;
-			motion.velocity.y = direction.y * speed;
+			updateZombieMovement(motion, bozo_motion);
 		}
 	}
 
@@ -471,6 +462,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// !!! TODO: update timers for dying **zombies** and remove if time drops below zero, similar to the death timer
 
 	return true;
+}
+
+void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion) {
+	if (bozo_motion.position.y - 50.f < motion.position.y && motion.position.y < bozo_motion.position.y + 50.f) {
+		// Zombie is on the same level as bozo
+		float direction = -1;
+		if ((bozo_motion.position.x - motion.position.x) > 0) {
+			direction = 1;
+		}
+		float speed = 200.f;
+		motion.velocity.x = direction * speed;
+	}
 }
 
 // Reset the world state to its initial state
