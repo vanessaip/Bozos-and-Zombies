@@ -537,6 +537,10 @@ void WorldSystem::restart_game()
 	std::vector<Entity> ladder4 = createClimbable(renderer, {window_width_px-PLATFORM_WIDTH*4, window_height_px*0.4}, 5);
 	std::vector<Entity> ladder5 = createClimbable(renderer, {window_width_px-PLATFORM_WIDTH*9, window_height_px*0.2}, 5);
 
+	// Create spikes
+	Entity spike1 = createSpike(renderer, {300, 583});
+registry.colors.insert(spike1, { 0.5f, 0.5f, 0.5f });
+
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, { 500, window_height_px*0.8-50.f });
 	registry.colors.insert(player_bozo, {1, 0.8f, 0.8f});
@@ -581,8 +585,7 @@ void WorldSystem::handle_collisions()
 			// Player& player = registry.players.get(entity);
 
 			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
-			if (registry.zombies.has(entity_other))
-			{
+			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other))) {
 				// initiate death unless already dying
 				if (!registry.deathTimers.has(entity))
 				{

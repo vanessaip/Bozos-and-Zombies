@@ -28,6 +28,7 @@ public:
 	ComponentContainer<Platform> platforms;
 	ComponentContainer<Background> backgrounds;
 	ComponentContainer<Wall> walls;
+	ComponentContainer<Spike> spikes;
 	ComponentContainer<Climbable> climbables;
 
 	// constructor that adds all containers for looping over them
@@ -51,6 +52,7 @@ public:
 		registry_list.push_back(&platforms);
 		registry_list.push_back(&backgrounds);
 		registry_list.push_back(&walls);
+		registry_list.push_back(&spikes);
 		registry_list.push_back(&climbables);
 	}
 

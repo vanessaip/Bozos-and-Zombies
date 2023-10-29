@@ -36,7 +36,9 @@ std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, uint num_
 Entity createWall(RenderSystem* renderer, vec2 position, float height);
 // ladders
 std::vector<Entity> createClimbable(RenderSystem* renderer, vec2 top_position, uint num_sections);
-// render background as a sprite
+// spikes
+Entity createSpike(RenderSystem* renderer, vec2 pos);
+// background
 Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::BACKGROUND, vec2 position = { window_width_px/2, window_height_px/2 }, vec2 scale = { window_width_px, window_height_px });
 
 
