@@ -1,4 +1,4 @@
- #pragma once
+#pragma once
 #include "common.hpp"
 #include <vector>
 #include <unordered_map>
@@ -15,32 +15,28 @@ struct Player
 // Zombies can turn Humans into Zombies
 struct Zombie
 {
-
 };
 
 // Player and Student(s) are Human
 struct Human
 {
-
 };
 
 struct Background
 {
-
 };
 
 struct Platform
 {
-
 };
 
 struct Wall
 {
-
 };
 
 // All data relevant to the shape and motion of entities
-struct Motion {
+struct Motion
+{
 	vec2 position;
 	float angle;
 	vec2 velocity;
@@ -49,7 +45,7 @@ struct Motion {
 	// Second boolean is reflection on y axis with true for reflected
 	vec2 reflect;
 	bool offGround;
-	Motion(vec2 position = { 0.f, 0.f }, float angle = 0.f, vec2 velocity = {0.f, 0.f}, vec2 scale = {10.f, 10.f}, vec2 reflect = { false, false }, bool offGround = true)
+	Motion(vec2 position = { 0.f, 0.f }, float angle = 0.f, vec2 velocity = { 0.f, 0.f }, vec2 scale = { 10.f, 10.f }, vec2 reflect = { false, false }, bool offGround = true)
 	{
 		this->position = position;
 		this->angle = angle;
@@ -65,15 +61,17 @@ struct Collision
 {
 	// Note, the first object is stored in the ECS container.entities
 	Entity other_entity; // the second object involved in the collision
-//	int collision_type; // 0 is interactive collision, 1 is collision for stand on platform, 2 is for bounce back collision
-	Collision(Entity& other_entity) {
-		this->other_entity = other_entity; 
-//		this->collision_type = collision_type;
+	//	int collision_type; // 0 is interactive collision, 1 is collision for stand on platform, 2 is for bounce back collision
+	Collision(Entity& other_entity)
+	{
+		this->other_entity = other_entity;
+		//		this->collision_type = collision_type;
 	};
 };
 
 // Data structure for toggling debug mode
-struct Debug {
+struct Debug
+{
 	bool in_debug_mode = 0;
 	bool in_freeze_mode = 0;
 };
@@ -98,24 +96,30 @@ struct DeathTimer
 	bool direction = 0;
 };
 
+// A timer that will be associated to a NPC player that converts into a Zombie
+struct InfectTimer
+{
+	float timer_ms = 3000.f;
+	bool direction = 0;
+};
+
 // Keyframe animation stores all keyframes and timing data for a given entity
 struct KeyframeAnimation
 {
-	int num_of_frames = 0;	// total number of keyframes
+	int num_of_frames = 0; // total number of keyframes
 	int curr_frame = 0;
-	float timer_ms = 0.f;		// time since keyframe was updated
-	float switch_time = 0.f;	// time when next keyframe should be loaded in
+	float timer_ms = 0.f;	 // time since keyframe was updated
+	float switch_time = 0.f; // time when next keyframe should be loaded in
 	bool loop = false;
-	std::vector<Motion> motion_frames;	// keyframes
+	std::vector<Motion> motion_frames; // keyframes
 
-	KeyframeAnimation(int num_of_frames, float switch_time, bool loop, std::vector<Motion>& frames) 
+	KeyframeAnimation(int num_of_frames, float switch_time, bool loop, std::vector<Motion>& frames)
 	{
 		this->num_of_frames = num_of_frames;
 		this->switch_time = switch_time;
 		this->loop = loop;
 		this->motion_frames = frames;
 	}
-	
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)
@@ -136,7 +140,7 @@ struct TexturedVertex
 struct Mesh
 {
 	static bool loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, vec2& out_size);
-	vec2 original_size = {1,1};
+	vec2 original_size = { 1, 1 };
 	std::vector<ColoredVertex> vertices;
 	std::vector<uint16_t> vertex_indices;
 };
@@ -155,7 +159,8 @@ struct Camera
 	bool shiftHorizontal = false;
 	bool shiftVertical = false;
 
-	Camera(float l, float t, float r, float b) {
+	Camera(float l, float t, float r, float b)
+	{
 		left = l;
 		top = t;
 		right = r;
@@ -187,7 +192,8 @@ struct Camera
  * enums there are, and as a default value to represent uninitialized fields.
  */
 
-enum class TEXTURE_ASSET_ID {
+enum class TEXTURE_ASSET_ID
+{
 	STUDENT = 0,
 	ZOMBIE = STUDENT + 1,
 	BOZO = ZOMBIE + 1,
@@ -197,28 +203,33 @@ enum class TEXTURE_ASSET_ID {
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
-enum class EFFECT_ASSET_ID {
+enum class EFFECT_ASSET_ID
+{
 	COLOURED = 0,
 	// SALMON = COLOURED + 1, // can reuse if we end up having meshes
 	TEXTURED = COLOURED + 1,
 	WATER = TEXTURED + 1,
-	EFFECT_COUNT = WATER + 1
+	ANIMATED = WATER + 1,
+	EFFECT_COUNT = ANIMATED + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
-enum class GEOMETRY_BUFFER_ID {
+enum class GEOMETRY_BUFFER_ID
+{
 	SALMON = 0,
 	SPRITE = SALMON + 1,
 	DEBUG_LINE = SPRITE + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
-	SPRITE_SHEET_BOZO = SCREEN_TRIANGLE + 1,
-	SPRITE_SHEET_ZOMBIE = SPRITE_SHEET_BOZO + 1,
-	SPRITE_SHEET_STUDENT = SPRITE_SHEET_ZOMBIE + 1,
-	GEOMETRY_COUNT = SPRITE_SHEET_STUDENT + 1
+	//SPRITE_SHEET_BOZO = SCREEN_TRIANGLE + 1,
+	//SPRITE_SHEET_ZOMBIE = SPRITE_SHEET_BOZO + 1,
+	//SPRITE_SHEET_STUDENT = SPRITE_SHEET_ZOMBIE + 1,
+	SPRITE_SHEET = SCREEN_TRIANGLE + 1,
+	GEOMETRY_COUNT = SPRITE_SHEET + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
-struct RenderRequest {
+struct RenderRequest
+{
 	TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
@@ -241,11 +252,10 @@ struct SpriteSheet
 	vec2 spriteDim = { -1.f, -1.f };
 	vec2 truncation;
 	std::vector<int> spriteCount;
-	TEXTURE_ASSET_ID textureId;
-	GEOMETRY_BUFFER_ID bufferId;
+	uint bufferId;
 	ANIMATION_MODE mode = ANIMATION_MODE::IDLE;
 
-	SpriteSheet(GEOMETRY_BUFFER_ID bId, ANIMATION_MODE defaultMode, std::vector<int>& spriteCt, float switchTime, vec2 trunc)
+	SpriteSheet(uint bId, ANIMATION_MODE defaultMode, std::vector<int>& spriteCt, float switchTime, vec2 trunc)
 	{
 		bufferId = bId;
 		spriteCount = spriteCt;
@@ -275,4 +285,3 @@ struct SpriteSheet
 			return 0;
 	}
 };
-

@@ -46,18 +46,29 @@ class RenderSystem {
 		shader_path("coloured"),
 		// shader_path("salmon"),
 		shader_path("textured"),
-		shader_path("water")};
+		shader_path("water"),
+		shader_path("animated") };
 
-	std::array<GLuint, geometry_count> vertex_buffers;
-	std::array<GLuint, geometry_count> index_buffers;
+	std::array<GLuint, 50> vertex_buffers;
+	std::array<GLuint, 50> index_buffers;
 	std::array<Mesh, geometry_count> meshes;
 
+	// vertex and index buffers for sprite sheets
+	std::vector<GLuint> sprite_vertex_buffers;
+	std::vector<GLuint> sprite_index_buffers;
+
 public:
+	uint RenderSystem::spriteSheetBuffersCount = 0;
 	// Initialize the window
 	bool init(GLFWwindow* window);
 
 	template <class T>
 	void bindVBOandIBO(GEOMETRY_BUFFER_ID gid, std::vector<T> vertices, std::vector<uint16_t> indices);
+
+	template <class T>
+	void bindSpriteSheetVBO(uint gid, std::vector<T> vertices);
+	template <class T>
+	void bindSpriteSheetVBOandIBO(uint gid, std::vector<T> vertices, std::vector<uint16_t> indices);
 
 	void initializeGlTextures();
 
@@ -83,11 +94,13 @@ public:
 
 	void step(float elapsed_time_ms);
 
+	void RenderSystem::initializeSpriteSheet(Entity& entity, ANIMATION_MODE defaultMode, std::vector<int> spriteCounts, float switchTime, vec2 trunc);
+
 	mat3 createProjectionMatrix(float elapsed_time_ms);
 
 	void resetCamera();
-
-	ivec2& getTextureDimensions(TEXTURE_ASSET_ID textureId);
+	
+	void resetSpriteSheetTracker();
 
 private:
 	// Internal drawing functions for each entity type

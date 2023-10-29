@@ -15,6 +15,7 @@ public:
 	ComponentContainer<SpriteSheet> spriteSheets;
 	ComponentContainer<KeyframeAnimation> keyframeAnimations;
 	ComponentContainer<DeathTimer> deathTimers;
+	ComponentContainer<InfectTimer> infectTimers;
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
 	ComponentContainer<Player> players;
@@ -37,6 +38,7 @@ public:
 		registry_list.push_back(&spriteSheets);
 		registry_list.push_back(&keyframeAnimations);
 		registry_list.push_back(&deathTimers);
+		registry_list.push_back(&infectTimers);
 		registry_list.push_back(&motions);
 		registry_list.push_back(&collisions);
 		registry_list.push_back(&players);
