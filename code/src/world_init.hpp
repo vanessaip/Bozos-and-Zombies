@@ -43,6 +43,12 @@ Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTU
 
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
-const std::vector<vec2> ZOMBIE_START_POS = { { 1200, 400} };
+
+// This stores the zombie's starting position
+const std::vector<vec2> ZOMBIE_START_POS = { { 1200, 440} };
+
+// This stores level heights from bottom to top
+const std::vector<std::vector<float>> FLOOR_DEFINITIONS = { {760, 600, 440, 280, 120} };
+const std::vector<std::vector<float>> ZOMBIE_FLOOR_TRAVERSE_POINTS = { {760, 600, 440, 280, 120} };
 
 

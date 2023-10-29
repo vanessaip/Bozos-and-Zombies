@@ -177,12 +177,15 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		auto& platforms = registry.platforms;
 		auto& walls = registry.walls;
 		auto& climables = registry.climbables;
+		
+		bool isHuman = registry.humans.has(motion_container.entities[i]);
+		bool isZombie = registry.zombies.has(motion_container.entities[i]);
 
 		// Bounding entities to window
-		if (registry.humans.has(motion_container.entities[i]) || registry.zombies.has(motion_container.entities[i]))
+		if (isHuman|| isZombie)
 		{
-			float entityRightSide = motion.position.x + motion.scale[0] / 2.f;
-			float entityLeftSide = motion.position.x - motion.scale[0] / 2.f;
+			float entityRightSide = motion.position.x + abs(motion.scale[0]) / 2.f;
+			float entityLeftSide = motion.position.x - abs(motion.scale[0]) / 2.f;
 			float entityBottom = motion.position.y + motion.scale[1] / 2.f;
 			float entityTop = motion.position.y - motion.scale[1] / 2.f;
 
@@ -276,19 +279,30 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 				// Collision with Right edge of block
 				if (entityLeftSide < xBlockRightBound &&
-					entityLeftSide > xBlockRightBound - 20.f &&
+					entityLeftSide > xBlockRightBound - 10.f &&
 					entityTop < yBlockBottom &&
-					entityBottom > yBlockTop && player.keyPresses[0])
+					entityBottom > yBlockTop && (player.keyPresses[0] || isZombie))
 				{
 					motion.velocity.x = 0;
+
+					if (isZombie && !motion.offGround) {
+						motion.offGround = true;
+						motion.velocity[1] -= 200;
+					}
 				}
 
+				// Collision with Left edge of block
 				if (entityRightSide > xBlockLeftBound &&
-					entityRightSide < xBlockLeftBound + 20.f &&
+					entityRightSide < xBlockLeftBound + 10.f &&
 					entityTop < yBlockBottom &&
-					entityBottom > yBlockTop && player.keyPresses[1])
+					entityBottom > yBlockTop && (player.keyPresses[1] || isZombie))
 				{
 					motion.velocity.x = 0;
+
+					if (isZombie && !motion.offGround) {
+						motion.offGround = true;
+						motion.velocity[1] -= 200;
+					}
 				}
 			}
 
@@ -324,25 +338,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		// If entity is a zombie, update the Zombie's position to follow the player
 		if (registry.zombies.has(motion_container.entities[i]))
 		{
-      updateZombieMovement(motion, bozo_motion);
-			vec2 direction = bozo_motion.position - motion.position;
-			float length = sqrt(direction.x * direction.x + direction.y * direction.y);
-			if (length != 0)
-			{ // prevent division by zero
-				direction.x /= length;
-				direction.y /= length;
-			}
-			float speed = 100.f;
-			motion.velocity.x = direction.x * speed;
-			motion.velocity.y = direction.y * speed;
-
-			// update sprite animation depending on distance to player
-			Entity& zombie = motion_container.entities[i];
-			SpriteSheet& zombieSheet = registry.spriteSheets.get(zombie);
-			if (length < 75.f)
-				zombieSheet.updateAnimation(ANIMATION_MODE::ATTACK);
-			else
-				zombieSheet.updateAnimation(ANIMATION_MODE::RUN);
+			updateZombieMovement(motion, bozo_motion, motion_container.entities[i]);
 		}
 	}
 
@@ -502,16 +498,128 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	return true;
 }
 
-void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion) {
-	if (bozo_motion.position.y - 50.f < motion.position.y && motion.position.y < bozo_motion.position.y + 50.f) {
+void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Entity& zombie) {
+
+	int bozo_level = checkLevel(bozo_motion);
+	int zombie_level = checkLevel(motion);
+
+	if (zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1)) {
 		// Zombie is on the same level as bozo
+		motion.climbing = false;
 		float direction = -1;
 		if ((bozo_motion.position.x - motion.position.x) > 0) {
 			direction = 1;
 		}
 		float speed = 200.f;
 		motion.velocity.x = direction * speed;
+
+		if (motion.velocity.x > 0) {
+			motion.reflect[0] = true;
+		}
+		else {
+			motion.reflect[0] = false;
+		}
 	}
+	else if (zombie_level < bozo_level) {
+		// Zombie is a level below bozo and needs to climb up
+		if (zombie_level == 0) {
+			zombie_level++;
+		}
+		
+		// Move toward the target_ladder
+		float target_ladder = getClosestLadder(zombie_level, bozo_motion);
+
+		if ((target_ladder - motion.position.x) > 0) {
+			motion.velocity.x = 200.f;
+		}
+		else {
+			motion.velocity.x = -200.f;
+		}
+
+		// When at the ladder, start ascending
+		if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f)) {
+			motion.position.x = target_ladder;
+			motion.velocity.x = 0;
+			motion.velocity.y = 0;
+			motion.velocity.y = -200.f;
+			motion.climbing = true;
+		}
+		else {
+			motion.climbing = false;
+		}
+
+	}
+	else {
+		// Zombie is a level above bozo and needs to climb down
+		// Move toward the target_ladder
+		float target_ladder = getClosestLadder(zombie_level, bozo_motion);
+
+		if ((target_ladder - motion.position.x) > 0) {
+			motion.velocity.x = 200.f;
+		}
+		else {
+			motion.velocity.x = -200.f;
+		}
+
+		// When at the ladder, start descending
+		if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f)) {
+			motion.position.x = target_ladder;
+			motion.velocity.x = 0;
+			motion.velocity.y = 0;
+			motion.velocity.y = +200.f;
+			motion.climbing = true;
+		}
+		else {
+			motion.climbing = false;
+		}
+
+	}
+
+
+	// update sprite animation depending on distance to player
+	SpriteSheet& zombieSheet = registry.spriteSheets.get(zombie);
+	float length = sqrt(abs(motion.position.x - bozo_motion.position.x) + abs(motion.position.y - bozo_motion.position.y));
+	if (length < 75.f)
+		zombieSheet.updateAnimation(ANIMATION_MODE::ATTACK);
+	else
+		zombieSheet.updateAnimation(ANIMATION_MODE::RUN);
+	
+}
+
+int WorldSystem::checkLevel(Motion& motion) {
+	if (motion.position.y < floor_positions[0] && motion.position.y > floor_positions[1]) {
+		return 0;
+	}
+	else if (motion.position.y < floor_positions[1] && motion.position.y > floor_positions[2]) {
+		return 1;
+	}
+	else if (motion.position.y < floor_positions[2] && motion.position.y > floor_positions[3]) {
+		return 2;
+	}
+	else if (motion.position.y < floor_positions[3] && motion.position.y > floor_positions[4]) {
+		return 3;
+	}
+	else {
+		return 4;
+	}
+}
+
+float WorldSystem::getClosestLadder(int zombie_level, Motion& bozo_motion) {
+	std::vector<float> ladders = ladder_positions[zombie_level];
+
+	// Find the closest ladder to get to bozo
+	int closest = 0;
+	float min_dist = 10000;
+
+	for (int i = 0; i < ladders.size(); i++) {
+		float dist = abs(ladders[i] - bozo_motion.position.x);
+		if (dist < min_dist) {
+			closest = i;
+			min_dist = dist;
+		}
+	}
+
+	return ladders[closest];
 }
 
 void WorldSystem::updateClimbing(Motion& motion, vec4 entityBB, ComponentContainer<Motion>& motion_container) {
@@ -526,8 +634,8 @@ void WorldSystem::updateClimbing(Motion& motion, vec4 entityBB, ComponentContain
 	for (int i = 0; i < climbables.size(); i++) {
 		Motion& blockMotion = motion_container.get(climbables.entities[i]);
 
-		float xLeftBound = blockMotion.position.x - motion.scale[0] / 2.f;
-		float xRightBound = blockMotion.position.x + motion.scale[0] / 2.f;
+		float xLeftBound = blockMotion.position.x - abs(motion.scale[0]) / 2.f;
+		float xRightBound = blockMotion.position.x + abs(motion.scale[0]) / 2.f;
 		float yTop = blockMotion.position.y - motion.scale[1] / 2.f;
 		float yBottom = blockMotion.position.y + motion.scale[1] / 2.f;
 
@@ -602,6 +710,13 @@ void WorldSystem::restart_game()
 	std::vector<Entity> platform6 = createPlatforms(renderer, {window_width_px-PLATFORM_WIDTH*10-80.f, window_height_px*0.4}, 10);
 	std::vector<Entity> platform7 = createPlatforms(renderer, {110.f,window_height_px*0.2}, 25);
 
+	floor_positions = { 
+		window_height_px - 12.f, 
+		window_height_px * 0.8 , 
+		window_height_px * 0.6 , 
+		window_height_px * 0.4, 
+		window_height_px * 0.2 };
+
 	// stairs
 	std::vector<Entity> step0 = createSteps(renderer, {PLATFORM_WIDTH*12-20.f,window_height_px*0.8}, 5, 3, false);
 	std::vector<Entity> step1 = createSteps(renderer, {window_width_px-PLATFORM_WIDTH*6-STEP_WIDTH*6,window_height_px*0.8+PLATFORM_HEIGHT*4}, 5, 2, true);
@@ -622,8 +737,14 @@ void WorldSystem::restart_game()
 	std::vector<Entity> ladder4 = createClimbable(renderer, {window_width_px-PLATFORM_WIDTH*4, window_height_px*0.4}, 5);
 	std::vector<Entity> ladder5 = createClimbable(renderer, {window_width_px-PLATFORM_WIDTH*9, window_height_px*0.2}, 5);
 
+	ladder_positions = { 
+		{PLATFORM_WIDTH * 9}, 
+		{PLATFORM_WIDTH * 7, window_width_px - PLATFORM_WIDTH * 6}, 
+		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 4}, 
+		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 9 } };
+
 	// Create spikes
-	Entity spike1 = createSpike(renderer, {300, 623});
+	Entity spike1 = createSpike(renderer, {260, 625});
 	registry.colors.insert(spike1, { 0.5f, 0.5f, 0.5f });
 
 	// Create a new Bozo player
@@ -634,21 +755,17 @@ void WorldSystem::restart_game()
 
 	// Create zombie (one starter zombie per level?)
 	Entity zombie = createZombie(renderer, ZOMBIE_START_POS[curr_level]);
-	// Setting random initial position and constant velocity (can keep random zombie position?)
-	/*Motion& zombie_motion = registry.motions.get(zombie);
-	zombie_motion.position = vec2(window_width_px - 200.f,
-		50.f + uniform_dist(rng) * (window_height_px - 100.f));*/
 
 	// Create student
-	Entity student = createStudent(renderer, { 0, 0 });
+	Entity student = createStudent(renderer, { 1000, 440 });
 	registry.colors.insert(student, { 1, 0.8f, 0.8f });
 
 	// Setting random initial position and constant velocity
 	Motion& student_motion = registry.motions.get(student);
-	student_motion.position =
+	/*student_motion.position =
 		vec2(window_width_px / 2.f,
 			50.f + uniform_dist(rng) * (window_height_px - 100.f));
-	student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 200.f : -200.f;
+	student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 200.f : -200.f;*/
 
 	setup_keyframes(renderer);
 }

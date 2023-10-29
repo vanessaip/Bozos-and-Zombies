@@ -38,9 +38,13 @@ public:
 	// Should the game be over ?
 	bool is_over()const;
 
-	void updateZombieMovement(Motion& motion, Motion& bozo_motion);
+	void updateZombieMovement(Motion& motion, Motion& bozo_motion, Entity& zombie);
 
 	void updateClimbing(Motion& motion, vec4 entityBB, ComponentContainer<Motion>& motion_container);
+
+	int checkLevel(Motion& motion);
+
+	float getClosestLadder(int zombie_level, Motion& bozo_motion);
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
@@ -62,6 +66,10 @@ private:
 	RenderSystem* renderer;
 	float current_speed;
 	Entity player_bozo;
+
+	// Level definitions
+	std::vector<float> floor_positions;
+	std::vector<std::vector<float>> ladder_positions;
 
 	// music references
 	Mix_Music* background_music;
