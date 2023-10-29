@@ -236,13 +236,12 @@ void RenderSystem::step(float elapsed_time_ms) {
 		sheet.timer_ms += elapsed_time_ms;
 
 		if (sheet.timer_ms > sheet.switchTime_ms) {
-			sheet.xOffset += sheet.spriteWidth;
+			sheet.offset.x += sheet.spriteDim.x;
 			sheet.timer_ms = 0;
 
-			if (sheet.xOffset + sheet.spriteWidth > 1)
-				sheet.xOffset = 0.f;
+			if (sheet.offset.x / sheet.spriteDim.x >= sheet.getCurrentSpriteCount())
+				sheet.offset.x = 0.f;
 
-			std::cout << "left = " << sheet.xOffset << "\n";
 			updateSpriteSheetGeometryBugger(sheet);
 		}
 	}
@@ -352,7 +351,8 @@ ivec2& RenderSystem::getTextureDimensions(TEXTURE_ASSET_ID textureId) {
 }
 
 void RenderSystem::updateSpriteSheetGeometryBugger(SpriteSheet& sheet) {
-	assert(sheet.spriteWidth > 0);
+	assert(sheet.spriteDim.x > 0);
+	assert(sheet.spriteDim.y > 0);
 
 	std::vector<TexturedVertex> textured_vertices(4);
 	textured_vertices[0].position = { -1.f / 2, +1.f / 2, 0.f };
@@ -360,10 +360,10 @@ void RenderSystem::updateSpriteSheetGeometryBugger(SpriteSheet& sheet) {
 	textured_vertices[2].position = { +1.f / 2, -1.f / 2, 0.f };
 	textured_vertices[3].position = { -1.f / 2, -1.f / 2, 0.f };
 
-	textured_vertices[0].texcoord = { sheet.xOffset, 1.f };
-	textured_vertices[1].texcoord = { sheet.xOffset + sheet.spriteWidth, 1.f };
-	textured_vertices[2].texcoord = { sheet.xOffset + sheet.spriteWidth, 0.f };
-	textured_vertices[3].texcoord = { sheet.xOffset, 0.f };
+	textured_vertices[0].texcoord = { sheet.offset.x, sheet.offset.y + sheet.spriteDim.y };
+	textured_vertices[1].texcoord = { sheet.offset.x + sheet.spriteDim.x - sheet.truncation.x, sheet.offset.y + sheet.spriteDim.y };
+	textured_vertices[2].texcoord = { sheet.offset.x + sheet.spriteDim.x - sheet.truncation.x, sheet.offset.y + sheet.truncation.y };
+	textured_vertices[3].texcoord = { sheet.offset.x, sheet.offset.y + sheet.truncation.y };
 
 	// Counterclockwise as it's the default opengl front winding direction.
 	const std::vector<uint16_t> textured_indices = { 0, 3, 1, 1, 3, 2 };

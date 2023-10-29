@@ -7,8 +7,8 @@
 // These are ahrd coded to the dimensions of the entity texture
 const float STUDENT_BB_WIDTH = 100.f;
 const float STUDENT_BB_HEIGHT = 160.f;
-const float ZOMBIE_BB_WIDTH = 80.f;
-const float ZOMBIE_BB_HEIGHT = 160.f;
+const float ZOMBIE_BB_WIDTH = 250.f;
+const float ZOMBIE_BB_HEIGHT = 200.f;
 const float BOZO_BB_WIDTH = 120.f;
 const float BOZO_BB_HEIGHT = 160.f;
 const float PLATFORM_HEIGHT = 20.f;

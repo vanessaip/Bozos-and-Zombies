@@ -212,7 +212,9 @@ enum class GEOMETRY_BUFFER_ID {
 	DEBUG_LINE = SPRITE + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
 	SPRITE_SHEET_BOZO = SCREEN_TRIANGLE + 1,
-	GEOMETRY_COUNT = SPRITE_SHEET_BOZO + 1
+	SPRITE_SHEET_ZOMBIE = SPRITE_SHEET_BOZO + 1,
+	SPRITE_SHEET_STUDENT = SPRITE_SHEET_ZOMBIE + 1,
+	GEOMETRY_COUNT = SPRITE_SHEET_STUDENT + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
@@ -222,31 +224,55 @@ struct RenderRequest {
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 };
 
+enum class ANIMATION_MODE
+{
+	IDLE = 0,
+	RUN = IDLE + 1,
+	ATTACK = RUN + 1,
+	MODE_COUNT = ATTACK + 1
+};
+const int animation_mode_count = (int)ANIMATION_MODE::MODE_COUNT;
+
 struct SpriteSheet
 {
-	float xOffset = 0.f;
-	float yOffset = 0.f;
-	float spriteWidth = -1.f;
-	float numOfSprites;
 	float timer_ms = 0.f;
 	float switchTime_ms;
-	vec2 textureDimensions;
+	vec2 offset = { 0.f, 0.f };
+	vec2 spriteDim = { -1.f, -1.f };
+	vec2 truncation;
+	std::vector<int> spriteCount;
 	TEXTURE_ASSET_ID textureId;
 	GEOMETRY_BUFFER_ID bufferId;
+	ANIMATION_MODE mode = ANIMATION_MODE::IDLE;
 
-	SpriteSheet(TEXTURE_ASSET_ID tId, GEOMETRY_BUFFER_ID bId, float sWidth, float num, float switchTime)
+	SpriteSheet(GEOMETRY_BUFFER_ID bId, ANIMATION_MODE defaultMode, std::vector<int>& spriteCt, float switchTime, vec2 trunc)
 	{
-		textureId = tId;
 		bufferId = bId;
-		numOfSprites = num;
+		spriteCount = spriteCt;
 		switchTime_ms = switchTime;
+		truncation = trunc;
 
-		spriteWidth = 1.f / numOfSprites;
+		double maxCount = *std::max_element(spriteCount.begin(), spriteCount.end());
+		spriteDim.x = 1.f / maxCount;
+		spriteDim.y = 1.f / animation_mode_count;
+
+		updateAnimation(defaultMode);
 	}
 
-	void updateDimensions(float x, float y) {
-		textureDimensions = vec2(x, y);
-		spriteWidth = textureDimensions.x / (numOfSprites * 1.f);
+	void updateAnimation(ANIMATION_MODE newMode) {
+		mode = newMode;
+		if ((int)mode >= 0) {
+			offset.y = ((int)mode) * spriteDim.y;
+		}
+		else
+			offset.y = 0.f;
+	}
+
+	int getCurrentSpriteCount() {
+		if ((int)mode >= 0)
+			return spriteCount[(int)mode];
+		else
+			return 0;
 	}
 };
 
