@@ -873,7 +873,7 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 	// TODO(vanessa): currently all platforms using same Motion frames are stacked on top of each other, fix to make adjacent
 	// 					need to add walls or some other method of preventing characters from going under moving platforms
 	//					reconcile behaviour of moving platforms passing through static platforms
-	/*std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
+	std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
 	Motion m1 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.8));
 	Motion m2 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.2));
 	std::vector<Motion> frames = { m1, m2 };
