@@ -31,8 +31,8 @@ inline std::string audio_path(const std::string& name) {return data_path() + "/a
 inline std::string mesh_path(const std::string& name) {return data_path() + "/meshes/" + std::string(name);};
 
 // Set to dimensions of background sprite, can be changed when we make custom backgrounds
-const int window_width_px = 1280;
-const int window_height_px = 960;
+const int window_width_px = 1440;
+const int window_height_px = 810;
 
 const int screen_width_px = 800;
 const int screen_height_px = 500;
