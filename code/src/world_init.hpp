@@ -16,6 +16,7 @@ const float PLATFORM_WIDTH = 50.f;
 const float WALL_WIDTH = 20.f;
 const float STEP_HEIGHT = 30.f;
 const float STEP_WIDTH = 30.f;
+const vec2 CLIMBABLE_DIM = {22.f, 32.f};
 
 // the player
 Entity createBozo(RenderSystem* renderer, vec2 pos);
@@ -33,6 +34,8 @@ std::vector<Entity> createPlatforms(RenderSystem* renderer, vec2 left_position, 
 std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, uint num_steps, uint step_blocks, bool left);
 // walls
 Entity createWall(RenderSystem* renderer, vec2 position, float height);
+// ladders
+std::vector<Entity> createClimbable(RenderSystem* renderer, vec2 top_position, uint num_sections);
 // render background as a sprite
 Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::BACKGROUND, vec2 position = { window_width_px/2, window_height_px/2 }, vec2 scale = { window_width_px, window_height_px });
 

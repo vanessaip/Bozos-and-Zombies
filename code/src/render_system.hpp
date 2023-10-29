@@ -44,6 +44,9 @@ class RenderSystem {
 		textures_path("Tiles_74.png"),	// wall
 		textures_path("egg.png"),
 		textures_path("2-2.png"),
+		textures_path("Ladder1.png"),
+		textures_path("Ladder2.png"),
+		textures_path("Ladder3.png"),
 		};
 
 	std::array<GLuint, effect_count> effects;

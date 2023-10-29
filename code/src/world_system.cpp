@@ -444,6 +444,14 @@ void WorldSystem::restart_game() {
 	Entity wall4 = createWall(renderer, {80.f, window_height_px*0.4-20.f}, window_height_px*0.4+70.f);
 	Entity wall5 = createWall(renderer, {window_width_px-100.f, window_height_px*0.4-20}, window_height_px*0.4+70.f);
 
+	// Create climbables
+	std::vector<Entity> ladder0 = createClimbable(renderer, {PLATFORM_WIDTH*9, window_height_px*0.8}, 5);
+	std::vector<Entity> ladder1 = createClimbable(renderer, {PLATFORM_WIDTH*7, window_height_px*0.6}, 5);
+	std::vector<Entity> ladder2 = createClimbable(renderer, {window_width_px-PLATFORM_WIDTH*6, window_height_px*0.6}, 5);
+	std::vector<Entity> ladder3 = createClimbable(renderer, {PLATFORM_WIDTH*4, window_height_px*0.2}, 10);
+	std::vector<Entity> ladder4 = createClimbable(renderer, {window_width_px-PLATFORM_WIDTH*4, window_height_px*0.4}, 5);
+	std::vector<Entity> ladder5 = createClimbable(renderer, {window_width_px-PLATFORM_WIDTH*9, window_height_px*0.2}, 5);
+
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, { 500, window_height_px*0.8-50.f });
 	registry.colors.insert(player_bozo, {1, 0.8f, 0.8f});
@@ -620,7 +628,7 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 	//					reconcile behaviour of moving platforms passing through static platforms
 	std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
 	Motion m1 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.8));
-	Motion m2 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.4));
+	Motion m2 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.2));
 	std::vector<Motion> frames = { m1, m2 };
 	for (uint i = 0; i < moving_plat.size(); i++) {
 		Entity currplat = moving_plat[i];
@@ -629,7 +637,7 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 
 	std::vector<Entity> moving_plat2 = createPlatforms(renderer, { 0.f, 0.f }, 7);
 	Motion m3 = Motion(vec2(PLATFORM_WIDTH*6, window_height_px*0.8));
-	Motion m4 = Motion(vec2(PLATFORM_WIDTH*6, window_height_px*0.4));
+	Motion m4 = Motion(vec2(PLATFORM_WIDTH*6, window_height_px*0.2));
 	std::vector<Motion> frames2 = { m3, m4 };
 	for (uint i = 0; i < moving_plat2.size(); i++) {
 		registry.animations.emplace(moving_plat2[i], KeyframeAnimation((int)frames2.size(), 2000.f, true, frames2));

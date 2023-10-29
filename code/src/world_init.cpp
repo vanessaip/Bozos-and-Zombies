@@ -189,6 +189,46 @@ Entity createWall(RenderSystem* renderer, vec2 position, float height)
 	return entity;
 }
 
+std::vector<Entity> createClimbable(RenderSystem* renderer, vec2 top_position, uint num_sections)
+{
+	std::vector<Entity> sections;
+	TEXTURE_ASSET_ID texture;
+	for (uint i = 0; i < num_sections; i++) {
+		if (i == 0) {
+			texture = TEXTURE_ASSET_ID::LADDER1;
+		} else if (i == num_sections-1) {
+			texture = TEXTURE_ASSET_ID::LADDER3;
+		} else {
+			texture = TEXTURE_ASSET_ID::LADDER2;
+		}
+
+		auto entity = Entity();
+		sections.push_back(entity);
+
+		// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+		Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+		registry.meshPtrs.emplace(entity, &mesh);
+
+		// Initialize the motion
+		auto& motion = registry.motions.emplace(entity);
+		motion.angle = 0.f;
+		motion.velocity = { 0.f, 0.f };
+		motion.position = top_position;
+		top_position.y += CLIMBABLE_DIM.y;
+
+		motion.scale = CLIMBABLE_DIM;
+
+		registry.climbables.emplace(entity);
+		registry.renderRequests.insert(
+			entity,
+			{texture,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+	}
+	
+	return sections;
+}
+
 Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, vec2 position, vec2 scale)
 {
 	auto entity = Entity();
