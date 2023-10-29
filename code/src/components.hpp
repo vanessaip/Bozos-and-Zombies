@@ -39,6 +39,12 @@ struct Wall
 
 };
 
+// Ladders and maybe stairs?
+struct Climbable
+{
+
+};
+
 // All data relevant to the shape and motion of entities
 struct Motion {
 	vec2 position;
@@ -198,7 +204,10 @@ enum class TEXTURE_ASSET_ID {
 	WALL = STEP1 + 1,
 	EGG0 = WALL + 1,
 	BACKGROUND_INDOOR = EGG0 + 1,
-	TEXTURE_COUNT = BACKGROUND_INDOOR + 1
+	LADDER1 = BACKGROUND_INDOOR + 1,
+	LADDER2 = LADDER1 + 1,
+	LADDER3 = LADDER2 + 1,
+	TEXTURE_COUNT = LADDER3 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
