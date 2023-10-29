@@ -41,4 +41,14 @@ Entity createSpike(RenderSystem* renderer, vec2 pos);
 // background
 Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::BACKGROUND, vec2 position = { window_width_px/2, window_height_px/2 }, vec2 scale = { window_width_px, window_height_px });
 
+// ----------------- Level variables go here -----------------
+// Index 0 is level 1, index 1 is level 2 etc.
+
+// This stores the zombie's starting position
+const std::vector<vec2> ZOMBIE_START_POS = { { 1200, 440} };
+
+// This stores level heights from bottom to top
+const std::vector<std::vector<float>> FLOOR_DEFINITIONS = { {760, 600, 440, 280, 120} };
+const std::vector<std::vector<float>> ZOMBIE_FLOOR_TRAVERSE_POINTS = { {760, 600, 440, 280, 120} };
+
 
