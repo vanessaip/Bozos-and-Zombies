@@ -28,7 +28,7 @@ class RenderSystem {
 	// Associated id with .obj path
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
-		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SALMON, mesh_path("salmon.obj"))
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPIKE, mesh_path("spike.obj"))
 		  // specify meshes of other assets here
 	};
 
@@ -37,17 +37,25 @@ class RenderSystem {
 		textures_path("student_sprite_sheet.png"),
 		textures_path("zombie_sprite_sheet.png"),
 		textures_path("bozo_sprite_sheet.png"),
-		textures_path("background_temp.png"),
-		textures_path("platform.png")};
+		textures_path("business-background.png"),
+		textures_path("Tile_40.png"),	// platform
+		textures_path("Tile_04.png"),	// step left section
+		textures_path("Tile_02.png"),	// step middle section
+		textures_path("Tiles_74.png"),	// wall
+		textures_path("egg.png"),
+		textures_path("2-2.png"),
+		textures_path("Ladder1.png"),
+		textures_path("Ladder2.png"),
+		textures_path("Ladder3.png"),
+		};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, effect_count> effect_paths = {
 		shader_path("coloured"),
-		// shader_path("salmon"),
+		shader_path("spike"),
 		shader_path("textured"),
-		shader_path("water"),
-		shader_path("animated") };
+		shader_path("water") };
 
 	std::array<GLuint, 50> vertex_buffers;
 	std::array<GLuint, 50> index_buffers;

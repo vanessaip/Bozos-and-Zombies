@@ -34,6 +34,17 @@ struct Wall
 {
 };
 
+struct Spike
+{
+
+};
+
+// Ladders and maybe stairs?
+struct Climbable
+{
+
+};
+
 // All data relevant to the shape and motion of entities
 struct Motion
 {
@@ -199,25 +210,31 @@ enum class TEXTURE_ASSET_ID
 	BOZO = ZOMBIE + 1,
 	BACKGROUND = BOZO + 1,
 	PLATFORM = BACKGROUND + 1,
-	TEXTURE_COUNT = PLATFORM + 1
+	STEP0 = PLATFORM + 1,
+	STEP1 = STEP0 + 1,
+	WALL = STEP1 + 1,
+	EGG0 = WALL + 1,
+	BACKGROUND_INDOOR = EGG0 + 1,
+	LADDER1 = BACKGROUND_INDOOR + 1,
+	LADDER2 = LADDER1 + 1,
+	LADDER3 = LADDER2 + 1,
+	TEXTURE_COUNT = LADDER3 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID
 {
 	COLOURED = 0,
-	// SALMON = COLOURED + 1, // can reuse if we end up having meshes
-	TEXTURED = COLOURED + 1,
+	SPIKE = COLOURED + 1, // can reuse if we end up having meshes
+	TEXTURED = SPIKE + 1,
 	WATER = TEXTURED + 1,
-	ANIMATED = WATER + 1,
-	EFFECT_COUNT = ANIMATED + 1
+	EFFECT_COUNT = WATER + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
-enum class GEOMETRY_BUFFER_ID
-{
-	SALMON = 0,
-	SPRITE = SALMON + 1,
+enum class GEOMETRY_BUFFER_ID {
+	SPIKE = 0,
+	SPRITE = SPIKE + 1,
 	DEBUG_LINE = SPRITE + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
 	//SPRITE_SHEET_BOZO = SCREEN_TRIANGLE + 1,

@@ -331,7 +331,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			// update sprite animation depending on distance to player
 			Entity& zombie = motion_container.entities[i];
 			SpriteSheet& zombieSheet = registry.spriteSheets.get(zombie);
-			if (length < 200.f)
+			if (length < 75.f)
 				zombieSheet.updateAnimation(ANIMATION_MODE::ATTACK);
 			else
 				zombieSheet.updateAnimation(ANIMATION_MODE::RUN);
@@ -519,23 +519,55 @@ void WorldSystem::restart_game()
 	renderer->resetSpriteSheetTracker();
 
 	// Create background first (painter's algorithm for rendering)
+	// base colour
 	Entity background = createBackground(renderer);
+
+	// indoor background
+	Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
+
+	// egg
+	Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, {window_width_px/2-80.f, window_height_px*0.4}, {250.f,250.f});
 
 	// Create platform(s) at set positions, specify width
 	// TODO(vanesssa): define array of platform dimensions for each level
-	Entity platform0 = createPlatform(renderer, { window_width_px / 2, window_height_px - 50.f }, window_width_px - 60.f);
-	Entity platform1 = createPlatform(renderer, { 260, 600 }, 430.f);
-	Entity platform2 = createPlatform(renderer, { window_width_px - 460.f, 600 }, 460.f);
-	Entity platform3 = createPlatform(renderer, { window_width_px - 500.f, 300 }, 300.f);
-	Entity platform4 = createPlatform(renderer, { window_width_px / 2, 70.f }, window_width_px - 60.f);
+	uint center_x = window_width_px/2;
+	// floors
+	std::vector<Entity> platform0 = createPlatforms(renderer, {center_x-PLATFORM_WIDTH*7.5, window_height_px-12.f}, 16);
+	std::vector<Entity> platform1 = createPlatforms(renderer, {PLATFORM_WIDTH*4,window_height_px*0.8}, 8);
+	std::vector<Entity> platform2 = createPlatforms(renderer, {window_width_px-PLATFORM_WIDTH*6,window_height_px*0.8}, 2);
+	std::vector<Entity> platform3 = createPlatforms(renderer, {110.f,window_height_px*0.6}, 7);
+	std::vector<Entity> platform4 = createPlatforms(renderer, {window_width_px-PLATFORM_WIDTH*7-80.f, window_height_px*0.6}, 7);
+	std::vector<Entity> platform5 = createPlatforms(renderer, {110.f,window_height_px*0.4}, 7);
+	std::vector<Entity> platform6 = createPlatforms(renderer, {window_width_px-PLATFORM_WIDTH*10-80.f, window_height_px*0.4}, 10);
+	std::vector<Entity> platform7 = createPlatforms(renderer, {110.f,window_height_px*0.2}, 25);
+
+	// stairs
+	std::vector<Entity> step0 = createSteps(renderer, {PLATFORM_WIDTH*12-20.f,window_height_px*0.8}, 5, 3, false);
+	std::vector<Entity> step1 = createSteps(renderer, {window_width_px-PLATFORM_WIDTH*6-STEP_WIDTH*6,window_height_px*0.8+PLATFORM_HEIGHT*4}, 5, 2, true);
 
 	// Create walls
-	Entity wall0 = createWall(renderer, { 40, 500 }, 850);
-	Entity wall1 = createWall(renderer, { window_width_px - 40, 500 }, 850);
+	Entity wall0 = createWall(renderer, {320.f, window_height_px*0.9+10.f}, window_height_px*0.2-10.f);
+	Entity wall1 = createWall(renderer, {window_width_px-320.f, window_height_px*0.9+10.f}, window_height_px*0.2-10.f);
+	Entity wall2 = createWall(renderer, {180.f, window_height_px*0.7+15.f}, window_height_px*0.2);
+	Entity wall3 = createWall(renderer, {window_width_px-220.f, window_height_px*0.7+15.f}, window_height_px*0.2);
+	Entity wall4 = createWall(renderer, {80.f, window_height_px*0.4-20.f}, window_height_px*0.4+70.f);
+	Entity wall5 = createWall(renderer, {window_width_px-100.f, window_height_px*0.4-20}, window_height_px*0.4+70.f);
+
+	// Create climbables
+	std::vector<Entity> ladder0 = createClimbable(renderer, {PLATFORM_WIDTH*9, window_height_px*0.8}, 5);
+	std::vector<Entity> ladder1 = createClimbable(renderer, {PLATFORM_WIDTH*7, window_height_px*0.6}, 5);
+	std::vector<Entity> ladder2 = createClimbable(renderer, {window_width_px-PLATFORM_WIDTH*6, window_height_px*0.6}, 5);
+	std::vector<Entity> ladder3 = createClimbable(renderer, {PLATFORM_WIDTH*4, window_height_px*0.2}, 10);
+	std::vector<Entity> ladder4 = createClimbable(renderer, {window_width_px-PLATFORM_WIDTH*4, window_height_px*0.4}, 5);
+	std::vector<Entity> ladder5 = createClimbable(renderer, {window_width_px-PLATFORM_WIDTH*9, window_height_px*0.2}, 5);
+
+	// Create spikes
+	Entity spike1 = createSpike(renderer, {300, 583});
+registry.colors.insert(spike1, { 0.5f, 0.5f, 0.5f });
 
 	// Create a new Bozo player
-	player_bozo = createBozo(renderer, { 200, 500 });
-	registry.colors.insert(player_bozo, { 1, 0.8f, 0.8f });
+	player_bozo = createBozo(renderer, { 500, window_height_px*0.8-50.f });
+	registry.colors.insert(player_bozo, {1, 0.8f, 0.8f});
 	Motion& bozo_motion = registry.motions.get(player_bozo);
 	bozo_motion.velocity = { 0.f, 0.f };
 
@@ -577,8 +609,7 @@ void WorldSystem::handle_collisions()
 			// Player& player = registry.players.get(entity);
 
 			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
-			if (registry.zombies.has(entity_other))
-			{
+			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other))) {
 				// initiate death unless already dying
 				if (!registry.deathTimers.has(entity))
 				{
@@ -760,19 +791,29 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 }
 
 // defines keyframes for entities that are animated
-void WorldSystem::setup_keyframes(RenderSystem* renderer)
+void WorldSystem::setup_keyframes(RenderSystem* rendered)
 {
 	// Example use case
 
-	Entity moving_plat = createPlatform(renderer, { 0.f, 0.f }, 150.f);
-	Motion m1 = Motion(vec2(window_width_px - 150, 300));
-	Motion m2 = Motion(vec2(window_width_px - 150, 600));
+	// TODO(vanessa): currently all platforms using same Motion frames are stacked on top of each other, fix to make adjacent
+	// 					need to add walls or some other method of preventing characters from going under moving platforms
+	//					reconcile behaviour of moving platforms passing through static platforms
+	std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
+	Motion m1 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.8));
+	Motion m2 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.2));
 	std::vector<Motion> frames = { m1, m2 };
-	registry.keyframeAnimations.emplace(moving_plat, KeyframeAnimation((int)frames.size(), 3000.f, true, frames));
 
-	Entity moving_plat2 = createPlatform(renderer, { 0.f, 0.f }, 150.f);
-	Motion m3 = Motion(vec2(150, 300));
-	Motion m4 = Motion(vec2(500, 300));
+	for (uint i = 0; i < moving_plat.size(); i++) {
+		Entity currplat = moving_plat[i];
+		registry.keyframeAnimations.emplace(currplat, KeyframeAnimation((int)frames.size(), 3000.f, true, frames));
+	}
+
+	std::vector<Entity> moving_plat2 = createPlatforms(renderer, { 0.f, 0.f }, 7);
+	Motion m3 = Motion(vec2(PLATFORM_WIDTH*6, window_height_px*0.8));
+	Motion m4 = Motion(vec2(PLATFORM_WIDTH*6, window_height_px*0.2));
 	std::vector<Motion> frames2 = { m3, m4 };
-	registry.keyframeAnimations.emplace(moving_plat2, KeyframeAnimation((int)frames.size(), 2000.f, true, frames2));
+
+	for (uint i = 0; i < moving_plat2.size(); i++) {
+		registry.keyframeAnimations.emplace(moving_plat2[i], KeyframeAnimation((int)frames.size(), 2000.f, true, frames2));
+	}
 }
