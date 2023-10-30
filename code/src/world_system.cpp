@@ -779,11 +779,11 @@ void WorldSystem::restart_game()
 	registry.colors.insert(student0, { 1, 0.8f, 0.8f });
 	Entity student1 = createStudent(renderer, { 300, 440 });
 	registry.colors.insert(student1, { 1, 0.8f, 0.8f });
-	Entity student2 = createStudent(renderer, { 1000, window_height_px*0.8-50.f });
+	Entity student2 = createStudent(renderer, { 1000, window_height_px * 0.8 - 50.f });
 	registry.colors.insert(student2, { 1, 0.8f, 0.8f });
-	Entity student3 = createStudent(renderer, { 400, window_height_px*0.4-50.f });
+	Entity student3 = createStudent(renderer, { 400, window_height_px * 0.4 - 50.f });
 	registry.colors.insert(student3, { 1, 0.8f, 0.8f });
-	Entity student4 = createStudent(renderer, { 600, window_height_px*0.2-50.f });
+	Entity student4 = createStudent(renderer, { 600, window_height_px * 0.2 - 50.f });
 	registry.colors.insert(student4, { 1, 0.8f, 0.8f });
 
 	setup_keyframes(renderer);
@@ -819,11 +819,7 @@ void WorldSystem::handle_collisions()
 					// Add a little jump animation
 					motion_player.offGround = true;
 					motion_player.velocity[0] = 0.f;
-					motion_player.velocity[1] = -200.f;
-
-					// Modify Bozo's color
-					vec3& color = registry.colors.get(entity);
-					color = { 1.0f, 0.f, 0.f };
+					motion_player.velocity[1] = -100.f;
 
 					registry.deathTimers.emplace(entity);
 
@@ -856,6 +852,7 @@ void WorldSystem::handle_collisions()
 					Mix_PlayChannel(-1, salmon_eat_sound, 0);
 				}
 			}
+			// Check Player - Book collisions
 			else if (registry.books.has(entity_other)) {
 				bool& offHand = registry.books.get(entity_other).offHand;
 				Motion& motion_book = registry.motions.get(entity_other);
@@ -865,6 +862,7 @@ void WorldSystem::handle_collisions()
 				}
 			}
 		}
+		// Check NPC - Zombie Collision
 		else if (registry.humans.has(entity) && registry.zombies.has(entity_other))
 		{
 			if (!registry.infectTimers.has(entity))
@@ -898,6 +896,16 @@ void WorldSystem::handle_collisions()
 				}
 				Mix_PlayChannel(-1, player_death_sound, 0);
 			}
+		}
+		// Check Book - Zombie collision
+		else if (registry.books.has(entity) && registry.zombies.has(entity_other)) {
+			Motion& motion_book = registry.motions.get(entity);
+			// Only collide when book is in air
+			if (motion_book.offGround == true) {
+				registry.remove_all_components_of(entity);
+				registry.remove_all_components_of(entity_other);
+			}
+
 		}
 	}
 
