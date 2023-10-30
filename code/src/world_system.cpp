@@ -187,6 +187,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		auto &platforms = registry.platforms;
 		auto &walls = registry.walls;
 		bool isHuman = registry.humans.has(motion_container.entities[i]);
+		bool isNPC = registry.humans.has(motion_container.entities[i]) && !registry.players.has(motion_container.entities[i]);
 		bool isZombie = registry.zombies.has(motion_container.entities[i]);
 		bool isBook = registry.books.has(motion_container.entities[i]);
 
@@ -205,11 +206,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 		// Bounding entities to window
 		if (isHuman || isZombie || isBook)
-		{
+		{	
 			float entityRightSide = motion.position.x + abs(motion.scale[0]) / 2.f;
 			float entityLeftSide = motion.position.x - abs(motion.scale[0]) / 2.f;
 			float entityBottom = motion.position.y + motion.scale[1] / 2.f;
 			float entityTop = motion.position.y - motion.scale[1] / 2.f;
+
+			if (isNPC) {
+				float entityRightSide = motion.position.x + abs(motion.scale[0]) / 2.f;
+				float entityLeftSide = motion.position.x - abs(motion.scale[0]) / 2.f;
+				float entityBottom = motion.position.y + motion.scale[1] / 2.f;
+				float entityTop = motion.position.y - motion.scale[1] / 2.f;
+			}
 
 			vec4 entityBB = {entityRightSide, entityLeftSide, entityBottom, entityTop};
 
@@ -304,14 +312,25 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				if (entityLeftSide < xBlockRightBound &&
 					entityLeftSide > xBlockRightBound - 10.f &&
 					entityTop < yBlockBottom &&
-					entityBottom > yBlockTop && (player.keyPresses[0] || isZombie))
+					entityBottom > yBlockTop && (player.keyPresses[0] || isZombie || isNPC))
 				{
-					motion.velocity.x = 0;
+					if (isNPC) {
+						if (registry.platforms.has(blocks[i])) {
+							motion.offGround = true;
+							motion.velocity[1] -= 50;
+						}
+						else {
+							motion.velocity.x = -motion.velocity.x;
+						}
+					}
+					else {
+						motion.velocity.x = 0;
 
-					if (isZombie && !motion.offGround)
-					{
-						motion.offGround = true;
-						motion.velocity[1] -= 200;
+						if (isZombie && !motion.offGround)
+						{
+							motion.offGround = true;
+							motion.velocity[1] -= 200;
+						}
 					}
 				}
 
@@ -319,15 +338,27 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				if (entityRightSide > xBlockLeftBound &&
 					entityRightSide < xBlockLeftBound + 10.f &&
 					entityTop < yBlockBottom &&
-					entityBottom > yBlockTop && (player.keyPresses[1] || isZombie))
+					entityBottom > yBlockTop && (player.keyPresses[1] || isZombie || isNPC))
 				{
-					motion.velocity.x = 0;
-
-					if (isZombie && !motion.offGround)
-					{
-						motion.offGround = true;
-						motion.velocity[1] -= 200;
+					if (isNPC) {
+						if (registry.platforms.has(blocks[i])) {
+							motion.offGround = true;
+							motion.velocity[1] -= 50;
+						}
+						else {
+							motion.velocity.x = -motion.velocity.x;
+						}
 					}
+					else {
+						motion.velocity.x = 0;
+
+						if (isZombie && !motion.offGround)
+						{
+							motion.offGround = true;
+							motion.velocity[1] -= 200;
+						}
+					}
+
 				}
 			}
 
@@ -350,15 +381,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		{
 			if (motion.velocity.x < 0)
 			{
-				motion.scale.x = -std::abs(motion.scale.x);
-			}
-			else if (motion.velocity.x == 0 && !registry.infectTimers.has(motion_container.entities[i]))
-			{
-				motion.velocity.x = motion.scale.x > 0 ? -200.f : 200.f;
+				motion.reflect[0] = false;
 			}
 			else
 			{
-				motion.scale.x = std::abs(motion.scale.x);
+				motion.reflect[0] = true;
 			}
 		}
 		else
@@ -575,13 +602,13 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 
 			if ((target_ladder - motion.position.x) > 0)
 			{
-				motion.velocity.x = 100.f;
-				motion.scale.x = std::abs(motion.scale.x);
+				motion.velocity.x = ZOMBIE_SPEED;
+				motion.reflect[0] = true;
 			}
 			else
 			{
-				motion.velocity.x = -100.f;
-				motion.scale.x = -std::abs(motion.scale.x);
+				motion.velocity.x = -ZOMBIE_SPEED;
+				motion.reflect[0] = false;
 			}
 
 			// When at the ladder, start descending
@@ -589,7 +616,7 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 			{
 				motion.position.x = target_ladder;
 				motion.velocity.x = 0;
-				motion.velocity.y = 200.f;
+				motion.velocity.y = 2 * ZOMBIE_SPEED;
 				motion.climbing = true;
 			}
 			else
@@ -603,13 +630,13 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 
 			if ((target_ladder - motion.position.x) > 0)
 			{
-				motion.velocity.x = 100.f;
-				motion.scale.x = std::abs(motion.scale.x);
+				motion.velocity.x = ZOMBIE_SPEED;
+				motion.reflect[0] = false;
 			}
 			else
 			{
-				motion.velocity.x = -100.f;
-				motion.scale.x = -std::abs(motion.scale.x);
+				motion.velocity.x = -ZOMBIE_SPEED;
+				motion.reflect[0] = true;
 			}
 
 			// When at the ladder, start ascending
@@ -617,7 +644,7 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 			{
 				motion.position.x = target_ladder;
 				motion.velocity.x = 0;
-				motion.velocity.y = -100.f;
+				motion.velocity.y = - 2 * ZOMBIE_SPEED;
 				motion.climbing = true;
 			}
 			else
@@ -633,7 +660,7 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 			{
 				direction = 1;
 			}
-			float speed = 100.f;
+			float speed = ZOMBIE_SPEED;
 			motion.velocity.x = direction * speed;
 
 			// If the zombie hasn't gotten to the player yet, set the appropriate direction the zombie is facing
@@ -663,13 +690,13 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 
 		if ((target_ladder - motion.position.x) > 0)
 		{
-			motion.velocity.x = 100.f;
-			motion.scale.x = std::abs(motion.scale.x);
+			motion.velocity.x = ZOMBIE_SPEED;
+			motion.reflect[0] = true;
 		}
 		else
 		{
-			motion.velocity.x = -100.f;
-			motion.scale.x = -std::abs(motion.scale.x);
+			motion.velocity.x = -ZOMBIE_SPEED;
+			motion.reflect[0] = false;
 		}
 
 		// When at the ladder, start ascending
@@ -677,7 +704,7 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 		{
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
-			motion.velocity.y = -100.f;
+			motion.velocity.y = - 2 * ZOMBIE_SPEED;
 			motion.climbing = true;
 		}
 		else
@@ -693,13 +720,13 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 
 		if ((target_ladder - motion.position.x) > 0)
 		{
-			motion.velocity.x = 100.f;
-			motion.scale.x = std::abs(motion.scale.x);
+			motion.velocity.x = ZOMBIE_SPEED;
+			motion.reflect[0] = true;
 		}
 		else
 		{
-			motion.velocity.x = -100.f;
-			motion.scale.x = -std::abs(motion.scale.x);
+			motion.velocity.x = -ZOMBIE_SPEED;
+			motion.reflect[0] = false;
 		}
 
 		// When at the ladder, start descending
@@ -707,7 +734,7 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 		{
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
-			motion.velocity.y = 200.f;
+			motion.velocity.y = 2 * ZOMBIE_SPEED;
 			motion.climbing = true;
 		}
 		else
@@ -951,7 +978,7 @@ void WorldSystem::restart_game()
 	for (Entity student : registry.humans.entities)
 	{
 		Motion &student_motion = registry.motions.get(student);
-		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 200.f : -200.f;
+		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
 	}
 
 	setup_keyframes(renderer);
