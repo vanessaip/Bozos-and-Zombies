@@ -27,12 +27,16 @@ WorldSystem::~WorldSystem()
 		Mix_FreeMusic(background_music);
 	if (player_death_sound != nullptr)
 		Mix_FreeChunk(player_death_sound);
-	if (salmon_eat_sound != nullptr)
-		Mix_FreeChunk(salmon_eat_sound);
+	if (student_disappear_sound != nullptr)
+		Mix_FreeChunk(student_disappear_sound);
 	if (player_jump_sound != nullptr)
 		Mix_FreeChunk(player_jump_sound);
 	if (player_land_sound != nullptr)
 		Mix_FreeChunk(player_land_sound);
+	if (collect_book_sound != nullptr)
+		Mix_FreeChunk(collect_book_sound);
+	if (zombie_kill_sound != nullptr)
+		Mix_FreeChunk(zombie_kill_sound);
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -45,7 +49,7 @@ WorldSystem::~WorldSystem()
 // Debugging
 namespace
 {
-	void glfw_err_cb(int error, const char* desc)
+	void glfw_err_cb(int error, const char *desc)
 	{
 		fprintf(stderr, "%d: %s", error, desc);
 	}
@@ -53,7 +57,7 @@ namespace
 
 // World initialization
 // Note, this has a lot of OpenGL specific things, could be moved to the renderer
-GLFWwindow* WorldSystem::create_window()
+GLFWwindow *WorldSystem::create_window()
 {
 	///////////////////////////////////////
 	// Initialize GLFW
@@ -89,9 +93,12 @@ GLFWwindow* WorldSystem::create_window()
 	// Input is handled using GLFW, for more info see
 	// http://www.glfw.org/docs/latest/input_guide.html
 	glfwSetWindowUserPointer(window, this);
-	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
-	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
-	auto mouse_button_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_button(_0, _1, _2); };
+	auto key_redirect = [](GLFWwindow *wnd, int _0, int _1, int _2, int _3)
+	{ ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
+	auto cursor_pos_redirect = [](GLFWwindow *wnd, double _0, double _1)
+	{ ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_move({_0, _1}); };
+	auto mouse_button_redirect = [](GLFWwindow *wnd, int _0, int _1, int _2)
+	{ ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_button(_0, _1, _2); };
 	glfwSetKeyCallback(window, key_redirect);
 	glfwSetCursorPosCallback(window, cursor_pos_redirect);
 	glfwSetMouseButtonCallback(window, mouse_button_redirect);
@@ -111,25 +118,28 @@ GLFWwindow* WorldSystem::create_window()
 
 	background_music = Mix_LoadMUS(audio_path("soundtrack.wav").c_str());
 	player_death_sound = Mix_LoadWAV(audio_path("player_death.wav").c_str());
-	salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav").c_str());
+	student_disappear_sound = Mix_LoadWAV(audio_path("student_disappear.wav").c_str());
 	player_jump_sound = Mix_LoadWAV(audio_path("player_jump.wav").c_str());
 	player_land_sound = Mix_LoadWAV(audio_path("player_land.wav").c_str());
+	collect_book_sound = Mix_LoadWAV(audio_path("Mario-coin-sound.wav").c_str());
+	zombie_kill_sound = Mix_LoadWAV(audio_path("splat.wav").c_str());
 
-	if (background_music == nullptr || player_death_sound == nullptr || salmon_eat_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr)
+	if (background_music == nullptr || player_death_sound == nullptr || student_disappear_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr || zombie_kill_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-			audio_path("soundtrack.wav").c_str(),
-			audio_path("player_death.wav").c_str(),
-			audio_path("salmon_eat.wav").c_str()),
-			audio_path("player_jump.wav").c_str(),
-			audio_path("player_land.wav").c_str();
+				audio_path("soundtrack.wav").c_str(),
+				audio_path("player_death.wav").c_str(),
+				audio_path("student_disappear.wav").c_str(),
+				audio_path("player_jump.wav").c_str(),
+				audio_path("player_land.wav").c_str(),
+				audio_path("Mario-coin-sound.wav").c_str());
 		return nullptr;
 	}
 
 	return window;
 }
 
-void WorldSystem::init(RenderSystem* renderer_arg)
+void WorldSystem::init(RenderSystem *renderer_arg)
 {
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
@@ -154,7 +164,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
 
 	// Removing out of screen entities
-	auto& motion_container = registry.motions;
+	auto &motion_container = registry.motions;
 
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
@@ -197,28 +207,29 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	Player& player = registry.players.get(player_bozo);
 
-	Motion& bozo_motion = registry.motions.get(player_bozo);
-	std::vector<std::tuple<Motion*, Motion*>> charactersOnMovingPlat = {};
+	Motion &bozo_motion = registry.motions.get(player_bozo);
+	std::vector<std::tuple<Motion *, Motion *>> charactersOnMovingPlat = {};
 
 	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i)
 	{
-		Motion& motion = motion_container.components[i];
+		Motion &motion = motion_container.components[i];
 
-		auto& platforms = registry.platforms;
-		auto& walls = registry.walls;
-		auto& climables = registry.climbables;
-
+		auto &platforms = registry.platforms;
+		auto &walls = registry.walls;
 		bool isHuman = registry.humans.has(motion_container.entities[i]);
 		bool isZombie = registry.zombies.has(motion_container.entities[i]);
 		bool isBook = registry.books.has(motion_container.entities[i]);
 
-		if (registry.players.has(motion_container.entities[i]) && !registry.deathTimers.has(motion_container.entities[i])) {
+		if (registry.players.has(motion_container.entities[i]) && !registry.deathTimers.has(motion_container.entities[i]))
+		{
 			motion.velocity[0] = 0;
 
-			if (player.keyPresses[0]) {
+			if (player.keyPresses[0])
+			{
 				motion.velocity[0] -= 400;
 			}
-			if (player.keyPresses[1]) {
+			if (player.keyPresses[1])
+			{
 				motion.velocity[0] += 400;
 			}
 		}
@@ -230,7 +241,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			float entityBottom = motion.position.y + motion.scale[1] / 2.f;
 			float entityTop = motion.position.y - motion.scale[1] / 2.f;
 
-			vec4 entityBB = { entityRightSide, entityLeftSide, entityBottom, entityTop };
+			vec4 entityBB = {entityRightSide, entityLeftSide, entityBottom, entityTop};
 
 			if (registry.players.has(motion_container.entities[i]) && !registry.deathTimers.has(motion_container.entities[i]))
 			{
@@ -246,11 +257,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				}
 			}
 
-			if (motion.position.x < 40.f + BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0)
+			if (motion.position.x < 80.f + BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0)
 			{
 				motion.velocity.x = 0;
 			}
-			else if (motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f && motion.velocity.x > 0)
+			else if (motion.position.x > window_width_px - 100.f - BOZO_BB_WIDTH / 2.f && motion.velocity.x > 0)
 			{
 				motion.velocity.x = 0;
 			}
@@ -279,7 +290,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 			for (int i = 0; i < blocks.size(); i++)
 			{
-				Motion& blockMotion = motion_container.get(blocks[i]);
+				Motion &blockMotion = motion_container.get(blocks[i]);
 
 				float xBlockLeftBound = blockMotion.position.x - blockMotion.scale[0] / 2.f;
 				float xBlockRightBound = blockMotion.position.x + blockMotion.scale[0] / 2.f;
@@ -287,7 +298,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				float yBlockBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
 
 				// Add this check so that the player can pass through platforms when on a ladder
-				if (!motion.climbing) {
+				if (!motion.climbing)
+				{
 					// Collision with Top of block
 					if (motion.velocity.y >= 0 && entityBottom >= yBlockTop && entityBottom < yBlockTop + 20.f &&
 						entityRightSide > xBlockLeftBound && entityLeftSide < xBlockRightBound)
@@ -299,10 +311,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 							charactersOnMovingPlat.push_back(std::make_tuple(&motion, &blockMotion)); // track collision if platform is moving down
 						}
 
-						if (motion.offGround)
-						{
-							Mix_PlayChannel(-1, player_land_sound, 0);
-						}
+						// if (motion.offGround)
+						// {
+						// 	Mix_PlayChannel(-1, player_land_sound, 0);
+						// }
 						motion.position.y = yBlockTop - motion.scale[1] / 2.f;
 						motion.velocity.y = 0.f;
 						motion.offGround = false;
@@ -326,7 +338,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				{
 					motion.velocity.x = 0;
 
-					if (isZombie && !motion.offGround) {
+					if (isZombie && !motion.offGround)
+					{
 						motion.offGround = true;
 						motion.velocity[1] -= 200;
 					}
@@ -340,31 +353,42 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				{
 					motion.velocity.x = 0;
 
-					if (isZombie && !motion.offGround) {
+					if (isZombie && !motion.offGround)
+					{
 						motion.offGround = true;
 						motion.velocity[1] -= 200;
 					}
 				}
 			}
 
-			if (motion.climbing) {
+			if (motion.climbing)
+			{
 				motion.offGround = false;
 			}
-			else {
+			else
+			{
 				motion.offGround = offAll;
 			}
 
-			if (registry.humans.has(motion_container.entities[i])) {
+			if (registry.humans.has(motion_container.entities[i]))
+			{
 				updateClimbing(motion, entityBB, motion_container);
 			}
 		}
 
 		if (registry.humans.has(motion_container.entities[i]) && !registry.players.has(motion_container.entities[i]))
 		{
-			if (motion.position.x < 40.f + STUDENT_BB_HEIGHT / 2.f ||
-				motion.position.x > window_width_px - STUDENT_BB_HEIGHT / 2.f - 40.f)
+			if (motion.velocity.x < 0)
 			{
-				motion.velocity.x = -motion.velocity.x;
+				motion.scale.x = -std::abs(motion.scale.x);
+			}
+			else if (motion.velocity.x == 0 && !registry.infectTimers.has(motion_container.entities[i]))
+			{
+				motion.velocity.x = motion.scale.x > 0 ? -200.f : 200.f;
+			}
+			else
+			{
+				motion.scale.x = std::abs(motion.scale.x);
 			}
 		}
 		else
@@ -377,37 +401,41 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 
 		// Add book behaviour
-		if (registry.books.has(motion_container.entities[i])) {
-			Book& book = registry.books.get(motion_container.entities[i]);
+		if (registry.books.has(motion_container.entities[i]))
+		{
+			Book &book = registry.books.get(motion_container.entities[i]);
 			Motion motion_player = registry.motions.get(player_bozo);
 			// If book is in hand, we consider it as on ground and always go with player
-			if (book.offHand == false) {
+			if (book.offHand == false)
+			{
 				motion.offGround = false;
 				motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
 				motion.position.y = motion_player.position.y;
 			}
 			// If book is on ground, it's velocity should always be 0
-			if (motion.offGround == false) {
-				motion.velocity = { 0.f, 0.f };
+			if (motion.offGround == false)
+			{
+				motion.velocity = {0.f, 0.f};
 			}
 		}
 
 		// If entity is a zombie, update its direction to always move towards Bozo
-		if (registry.zombies.has(motion_container.entities[i])) {
+		if (registry.zombies.has(motion_container.entities[i]))
+		{
 			updateZombieMovement(motion, bozo_motion, motion_container.entities[i]);
 		}
 
 		// If entity if a player effect, for example bozo_pointer, move it along with the player
-		if (registry.playerEffects.has(motion_container.entities[i])) {
+		if (registry.playerEffects.has(motion_container.entities[i]))
+		{
 			motion.position.x = bozo_motion.position.x;
 			motion.position.y = bozo_motion.position.y;
 		}
-
 	}
 
 	// Processing the player state
 	assert(registry.screenStates.components.size() <= 1);
-	ScreenState& screen = registry.screenStates.components[0];
+	ScreenState &screen = registry.screenStates.components[0];
 
 	float min_timer_ms = 3000.f;
 	float infect_timer_ms = 3000.f;
@@ -417,8 +445,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	for (Entity entity : registry.deathTimers.entities)
 	{
 		// progress timer, make the rotation happening based on time
-		DeathTimer& timer = registry.deathTimers.get(entity);
-		Motion& motion = registry.motions.get(entity);
+		DeathTimer &timer = registry.deathTimers.get(entity);
+		Motion &motion = registry.motions.get(entity);
 		timer.timer_ms -= elapsed_ms_since_last_update;
 		if (timer.timer_ms < min_timer_ms)
 		{
@@ -452,8 +480,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	for (Entity entity : registry.infectTimers.entities)
 	{
 		// progress timer, make the rotation happening based on time
-		InfectTimer& timer = registry.infectTimers.get(entity);
-		Motion& motion = registry.motions.get(entity);
+		InfectTimer &timer = registry.infectTimers.get(entity);
+		Motion &motion = registry.motions.get(entity);
 		timer.timer_ms -= elapsed_ms_since_last_update;
 		if (timer.timer_ms < infect_timer_ms)
 		{
@@ -492,7 +520,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	for (Entity entity : registry.keyframeAnimations.entities)
 	{
 		bool updateVelocity = false;
-		KeyframeAnimation& animation = registry.keyframeAnimations.get(entity);
+		KeyframeAnimation &animation = registry.keyframeAnimations.get(entity);
 		animation.timer_ms += elapsed_ms_since_last_update;
 
 		// update frame when time limit is reached
@@ -515,18 +543,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		if (animation.curr_frame >= animation.num_of_frames)
 			animation.curr_frame = 0;
 
-		Motion& curr_frame = animation.motion_frames[animation.curr_frame];
-		Motion& next_frame = animation.motion_frames[next];
-		Motion& entity_motion = registry.motions.get(entity);
+		Motion &curr_frame = animation.motion_frames[animation.curr_frame];
+		Motion &next_frame = animation.motion_frames[next];
+		Motion &entity_motion = registry.motions.get(entity);
 
 		// set velocity so we can update entity velocities that are on top of animated entity (e.g. a platform)
 		if (updateVelocity)
 		{
 			entity_motion.velocity =
-			{
-				(next_frame.position.x - curr_frame.position.x) / (animation.switch_time / 1000.f),
-				(next_frame.position.y - curr_frame.position.y) / (animation.switch_time / 1000.f),
-			};
+				{
+					(next_frame.position.x - curr_frame.position.x) / (animation.switch_time / 1000.f),
+					(next_frame.position.y - curr_frame.position.y) / (animation.switch_time / 1000.f),
+				};
 		}
 
 		// interpolate motion based on timer
@@ -541,10 +569,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 
 	// For all objects that are standing on a platform that is moving down, re-update the character position
-	for (std::tuple<Motion*, Motion*> tuple : charactersOnMovingPlat)
+	for (std::tuple<Motion *, Motion *> tuple : charactersOnMovingPlat)
 	{
-		Motion& object_motion = *std::get<0>(tuple);
-		Motion& plat_motion = *std::get<1>(tuple);
+		Motion &object_motion = *std::get<0>(tuple);
+		Motion &plat_motion = *std::get<1>(tuple);
 
 		if (plat_motion.velocity.y > 0)
 			object_motion.position.y += plat_motion.velocity.y * (elapsed_ms_since_last_update / 1000.f) + 3.f; // +3 tolerance;
@@ -552,7 +580,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// !!! TODO: update timers for dying **zombies** and remove if time drops below zero, similar to the death timer
 
 	// update animation mode
-	SpriteSheet& spriteSheet = registry.spriteSheets.get(player_bozo);
+	SpriteSheet &spriteSheet = registry.spriteSheets.get(player_bozo);
 	if (bozo_motion.velocity.x != 0.f && !bozo_motion.offGround)
 		spriteSheet.updateAnimation(ANIMATION_MODE::RUN);
 	else if (bozo_motion.velocity.x == 0 || bozo_motion.offGround)
@@ -561,128 +589,149 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	return true;
 }
 
-void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Entity& zombie) {
+void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Entity &zombie)
+{
 
 	int bozo_level = checkLevel(bozo_motion);
 	int zombie_level = checkLevel(motion);
 
-	if ((zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1))) {
+	if ((zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1)))
+	{
 		// Zombie is on the same level as bozo
 
-		if (bozo_level == 0 && zombie_level == 1 && bozo_motion.position.x < 700) {
+		if (bozo_level == 0 && zombie_level == 1 && bozo_motion.position.x < 700)
+		{
 			float target_ladder = getClosestLadder(zombie_level - 1, bozo_motion);
 
-			if ((target_ladder - motion.position.x) > 0) {
+			if ((target_ladder - motion.position.x) > 0)
+			{
 				motion.velocity.x = 100.f;
+				motion.scale.x = std::abs(motion.scale.x);
 			}
-			else {
+			else
+			{
 				motion.velocity.x = -100.f;
+				motion.scale.x = -std::abs(motion.scale.x);
 			}
 
 			// When at the ladder, start descending
-			if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f)) {
+			if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f))
+			{
 				motion.position.x = target_ladder;
 				motion.velocity.x = 0;
 				motion.velocity.y = 200.f;
 				motion.climbing = true;
 			}
-			else {
+			else
+			{
 				motion.climbing = false;
 			}
 		}
-		else if (bozo_level == 0 && zombie_level == 0 && bozo_motion.position.x > 700 && motion.position.x < 700) {
+		else if (bozo_level == 0 && zombie_level == 0 && bozo_motion.position.x > 700 && motion.position.x < 700)
+		{
 			float target_ladder = getClosestLadder(zombie_level, motion);
 
-			if ((target_ladder - motion.position.x) > 0) {
+			if ((target_ladder - motion.position.x) > 0)
+			{
 				motion.velocity.x = 100.f;
+				motion.scale.x = std::abs(motion.scale.x);
 			}
-			else {
+			else
+			{
 				motion.velocity.x = -100.f;
+				motion.scale.x = -std::abs(motion.scale.x);
 			}
 
 			// When at the ladder, start ascending
-			if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f)) {
+			if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f))
+			{
 				motion.position.x = target_ladder;
 				motion.velocity.x = 0;
 				motion.velocity.y = -100.f;
 				motion.climbing = true;
 			}
-			else {
+			else
+			{
 				motion.climbing = false;
 			}
 		}
-		else {
+		else
+		{
 			motion.climbing = false;
 			float direction = -1;
-			if ((bozo_motion.position.x - motion.position.x) > 0) {
+			if ((bozo_motion.position.x - motion.position.x) > 0)
+			{
 				direction = 1;
 			}
 			float speed = 100.f;
-			motion.velocity.x = direction * speed;
-
-			// If the zombie hasn't gotten to the player yet, set the appropriate direction the zombie is facing
-			/*
-			if (abs(motion.position.x - bozo_motion.position.x) > 5) {
-				if (motion.velocity.x > 0) {
-					motion.reflect[0] = true;
-				}
-				else {
-					motion.reflect[0] = false;
-				}
-			}
-			*/
+			motion.velocity.x = direction * speed;			
 		}
 	}
-	else if (zombie_level < bozo_level) {
+	else if (zombie_level < bozo_level)
+	{
 		// Zombie is a level below bozo and needs to climb up
-		if (zombie_level == 0) {
+		if (zombie_level == 0)
+		{
 			zombie_level++;
 		}
 
 		// Move toward the target_ladder
 		float target_ladder = getClosestLadder(zombie_level, bozo_motion);
 
-		if ((target_ladder - motion.position.x) > 0) {
+		if ((target_ladder - motion.position.x) > 0)
+		{
 			motion.velocity.x = 100.f;
+			motion.scale.x = std::abs(motion.scale.x);
 		}
-		else {
+		else
+		{
 			motion.velocity.x = -100.f;
+			motion.scale.x = -std::abs(motion.scale.x);
 		}
 
 		// When at the ladder, start ascending
-		if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f)) {
+		if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f))
+		{
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
 			motion.velocity.y = -100.f;
 			motion.climbing = true;
 		}
-		else {
+		else
+		{
 			motion.climbing = false;
 		}
-
 	}
-	else {
+	else
+	{
 		// Zombie is a level above bozo and needs to climb down
 		// Move toward the target_ladder
 		float target_ladder = getClosestLadder(zombie_level - 1, bozo_motion);
 
-		if ((target_ladder - motion.position.x) > 0) {
+		if ((target_ladder - motion.position.x) > 0)
+		{
 			motion.velocity.x = 100.f;
+			motion.scale.x = std::abs(motion.scale.x);
 		}
-		else {
+		else
+		{
 			motion.velocity.x = -100.f;
+			motion.scale.x = -std::abs(motion.scale.x);
 		}
 
 		// When at the ladder, start descending
-		if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f)) {
+		if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f))
+		{
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
 			motion.velocity.y = 200.f;
 			motion.climbing = true;
 		}
-		else {
+		else
+		{
 			motion.climbing = false;
 		}
+	
 	}
 
 	// update zombie direction
@@ -692,47 +741,55 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	else {
 		motion.reflect[0] = false;
 	}
-
+	
 
 	// update sprite animation depending on distance to player
-	SpriteSheet& zombieSheet = registry.spriteSheets.get(zombie);
+	SpriteSheet &zombieSheet = registry.spriteSheets.get(zombie);
 	float length = sqrt(abs(motion.position.x - bozo_motion.position.x) + abs(motion.position.y - bozo_motion.position.y));
 	if (length < 10.f)
 		zombieSheet.updateAnimation(ANIMATION_MODE::ATTACK);
 	else
 		zombieSheet.updateAnimation(ANIMATION_MODE::RUN);
-
 }
 
-int WorldSystem::checkLevel(Motion& motion) {
+int WorldSystem::checkLevel(Motion &motion)
+{
 	float entityBottom = motion.position.y + abs(motion.scale[1]) / 2.f;
-	if (entityBottom < floor_positions[0] && entityBottom > floor_positions[1]) {
+	if (entityBottom < floor_positions[0] && entityBottom > floor_positions[1])
+	{
 		return 0;
 	}
-	else if (entityBottom < floor_positions[1] && entityBottom > floor_positions[2]) {
+	else if (entityBottom < floor_positions[1] && entityBottom > floor_positions[2])
+	{
 		return 1;
 	}
-	else if (entityBottom < floor_positions[2] && entityBottom > floor_positions[3]) {
+	else if (entityBottom < floor_positions[2] && entityBottom > floor_positions[3])
+	{
 		return 2;
 	}
-	else if (entityBottom < floor_positions[3] && entityBottom > floor_positions[4]) {
+	else if (entityBottom < floor_positions[3] && entityBottom > floor_positions[4])
+	{
 		return 3;
 	}
-	else {
+	else
+	{
 		return 4;
 	}
 }
 
-float WorldSystem::getClosestLadder(int zombie_level, Motion& bozo_motion) {
+float WorldSystem::getClosestLadder(int zombie_level, Motion &bozo_motion)
+{
 	std::vector<float> ladders = ladder_positions[zombie_level];
 
 	// Find the closest ladder to get to bozo
 	int closest = 0;
 	float min_dist = 10000;
 
-	for (int i = 0; i < ladders.size(); i++) {
+	for (int i = 0; i < ladders.size(); i++)
+	{
 		float dist = abs(ladders[i] - bozo_motion.position.x);
-		if (dist < min_dist) {
+		if (dist < min_dist)
+		{
 			closest = i;
 			min_dist = dist;
 		}
@@ -741,59 +798,70 @@ float WorldSystem::getClosestLadder(int zombie_level, Motion& bozo_motion) {
 	return ladders[closest];
 }
 
-void WorldSystem::updateClimbing(Motion& motion, vec4 entityBB, ComponentContainer<Motion>& motion_container) {
-	Player& player = registry.players.get(player_bozo);
-	auto& climbables = registry.climbables;
+void WorldSystem::updateClimbing(Motion &motion, vec4 entityBB, ComponentContainer<Motion> &motion_container)
+{
+	Player &player = registry.players.get(player_bozo);
+	auto &climbables = registry.climbables;
 
 	bool touchingClimbable = false;
 
 	// This is so that the player can descend the ladder if standing on top
 	float entityBottom = motion.position.y + motion.scale[1] / 2.f;
 
-	for (int i = 0; i < climbables.size(); i++) {
-		Motion& blockMotion = motion_container.get(climbables.entities[i]);
+	for (int i = 0; i < climbables.size(); i++)
+	{
+		Motion &blockMotion = motion_container.get(climbables.entities[i]);
 
 		float xLeftBound = blockMotion.position.x - abs(blockMotion.scale[0]) / 2.f;
 		float xRightBound = blockMotion.position.x + abs(blockMotion.scale[0]) / 2.f;
 		float yTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
 		float yBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
 
-		if (motion.position.x  < xRightBound && motion.position.x > xLeftBound && entityBottom < yBottom + 10.f && entityBottom > yTop) {
+		if (motion.position.x < xRightBound && motion.position.x > xLeftBound && entityBottom < yBottom + 10.f && entityBottom > yTop)
+		{
 			touchingClimbable = touchingClimbable || true;
 		}
 	}
 
-	if (touchingClimbable) {
-		if (player.keyPresses[2] || player.keyPresses[3] || motion.climbing) {
+	if (touchingClimbable)
+	{
+		if (player.keyPresses[2] || player.keyPresses[3] || motion.climbing)
+		{
 			motion.velocity.y = 0;
-			if (player.keyPresses[2]) {
+			if (player.keyPresses[2])
+			{
 				motion.climbing = true;
 				motion.velocity.y -= 200;
 			}
-			if (player.keyPresses[3] && !isBottomOfLadder({motion.position.x, entityBottom + 5}, motion_container)) {
+			if (player.keyPresses[3] && !isBottomOfLadder({motion.position.x, entityBottom + 5}, motion_container))
+			{
 
 				motion.climbing = true;
 				motion.velocity.y += 200;
 			}
 		}
 	}
-	else {
+	else
+	{
 		motion.climbing = false;
 	}
 }
 
-bool WorldSystem::isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& motion_container) {
-	auto& climbables = registry.climbables;
+bool WorldSystem::isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion> &motion_container)
+{
+	auto &climbables = registry.climbables;
 
-	for (int i = 0; i < climbables.size(); i++) {
-		Motion& blockMotion = motion_container.get(climbables.entities[i]);
+	for (int i = 0; i < climbables.size(); i++)
+	{
+		Motion &blockMotion = motion_container.get(climbables.entities[i]);
 
 		float xLeftBound = blockMotion.position.x - abs(blockMotion.scale[0]) / 2.f;
 		float xRightBound = blockMotion.position.x + abs(blockMotion.scale[0]) / 2.f;
 		float yTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
 		float yBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
 
-		if (nextPos[0]  < xRightBound && nextPos[0] > xLeftBound && nextPos[1] < yBottom && nextPos[1] > yTop) {
+		if (nextPos[0] < xRightBound && nextPos[0] > xLeftBound && nextPos[1] < yBottom && nextPos[1] > yTop)
+		{
 			return false;
 		}
 	}
@@ -835,53 +903,53 @@ void WorldSystem::restart_game()
 	Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
 
 	// egg
-	Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f,250.f });
+	Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, {window_width_px / 2 - 80.f, window_height_px * 0.4}, {250.f, 250.f});
 
 	// Create platform(s) at set positions, specify width
 	// TODO(vanesssa): define array of platform dimensions for each level
 	uint center_x = window_width_px / 2;
 	// floors
-	std::vector<Entity> platform0 = createPlatforms(renderer, { center_x - PLATFORM_WIDTH * 7.5, window_height_px - 12.f }, 16);
-	std::vector<Entity> platform1 = createPlatforms(renderer, { PLATFORM_WIDTH * 4,window_height_px * 0.8 }, 8);
-	std::vector<Entity> platform2 = createPlatforms(renderer, { window_width_px - PLATFORM_WIDTH * 6,window_height_px * 0.8 }, 2);
-	std::vector<Entity> platform3 = createPlatforms(renderer, { 110.f,window_height_px * 0.6 }, 7);
-	std::vector<Entity> platform4 = createPlatforms(renderer, { window_width_px - PLATFORM_WIDTH * 7 - 80.f, window_height_px * 0.6 }, 7);
-	std::vector<Entity> platform5 = createPlatforms(renderer, { 110.f,window_height_px * 0.4 }, 7);
-	std::vector<Entity> platform6 = createPlatforms(renderer, { window_width_px - PLATFORM_WIDTH * 10 - 80.f, window_height_px * 0.4 }, 10);
-	std::vector<Entity> platform7 = createPlatforms(renderer, { 110.f,window_height_px * 0.2 }, 25);
+	std::vector<Entity> platform0 = createPlatforms(renderer, {center_x - PLATFORM_WIDTH * 7.5, window_height_px - 12.f}, 16);
+	std::vector<Entity> platform1 = createPlatforms(renderer, {PLATFORM_WIDTH * 4, window_height_px * 0.8}, 8);
+	std::vector<Entity> platform2 = createPlatforms(renderer, {window_width_px - PLATFORM_WIDTH * 6, window_height_px * 0.8}, 2);
+	std::vector<Entity> platform3 = createPlatforms(renderer, {110.f, window_height_px * 0.6}, 7);
+	std::vector<Entity> platform4 = createPlatforms(renderer, {window_width_px - PLATFORM_WIDTH * 7 - 80.f, window_height_px * 0.6}, 7);
+	std::vector<Entity> platform5 = createPlatforms(renderer, {110.f, window_height_px * 0.4}, 7);
+	std::vector<Entity> platform6 = createPlatforms(renderer, {window_width_px - PLATFORM_WIDTH * 10 - 80.f, window_height_px * 0.4}, 10);
+	std::vector<Entity> platform7 = createPlatforms(renderer, {110.f, window_height_px * 0.2}, 25);
 
 	floor_positions = {
 		window_height_px - 12.f,
-		window_height_px * 0.8 ,
-		window_height_px * 0.6 ,
+		window_height_px * 0.8,
+		window_height_px * 0.6,
 		window_height_px * 0.4,
-		window_height_px * 0.2 };
+		window_height_px * 0.2};
 
 	// stairs
-	std::vector<Entity> step0 = createSteps(renderer, { PLATFORM_WIDTH * 12 - 20.f,window_height_px * 0.8 }, 5, 3, false);
-	std::vector<Entity> step1 = createSteps(renderer, { window_width_px - PLATFORM_WIDTH * 6 - STEP_WIDTH * 6,window_height_px * 0.8 + PLATFORM_HEIGHT * 4 }, 5, 2, true);
+	std::vector<Entity> step0 = createSteps(renderer, {PLATFORM_WIDTH * 12 - 20.f, window_height_px * 0.8}, 5, 3, false);
+	std::vector<Entity> step1 = createSteps(renderer, {window_width_px - PLATFORM_WIDTH * 6 - STEP_WIDTH * 6, window_height_px * 0.8 + PLATFORM_HEIGHT * 4}, 5, 2, true);
 
 	// Create walls
-	Entity wall0 = createWall(renderer, { 320.f, window_height_px * 0.9 + 10.f }, window_height_px * 0.2 - 10.f);
-	Entity wall1 = createWall(renderer, { window_width_px - 320.f, window_height_px * 0.9 + 10.f }, window_height_px * 0.2 - 10.f);
-	Entity wall2 = createWall(renderer, { 180.f, window_height_px * 0.7 + 15.f }, window_height_px * 0.2);
-	Entity wall3 = createWall(renderer, { window_width_px - 220.f, window_height_px * 0.7 + 15.f }, window_height_px * 0.2);
-	Entity wall4 = createWall(renderer, { 80.f, window_height_px * 0.4 - 20.f }, window_height_px * 0.4 + 70.f);
-	Entity wall5 = createWall(renderer, { window_width_px - 100.f, window_height_px * 0.4 - 20.f }, window_height_px * 0.4 + 70.f);
+	Entity wall0 = createWall(renderer, {320.f, window_height_px * 0.9 + 10.f}, window_height_px * 0.2 - 10.f);
+	Entity wall1 = createWall(renderer, {window_width_px - 320.f, window_height_px * 0.9 + 10.f}, window_height_px * 0.2 - 10.f);
+	Entity wall2 = createWall(renderer, {180.f, window_height_px * 0.7 + 15.f}, window_height_px * 0.2);
+	Entity wall3 = createWall(renderer, {window_width_px - 220.f, window_height_px * 0.7 + 15.f}, window_height_px * 0.2);
+	Entity wall4 = createWall(renderer, {80.f, window_height_px * 0.4 - 20.f}, window_height_px * 0.4 + 70.f);
+	Entity wall5 = createWall(renderer, {window_width_px - 100.f, window_height_px * 0.4 - 20}, window_height_px * 0.4 + 70.f);
 
 	// Create climbables
-	std::vector<Entity> ladder0 = createClimbable(renderer, { PLATFORM_WIDTH * 9, window_height_px * 0.795 }, 5);
-	std::vector<Entity> ladder1 = createClimbable(renderer, { PLATFORM_WIDTH * 7, window_height_px * 0.6 }, 5);
-	std::vector<Entity> ladder2 = createClimbable(renderer, { window_width_px - PLATFORM_WIDTH * 6, window_height_px * 0.6 }, 5);
-	std::vector<Entity> ladder3 = createClimbable(renderer, { PLATFORM_WIDTH * 4, window_height_px * 0.2 }, 10);
-	std::vector<Entity> ladder4 = createClimbable(renderer, { window_width_px - PLATFORM_WIDTH * 4, window_height_px * 0.4 }, 5);
-	std::vector<Entity> ladder5 = createClimbable(renderer, { window_width_px - PLATFORM_WIDTH * 9, window_height_px * 0.2 }, 5);
+	std::vector<Entity> ladder0 = createClimbable(renderer, {PLATFORM_WIDTH * 9, window_height_px * 0.795}, 5);
+	std::vector<Entity> ladder1 = createClimbable(renderer, {PLATFORM_WIDTH * 7, window_height_px * 0.6}, 5);
+	std::vector<Entity> ladder2 = createClimbable(renderer, {window_width_px - PLATFORM_WIDTH * 6, window_height_px * 0.6}, 5);
+	std::vector<Entity> ladder3 = createClimbable(renderer, {PLATFORM_WIDTH * 4, window_height_px * 0.2}, 10);
+	std::vector<Entity> ladder4 = createClimbable(renderer, {window_width_px - PLATFORM_WIDTH * 4, window_height_px * 0.4}, 5);
+	std::vector<Entity> ladder5 = createClimbable(renderer, {window_width_px - PLATFORM_WIDTH * 9, window_height_px * 0.2}, 5);
 
 	ladder_positions = {
 		{PLATFORM_WIDTH * 9},
 		{PLATFORM_WIDTH * 7, window_width_px - PLATFORM_WIDTH * 6},
 		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 4},
-		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 9 } };
+		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 9}};
 
 	// Create spikes
 	Entity spike1 = createSpike(renderer, { 260.f, 625.f });
@@ -901,7 +969,7 @@ void WorldSystem::restart_game()
 	Motion& bozo_motion = registry.motions.get(player_bozo);
 	bozo_motion.velocity = { 0.f, 0.f };
 
-	player_bozo_pointer = createBozoPointer(renderer, { 200, 500 });
+	player_bozo_pointer = createBozoPointer(renderer, {200, 500});
 	// Create zombie (one starter zombie per level?)
 	for(vec2 pos : ZOMBIE_START_POS[curr_level])
 		createZombie(renderer, pos);
@@ -909,25 +977,25 @@ void WorldSystem::restart_game()
 	// Create students
 	for (vec2 pos : STUDENT_START_POS[curr_level])
 		createStudent(renderer, pos);
-	
-	/*
-	Entity student0 = createStudent(renderer, { 1000, 440 });
-	Entity student1 = createStudent(renderer, { 300, 440 });
-	Entity student2 = createStudent(renderer, { 1000, window_height_px * 0.8 - 50.f });
-	Entity student3 = createStudent(renderer, { 400, window_height_px * 0.4 - 50.f });
-	Entity student4 = createStudent(renderer, { 600, window_height_px * 0.2 - 50.f });
-	*/
+
+	for (Entity student : registry.humans.entities)
+	{
+		Motion &student_motion = registry.motions.get(student);
+		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 200.f : -200.f;
+	}
 
 	setup_keyframes(renderer);
 
 	points = 0;
+
+	Entity tutorial1 = createTextBox(renderer, {1200, 100}, "test text", {400.f, 200.f});
 }
 
 // Compute collisions between entities
 void WorldSystem::handle_collisions()
 {
 	// Loop over all collisions detected by the physics system
-	auto& collisionsRegistry = registry.collisions;
+	auto &collisionsRegistry = registry.collisions;
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++)
 	{
 		// The entity and its collider
@@ -940,13 +1008,14 @@ void WorldSystem::handle_collisions()
 			// Player& player = registry.players.get(entity);
 
 			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
-			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other))) {
+			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)))
+			{
 				// initiate death unless already dying
 				if (!registry.deathTimers.has(entity))
 				{
 					// Scream, reset timer, and make the player [dying animation]
-					Motion& motion_player = registry.motions.get(entity);
-					Motion& motion_zombie = registry.motions.get(entity_other);
+					Motion &motion_player = registry.motions.get(entity);
+					Motion &motion_zombie = registry.motions.get(entity_other);
 
 					// Add a little jump animation
 					motion_player.offGround = true;
@@ -956,7 +1025,7 @@ void WorldSystem::handle_collisions()
 					registry.deathTimers.emplace(entity);
 
 					// Set the direction of the death
-					DeathTimer& timer = registry.deathTimers.get(entity);
+					DeathTimer &timer = registry.deathTimers.get(entity);
 					if (motion_zombie.velocity.x < 0)
 					{
 						timer.direction = 0;
@@ -974,21 +1043,31 @@ void WorldSystem::handle_collisions()
 			{
 				if (!registry.deathTimers.has(entity))
 				{
-					// spawn book at the same position as the student and collect it
-					Motion& m = registry.motions.get(entity_other);
-					Entity book = createBook(renderer, m.position);
-					Book& b = registry.books.get(book);
-					b.offHand = false;
-					++points;
+					// random chance of spawning book at the same position as the "saved" student, plays different sound if a book is spawned
+					int spawn_book = rng() % 2; // 0 or 1
+					if (spawn_book)
+					{
+						Motion &m = registry.motions.get(entity_other);
+						Entity book = createBook(renderer, m.position);
+						Book &b = registry.books.get(book);
+						b.offHand = false;
+						++points;
+						Mix_PlayChannel(-1, collect_book_sound, 0);
+					}
+					else
+					{
+					}
 					registry.remove_all_components_of(entity_other);
-					Mix_PlayChannel(-1, salmon_eat_sound, 0);
+					Mix_PlayChannel(-1, student_disappear_sound, 0);
 				}
 			}
 			// Check Player - Book collisions
-			else if (registry.books.has(entity_other)) {
-				bool& offHand = registry.books.get(entity_other).offHand;
-				Motion& motion_book = registry.motions.get(entity_other);
-				if (motion_book.offGround == false && offHand == true) {
+			else if (registry.books.has(entity_other))
+			{
+				bool &offHand = registry.books.get(entity_other).offHand;
+				Motion &motion_book = registry.motions.get(entity_other);
+				if (motion_book.offGround == false && offHand == true)
+				{
 					offHand = false;
 					++points;
 				}
@@ -1000,8 +1079,8 @@ void WorldSystem::handle_collisions()
 			if (!registry.infectTimers.has(entity))
 			{
 				// Get the position of the student entity
-				Motion& motion_student = registry.motions.get(entity);
-				Motion& motion_zombie = registry.motions.get(entity_other);
+				Motion &motion_student = registry.motions.get(entity);
+				Motion &motion_zombie = registry.motions.get(entity_other);
 
 				// Scream, reset timer, and make the player [dying animation]
 
@@ -1011,13 +1090,13 @@ void WorldSystem::handle_collisions()
 				motion_student.velocity[1] = -200.f;
 
 				// Modify Student's color
-				vec3& color = registry.colors.get(entity);
-				color = { 1.0f, 0.f, 0.f };
+				vec3 &color = registry.colors.get(entity);
+				color = {1.0f, 0.f, 0.f};
 
 				registry.infectTimers.emplace(entity);
 
 				// Set the direction of the death
-				InfectTimer& timer = registry.infectTimers.get(entity);
+				InfectTimer &timer = registry.infectTimers.get(entity);
 				if (motion_zombie.velocity.x < 0)
 				{
 					timer.direction = 0;
@@ -1030,14 +1109,16 @@ void WorldSystem::handle_collisions()
 			}
 		}
 		// Check Book - Zombie collision
-		else if (registry.books.has(entity) && registry.zombies.has(entity_other)) {
-			Motion& motion_book = registry.motions.get(entity);
+		else if (registry.books.has(entity) && registry.zombies.has(entity_other))
+		{
+			Motion &motion_book = registry.motions.get(entity);
 			// Only collide when book is in air
-			if (motion_book.offGround == true) {
+			if (motion_book.offGround == true)
+			{
+				Mix_PlayChannel(-1, zombie_kill_sound, 0);
 				registry.remove_all_components_of(entity);
 				registry.remove_all_components_of(entity_other);
 			}
-
 		}
 
 		// Check Spike - Zombie collision
@@ -1065,8 +1146,8 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	Motion& motion = registry.motions.get(player_bozo);
-	Player& player = registry.players.get(player_bozo);
+	Motion &motion = registry.motions.get(player_bozo);
+	Player &player = registry.players.get(player_bozo);
 
 	if (action == GLFW_PRESS && (!registry.deathTimers.has(player_bozo)))
 	{
@@ -1079,11 +1160,13 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			player.keyPresses[1] = true;
 		}
 
-		if (key == GLFW_KEY_W) {
+		if (key == GLFW_KEY_W)
+		{
 			player.keyPresses[2] = true;
 		}
 
-		if (key == GLFW_KEY_S) {
+		if (key == GLFW_KEY_S)
+		{
 			player.keyPresses[3] = true;
 		}
 
@@ -1179,36 +1262,49 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	// xpos and ypos are relative to the top-left of the window, the salmon's
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	
-	if (!registry.deathTimers.has(player_bozo)) {
-		Motion& motion = registry.motions.get(player_bozo_pointer);
+
+	if (!registry.deathTimers.has(player_bozo))
+	{
+		Motion &motion = registry.motions.get(player_bozo_pointer);
 		float radians = atan2(mouse_position.y - motion.position.y, mouse_position.x - motion.position.x);
 		// printf("Radians: %f\n", radians);
 		motion.angle = radians;
 	}
 
-
-	(vec2)mouse_position; // dummy to avoid compiler warning
+	(vec2) mouse_position; // dummy to avoid compiler warning
 }
 
-void WorldSystem::on_mouse_button(int button, int action, int mod) {
-	if (registry.deathTimers.has(player_bozo)) {
+void WorldSystem::on_mouse_button(int button, int action, int mod)
+{
+	if (registry.deathTimers.has(player_bozo))
+	{
 		return;
 	}
 
-	/*
-	if (button == GLFW_MOUSE_BUTTON_LEFT) { // && action == GLFW_RELEASE
-		auto& booksRegistry = registry.books;
-		for (int i = 0; i < booksRegistry.size(); i++) {
-			Entity entity = booksRegistry.entities[i];
-			Book& book = registry.books.get(entity);
-			if (book.offHand == false) {
-				Motion& motion_book = registry.motions.get(entity);
-				Motion& motion_bozo = registry.motions.get(player_bozo);
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+		// printf("xpos: %f, ypos: %f\n", xpos, ypos);
 
-				double xpos, ypos;
-				glfwGetCursorPos(window, &xpos, &ypos);
-				vec2& position = motion_bozo.position;
+		if (xpos > 1365 && xpos < 1397 && ypos < 47 && ypos > 13 && registry.textboxes.size() > 0)
+		{
+			registry.remove_all_components_of(registry.textboxes.entities.back());
+
+			return;
+		}
+
+		auto &booksRegistry = registry.books;
+		for (int i = 0; i < booksRegistry.size(); i++)
+		{
+			Entity entity = booksRegistry.entities[i];
+			Book &book = registry.books.get(entity);
+			if (book.offHand == false)
+			{
+				Motion &motion_book = registry.motions.get(entity);
+				Motion &motion_bozo = registry.motions.get(player_bozo);
+
+				vec2 &position = motion_bozo.position;
 				double direction = atan2(ypos - position[1], xpos - position[0]);
 
 				motion_book.velocity.x = 500.f * cos(direction);
@@ -1221,11 +1317,10 @@ void WorldSystem::on_mouse_button(int button, int action, int mod) {
 			}
 		}
 	}
-	*/
 }
 
 // defines keyframes for entities that are animated
-void WorldSystem::setup_keyframes(RenderSystem* rendered)
+void WorldSystem::setup_keyframes(RenderSystem *rendered)
 {
 	// Example use case
 

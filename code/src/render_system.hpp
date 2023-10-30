@@ -49,6 +49,7 @@ class RenderSystem {
 		textures_path("Ladder2.png"),
 		textures_path("Ladder3.png"),
 		textures_path("book.png"),
+		textures_path("tutorial1.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

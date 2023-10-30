@@ -46,6 +46,8 @@ Entity createSpike(RenderSystem* renderer, vec2 pos);
 Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::BACKGROUND, vec2 position = { window_width_px / 2, window_height_px / 2 }, vec2 scale = { window_width_px, window_height_px });
 // book
 Entity createBook(RenderSystem* renderer, vec2 position);
+// text box
+Entity createTextBox(RenderSystem* renderer, vec2 position, std::string text, vec2 scale = { 1.f, 1.f });
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 

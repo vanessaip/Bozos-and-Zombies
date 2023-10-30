@@ -379,3 +379,30 @@ Entity createBook(RenderSystem* renderer, vec2 position)
 
 	return entity;
 }
+
+Entity createTextBox(RenderSystem* renderer, vec2 position, std::string text, vec2 scale)
+{
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto& textbox = registry.textboxes.emplace(entity);
+	textbox.text = text;
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	// Create an (empty) Book component to be able to refer to all books
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::TUTORIAL1,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
