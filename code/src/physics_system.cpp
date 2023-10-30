@@ -1,20 +1,21 @@
 // internal
 #include "physics_system.hpp"
 #include "world_init.hpp"
-
-//float GRAVITY = 10;
+#include <iostream>
+#include <vector>
+// float GRAVITY = 10;
 
 // Returns the local bounding coordinates scaled by the current size of the entity
-vec2 get_bounding_box(const Motion& motion)
+vec2 get_bounding_box(const Motion &motion)
 {
 	// abs is to avoid negative scale due to the facing direction.
-	return { abs(motion.scale.x), abs(motion.scale.y) };
+	return {abs(motion.scale.x), abs(motion.scale.y)};
 }
 
 // This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
 // if the center point of either object is inside the other's bounding-box-circle. You can
 // surely implement a more accurate detection
-bool collides(const Motion& motion1, const Motion& motion2)
+bool collides(const Motion &motion1, const Motion &motion2)
 {
 
 	vec2 dp = motion1.position - motion2.position;
@@ -29,7 +30,7 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	return false;
 }
 
-//void special_collision(const Entity& entity_bozo, const Entity& entity_plat) {
+// void special_collision(const Entity& entity_bozo, const Entity& entity_plat) {
 //	Motion& motion_bozo = registry.motions.get(entity_bozo);
 //	Motion& motion_plat = registry.motions.get(entity_plat);
 //			float xPlatLeftBound = motion_plat.position.x - motion_plat.scale[0] / 2.f;
@@ -40,21 +41,55 @@ bool collides(const Motion& motion1, const Motion& motion2)
 //			motion_bozo.position.x > xPlatLeftBound && motion_bozo.position.x < xPlatRightBound) {
 //			registry.collisions.emplace_with_duplicates(entity_bozo, entity_plat);
 //		}
-//}
+// }
+
+bool checkCollision(const Motion &player, const Mesh *spikeMesh)
+{
+	if (spikeMesh == nullptr)
+	{
+		return false; // No mesh to check against
+	}
+
+	// Calculate the player's bounding box edges
+	vec2 bb_half = get_bounding_box(player) / 2.f;
+	float left = player.position.x - bb_half.x;
+	float right = player.position.x + bb_half.x;
+	float top = player.position.y - bb_half.y;
+	float bottom = player.position.y + bb_half.y;
+
+	// Check each vertex of the spike mesh
+	for (const ColoredVertex &v : spikeMesh->vertices)
+	{
+		// Assume vertex position is in local space, transform to world space
+		vec2 worldPos = player.position + vec2(v.position.x, v.position.y) * spikeMesh->original_size * 25.f;
+
+		// If any vertex is inside the player's bounding box, there's a collision
+		if (worldPos.x >= left && worldPos.x <= right && worldPos.y >= top && worldPos.y <= bottom)
+		{
+			std::cout << "Collision detected!" << std::endl;
+			return true;
+		}
+	}
+
+	return false; // No collision if no vertices are inside the bounding box
+}
 
 void PhysicsSystem::step(float elapsed_ms)
 {
 	// Move fish based on how much time has passed, this is to (partially) avoid
 	// having entities move at different speed based on the machine.
-	auto& motion_container = registry.motions;
+	auto &motion_container = registry.motions;
+	auto &meshPtr_container = registry.meshPtrs;
+
 	for (uint i = 0; i < motion_container.size(); i++)
 	{
 		// !!! TODO A1: update motion.position based on step_seconds and motion.velocity
-		Motion& motion = motion_container.components[i];
+		Motion &motion = motion_container.components[i];
 		Entity entity = motion_container.entities[i];
 		float step_seconds = elapsed_ms / 1000.f;
 
-		if ((registry.humans.has(entity) || registry.zombies.has(entity) || registry.books.has(entity)) && motion.offGround) {
+		if ((registry.humans.has(entity) || registry.zombies.has(entity) || registry.books.has(entity)) && motion.offGround)
+		{
 			motion.velocity[1] += PhysicsSystem::GRAVITY;
 		}
 
@@ -65,24 +100,41 @@ void PhysicsSystem::step(float elapsed_ms)
 	// Check for collisions between all moving entities
 	for (uint i = 0; i < motion_container.components.size(); i++)
 	{
-		Motion& motion_i = motion_container.components[i];
+		Motion &motion_i = motion_container.components[i];
 		Entity entity_i = motion_container.entities[i];
+		Mesh *mesh_i = meshPtr_container.get(entity_i); // Get the second mesh
 
 		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
 		for (uint j = i + 1; j < motion_container.components.size(); j++)
 		{
-			Motion& motion_j = motion_container.components[j];
+			Motion &motion_j = motion_container.components[j];
 			Entity entity_j = motion_container.entities[j];
-			//if (registry.players.has(entity_i) && registry.platforms.has(entity_j)) {
-			//	special_collision(entity_i,entity_j);
-			//}
-			if (collides(motion_i, motion_j))
+			Mesh *mesh_j = meshPtr_container.get(entity_j); // Get the second mesh
+
+			if (registry.players.has(entity_i) && registry.spikes.has(entity_j))
 			{
-				// Create a collisions event
-				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
-				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-				registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+				// if (registry.players.has(entity_i) && registry.platforms.has(entity_j)) {
+				//	special_collision(entity_i,entity_j);
+				// }
+				if (checkCollision(motion_i, mesh_j))
+				{
+					// Create a collisions event
+					// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
+					registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+					registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+				}
 			}
+			// else
+			// {
+
+			// 	if (collides(motion_i, motion_j))
+			// 	{
+			// 		// Create a collisions event
+			// 		// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
+			// 		registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+			// 		registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+			// 	}
+			// }
 		}
 	}
 }
