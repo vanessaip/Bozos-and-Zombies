@@ -951,6 +951,7 @@ void WorldSystem::restart_game()
 
 	// indoor background
 	Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
+	Entity basement = createBackground(renderer, TEXTURE_ASSET_ID::BASEMENT);
 
 	// Tutorial sign
 	Entity tutorial1 = createTextBox(renderer, { 643, 550 }, "tutorial1", { 250.f, 150.f });
