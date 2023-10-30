@@ -332,7 +332,7 @@ Entity createBook(RenderSystem* renderer, vec2 position)
 	motion.position = position;
 
 	// Setting initial values, scale the same with player
-	motion.scale = vec2({ 102.f * 0.4, 84.f * 0.4 });
+	motion.scale = vec2({ 102.f * 0.3, 84.f * 0.3 });
 
 	// Create an (empty) Book component to be able to refer to all books
 	registry.books.emplace(entity);
