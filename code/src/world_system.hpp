@@ -45,6 +45,8 @@ public:
 	int checkLevel(Motion& motion);
 
 	float getClosestLadder(int zombie_level, Motion& bozo_motion);
+
+	bool isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& motion_container);
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);

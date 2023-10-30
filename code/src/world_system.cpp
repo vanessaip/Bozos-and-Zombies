@@ -545,21 +545,66 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 
 	if ((zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1))) {
 		// Zombie is on the same level as bozo
-		motion.climbing = false;
-		float direction = -1;
-		if ((bozo_motion.position.x - motion.position.x) > 0) {
-			direction = 1;
-		}
-		float speed = 100.f;
-		motion.velocity.x = direction * speed;
 
-		// If the zombie hasn't gotten to the player yet, set the appropriate direction the zombie is facing
-		if (abs(motion.position.x - bozo_motion.position.x) > 5) {
-			if (motion.velocity.x > 0) {
-				motion.reflect[0] = true;
+		if (bozo_level == 0 && zombie_level == 1 && bozo_motion.position.x < 700) {
+			float target_ladder = getClosestLadder(zombie_level - 1, bozo_motion);
+
+			if ((target_ladder - motion.position.x) > 0) {
+				motion.velocity.x = 100.f;
 			}
 			else {
-				motion.reflect[0] = false;
+				motion.velocity.x = -100.f;
+			}
+
+			// When at the ladder, start descending
+			if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f)) {
+				motion.position.x = target_ladder;
+				motion.velocity.x = 0;
+				motion.velocity.y = 200.f;
+				motion.climbing = true;
+			}
+			else {
+				motion.climbing = false;
+			}
+		}
+		else if (bozo_level == 0 && zombie_level == 0 && bozo_motion.position.x > 700 && motion.position.x < 700) {
+			float target_ladder = getClosestLadder(zombie_level, motion);
+
+			if ((target_ladder - motion.position.x) > 0) {
+				motion.velocity.x = 100.f;
+			}
+			else {
+				motion.velocity.x = -100.f;
+			}
+
+			// When at the ladder, start ascending
+			if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f)) {
+				motion.position.x = target_ladder;
+				motion.velocity.x = 0;
+				motion.velocity.y = -100.f;
+				motion.climbing = true;
+			}
+			else {
+				motion.climbing = false;
+			}
+		}
+		else {
+			motion.climbing = false;
+			float direction = -1;
+			if ((bozo_motion.position.x - motion.position.x) > 0) {
+				direction = 1;
+			}
+			float speed = 100.f;
+			motion.velocity.x = direction * speed;
+
+			// If the zombie hasn't gotten to the player yet, set the appropriate direction the zombie is facing
+			if (abs(motion.position.x - bozo_motion.position.x) > 5) {
+				if (motion.velocity.x > 0) {
+					motion.reflect[0] = true;
+				}
+				else {
+					motion.reflect[0] = false;
+				}
 			}
 		}
 	}
@@ -676,12 +721,12 @@ void WorldSystem::updateClimbing(Motion& motion, vec4 entityBB, ComponentContain
 	for (int i = 0; i < climbables.size(); i++) {
 		Motion& blockMotion = motion_container.get(climbables.entities[i]);
 
-		float xLeftBound = blockMotion.position.x - abs(motion.scale[0]) / 2.f;
-		float xRightBound = blockMotion.position.x + abs(motion.scale[0]) / 2.f;
-		float yTop = blockMotion.position.y - motion.scale[1] / 2.f;
-		float yBottom = blockMotion.position.y + motion.scale[1] / 2.f;
+		float xLeftBound = blockMotion.position.x - abs(blockMotion.scale[0]) / 2.f;
+		float xRightBound = blockMotion.position.x + abs(blockMotion.scale[0]) / 2.f;
+		float yTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
+		float yBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
 
-		if (motion.position.x  < xRightBound && motion.position.x > xLeftBound && entityBottom < yBottom && entityBottom > yTop) {
+		if (motion.position.x  < xRightBound && motion.position.x > xLeftBound && entityBottom < yBottom + 10.f && entityBottom > yTop) {
 			touchingClimbable = touchingClimbable || true;
 		}
 	}
@@ -693,7 +738,8 @@ void WorldSystem::updateClimbing(Motion& motion, vec4 entityBB, ComponentContain
 				motion.climbing = true;
 				motion.velocity.y -= 200;
 			}
-			if (player.keyPresses[3]) {
+			if (player.keyPresses[3] && !isBottomOfLadder({motion.position.x, entityBottom + 5}, motion_container)) {
+
 				motion.climbing = true;
 				motion.velocity.y += 200;
 			}
@@ -702,6 +748,24 @@ void WorldSystem::updateClimbing(Motion& motion, vec4 entityBB, ComponentContain
 	else {
 		motion.climbing = false;
 	}
+}
+
+bool WorldSystem::isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& motion_container) {
+	auto& climbables = registry.climbables;
+
+	for (int i = 0; i < climbables.size(); i++) {
+		Motion& blockMotion = motion_container.get(climbables.entities[i]);
+
+		float xLeftBound = blockMotion.position.x - abs(blockMotion.scale[0]) / 2.f;
+		float xRightBound = blockMotion.position.x + abs(blockMotion.scale[0]) / 2.f;
+		float yTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
+		float yBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
+
+		if (nextPos[0]  < xRightBound && nextPos[0] > xLeftBound && nextPos[1] < yBottom && nextPos[1] > yTop) {
+			return false;
+		}
+	}
+	return true;
 }
 
 // Reset the world state to its initial state
@@ -772,7 +836,7 @@ void WorldSystem::restart_game()
 	Entity wall5 = createWall(renderer, { window_width_px - 100.f, window_height_px * 0.4 - 20 }, window_height_px * 0.4 + 70.f);
 
 	// Create climbables
-	std::vector<Entity> ladder0 = createClimbable(renderer, { PLATFORM_WIDTH * 9, window_height_px * 0.8 }, 5);
+	std::vector<Entity> ladder0 = createClimbable(renderer, { PLATFORM_WIDTH * 9, window_height_px * 0.795 }, 5);
 	std::vector<Entity> ladder1 = createClimbable(renderer, { PLATFORM_WIDTH * 7, window_height_px * 0.6 }, 5);
 	std::vector<Entity> ladder2 = createClimbable(renderer, { window_width_px - PLATFORM_WIDTH * 6, window_height_px * 0.6 }, 5);
 	std::vector<Entity> ladder3 = createClimbable(renderer, { PLATFORM_WIDTH * 4, window_height_px * 0.2 }, 10);
@@ -984,7 +1048,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		if (key == GLFW_KEY_SPACE && !motion.offGround)
 		{
 			motion.offGround = true;
-			motion.velocity[1] -= 200;
+			motion.velocity[1] -= 300;
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 	}
