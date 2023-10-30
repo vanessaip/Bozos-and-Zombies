@@ -902,6 +902,7 @@ void WorldSystem::handle_collisions()
 			Motion& motion_book = registry.motions.get(entity);
 			// Only collide when book is in air
 			if (motion_book.offGround == true) {
+				registry.remove_all_components_of(entity);
 				registry.remove_all_components_of(entity_other);
 			}
 
