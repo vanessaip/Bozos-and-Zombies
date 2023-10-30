@@ -193,6 +193,11 @@ struct Camera
 	}
 };
 
+struct TextBox
+{
+	std::string text = "";
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -234,7 +239,8 @@ enum class TEXTURE_ASSET_ID
 	LADDER2 = LADDER1 + 1,
 	LADDER3 = LADDER2 + 1,
 	BOOK = LADDER3 + 1,
-	TEXTURE_COUNT = BOOK + 1
+	TUTORIAL1 = BOOK + 1,
+	TEXTURE_COUNT = TUTORIAL1 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

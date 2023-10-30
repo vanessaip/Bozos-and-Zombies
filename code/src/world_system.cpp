@@ -878,6 +878,8 @@ void WorldSystem::restart_game()
 	setup_keyframes(renderer);
 
 	points = 0;
+
+	Entity tutorial1 = createTextBox(renderer, { 1200, 100 }, "test text", {400.f, 200.f});
 }
 
 // Compute collisions between entities
@@ -1130,6 +1132,18 @@ void WorldSystem::on_mouse_button(int button, int action, int mod) {
 	}
 
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+		// printf("xpos: %f, ypos: %f\n", xpos, ypos);
+
+		if (xpos > 1365 && xpos < 1397 && ypos < 47 && ypos > 13 && registry.textboxes.size() > 0) {
+			registry.remove_all_components_of(registry.textboxes.entities.back());
+			
+			return;
+		}
+
+
 		auto& booksRegistry = registry.books;
 		for (int i = 0; i < booksRegistry.size(); i++) {
 			Entity entity = booksRegistry.entities[i];
@@ -1138,8 +1152,7 @@ void WorldSystem::on_mouse_button(int button, int action, int mod) {
 				Motion& motion_book = registry.motions.get(entity);
 				Motion& motion_bozo = registry.motions.get(player_bozo);
 
-				double xpos, ypos;
-				glfwGetCursorPos(window, &xpos, &ypos);
+
 				vec2& position = motion_bozo.position;
 				double direction = atan2(ypos - position[1], xpos - position[0]);
 

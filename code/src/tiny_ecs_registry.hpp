@@ -33,6 +33,7 @@ public:
 	ComponentContainer<Spike> spikes;
 	ComponentContainer<Climbable> climbables;
 	ComponentContainer<Book> books;
+	ComponentContainer<TextBox> textboxes;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
