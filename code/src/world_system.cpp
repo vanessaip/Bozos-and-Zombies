@@ -35,6 +35,8 @@ WorldSystem::~WorldSystem()
 		Mix_FreeChunk(player_land_sound);
 	if (collect_book_sound != nullptr)
 		Mix_FreeChunk(collect_book_sound);
+	if (zombie_kill_sound != nullptr)
+		Mix_FreeChunk(zombie_kill_sound);
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -117,8 +119,9 @@ GLFWwindow* WorldSystem::create_window()
 	player_jump_sound = Mix_LoadWAV(audio_path("player_jump.wav").c_str());
 	player_land_sound = Mix_LoadWAV(audio_path("player_land.wav").c_str());
 	collect_book_sound = Mix_LoadWAV(audio_path("Mario-coin-sound.wav").c_str());
+	zombie_kill_sound = Mix_LoadWAV(audio_path("splat.wav").c_str());
 
-	if (background_music == nullptr || player_death_sound == nullptr || salmon_eat_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr)
+	if (background_music == nullptr || player_death_sound == nullptr || salmon_eat_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr || zombie_kill_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("soundtrack.wav").c_str(),
@@ -929,6 +932,7 @@ void WorldSystem::handle_collisions()
 			Motion& motion_book = registry.motions.get(entity);
 			// Only collide when book is in air
 			if (motion_book.offGround == true) {
+				Mix_PlayChannel(-1, zombie_kill_sound, 0);
 				registry.remove_all_components_of(entity);
 				registry.remove_all_components_of(entity_other);
 			}

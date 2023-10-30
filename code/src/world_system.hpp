@@ -80,6 +80,7 @@ private:
 	Mix_Chunk* player_jump_sound;
 	Mix_Chunk* player_land_sound;
 	Mix_Chunk* collect_book_sound;
+	Mix_Chunk* zombie_kill_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;
