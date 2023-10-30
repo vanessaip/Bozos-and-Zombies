@@ -37,6 +37,7 @@ class RenderSystem {
 		textures_path("student_sprite_sheet.png"),
 		textures_path("zombie_sprite_sheet.png"),
 		textures_path("bozo_sprite_sheet.png"),
+		textures_path("bozo_pointer.png"),
 		textures_path("business-background.png"),
 		textures_path("Tile_40.png"),	// platform
 		textures_path("Tile_04.png"),	// step left section

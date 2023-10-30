@@ -11,6 +11,8 @@ const float ZOMBIE_BB_WIDTH = 50.f;
 const float ZOMBIE_BB_HEIGHT = STUDENT_BB_HEIGHT + 20.f;
 const float BOZO_BB_WIDTH = STUDENT_BB_WIDTH;
 const float BOZO_BB_HEIGHT = STUDENT_BB_HEIGHT;
+const float BOZO_POINTER_BB_WIDTH = 170.f;
+const float BOZO_POINTER_BB_HEIGHT = 170.f;
 const float PLATFORM_HEIGHT = 30.f;
 const float PLATFORM_WIDTH = 50.f;
 const float WALL_WIDTH = 20.f;
@@ -20,6 +22,8 @@ const vec2 CLIMBABLE_DIM = { 22.f, 32.f };
 
 // the player
 Entity createBozo(RenderSystem* renderer, vec2 pos);
+// the pointer
+Entity createBozoPointer(RenderSystem* renderer, vec2 pos);
 // the prey
 Entity createStudent(RenderSystem* renderer, vec2 position);
 // the enemy

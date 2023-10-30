@@ -67,6 +67,7 @@ private:
 	RenderSystem* renderer;
 	float current_speed;
 	Entity player_bozo;
+	Entity player_bozo_pointer;
 
 	// Level definitions
 	std::vector<float> floor_positions;

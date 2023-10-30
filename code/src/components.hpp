@@ -12,6 +12,11 @@ struct Player
 	vec4 keyPresses = { false, false, false, false };
 };
 
+struct PlayerEffects
+{
+	
+};
+
 // Zombies can turn Humans into Zombies
 struct Zombie
 {
@@ -215,7 +220,8 @@ enum class TEXTURE_ASSET_ID
 	STUDENT = 0,
 	ZOMBIE = STUDENT + 1,
 	BOZO = ZOMBIE + 1,
-	BACKGROUND = BOZO + 1,
+	BOZO_POINTER = BOZO + 1,
+	BACKGROUND = BOZO_POINTER + 1,
 	PLATFORM = BACKGROUND + 1,
 	STEP0 = PLATFORM + 1,
 	STEP1 = STEP0 + 1,

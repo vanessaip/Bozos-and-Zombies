@@ -33,6 +33,38 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
+
+Entity createBozoPointer(RenderSystem* renderer, vec2 pos) 
+{	
+	
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	// motion.position = player_motion.position;
+	motion.position = pos;
+	motion.angle = 0.f;
+	// motion.velocity = player_motion.velocity;
+	motion.velocity = { 0.f, 0.f };
+
+	// Setting initial values
+	motion.scale = vec2({ BOZO_POINTER_BB_WIDTH, BOZO_POINTER_BB_HEIGHT });
+
+	registry.playerEffects.emplace(entity);
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::BOZO_POINTER,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+
 Entity createStudent(RenderSystem* renderer, vec2 position)
 {
 	// Reserve en entity

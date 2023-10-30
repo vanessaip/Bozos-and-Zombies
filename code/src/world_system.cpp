@@ -182,6 +182,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		bool isZombie = registry.zombies.has(motion_container.entities[i]);
 		bool isBook = registry.books.has(motion_container.entities[i]);
 
+		if (registry.players.has(motion_container.entities[i]) && !registry.deathTimers.has(motion_container.entities[i])) {
+			motion.velocity[0] = 0;
+
+			if (player.keyPresses[0]) {
+				motion.velocity[0] -= 400;
+			}
+			if (player.keyPresses[1]) {
+				motion.velocity[0] += 400;
+			}
+		}
 		// Bounding entities to window
 		if (isHuman || isZombie || isBook)
 		{
@@ -356,6 +366,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		if (registry.zombies.has(motion_container.entities[i])) {
 			updateZombieMovement(motion, bozo_motion, motion_container.entities[i]);
 		}
+
+		// If entity if a player effect, for example bozo_pointer, move it along with the player
+		if (registry.playerEffects.has(motion_container.entities[i])) {
+			motion.position.x = bozo_motion.position.x;
+			motion.position.y = bozo_motion.position.y;
+		}
+
 	}
 
 	// Processing the player state
@@ -771,6 +788,7 @@ void WorldSystem::restart_game()
 	Motion& bozo_motion = registry.motions.get(player_bozo);
 	bozo_motion.velocity = { 0.f, 0.f };
 
+	player_bozo_pointer = createBozoPointer(renderer, { 200, 500 });
 	// Create zombie (one starter zombie per level?)
 	Entity zombie = createZombie(renderer, ZOMBIE_START_POS[curr_level]);
 
@@ -1017,6 +1035,14 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	// xpos and ypos are relative to the top-left of the window, the salmon's
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	
+	if (!registry.deathTimers.has(player_bozo)) {
+		Motion& motion = registry.motions.get(player_bozo_pointer);
+		float radians = atan2(mouse_position.y - motion.position.y, mouse_position.x - motion.position.x);
+		// printf("Radians: %f\n", radians);
+		motion.angle = radians;
+	}
+
 
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }
