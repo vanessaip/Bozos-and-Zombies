@@ -66,7 +66,6 @@ bool checkCollision(const Motion &player, const Mesh *spikeMesh, const Motion &s
 		// If any vertex is inside the player's bounding box, there's a collision
 		if (worldPos.x >= left && worldPos.x <= right && worldPos.y >= top && worldPos.y <= bottom)
 		{
-			std::cout << "Collision detected!" << std::endl;
 			return true;
 		}
 	}
@@ -113,9 +112,6 @@ void PhysicsSystem::step(float elapsed_ms)
 
 			if ((registry.players.has(entity_i) && registry.spikes.has(entity_j)) || (registry.players.has(entity_j) && registry.spikes.has(entity_i)))
 			{
-				// if (registry.players.has(entity_i) && registry.platforms.has(entity_j)) {
-				//	special_collision(entity_i,entity_j);
-				// }
 				if (checkCollision(motion_i, mesh_j, motion_j) || checkCollision(motion_j, mesh_i, motion_i))
 				{
 					// Create a collisions event
@@ -124,17 +120,17 @@ void PhysicsSystem::step(float elapsed_ms)
 					registry.collisions.emplace_with_duplicates(entity_j, entity_i);
 				}
 			}
-			// else
-			// {
+			else
+			{
 
-			// 	if (collides(motion_i, motion_j))
-			// 	{
-			// 		// Create a collisions event
-			// 		// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
-			// 		registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-			// 		registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-			// 	}
-			// }
+				if (collides(motion_i, motion_j))
+				{
+					// Create a collisions event
+					// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
+					registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+					registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+				}
+			}
 		}
 	}
 }
