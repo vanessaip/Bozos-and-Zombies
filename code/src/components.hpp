@@ -67,7 +67,8 @@ struct Motion
 	vec2 reflect;
 	bool offGround;
 	bool climbing;
-	Motion(vec2 position = { 0.f, 0.f }, float angle = 0.f, vec2 velocity = { 0.f, 0.f }, vec2 scale = { 10.f, 10.f }, vec2 reflect = { false, false }, bool offGround = true, bool climbing = false)
+	float speedMultiplier; 
+	Motion(vec2 position = { 0.f, 0.f }, float angle = 0.f, vec2 velocity = { 0.f, 0.f }, vec2 scale = { 10.f, 10.f }, vec2 reflect = { false, false }, bool offGround = true, bool climbing = false, float speedMultiplier = 1.0)
 	{
 		this->position = position;
 		this->angle = angle;
@@ -76,6 +77,7 @@ struct Motion
 		this->reflect = reflect;
 		this->offGround = offGround;
 		this->climbing = climbing;
+		this->speedMultiplier = speedMultiplier;
 	}
 };
 
