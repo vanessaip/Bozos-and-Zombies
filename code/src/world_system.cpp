@@ -602,12 +602,12 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 
 			if ((target_ladder - motion.position.x) > 0)
 			{
-				motion.velocity.x = 100.f;
+				motion.velocity.x = ZOMBIE_SPEED;
 				motion.reflect[0] = true;
 			}
 			else
 			{
-				motion.velocity.x = -100.f;
+				motion.velocity.x = -ZOMBIE_SPEED;
 				motion.reflect[0] = false;
 			}
 
@@ -616,7 +616,7 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 			{
 				motion.position.x = target_ladder;
 				motion.velocity.x = 0;
-				motion.velocity.y = 200.f;
+				motion.velocity.y = 2 * ZOMBIE_SPEED;
 				motion.climbing = true;
 			}
 			else
@@ -630,12 +630,12 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 
 			if ((target_ladder - motion.position.x) > 0)
 			{
-				motion.velocity.x = 100.f;
+				motion.velocity.x = ZOMBIE_SPEED;
 				motion.reflect[0] = false;
 			}
 			else
 			{
-				motion.velocity.x = -100.f;
+				motion.velocity.x = -ZOMBIE_SPEED;
 				motion.reflect[0] = true;
 			}
 
@@ -644,7 +644,7 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 			{
 				motion.position.x = target_ladder;
 				motion.velocity.x = 0;
-				motion.velocity.y = -100.f;
+				motion.velocity.y = - 2 * ZOMBIE_SPEED;
 				motion.climbing = true;
 			}
 			else
@@ -660,7 +660,7 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 			{
 				direction = 1;
 			}
-			float speed = 100.f;
+			float speed = ZOMBIE_SPEED;
 			motion.velocity.x = direction * speed;
 
 			// If the zombie hasn't gotten to the player yet, set the appropriate direction the zombie is facing
@@ -690,12 +690,12 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 
 		if ((target_ladder - motion.position.x) > 0)
 		{
-			motion.velocity.x = 100.f;
+			motion.velocity.x = ZOMBIE_SPEED;
 			motion.reflect[0] = true;
 		}
 		else
 		{
-			motion.velocity.x = -100.f;
+			motion.velocity.x = -ZOMBIE_SPEED;
 			motion.reflect[0] = false;
 		}
 
@@ -704,7 +704,7 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 		{
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
-			motion.velocity.y = -100.f;
+			motion.velocity.y = - 2 * ZOMBIE_SPEED;
 			motion.climbing = true;
 		}
 		else
@@ -720,12 +720,12 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 
 		if ((target_ladder - motion.position.x) > 0)
 		{
-			motion.velocity.x = 100.f;
+			motion.velocity.x = ZOMBIE_SPEED;
 			motion.reflect[0] = true;
 		}
 		else
 		{
-			motion.velocity.x = -100.f;
+			motion.velocity.x = -ZOMBIE_SPEED;
 			motion.reflect[0] = false;
 		}
 
@@ -734,7 +734,7 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 		{
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
-			motion.velocity.y = 200.f;
+			motion.velocity.y = 2 * ZOMBIE_SPEED;
 			motion.climbing = true;
 		}
 		else
