@@ -43,7 +43,7 @@ bool collides(const Motion &motion1, const Motion &motion2)
 //		}
 // }
 
-bool checkCollision(const Motion &player, const Mesh *spikeMesh)
+bool checkCollision(const Motion &player, const Mesh *spikeMesh, const Motion &spike)
 {
 	if (spikeMesh == nullptr)
 	{
@@ -61,7 +61,7 @@ bool checkCollision(const Motion &player, const Mesh *spikeMesh)
 	for (const ColoredVertex &v : spikeMesh->vertices)
 	{
 		// Assume vertex position is in local space, transform to world space
-		vec2 worldPos = player.position + vec2(v.position.x, v.position.y) * spikeMesh->original_size * 25.f;
+		vec2 worldPos = spike.position + vec2(v.position.x, v.position.y) * spikeMesh->original_size * 25.f;
 
 		// If any vertex is inside the player's bounding box, there's a collision
 		if (worldPos.x >= left && worldPos.x <= right && worldPos.y >= top && worldPos.y <= bottom)
@@ -111,12 +111,12 @@ void PhysicsSystem::step(float elapsed_ms)
 			Entity entity_j = motion_container.entities[j];
 			Mesh *mesh_j = meshPtr_container.get(entity_j); // Get the second mesh
 
-			if (registry.players.has(entity_i) && registry.spikes.has(entity_j))
+			if ((registry.players.has(entity_i) && registry.spikes.has(entity_j)) || (registry.players.has(entity_j) && registry.spikes.has(entity_i)))
 			{
 				// if (registry.players.has(entity_i) && registry.platforms.has(entity_j)) {
 				//	special_collision(entity_i,entity_j);
 				// }
-				if (checkCollision(motion_i, mesh_j))
+				if (checkCollision(motion_i, mesh_j, motion_j) || checkCollision(motion_j, mesh_i, motion_i))
 				{
 					// Create a collisions event
 					// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
