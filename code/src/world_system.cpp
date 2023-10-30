@@ -27,12 +27,16 @@ WorldSystem::~WorldSystem()
 		Mix_FreeMusic(background_music);
 	if (player_death_sound != nullptr)
 		Mix_FreeChunk(player_death_sound);
-	if (salmon_eat_sound != nullptr)
-		Mix_FreeChunk(salmon_eat_sound);
+	if (student_disappear_sound != nullptr)
+		Mix_FreeChunk(student_disappear_sound);
 	if (player_jump_sound != nullptr)
 		Mix_FreeChunk(player_jump_sound);
 	if (player_land_sound != nullptr)
 		Mix_FreeChunk(player_land_sound);
+	if (collect_book_sound != nullptr)
+		Mix_FreeChunk(collect_book_sound);
+	if (zombie_kill_sound != nullptr)
+		Mix_FreeChunk(zombie_kill_sound);
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -111,18 +115,21 @@ GLFWwindow* WorldSystem::create_window()
 
 	background_music = Mix_LoadMUS(audio_path("soundtrack.wav").c_str());
 	player_death_sound = Mix_LoadWAV(audio_path("player_death.wav").c_str());
-	salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav").c_str());
+	student_disappear_sound = Mix_LoadWAV(audio_path("student_disappear.wav").c_str());
 	player_jump_sound = Mix_LoadWAV(audio_path("player_jump.wav").c_str());
 	player_land_sound = Mix_LoadWAV(audio_path("player_land.wav").c_str());
+	collect_book_sound = Mix_LoadWAV(audio_path("Mario-coin-sound.wav").c_str());
+	zombie_kill_sound = Mix_LoadWAV(audio_path("splat.wav").c_str());
 
-	if (background_music == nullptr || player_death_sound == nullptr || salmon_eat_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr)
+	if (background_music == nullptr || player_death_sound == nullptr || student_disappear_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr || zombie_kill_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("soundtrack.wav").c_str(),
 			audio_path("player_death.wav").c_str(),
-			audio_path("salmon_eat.wav").c_str()),
+			audio_path("student_disappear.wav").c_str()),
 			audio_path("player_jump.wav").c_str(),
 			audio_path("player_land.wav").c_str();
+			audio_path("Mario-coin-sound.wav").c_str();
 		return nullptr;
 	}
 
@@ -269,10 +276,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 							charactersOnMovingPlat.push_back(std::make_tuple(&motion, &blockMotion)); // track collision if platform is moving down
 						}
 
-						if (motion.offGround)
-						{
-							Mix_PlayChannel(-1, player_land_sound, 0);
-						}
+						// if (motion.offGround)
+						// {
+						// 	Mix_PlayChannel(-1, player_land_sound, 0);
+						// }
 						motion.position.y = yBlockTop - motion.scale[1] / 2.f;
 						motion.velocity.y = 0.f;
 						motion.offGround = false;
@@ -538,21 +545,66 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 
 	if ((zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1))) {
 		// Zombie is on the same level as bozo
-		motion.climbing = false;
-		float direction = -1;
-		if ((bozo_motion.position.x - motion.position.x) > 0) {
-			direction = 1;
-		}
-		float speed = 100.f;
-		motion.velocity.x = direction * speed;
 
-		// If the zombie hasn't gotten to the player yet, set the appropriate direction the zombie is facing
-		if (abs(motion.position.x - bozo_motion.position.x) > 5) {
-			if (motion.velocity.x > 0) {
-				motion.reflect[0] = true;
+		if (bozo_level == 0 && zombie_level == 1 && bozo_motion.position.x < 700) {
+			float target_ladder = getClosestLadder(zombie_level - 1, bozo_motion);
+
+			if ((target_ladder - motion.position.x) > 0) {
+				motion.velocity.x = 100.f;
 			}
 			else {
-				motion.reflect[0] = false;
+				motion.velocity.x = -100.f;
+			}
+
+			// When at the ladder, start descending
+			if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f)) {
+				motion.position.x = target_ladder;
+				motion.velocity.x = 0;
+				motion.velocity.y = 200.f;
+				motion.climbing = true;
+			}
+			else {
+				motion.climbing = false;
+			}
+		}
+		else if (bozo_level == 0 && zombie_level == 0 && bozo_motion.position.x > 700 && motion.position.x < 700) {
+			float target_ladder = getClosestLadder(zombie_level, motion);
+
+			if ((target_ladder - motion.position.x) > 0) {
+				motion.velocity.x = 100.f;
+			}
+			else {
+				motion.velocity.x = -100.f;
+			}
+
+			// When at the ladder, start ascending
+			if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f)) {
+				motion.position.x = target_ladder;
+				motion.velocity.x = 0;
+				motion.velocity.y = -100.f;
+				motion.climbing = true;
+			}
+			else {
+				motion.climbing = false;
+			}
+		}
+		else {
+			motion.climbing = false;
+			float direction = -1;
+			if ((bozo_motion.position.x - motion.position.x) > 0) {
+				direction = 1;
+			}
+			float speed = 100.f;
+			motion.velocity.x = direction * speed;
+
+			// If the zombie hasn't gotten to the player yet, set the appropriate direction the zombie is facing
+			if (abs(motion.position.x - bozo_motion.position.x) > 5) {
+				if (motion.velocity.x > 0) {
+					motion.reflect[0] = true;
+				}
+				else {
+					motion.reflect[0] = false;
+				}
 			}
 		}
 	}
@@ -669,12 +721,12 @@ void WorldSystem::updateClimbing(Motion& motion, vec4 entityBB, ComponentContain
 	for (int i = 0; i < climbables.size(); i++) {
 		Motion& blockMotion = motion_container.get(climbables.entities[i]);
 
-		float xLeftBound = blockMotion.position.x - abs(motion.scale[0]) / 2.f;
-		float xRightBound = blockMotion.position.x + abs(motion.scale[0]) / 2.f;
-		float yTop = blockMotion.position.y - motion.scale[1] / 2.f;
-		float yBottom = blockMotion.position.y + motion.scale[1] / 2.f;
+		float xLeftBound = blockMotion.position.x - abs(blockMotion.scale[0]) / 2.f;
+		float xRightBound = blockMotion.position.x + abs(blockMotion.scale[0]) / 2.f;
+		float yTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
+		float yBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
 
-		if (motion.position.x  < xRightBound && motion.position.x > xLeftBound && entityBottom < yBottom && entityBottom > yTop) {
+		if (motion.position.x  < xRightBound && motion.position.x > xLeftBound && entityBottom < yBottom + 10.f && entityBottom > yTop) {
 			touchingClimbable = touchingClimbable || true;
 		}
 	}
@@ -686,7 +738,8 @@ void WorldSystem::updateClimbing(Motion& motion, vec4 entityBB, ComponentContain
 				motion.climbing = true;
 				motion.velocity.y -= 200;
 			}
-			if (player.keyPresses[3]) {
+			if (player.keyPresses[3] && !isBottomOfLadder({motion.position.x, entityBottom + 5}, motion_container)) {
+
 				motion.climbing = true;
 				motion.velocity.y += 200;
 			}
@@ -695,6 +748,24 @@ void WorldSystem::updateClimbing(Motion& motion, vec4 entityBB, ComponentContain
 	else {
 		motion.climbing = false;
 	}
+}
+
+bool WorldSystem::isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& motion_container) {
+	auto& climbables = registry.climbables;
+
+	for (int i = 0; i < climbables.size(); i++) {
+		Motion& blockMotion = motion_container.get(climbables.entities[i]);
+
+		float xLeftBound = blockMotion.position.x - abs(blockMotion.scale[0]) / 2.f;
+		float xRightBound = blockMotion.position.x + abs(blockMotion.scale[0]) / 2.f;
+		float yTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
+		float yBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
+
+		if (nextPos[0]  < xRightBound && nextPos[0] > xLeftBound && nextPos[1] < yBottom && nextPos[1] > yTop) {
+			return false;
+		}
+	}
+	return true;
 }
 
 // Reset the world state to its initial state
@@ -765,7 +836,7 @@ void WorldSystem::restart_game()
 	Entity wall5 = createWall(renderer, { window_width_px - 100.f, window_height_px * 0.4 - 20 }, window_height_px * 0.4 + 70.f);
 
 	// Create climbables
-	std::vector<Entity> ladder0 = createClimbable(renderer, { PLATFORM_WIDTH * 9, window_height_px * 0.8 }, 5);
+	std::vector<Entity> ladder0 = createClimbable(renderer, { PLATFORM_WIDTH * 9, window_height_px * 0.795 }, 5);
 	std::vector<Entity> ladder1 = createClimbable(renderer, { PLATFORM_WIDTH * 7, window_height_px * 0.6 }, 5);
 	std::vector<Entity> ladder2 = createClimbable(renderer, { window_width_px - PLATFORM_WIDTH * 6, window_height_px * 0.6 }, 5);
 	std::vector<Entity> ladder3 = createClimbable(renderer, { PLATFORM_WIDTH * 4, window_height_px * 0.2 }, 10);
@@ -862,14 +933,19 @@ void WorldSystem::handle_collisions()
 			{
 				if (!registry.deathTimers.has(entity))
 				{
-					// spawn book at the same position as the student and collect it
-					Motion& m = registry.motions.get(entity_other);
-					Entity book = createBook(renderer, m.position);
-					Book& b = registry.books.get(book);
-					b.offHand = false;
-					++points;
+					// random chance of spawning book at the same position as the "saved" student, plays different sound if a book is spawned
+					int spawn_book = rng() % 2; // 0 or 1
+					if (spawn_book) {
+						Motion& m = registry.motions.get(entity_other);
+						Entity book = createBook(renderer, m.position);
+						Book& b = registry.books.get(book);
+						b.offHand = false;
+						++points;
+						Mix_PlayChannel(-1, collect_book_sound, 0);
+					} else {
+					}
 					registry.remove_all_components_of(entity_other);
-					Mix_PlayChannel(-1, salmon_eat_sound, 0);
+					Mix_PlayChannel(-1, student_disappear_sound, 0);
 				}
 			}
 			// Check Player - Book collisions
@@ -922,6 +998,7 @@ void WorldSystem::handle_collisions()
 			Motion& motion_book = registry.motions.get(entity);
 			// Only collide when book is in air
 			if (motion_book.offGround == true) {
+				Mix_PlayChannel(-1, zombie_kill_sound, 0);
 				registry.remove_all_components_of(entity);
 				registry.remove_all_components_of(entity_other);
 			}
@@ -973,7 +1050,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		if (key == GLFW_KEY_SPACE && !motion.offGround)
 		{
 			motion.offGround = true;
-			motion.velocity[1] -= 200;
+			motion.velocity[1] -= 300;
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 	}
