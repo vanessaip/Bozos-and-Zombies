@@ -1058,7 +1058,7 @@ void WorldSystem::on_mouse_button(int button, int action, int mod) {
 
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
-		printf("xpos: %f, ypos: %f\n", xpos, ypos);
+		// printf("xpos: %f, ypos: %f\n", xpos, ypos);
 
 		if (xpos > 1365 && xpos < 1397 && ypos < 47 && ypos > 13 && registry.textboxes.size() > 0) {
 			registry.remove_all_components_of(registry.textboxes.entities.back());
