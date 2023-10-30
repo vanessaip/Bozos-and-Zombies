@@ -774,22 +774,17 @@ void WorldSystem::restart_game()
 	// Create zombie (one starter zombie per level?)
 	Entity zombie = createZombie(renderer, ZOMBIE_START_POS[curr_level]);
 
-	// Create student
-	Entity student = createStudent(renderer, { 1000, 440 });
-	registry.colors.insert(student, { 1, 0.8f, 0.8f });
-
-	// Setting random initial position and constant velocity
-	Motion& student_motion = registry.motions.get(student);
-	/*student_motion.position =
-		vec2(window_width_px / 2.f,
-			50.f + uniform_dist(rng) * (window_height_px - 100.f));
-	student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 200.f : -200.f;*/
-
-	// Create book
-	Entity book = createBook(renderer, { 500, 500 });
-	Motion& book_motion = registry.motions.get(book);
-	book_motion.velocity = { 0.f, 0.f };
-	book_motion.offGround = false;
+	// Create students
+	Entity student0 = createStudent(renderer, { 1000, 440 });
+	registry.colors.insert(student0, { 1, 0.8f, 0.8f });
+	Entity student1 = createStudent(renderer, { 300, 440 });
+	registry.colors.insert(student1, { 1, 0.8f, 0.8f });
+	Entity student2 = createStudent(renderer, { 1000, window_height_px*0.8-50.f });
+	registry.colors.insert(student2, { 1, 0.8f, 0.8f });
+	Entity student3 = createStudent(renderer, { 400, window_height_px*0.4-50.f });
+	registry.colors.insert(student3, { 1, 0.8f, 0.8f });
+	Entity student4 = createStudent(renderer, { 600, window_height_px*0.2-50.f });
+	registry.colors.insert(student4, { 1, 0.8f, 0.8f });
 
 	setup_keyframes(renderer);
 
@@ -851,10 +846,14 @@ void WorldSystem::handle_collisions()
 			{
 				if (!registry.deathTimers.has(entity))
 				{
-					// chew, count points, and set the LightUp timer
+					// spawn book at the same position as the student and collect it
+					Motion& m = registry.motions.get(entity_other);
+					Entity book = createBook(renderer, m.position);
+					Book& b = registry.books.get(book);
+					b.offHand = false;
+					++points;
 					registry.remove_all_components_of(entity_other);
 					Mix_PlayChannel(-1, salmon_eat_sound, 0);
-					// !!! TODO: just colliding with other students immunizes them or require keyboard input from user?
 				}
 			}
 			else if (registry.books.has(entity_other)) {
