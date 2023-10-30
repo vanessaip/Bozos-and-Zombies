@@ -49,11 +49,16 @@ Entity createBook(RenderSystem* renderer, vec2 position);
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 
-// This stores the zombie's starting position
-const std::vector<vec2> ZOMBIE_START_POS = { { 1200, 440} };
+// This stores the zombies's starting position
+const std::vector<std::vector<vec2>> ZOMBIE_START_POS = { { { 1200, 600 }, { 200, 440 }, { window_width_px - 200.f, 120.f}, {300, 440} } }; //{300, 440}, {200, 280}
+const std::vector<std::vector<vec2>> STUDENT_START_POS = { { { 1000, 440 }, { 300, 440 }, { 900, 280 }, {400, window_height_px * 0.4 - 50.f}, {600, window_height_px * 0.2 - 50.f}} };
 
 // This stores level heights from bottom to top
 const std::vector<std::vector<float>> FLOOR_DEFINITIONS = { {760, 600, 440, 280, 120} };
 const std::vector<std::vector<float>> ZOMBIE_FLOOR_TRAVERSE_POINTS = { {760, 600, 440, 280, 120} };
+
+// player starting position
+const std::vector<vec2> BOZO_STARTING_POS = { {500, window_height_px * 0.8 - 50.f } };
+const std::vector<vec2> ENEMY_SPAWN_POS = { {  window_width_px - 100.f, 120.f } };
 
 

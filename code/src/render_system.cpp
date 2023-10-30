@@ -299,7 +299,13 @@ mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 	{
 		// inerpolate camera "position" to get smooth movement
 		float nextLeft = (playerMotion.position.x + playerMotion.velocity.x * 2.f * elapsed_time_ms / 1000.f - (screen_width_px / 2.0)) + camera.xOffset;
-		left = left + (nextLeft - left) * (camera.timer_ms_x / camera.timer_stop_ms);
+		if (camera.timer_ms_x / camera.timer_stop_ms < 1.f)
+			left = left + (nextLeft - left) * (camera.timer_ms_x / camera.timer_stop_ms);
+		else
+		{
+			left = nextLeft;
+			camera.timer_ms_x = 0.f;
+		}
 
 		camera.timer_ms_x += elapsed_time_ms;
 		camera.shiftHorizontal = false;
@@ -350,12 +356,30 @@ mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
 }
 
-void RenderSystem::resetCamera() 
+void RenderSystem::resetCamera(vec2 defaultPos) 
 {
+	/*
+	camera.left = max<float>((defaultPos.x - (screen_width_px / 2.0)) + camera.xOffset, 0);
+	camera.right = min<float>(camera.left + screen_width_px, window_width_px * 1.f);
+	if (camera.right == window_width_px * 1.f)
+		camera.left = camera.right - screen_width_px;
+
+	camera.top = max(camera.top, 0.f);
+	camera.bottom = min<float>(camera.top + screen_height_px, window_height_px * 1.f);
+	if (camera.bottom == window_height_px * 1.f)
+		camera.top = camera.bottom - screen_height_px;
+	*/
 	camera.left = 0.f;
 	camera.top = 0.f;
-	camera.right = screen_width_px;
-	camera.bottom = screen_height_px;
+	camera.right = camera.left + screen_width_px;
+	camera.bottom = camera.top + screen_height_px;
+
+	camera.timer_ms_x = 0.f;
+	camera.timer_ms_y = 0.f;
+}
+
+vec4 RenderSystem::getCameraBounds() {
+	return { camera.left, camera.top, camera.right, camera.bottom };
 }
 
 void RenderSystem::resetSpriteSheetTracker() {
