@@ -33,6 +33,8 @@ WorldSystem::~WorldSystem()
 		Mix_FreeChunk(player_jump_sound);
 	if (player_land_sound != nullptr)
 		Mix_FreeChunk(player_land_sound);
+	if (collect_book_sound != nullptr)
+		Mix_FreeChunk(collect_book_sound);
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -114,8 +116,9 @@ GLFWwindow* WorldSystem::create_window()
 	salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav").c_str());
 	player_jump_sound = Mix_LoadWAV(audio_path("player_jump.wav").c_str());
 	player_land_sound = Mix_LoadWAV(audio_path("player_land.wav").c_str());
+	collect_book_sound = Mix_LoadWAV(audio_path("Mario-coin-sound.wav").c_str());
 
-	if (background_music == nullptr || player_death_sound == nullptr || salmon_eat_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr)
+	if (background_music == nullptr || player_death_sound == nullptr || salmon_eat_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("soundtrack.wav").c_str(),
@@ -123,6 +126,7 @@ GLFWwindow* WorldSystem::create_window()
 			audio_path("salmon_eat.wav").c_str()),
 			audio_path("player_jump.wav").c_str(),
 			audio_path("player_land.wav").c_str();
+			audio_path("Mario-coin-sound.wav").c_str();
 		return nullptr;
 	}
 
@@ -860,14 +864,19 @@ void WorldSystem::handle_collisions()
 			{
 				if (!registry.deathTimers.has(entity))
 				{
-					// spawn book at the same position as the student and collect it
-					Motion& m = registry.motions.get(entity_other);
-					Entity book = createBook(renderer, m.position);
-					Book& b = registry.books.get(book);
-					b.offHand = false;
-					++points;
+					// random chance of spawning book at the same position as the "saved" student, plays different sound if a book is spawned
+					int spawn_book = rng() % 2; // 0 or 1
+					if (spawn_book) {
+						Motion& m = registry.motions.get(entity_other);
+						Entity book = createBook(renderer, m.position);
+						Book& b = registry.books.get(book);
+						b.offHand = false;
+						++points;
+						Mix_PlayChannel(-1, collect_book_sound, 0);
+					} else {
+						Mix_PlayChannel(-1, salmon_eat_sound, 0);
+					}
 					registry.remove_all_components_of(entity_other);
-					Mix_PlayChannel(-1, salmon_eat_sound, 0);
 				}
 			}
 			// Check Player - Book collisions
