@@ -697,12 +697,12 @@ void WorldSystem::updateClimbing(Motion& motion, vec4 entityBB, ComponentContain
 	for (int i = 0; i < climbables.size(); i++) {
 		Motion& blockMotion = motion_container.get(climbables.entities[i]);
 
-		float xLeftBound = blockMotion.position.x - abs(motion.scale[0]) / 2.f;
-		float xRightBound = blockMotion.position.x + abs(motion.scale[0]) / 2.f;
-		float yTop = blockMotion.position.y - motion.scale[1] / 2.f;
-		float yBottom = blockMotion.position.y + motion.scale[1] / 2.f;
+		float xLeftBound = blockMotion.position.x - abs(blockMotion.scale[0]) / 2.f;
+		float xRightBound = blockMotion.position.x + abs(blockMotion.scale[0]) / 2.f;
+		float yTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
+		float yBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
 
-		if (motion.position.x  < xRightBound && motion.position.x > xLeftBound && entityBottom < yBottom && entityBottom > yTop) {
+		if (motion.position.x  < xRightBound && motion.position.x > xLeftBound && entityBottom < yBottom + 10.f && entityBottom > yTop) {
 			touchingClimbable = touchingClimbable || true;
 		}
 	}
@@ -714,7 +714,8 @@ void WorldSystem::updateClimbing(Motion& motion, vec4 entityBB, ComponentContain
 				motion.climbing = true;
 				motion.velocity.y -= 200;
 			}
-			if (player.keyPresses[3]) {
+			if (player.keyPresses[3] && !isBottomOfLadder({motion.position.x, entityBottom + 5}, motion_container)) {
+
 				motion.climbing = true;
 				motion.velocity.y += 200;
 			}
@@ -723,6 +724,24 @@ void WorldSystem::updateClimbing(Motion& motion, vec4 entityBB, ComponentContain
 	else {
 		motion.climbing = false;
 	}
+}
+
+bool WorldSystem::isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& motion_container) {
+	auto& climbables = registry.climbables;
+
+	for (int i = 0; i < climbables.size(); i++) {
+		Motion& blockMotion = motion_container.get(climbables.entities[i]);
+
+		float xLeftBound = blockMotion.position.x - abs(blockMotion.scale[0]) / 2.f;
+		float xRightBound = blockMotion.position.x + abs(blockMotion.scale[0]) / 2.f;
+		float yTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
+		float yBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
+
+		if (nextPos[0]  < xRightBound && nextPos[0] > xLeftBound && nextPos[1] < yBottom && nextPos[1] > yTop) {
+			return false;
+		}
+	}
+	return true;
 }
 
 // Reset the world state to its initial state
@@ -793,7 +812,7 @@ void WorldSystem::restart_game()
 	Entity wall5 = createWall(renderer, { window_width_px - 100.f, window_height_px * 0.4 - 20 }, window_height_px * 0.4 + 70.f);
 
 	// Create climbables
-	std::vector<Entity> ladder0 = createClimbable(renderer, { PLATFORM_WIDTH * 9, window_height_px * 0.794 }, 5);
+	std::vector<Entity> ladder0 = createClimbable(renderer, { PLATFORM_WIDTH * 9, window_height_px * 0.795 }, 5);
 	std::vector<Entity> ladder1 = createClimbable(renderer, { PLATFORM_WIDTH * 7, window_height_px * 0.6 }, 5);
 	std::vector<Entity> ladder2 = createClimbable(renderer, { window_width_px - PLATFORM_WIDTH * 6, window_height_px * 0.6 }, 5);
 	std::vector<Entity> ladder3 = createClimbable(renderer, { PLATFORM_WIDTH * 4, window_height_px * 0.2 }, 10);
