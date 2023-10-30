@@ -78,9 +78,11 @@ private:
 	// music references
 	Mix_Music* background_music;
 	Mix_Chunk* player_death_sound;
-	Mix_Chunk* salmon_eat_sound;
+	Mix_Chunk* student_disappear_sound;
 	Mix_Chunk* player_jump_sound;
 	Mix_Chunk* player_land_sound;
+	Mix_Chunk* collect_book_sound;
+	Mix_Chunk* zombie_kill_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;
