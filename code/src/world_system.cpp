@@ -27,8 +27,8 @@ WorldSystem::~WorldSystem()
 		Mix_FreeMusic(background_music);
 	if (player_death_sound != nullptr)
 		Mix_FreeChunk(player_death_sound);
-	if (salmon_eat_sound != nullptr)
-		Mix_FreeChunk(salmon_eat_sound);
+	if (student_disappear_sound != nullptr)
+		Mix_FreeChunk(student_disappear_sound);
 	if (player_jump_sound != nullptr)
 		Mix_FreeChunk(player_jump_sound);
 	if (player_land_sound != nullptr)
@@ -115,18 +115,18 @@ GLFWwindow* WorldSystem::create_window()
 
 	background_music = Mix_LoadMUS(audio_path("soundtrack.wav").c_str());
 	player_death_sound = Mix_LoadWAV(audio_path("player_death.wav").c_str());
-	salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav").c_str());
+	student_disappear_sound = Mix_LoadWAV(audio_path("student_disappear.wav").c_str());
 	player_jump_sound = Mix_LoadWAV(audio_path("player_jump.wav").c_str());
 	player_land_sound = Mix_LoadWAV(audio_path("player_land.wav").c_str());
 	collect_book_sound = Mix_LoadWAV(audio_path("Mario-coin-sound.wav").c_str());
 	zombie_kill_sound = Mix_LoadWAV(audio_path("splat.wav").c_str());
 
-	if (background_music == nullptr || player_death_sound == nullptr || salmon_eat_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr || zombie_kill_sound == nullptr)
+	if (background_music == nullptr || player_death_sound == nullptr || student_disappear_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr || zombie_kill_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("soundtrack.wav").c_str(),
 			audio_path("player_death.wav").c_str(),
-			audio_path("salmon_eat.wav").c_str()),
+			audio_path("student_disappear.wav").c_str()),
 			audio_path("player_jump.wav").c_str(),
 			audio_path("player_land.wav").c_str();
 			audio_path("Mario-coin-sound.wav").c_str();
@@ -276,10 +276,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 							charactersOnMovingPlat.push_back(std::make_tuple(&motion, &blockMotion)); // track collision if platform is moving down
 						}
 
-						if (motion.offGround)
-						{
-							Mix_PlayChannel(-1, player_land_sound, 0);
-						}
+						// if (motion.offGround)
+						// {
+						// 	Mix_PlayChannel(-1, player_land_sound, 0);
+						// }
 						motion.position.y = yBlockTop - motion.scale[1] / 2.f;
 						motion.velocity.y = 0.f;
 						motion.offGround = false;
@@ -877,9 +877,9 @@ void WorldSystem::handle_collisions()
 						++points;
 						Mix_PlayChannel(-1, collect_book_sound, 0);
 					} else {
-						Mix_PlayChannel(-1, salmon_eat_sound, 0);
 					}
 					registry.remove_all_components_of(entity_other);
+					Mix_PlayChannel(-1, student_disappear_sound, 0);
 				}
 			}
 			// Check Player - Book collisions
