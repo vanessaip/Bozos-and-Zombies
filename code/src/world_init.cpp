@@ -83,6 +83,8 @@ Entity createZombie(RenderSystem* renderer, vec2 position)
 	// Setting initial values, scale is negative to make it face the opposite way
 	motion.scale = vec2({ -ZOMBIE_BB_WIDTH, ZOMBIE_BB_HEIGHT });
 
+	motion.speedMultiplier = 1 + 0.1 * sin(rand());
+
 	// Create and (empty) Zombie component to be able to refer to all zombies
 	registry.zombies.emplace(entity);
 	std::vector<int> spriteCounts = { 8, 6, 5 };
