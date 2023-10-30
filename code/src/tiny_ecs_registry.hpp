@@ -12,8 +12,10 @@ class ECSRegistry
 public:
 	// Manually created list of all components this game has
 	// TODO: A1 add a LightUp component
-	ComponentContainer<KeyframeAnimation> animations;
+	ComponentContainer<SpriteSheet> spriteSheets;
+	ComponentContainer<KeyframeAnimation> keyframeAnimations;
 	ComponentContainer<DeathTimer> deathTimers;
+	ComponentContainer<InfectTimer> infectTimers;
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
 	ComponentContainer<Player> players;
@@ -28,14 +30,19 @@ public:
 	ComponentContainer<Platform> platforms;
 	ComponentContainer<Background> backgrounds;
 	ComponentContainer<Wall> walls;
+	ComponentContainer<Spike> spikes;
+	ComponentContainer<Climbable> climbables;
+	ComponentContainer<Book> books;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
 		// TODO: A1 add a LightUp component
-		registry_list.push_back(&animations);
+		registry_list.push_back(&spriteSheets);
+		registry_list.push_back(&keyframeAnimations);
 		registry_list.push_back(&deathTimers);
+		registry_list.push_back(&infectTimers);
 		registry_list.push_back(&motions);
 		registry_list.push_back(&collisions);
 		registry_list.push_back(&players);
@@ -50,6 +57,9 @@ public:
 		registry_list.push_back(&platforms);
 		registry_list.push_back(&backgrounds);
 		registry_list.push_back(&walls);
+		registry_list.push_back(&spikes);
+		registry_list.push_back(&climbables);
+		registry_list.push_back(&books);
 	}
 
 	void clear_all_components() {

@@ -37,10 +37,19 @@ public:
 
 	// Should the game be over ?
 	bool is_over()const;
+
+	void updateZombieMovement(Motion& motion, Motion& bozo_motion, Entity& zombie);
+
+	void updateClimbing(Motion& motion, vec4 entityBB, ComponentContainer<Motion>& motion_container);
+
+	int checkLevel(Motion& motion);
+
+	float getClosestLadder(int zombie_level, Motion& bozo_motion);
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
+	void on_mouse_button(int button, int action, int mod);
 
 	// Sets up keyframe interpolation for given entity
 	void setup_keyframes(RenderSystem* rendered);
@@ -59,6 +68,10 @@ private:
 	float current_speed;
 	Entity player_bozo;
 	Entity player_bozo_pointer;
+
+	// Level definitions
+	std::vector<float> floor_positions;
+	std::vector<std::vector<float>> ladder_positions;
 
 	// music references
 	Mix_Music* background_music;
