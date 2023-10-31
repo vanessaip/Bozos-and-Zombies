@@ -304,7 +304,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				float yBlockTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
 				float yBlockBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
 
-				// Add this check so that the player can pass through platforms when on a ladder
+				// Add this check so that the player can pass through platforms when on a ladderd
 				if (!motion.climbing)
 				{
 					// Collision with Top of block
@@ -312,11 +312,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 						entityRightSide > xBlockLeftBound && entityLeftSide < xBlockRightBound)
 					{
 						// Move character with moving block
-						if (registry.keyframeAnimations.has(blocks[i]))
-						{
-							motion.position.x += blockMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
-							charactersOnMovingPlat.push_back(std::make_tuple(&motion, &blockMotion)); // track collision if platform is moving down
-						}
+						//if (registry.keyframeAnimations.has(blocks[i]))
+						//{
+						//	motion.position.x += blockMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
+						//	charactersOnMovingPlat.push_back(std::make_tuple(&motion, &blockMotion)); // track collision if platform is moving down
+						//}
 
 						// if (motion.offGround)
 						// {
@@ -1038,6 +1038,9 @@ void WorldSystem::restart_game()
 		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
 	}
 
+	// Place food
+	Entity burger = createFood(renderer, { 500, 500 }, TEXTURE_ASSET_ID::BURGER, {30, 30});
+
 	setup_keyframes(renderer);
 
 	points = 0;
@@ -1394,22 +1397,22 @@ void WorldSystem::setup_keyframes(RenderSystem *rendered)
 	// TODO(vanessa): currently all platforms using same Motion frames are stacked on top of each other, fix to make adjacent
 	// 					need to add walls or some other method of preventing characters from going under moving platforms
 	//					reconcile behaviour of moving platforms passing through static platforms
-	/*std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
-	Motion m1 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.8));
+	std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
+	/*Motion m1 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.8));
 	Motion m2 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.2));
 	std::vector<Motion> frames = { m1, m2 };
 
 	for (uint i = 0; i < moving_plat.size(); i++) {
 		Entity currplat = moving_plat[i];
 		registry.keyframeAnimations.emplace(currplat, KeyframeAnimation((int)frames.size(), 3000.f, true, frames));
-	}
+	}*/
 
 	std::vector<Entity> moving_plat2 = createPlatforms(renderer, { 0.f, 0.f }, 7);
-	Motion m3 = Motion(vec2(PLATFORM_WIDTH * 6, window_height_px * 0.8));
-	Motion m4 = Motion(vec2(PLATFORM_WIDTH * 6, window_height_px * 0.2));
+	Motion m3 = Motion(vec2(PLATFORM_WIDTH * 9.2, window_height_px * 0.6));
+	Motion m4 = Motion(vec2(PLATFORM_WIDTH * 9.2, window_height_px * 0.4));
 	std::vector<Motion> frames2 = { m3, m4 };
 
 	for (uint i = 0; i < moving_plat2.size(); i++) {
-		registry.keyframeAnimations.emplace(moving_plat2[i], KeyframeAnimation((int)frames.size(), 2000.f, true, frames2));
-	}*/
+		registry.keyframeAnimations.emplace(moving_plat2[i], KeyframeAnimation((int)frames2.size(), 2000.f, true, frames2));
+	}
 }

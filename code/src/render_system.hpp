@@ -50,6 +50,12 @@ class RenderSystem {
 		textures_path("Ladder3.png"),
 		textures_path("book.png"),
 		textures_path("tutorial1.png"),
+		textures_path("burger.png"),
+		textures_path("muffin.png"),
+		textures_path("noodles.png"),
+		textures_path("onigiri.png"),
+		textures_path("pizza.png"),
+		textures_path("soda.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

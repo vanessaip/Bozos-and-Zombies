@@ -406,3 +406,27 @@ Entity createTextBox(RenderSystem* renderer, vec2 position, std::string text, ve
 
 	return entity;
 }
+
+Entity createFood(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID food, vec2 scale)
+{
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	// Create an (empty) Book component to be able to refer to all books
+	registry.renderRequests.insert(
+		entity,
+		{ food,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
