@@ -186,8 +186,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 		auto &platforms = registry.platforms;
 		auto &walls = registry.walls;
-		bool isHuman = registry.humans.has(motion_container.entities[i]);
 		bool isNPC = registry.humans.has(motion_container.entities[i]) && !registry.players.has(motion_container.entities[i]);
+		bool isPlayer = registry.players.has(motion_container.entities[i]);
+		bool isHuman = isNPC || isPlayer;
 		bool isZombie = registry.zombies.has(motion_container.entities[i]);
 		bool isBook = registry.books.has(motion_container.entities[i]);
 
@@ -211,13 +212,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			float entityLeftSide = motion.position.x - abs(motion.scale[0]) / 2.f;
 			float entityBottom = motion.position.y + motion.scale[1] / 2.f;
 			float entityTop = motion.position.y - motion.scale[1] / 2.f;
-
-			if (isNPC) {
-				float entityRightSide = motion.position.x + abs(motion.scale[0]) / 2.f;
-				float entityLeftSide = motion.position.x - abs(motion.scale[0]) / 2.f;
-				float entityBottom = motion.position.y + motion.scale[1] / 2.f;
-				float entityTop = motion.position.y - motion.scale[1] / 2.f;
-			}
 
 			vec4 entityBB = {entityRightSide, entityLeftSide, entityBottom, entityTop};
 
@@ -371,13 +365,23 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				motion.offGround = offAll;
 			}
 
-			if (registry.humans.has(motion_container.entities[i]))
+			if (isNPC && offAll && !registry.infectTimers.has(motion_container.entities[i])) {
+				if (motion.velocity.x > 0) {
+					motion.position.x -= 10.f;
+				}
+				else {
+					motion.position.x += 10.f;
+				}
+				motion.velocity.x = -motion.velocity.x;
+			}
+
+			if (isPlayer)
 			{
 				updateClimbing(motion, entityBB, motion_container);
 			}
 		}
 
-		if (registry.humans.has(motion_container.entities[i]) && !registry.players.has(motion_container.entities[i]))
+		if (isNPC)
 		{
 			if (motion.velocity.x < 0)
 			{
@@ -392,7 +396,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		{
 			if (motion.position.x + abs(motion.scale.x) < 0.f)
 			{
-				if (!registry.players.has(motion_container.entities[i])) // don't remove the player
+				if (isNPC) // don't remove the player
 					registry.remove_all_components_of(motion_container.entities[i]);
 			}
 		}
@@ -968,7 +972,7 @@ void WorldSystem::restart_game()
 	registry.colors.insert(student0, {1, 0.8f, 0.8f});
 	Entity student1 = createStudent(renderer, {300, 440});
 	registry.colors.insert(student1, {1, 0.8f, 0.8f});
-	Entity student2 = createStudent(renderer, {1000, window_height_px * 0.8 - 50.f});
+	Entity student2 = createStudent(renderer, {1100, window_height_px * 0.8 - 50.f});
 	registry.colors.insert(student2, {1, 0.8f, 0.8f});
 	Entity student3 = createStudent(renderer, {400, window_height_px * 0.4 - 50.f});
 	registry.colors.insert(student3, {1, 0.8f, 0.8f});
