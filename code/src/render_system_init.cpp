@@ -20,6 +20,7 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1); // vsync
+	glfwSetWindowAspectRatio(window, window_width_px, window_height_px);
 
 	// Load OpenGL function pointers
 	const int is_fine = gl3w_init();
@@ -328,3 +329,9 @@ bool loadEffectFromFile(
 	return true;
 }
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{	
+	// glfwMakeContextCurrent(window);
+	// float h = ((float)width)*aspect_ratio;
+	// glViewport(0, 0, width, h);
+}
