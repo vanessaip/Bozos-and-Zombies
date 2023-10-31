@@ -1026,8 +1026,21 @@ void WorldSystem::restart_game()
 		createZombie(renderer, pos);
 
 	// Create students
+<<<<<<< HEAD
 	for (vec2 pos : STUDENT_START_POS[curr_level])
 		createStudent(renderer, pos);
+=======
+	Entity student0 = createStudent(renderer, {1000, 440});
+	registry.colors.insert(student0, {1, 0.8f, 0.8f});
+	Entity student1 = createStudent(renderer, {300, 440});
+	registry.colors.insert(student1, {1, 0.8f, 0.8f});
+	Entity student2 = createStudent(renderer, {1100, window_height_px * 0.8 - 50.f});
+	registry.colors.insert(student2, {1, 0.8f, 0.8f});
+	Entity student3 = createStudent(renderer, {400, window_height_px * 0.4 - 50.f});
+	registry.colors.insert(student3, {1, 0.8f, 0.8f});
+	Entity student4 = createStudent(renderer, {600, window_height_px * 0.2 - 50.f});
+	registry.colors.insert(student4, {1, 0.8f, 0.8f});
+>>>>>>> main
 
 	for (Entity student : registry.humans.entities)
 	{
