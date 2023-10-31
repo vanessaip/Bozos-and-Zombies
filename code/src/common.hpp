@@ -34,12 +34,12 @@ inline std::string mesh_path(const std::string& name) {return data_path() + "/me
 const int window_width_px = 1440;
 const int window_height_px = 810;
 
-//const int screen_width_px = 720;
-//const int screen_height_px = 405;
+const int screen_width_px = 720;
+const int screen_height_px = 405;
 
 // For debugging
-const int screen_width_px = window_width_px;
-const int screen_height_px = window_height_px;
+//const int screen_width_px = window_width_px;
+//const int screen_height_px = window_height_px;
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f

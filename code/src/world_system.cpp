@@ -154,6 +154,9 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
+	if (registry.zombies.entities.size() < 1)
+		restart_game(); // level is over
+
 	// Updating window title with points
 	std::stringstream title_ss;
 	title_ss << "Books: " << points;
@@ -170,15 +173,47 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
 
-	Player &player = registry.players.get(player_bozo);
+	// generate new zombie every 20s
+	enemySpawnTimer += elapsed_ms_since_last_update;
+	npcSpawnTimer += elapsed_ms_since_last_update;
+	vec4 cameraBounds = renderer->getCameraBounds();;
+	if (enemySpawnTimer / 1000.f > 25) {
+		vec2 enemySpawnPos;
+		vec4 cameraBounds = renderer->getCameraBounds();;
+		do
+		{
+			if (enemySpawnIndex >= ZOMBIE_START_POS[curr_level].size())
+				enemySpawnIndex = 0;
+
+			enemySpawnPos = ZOMBIE_START_POS[curr_level][enemySpawnIndex];
+		} while (enemySpawnPos.x > cameraBounds[0] && enemySpawnPos.x < cameraBounds[3]
+			&& enemySpawnPos.y > cameraBounds[1] && enemySpawnPos.y < cameraBounds[4]); // ensure new student is spawned off screen
+
+		createZombie(renderer, enemySpawnPos);
+		enemySpawnTimer = 0.f;
+	}
+	if (npcSpawnTimer / 1000.f > 10) {
+		vec2 studentSpawnPos;
+		do
+		{
+			if (npcSpawnIndex >= STUDENT_START_POS[curr_level].size())
+				npcSpawnIndex = 0;
+
+			studentSpawnPos = STUDENT_START_POS[curr_level][npcSpawnIndex];
+		} 
+		while (studentSpawnPos.x > cameraBounds[0] && studentSpawnPos.x < cameraBounds[3]
+			&& studentSpawnPos.y > cameraBounds[1] && studentSpawnPos.y < cameraBounds[4]); // ensure new student is spawned off screen
+
+		Entity student = createStudent(renderer, studentSpawnPos);
+		Motion& student_motion = registry.motions.get(student);
+		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+		npcSpawnTimer = 0.f;
+	}
+
+	Player& player = registry.players.get(player_bozo);
 
 	Motion &bozo_motion = registry.motions.get(player_bozo);
 	std::vector<std::tuple<Motion *, Motion *>> charactersOnMovingPlat = {};
-
-	if (bozo_motion.velocity.x > 0)
-		bozo_motion.scale.x = BOZO_BB_WIDTH;
-	else if (bozo_motion.velocity.x < 0)
-		bozo_motion.scale.x = -BOZO_BB_WIDTH;
 
 	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i)
 	{
@@ -667,6 +702,7 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 			float speed = ZOMBIE_SPEED;
 			motion.velocity.x = direction * speed;
 
+			/*
 			// If the zombie hasn't gotten to the player yet, set the appropriate direction the zombie is facing
 			if (abs(motion.position.x - bozo_motion.position.x) > 5)
 			{
@@ -679,6 +715,7 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 					motion.reflect[0] = false;
 				}
 			}
+			*/
 		}
 	}
 	else if (zombie_level < bozo_level)
@@ -745,12 +782,22 @@ void WorldSystem::updateZombieMovement(Motion &motion, Motion &bozo_motion, Enti
 		{
 			motion.climbing = false;
 		}
+	
 	}
+
+	// update zombie direction
+	if (motion.velocity.x > 0 && (zombie_level != bozo_level || abs(motion.position.x - bozo_motion.position.x) > 5)) {
+		motion.reflect[0] = true;
+	}
+	else {
+		motion.reflect[0] = false;
+	}
+	
 
 	// update sprite animation depending on distance to player
 	SpriteSheet &zombieSheet = registry.spriteSheets.get(zombie);
 	float length = sqrt(abs(motion.position.x - bozo_motion.position.x) + abs(motion.position.y - bozo_motion.position.y));
-	if (length < 75.f)
+	if (length < 10.f)
 		zombieSheet.updateAnimation(ANIMATION_MODE::ATTACK);
 	else
 		zombieSheet.updateAnimation(ANIMATION_MODE::RUN);
@@ -875,13 +922,15 @@ bool WorldSystem::isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion> &mot
 // Reset the world state to its initial state
 void WorldSystem::restart_game()
 {
-	int curr_level = 0;
+	curr_level = 0;
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 	printf("Restarting\n");
 
-	// Reset the game speed
+	// Reset the game state variables
 	current_speed = 1.f;
+	enemySpawnTimer = 0.f;
+	npcSpawnTimer = 0.f;
 
 	// Reset sprite sheet buffer index
 
@@ -894,7 +943,7 @@ void WorldSystem::restart_game()
 	registry.list_all_components();
 
 	// reset camera on restart
-	renderer->resetCamera();
+	renderer->resetCamera(BOZO_STARTING_POS[curr_level]);
 	renderer->resetSpriteSheetTracker();
 
 	// Create background first (painter's algorithm for rendering)
@@ -957,30 +1006,31 @@ void WorldSystem::restart_game()
 		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 9}};
 
 	// Create spikes
-	Entity spike1 = createSpike(renderer, {260, 625});
-	registry.colors.insert(spike1, {0.5f, 0.5f, 0.5f});
+	Entity spike1 = createSpike(renderer, { 260.f, 625.f });
+	Entity spike2 = createSpike(renderer, { 50.f , window_height_px - 5.f });
+	Entity spike3 = createSpike(renderer, { 150.f , window_height_px - 5.f });
+	Entity spike4 = createSpike(renderer, { window_width_px - 50.f , window_height_px - 5.f});
+	Entity spike5 = createSpike(renderer, { window_width_px - 150.f , window_height_px - 5.f });
+	registry.colors.insert(spike1, { 0.5f, 0.5f, 0.5f });
+	registry.colors.insert(spike2, { 0.5f, 0.5f, 0.5f });
+	registry.colors.insert(spike3, { 0.5f, 0.5f, 0.5f });
+	registry.colors.insert(spike4, { 0.5f, 0.5f, 0.5f });
+	registry.colors.insert(spike5, { 0.5f, 0.5f, 0.5f });
 
 	// Create a new Bozo player
-	player_bozo = createBozo(renderer, {500, window_height_px * 0.8 - 50.f});
-	registry.colors.insert(player_bozo, {1, 0.8f, 0.8f});
-	Motion &bozo_motion = registry.motions.get(player_bozo);
-	bozo_motion.velocity = {0.f, 0.f};
+	player_bozo = createBozo(renderer, BOZO_STARTING_POS[curr_level]);
+	registry.colors.insert(player_bozo, { 1, 0.8f, 0.8f });
+	Motion& bozo_motion = registry.motions.get(player_bozo);
+	bozo_motion.velocity = { 0.f, 0.f };
 
 	player_bozo_pointer = createBozoPointer(renderer, {200, 500});
 	// Create zombie (one starter zombie per level?)
-	Entity zombie = createZombie(renderer, ZOMBIE_START_POS[curr_level]);
+	for(vec2 pos : ZOMBIE_START_POS[curr_level])
+		createZombie(renderer, pos);
 
 	// Create students
-	Entity student0 = createStudent(renderer, {1000, 440});
-	registry.colors.insert(student0, {1, 0.8f, 0.8f});
-	Entity student1 = createStudent(renderer, {300, 440});
-	registry.colors.insert(student1, {1, 0.8f, 0.8f});
-	Entity student2 = createStudent(renderer, {1100, window_height_px * 0.8 - 50.f});
-	registry.colors.insert(student2, {1, 0.8f, 0.8f});
-	Entity student3 = createStudent(renderer, {400, window_height_px * 0.4 - 50.f});
-	registry.colors.insert(student3, {1, 0.8f, 0.8f});
-	Entity student4 = createStudent(renderer, {600, window_height_px * 0.2 - 50.f});
-	registry.colors.insert(student4, {1, 0.8f, 0.8f});
+	for (vec2 pos : STUDENT_START_POS[curr_level])
+		createStudent(renderer, pos);
 
 	for (Entity student : registry.humans.entities)
 	{
@@ -1046,7 +1096,8 @@ void WorldSystem::handle_collisions()
 				if (!registry.deathTimers.has(entity))
 				{
 					// random chance of spawning book at the same position as the "saved" student, plays different sound if a book is spawned
-					int spawn_book = rng() % 2; // 0 or 1
+					//int spawn_book = rng() % 2; // 0 or 1
+					int spawn_book = 1;
 					if (spawn_book)
 					{
 						Motion &m = registry.motions.get(entity_other);
@@ -1078,36 +1129,42 @@ void WorldSystem::handle_collisions()
 		// Check NPC - Zombie Collision
 		else if (registry.humans.has(entity) && registry.zombies.has(entity_other))
 		{
-			if (!registry.infectTimers.has(entity))
+			// TODO: students don't always turn into zombies
+			int turnIntoZombie = rng() % 2; // 0 or 1
+
+			if (turnIntoZombie) 
 			{
-				// Get the position of the student entity
-				Motion &motion_student = registry.motions.get(entity);
-				Motion &motion_zombie = registry.motions.get(entity_other);
-
-				// Scream, reset timer, and make the player [dying animation]
-
-				// Add a little jump animation
-				motion_student.offGround = true;
-				motion_student.velocity[0] = 0.f;
-				motion_student.velocity[1] = -200.f;
-
-				// Modify Student's color
-				vec3 &color = registry.colors.get(entity);
-				color = {1.0f, 0.f, 0.f};
-
-				registry.infectTimers.emplace(entity);
-
-				// Set the direction of the death
-				InfectTimer &timer = registry.infectTimers.get(entity);
-				if (motion_zombie.velocity.x < 0)
+				if (!registry.infectTimers.has(entity))
 				{
-					timer.direction = 0;
+					// Get the position of the student entity
+					Motion& motion_student = registry.motions.get(entity);
+					Motion& motion_zombie = registry.motions.get(entity_other);
+
+					// Scream, reset timer, and make the player [dying animation]
+
+					// Add a little jump animation
+					motion_student.offGround = true;
+					motion_student.velocity[0] = 0.f;
+					motion_student.velocity[1] = -200.f;
+
+					// Modify Student's color
+					vec3& color = registry.colors.get(entity);
+					color = { 1.0f, 0.f, 0.f };
+
+					registry.infectTimers.emplace(entity);
+
+					// Set the direction of the death
+					InfectTimer& timer = registry.infectTimers.get(entity);
+					if (motion_zombie.velocity.x < 0)
+					{
+						timer.direction = 0;
+					}
+					else
+					{
+						timer.direction = 1;
+					}
+					Mix_PlayChannel(-1, player_death_sound, 0);
 				}
-				else
-				{
-					timer.direction = 1;
-				}
-				Mix_PlayChannel(-1, player_death_sound, 0);
 			}
 		}
 		// Check Book - Zombie collision
@@ -1121,6 +1178,11 @@ void WorldSystem::handle_collisions()
 				registry.remove_all_components_of(entity);
 				registry.remove_all_components_of(entity_other);
 			}
+		}
+
+		// Check Spike - Zombie collision
+		else if (registry.zombies.has(entity) && registry.spikes.has(entity_other)) {
+			registry.remove_all_components_of(entity);
 		}
 	}
 
@@ -1174,6 +1236,34 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 	}
+
+	// For debugging (because I don't have a mouse) - Justin
+	/*
+	if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT) { // && action == GLFW_RELEASE
+		auto& booksRegistry = registry.books;
+		for (int i = 0; i < booksRegistry.size(); i++) {
+			Entity entity = booksRegistry.entities[i];
+			Book& book = registry.books.get(entity);
+			if (book.offHand == false) {
+				Motion& motion_book = registry.motions.get(entity);
+				Motion& motion_bozo = registry.motions.get(player_bozo);
+
+				double xpos, ypos;
+				glfwGetCursorPos(window, &xpos, &ypos);
+				vec2& position = motion_bozo.position;
+				double direction = atan2(ypos - position[1], xpos - position[0]);
+
+				motion_book.velocity.x = 500.f * cos(direction);
+				motion_book.velocity.y = 500.f * sin(direction);
+
+				motion_book.offGround = true;
+				book.offHand = true;
+				--points;
+				break;
+			}
+		}
+	}
+	*/
 
 	if (action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo)))
 	{
@@ -1255,7 +1345,6 @@ void WorldSystem::on_mouse_button(int button, int action, int mod)
 
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 	{
-
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 		printf("xpos: %f, ypos: %f\n", xpos, ypos);

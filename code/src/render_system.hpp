@@ -20,9 +20,9 @@ class RenderSystem {
 	std::array<GLuint, texture_count> texture_gl_handles;
 	std::array<ivec2, texture_count> texture_dimensions;
 
-	Camera camera = Camera(0.f, 0.f, screen_width_px, screen_height_px);
 	vec2 lastRestingPlayerPos;
 	bool lastPlayerDirectionIsPos = true; // true = +x, false = -x
+	Camera camera = Camera(0.f, 0.f, screen_width_px, screen_height_px);
 
 	// Make sure these paths remain in sync with the associated enumerators.
 	// Associated id with .obj path
@@ -70,7 +70,7 @@ class RenderSystem {
 	std::vector<GLuint> sprite_index_buffers;
 
 public:
-	uint RenderSystem::spriteSheetBuffersCount = 0;
+	uint spriteSheetBuffersCount = 0;
 	// Initialize the window
 	bool init(GLFWwindow* window);
 
@@ -108,7 +108,9 @@ public:
 
 	mat3 createProjectionMatrix(float elapsed_time_ms);
 
-	void resetCamera();
+	void resetCamera(vec2 defaultPos);
+
+	vec4 getCameraBounds();
 
 	void resetSpriteSheetTracker();
 
