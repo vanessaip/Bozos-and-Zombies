@@ -34,6 +34,8 @@ public:
 	ComponentContainer<Climbable> climbables;
 	ComponentContainer<Book> books;
 	ComponentContainer<TextBox> textboxes;
+	ComponentContainer<Food> food;
+	ComponentContainer<Overlay> overlay;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!

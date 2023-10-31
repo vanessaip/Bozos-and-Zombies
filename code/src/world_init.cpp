@@ -407,7 +407,7 @@ Entity createTextBox(RenderSystem* renderer, vec2 position, std::string text, ve
 	return entity;
 }
 
-Entity createFood(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID food, vec2 scale)
+Entity createFood(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID food, vec2 scale, bool overlay = false)
 {
 	// Reserve en entity
 	auto entity = Entity();
@@ -421,7 +421,13 @@ Entity createFood(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID food, 
 	motion.position = position;
 	motion.scale = scale;
 
-	// Create an (empty) Book component to be able to refer to all books
+	if (overlay) {
+		registry.overlay.emplace(entity);
+	}
+	else {
+		registry.food.emplace(entity);
+		registry.food.get(entity).food_id = (int) food;
+	}
 	registry.renderRequests.insert(
 		entity,
 		{ food,

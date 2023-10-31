@@ -311,11 +311,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 						entityRightSide > xBlockLeftBound && entityLeftSide < xBlockRightBound)
 					{
 						// Move character with moving block
-						//if (registry.keyframeAnimations.has(blocks[i]))
-						//{
-						//	motion.position.x += blockMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
-						//	charactersOnMovingPlat.push_back(std::make_tuple(&motion, &blockMotion)); // track collision if platform is moving down
-						//}
+						if (registry.keyframeAnimations.has(blocks[i]))
+						{
+							motion.position.x += blockMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
+							charactersOnMovingPlat.push_back(std::make_tuple(&motion, &blockMotion)); // track collision if platform is moving down
+						}
 
 						// if (motion.offGround)
 						// {
@@ -930,6 +930,7 @@ void WorldSystem::restart_game()
 	current_speed = 1.f;
 	enemySpawnTimer = 0.f;
 	npcSpawnTimer = 0.f;
+	food_eaten_pos = 50.f;
 
 	// Reset sprite sheet buffer index
 
@@ -1038,7 +1039,12 @@ void WorldSystem::restart_game()
 	}
 
 	// Place food
-	Entity burger = createFood(renderer, { 500, 500 }, TEXTURE_ASSET_ID::BURGER, {30, 30});
+	Entity burger = createFood(renderer, { 1310, 136 }, TEXTURE_ASSET_ID::BURGER, {30, 30}, false);
+	Entity muffin = createFood(renderer, { 102, 298 }, TEXTURE_ASSET_ID::MUFFIN, { 30, 30 }, false);
+	Entity soda = createFood(renderer, { 660, 134 }, TEXTURE_ASSET_ID::SODA, { 30, 30 }, false);
+	Entity noodles = createFood(renderer, { 860, 296 }, TEXTURE_ASSET_ID::NOODLES, { 30, 30 }, false);
+	Entity onigiri = createFood(renderer, { 1200, 622 }, TEXTURE_ASSET_ID::ONIGIRI, { 30, 30 }, false);
+	Entity pizza = createFood(renderer, { 350, 770 }, TEXTURE_ASSET_ID::PIZZA, { 30, 30 }, false);
 
 	setup_keyframes(renderer);
 
@@ -1185,6 +1191,18 @@ void WorldSystem::handle_collisions()
 		// Check Spike - Zombie collision
 		else if (registry.zombies.has(entity) && registry.spikes.has(entity_other)) {
 			registry.remove_all_components_of(entity);
+		}
+
+		// Player - Food collision
+
+		else if (registry.food.has(entity) && registry.players.has(entity_other)) {
+			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID) registry.food.get(entity).food_id;
+			Entity food = createFood(renderer, { food_eaten_pos, 50 }, id, { 60, 60 }, false);
+
+			registry.remove_all_components_of(entity);
+			
+			food_eaten_pos = food_eaten_pos + 60;
+			registry.overlay.emplace(food);
 		}
 	}
 
@@ -1391,15 +1409,15 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 	// TODO(vanessa): currently all platforms using same Motion frames are stacked on top of each other, fix to make adjacent
 	// 					need to add walls or some other method of preventing characters from going under moving platforms
 	//					reconcile behaviour of moving platforms passing through static platforms
-	std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
-	/*Motion m1 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.8));
+	/*std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
+	Motion m1 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.8));
 	Motion m2 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.2));
 	std::vector<Motion> frames = { m1, m2 };
 
 	for (uint i = 0; i < moving_plat.size(); i++) {
 		Entity currplat = moving_plat[i];
 		registry.keyframeAnimations.emplace(currplat, KeyframeAnimation((int)frames.size(), 3000.f, true, frames));
-	}*/
+	}
 
 	std::vector<Entity> moving_plat2 = createPlatforms(renderer, { 0.f, 0.f }, 7);
 	Motion m3 = Motion(vec2(PLATFORM_WIDTH * 9.2, window_height_px * 0.6));
@@ -1408,5 +1426,5 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 
 	for (uint i = 0; i < moving_plat2.size(); i++) {
 		registry.keyframeAnimations.emplace(moving_plat2[i], KeyframeAnimation((int)frames2.size(), 2000.f, true, frames2));
-	}
+	}*/
 }

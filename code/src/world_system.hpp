@@ -75,6 +75,7 @@ private:
 	int npcSpawnIndex = 0;
 	int enemySpawnIndex = 0;
 	int curr_level = 0;
+	float food_eaten_pos = 50;
 
 	// Level definitions
 	std::vector<float> floor_positions;

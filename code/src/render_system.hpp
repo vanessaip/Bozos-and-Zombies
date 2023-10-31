@@ -114,6 +114,8 @@ public:
 
 	mat3 createProjectionMatrix(float elapsed_time_ms);
 
+	mat3 RenderSystem::createBasicProjectionMatrix();
+
 	void resetCamera(vec2 defaultPos);
 
 	vec4 getCameraBounds();
