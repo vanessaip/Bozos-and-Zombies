@@ -54,6 +54,12 @@ void PhysicsSystem::step(float elapsed_ms)
 		Entity entity = motion_container.entities[i];
 		float step_seconds = elapsed_ms / 1000.f;
 
+		if ((registry.players.has(entity))) {
+			if (motion.velocity.x > 0)
+				motion.reflect.x = false;
+			else if (motion.velocity.x < 0)
+				motion.reflect.x = true;
+		}
 		if ((registry.humans.has(entity) || registry.zombies.has(entity) || registry.books.has(entity)) && motion.offGround) {
 			motion.velocity[1] += PhysicsSystem::GRAVITY;
 		}
