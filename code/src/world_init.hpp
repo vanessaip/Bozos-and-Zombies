@@ -20,6 +20,8 @@ const float STEP_HEIGHT = 30.f;
 const float STEP_WIDTH = 30.f;
 const vec2 CLIMBABLE_DIM = { 22.f, 32.f };
 
+const float ZOMBIE_SPEED = 100.f;
+
 // the player
 Entity createBozo(RenderSystem* renderer, vec2 pos);
 // the pointer
