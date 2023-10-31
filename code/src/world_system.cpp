@@ -900,6 +900,9 @@ void WorldSystem::restart_game()
 	// indoor background
 	Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
 
+	// Tutorial sign
+	Entity tutorial1 = createTextBox(renderer, {643, 550}, "tutorial1", {250.f, 150.f});
+
 	// egg
 	Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, {window_width_px / 2 - 80.f, window_height_px * 0.4}, {250.f, 250.f});
 
@@ -984,8 +987,6 @@ void WorldSystem::restart_game()
 	setup_keyframes(renderer);
 
 	points = 0;
-
-	Entity tutorial1 = createTextBox(renderer, {1200, 100}, "test text", {400.f, 200.f});
 }
 
 // Compute collisions between entities
@@ -1253,14 +1254,15 @@ void WorldSystem::on_mouse_button(int button, int action, int mod)
 
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
-		// printf("xpos: %f, ypos: %f\n", xpos, ypos);
+		printf("xpos: %f, ypos: %f\n", xpos, ypos);
 
-		if (xpos > 1365 && xpos < 1397 && ypos < 47 && ypos > 13 && registry.textboxes.size() > 0)
-		{
-			registry.remove_all_components_of(registry.textboxes.entities.back());
+		// Clicks to close the tutorial banner (hardcoded)
+		// if (xpos > 1365 && xpos < 1397 && ypos < 47 && ypos > 13 && registry.textboxes.size() > 0)
+		// {
+		// 	registry.remove_all_components_of(registry.textboxes.entities.back());
 
-			return;
-		}
+		// 	return;
+		// }
 
 		auto &booksRegistry = registry.books;
 		for (int i = 0; i < booksRegistry.size(); i++)
