@@ -5,6 +5,9 @@
 
 #include "tiny_ecs_registry.hpp"
 
+float screen_width = screen_width_px;
+float screen_height = screen_width_px;
+
 void RenderSystem::drawTexturedMesh(Entity entity,
 									const mat3 &projection)
 {
@@ -261,6 +264,14 @@ void RenderSystem::step(float elapsed_time_ms) {
 
 mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 {
+	if (debugging.in_debug_mode) {
+		screen_width = window_width_px;
+		screen_height = window_height_px;
+	}
+	else {
+		screen_width = screen_width_px;
+		screen_height = screen_height_px;
+	}
 	// Set projection matrix to define camera bounds
 	float left = camera.left;
 	float top = camera.top;
@@ -298,7 +309,7 @@ mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 	else 
 	{
 		// inerpolate camera "position" to get smooth movement
-		float nextLeft = (playerMotion.position.x + playerMotion.velocity.x * 2.f * elapsed_time_ms / 1000.f - (screen_width_px / 2.0)) + camera.xOffset;
+		float nextLeft = (playerMotion.position.x + playerMotion.velocity.x * 2.f * elapsed_time_ms / 1000.f - (screen_width / 2.0)) + camera.xOffset;
 		if (camera.timer_ms_x / camera.timer_stop_ms < 1.f)
 			left = left + (nextLeft - left) * (camera.timer_ms_x / camera.timer_stop_ms);
 		else
@@ -312,10 +323,10 @@ mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 	}
 
 	// handle y-position changes
-	float nextTop = (playerMotion.position.y - (screen_height_px / 2.0));
+	float nextTop = (playerMotion.position.y - (screen_height / 2.0));
 	float verticalDiff = abs(nextTop - top);
 
-	if (verticalDiff > (screen_height_px / 3.f - 60.f))  // this comparison depends on how we set up the level (may need to adjust)
+	if (verticalDiff > (screen_height / 3.f - 60.f))  // this comparison depends on how we set up the level (may need to adjust)
 		camera.shiftVertical = true;
 
 	if (camera.shiftVertical)
@@ -333,14 +344,14 @@ mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 
 	// bound camera to level boundaries
 	left = max<float>(left, 0);
-	right = min<float>(left + screen_width_px, window_width_px * 1.f);
+	right = min<float>(left + screen_width, window_width_px * 1.f);
 	if (right == window_width_px * 1.f)
-		left = right - screen_width_px;
+		left = right - screen_width;
 	
 	top = max(top, 0.f);
-	bottom = min<float>(top + screen_height_px, window_height_px * 1.f);
+	bottom = min<float>(top + screen_height, window_height_px * 1.f);
 	if (bottom == window_height_px * 1.f)
-		top = bottom - screen_height_px;
+		top = bottom - screen_height;
 
 	camera.left = left;
 	camera.top = top;
@@ -371,8 +382,8 @@ void RenderSystem::resetCamera(vec2 defaultPos)
 	*/
 	camera.left = 0.f;
 	camera.top = 0.f;
-	camera.right = camera.left + screen_width_px;
-	camera.bottom = camera.top + screen_height_px;
+	camera.right = camera.left + screen_width;
+	camera.bottom = camera.top + screen_height;
 
 	camera.timer_ms_x = 0.f;
 	camera.timer_ms_y = 0.f;
