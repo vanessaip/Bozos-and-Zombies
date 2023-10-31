@@ -1235,6 +1235,10 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			motion.velocity[1] -= 300;
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
+
+		if (key == GLFW_KEY_P) {
+			debugging.in_debug_mode = !debugging.in_debug_mode;
+		}
 	}
 
 	// For debugging (because I don't have a mouse) - Justin
