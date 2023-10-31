@@ -207,12 +207,12 @@ void RenderSystem::draw(float elapsed_time_ms)
 	// Getting size of window
 	int w, h;
 	glfwGetFramebufferSize(window, &w, &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
-
+	
 	// First render to the custom framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
 	gl_has_errors();
 	// Clearing backbuffer
-	glViewport(0, 0, w, h);
+	glViewport(0, 0, window_width_px, window_height_px);
 	glDepthRange(0.00001, 10);
 	glClearColor(0, 0, 1, 1.0);
 	glClearDepth(10.f);
@@ -354,7 +354,7 @@ mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
 	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
-}
+	}
 
 void RenderSystem::resetCamera(vec2 defaultPos) 
 {
