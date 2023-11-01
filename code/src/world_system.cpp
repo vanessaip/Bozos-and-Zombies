@@ -186,8 +186,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				enemySpawnIndex = 0;
 
 			enemySpawnPos = ZOMBIE_START_POS[curr_level][enemySpawnIndex];
-		} while (enemySpawnPos.x > cameraBounds[0] && enemySpawnPos.x < cameraBounds[3]
-			&& enemySpawnPos.y > cameraBounds[1] && enemySpawnPos.y < cameraBounds[4]); // ensure new student is spawned off screen
+		} while (enemySpawnPos.x > cameraBounds[0] && enemySpawnPos.x < cameraBounds[2]
+			&& enemySpawnPos.y > cameraBounds[1] && enemySpawnPos.y < cameraBounds[3]); // ensure new student is spawned off screen
 
 		createZombie(renderer, enemySpawnPos);
 		enemySpawnTimer = 0.f;
@@ -1341,9 +1341,14 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 }
 
 vec2 WorldSystem::relativePos(vec2 mouse_position) {
-	vec4 cameraBounds = renderer->getCameraBounds();
-	vec2 relativePos = { cameraBounds[0] + mouse_position.x / 2.f, cameraBounds[1] + mouse_position.y / 2.f };
-	printf("%f %f\n", mouse_position.x, mouse_position.y);
+	vec2 relativePos;
+	if (debugging.in_debug_mode == true) {
+		relativePos = mouse_position;
+	}
+	else {
+		vec4 cameraBounds = renderer->getCameraBounds();
+		relativePos = { cameraBounds[0] + mouse_position.x / 2.f, cameraBounds[1] + mouse_position.y / 2.f };
+	}
 	return relativePos;
 }
 
