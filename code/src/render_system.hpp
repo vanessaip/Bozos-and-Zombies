@@ -56,6 +56,7 @@ class RenderSystem {
 		textures_path("onigiri.png"),
 		textures_path("pizza.png"),
 		textures_path("soda.png"),
+		textures_path("heart.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

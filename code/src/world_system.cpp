@@ -226,18 +226,38 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		bool isZombie = registry.zombies.has(motion_container.entities[i]);
 		bool isBook = registry.books.has(motion_container.entities[i]);
 
-		if (registry.players.has(motion_container.entities[i]) && !registry.deathTimers.has(motion_container.entities[i]))
+		if (isPlayer && !registry.deathTimers.has(motion_container.entities[i]))
 		{
 			motion.velocity[0] = 0;
+			
+			// If player just lost a life, make invincible for a bit
+			if (registry.lostLifeTimer.has(player_bozo)) {
+				LostLife& timer = registry.lostLifeTimer.get(player_bozo);
+				timer.timer_ms -= elapsed_ms_since_last_update; 
+				
+				// Fade a bit to show invincibility
+				vec3& color = registry.colors.get(player_bozo);
+				color = { 0.5f, 0.5f, 0.5f };
+
+				if (timer.timer_ms <= 0) {
+					registry.lostLifeTimer.remove(player_bozo);
+				}
+			}
+			else {
+				vec3& color = registry.colors.get(player_bozo);
+				color = { 1.f, 1.f, 1.f };
+			}
+
 
 			if (player.keyPresses[0])
 			{
-				motion.velocity[0] -= 400;
+				motion.velocity[0] -= 200;
 			}
 			if (player.keyPresses[1])
 			{
-				motion.velocity[0] += 400;
+				motion.velocity[0] += 200;
 			}
+
 		}
 		// Bounding entities to window
 		if (isHuman || isZombie || isBook)
@@ -248,20 +268,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			float entityTop = motion.position.y - motion.scale[1] / 2.f;
 
 			vec4 entityBB = { entityRightSide, entityLeftSide, entityBottom, entityTop };
-
-			if (registry.players.has(motion_container.entities[i]) && !registry.deathTimers.has(motion_container.entities[i]))
-			{
-				motion.velocity[0] = 0;
-
-				if (player.keyPresses[0])
-				{
-					motion.velocity[0] -= 200;
-				}
-				if (player.keyPresses[1])
-				{
-					motion.velocity[0] += 200;
-				}
-			}
 
 			if (motion.position.x < 80.f + BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0)
 			{
@@ -931,6 +937,7 @@ void WorldSystem::restart_game()
 	enemySpawnTimer = 0.f;
 	npcSpawnTimer = 0.f;
 	food_eaten_pos = 50.f;
+	player_lives = 2;
 
 	// Reset sprite sheet buffer index
 
@@ -1046,6 +1053,15 @@ void WorldSystem::restart_game()
 	Entity onigiri = createFood(renderer, { 1200, 622 }, TEXTURE_ASSET_ID::ONIGIRI, { 30, 30 }, false);
 	Entity pizza = createFood(renderer, { 350, 770 }, TEXTURE_ASSET_ID::PIZZA, { 30, 30 }, false);
 
+	float heart_pos_x = 1385;
+	float heart_starting_pos_y = 40;
+
+	Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
+	Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
+	Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
+
+	player_hearts = { heart0, heart1, heart2 };
+
 	setup_keyframes(renderer);
 
 	points = 0;
@@ -1070,9 +1086,29 @@ void WorldSystem::handle_collisions()
 			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
 			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)))
 			{
-				// initiate death unless already dying
-				if (!registry.deathTimers.has(entity))
-				{
+				// Reduce hearts if player has lives left
+				if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives > 0) {
+					// Remove a heart
+					registry.remove_all_components_of(player_hearts[player_lives]);
+
+					// Play death sound
+					Mix_PlayChannel(-1, zombie_kill_sound, 0);
+
+					// Decrement the player lives
+					player_lives--;
+
+					// Move player back to start
+					Motion& bozo_motion = registry.motions.get(player_bozo);
+					bozo_motion.position = BOZO_STARTING_POS[curr_level];
+
+					// Add to lost life timer
+					if (!registry.lostLifeTimer.has(player_bozo)) {
+						registry.lostLifeTimer.emplace(player_bozo);
+					}
+				}
+				else if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives == 0)
+				{	
+					// Kill player if no lives left
 					// Scream, reset timer, and make the player [dying animation]
 					Motion& motion_player = registry.motions.get(entity);
 					Motion& motion_zombie = registry.motions.get(entity_other);
@@ -1228,7 +1264,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	Motion& motion = registry.motions.get(player_bozo);
 	Player& player = registry.players.get(player_bozo);
 
-	if (action == GLFW_PRESS && (!registry.deathTimers.has(player_bozo)))
+	if (action == GLFW_PRESS && !registry.deathTimers.has(player_bozo))
 	{
 		if (key == GLFW_KEY_A)
 		{

@@ -16,6 +16,7 @@ public:
 	ComponentContainer<KeyframeAnimation> keyframeAnimations;
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<InfectTimer> infectTimers;
+	ComponentContainer<LostLife> lostLifeTimer;
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
 	ComponentContainer<Player> players;
@@ -63,6 +64,9 @@ public:
 		registry_list.push_back(&spikes);
 		registry_list.push_back(&climbables);
 		registry_list.push_back(&books);
+		registry_list.push_back(&food);
+		registry_list.push_back(&overlay);
+		registry_list.push_back(&lostLifeTimer);
 	}
 
 	void clear_all_components() {

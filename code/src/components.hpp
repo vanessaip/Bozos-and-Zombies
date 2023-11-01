@@ -128,6 +128,13 @@ struct InfectTimer
 	bool direction = 0;
 };
 
+// When the player has lost a life, it should be invincible for a few seconds
+struct LostLife
+{
+	float timer_ms = 3000.f;
+	bool direction = 0;
+};
+
 // Keyframe animation stores all keyframes and timing data for a given entity
 struct KeyframeAnimation
 {
@@ -256,7 +263,8 @@ enum class TEXTURE_ASSET_ID
 	ONIGIRI = NOODLES + 1,
 	PIZZA = ONIGIRI + 1,
 	SODA = PIZZA + 1,
-	TEXTURE_COUNT = SODA + 1
+	HEART = SODA + 1,
+	TEXTURE_COUNT = HEART + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
