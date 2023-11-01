@@ -70,6 +70,11 @@ private:
 	float current_speed;
 	Entity player_bozo;
 	Entity player_bozo_pointer;
+	float enemySpawnTimer = 0.f;
+	float npcSpawnTimer = 0.f;
+	int npcSpawnIndex = 0;
+	int enemySpawnIndex = 0;
+	int curr_level = 0;
 
 	// Level definitions
 	std::vector<float> floor_positions;
@@ -87,4 +92,8 @@ private:
 	// C++ random number generator
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
+
+	// Helpers
+	vec2 relativePos(vec2 mouse_position);
+
 };
