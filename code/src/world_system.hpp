@@ -76,6 +76,7 @@ private:
 	int enemySpawnIndex = 0;
 	int curr_level = 0;
 	float food_eaten_pos = 50;
+	int food_eaten = 0;
 
 	// This is actually 5 lives but 0 indexed.
 	int player_lives = 4;

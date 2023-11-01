@@ -154,7 +154,7 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
-	if (registry.zombies.entities.size() < 1 && registry.food.entities.size() < 1 && this->game_over == false) {
+	if (registry.zombies.entities.size() < 1 && food_eaten > 5 && this->game_over == false) {
 		// restart_game(); // level is over
 		createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
 		this->game_over = true;
@@ -944,6 +944,7 @@ void WorldSystem::restart_game()
 	npcSpawnTimer = 0.f;
 	food_eaten_pos = 50.f;
 	player_lives = 4;
+	int food_eaten = 0;
 
 	// Reset sprite sheet buffer index
 
@@ -1245,6 +1246,8 @@ void WorldSystem::handle_collisions()
 			Entity food = createFood(renderer, { food_eaten_pos, 50 }, id, { 60, 60 }, false);
 
 			registry.remove_all_components_of(entity);
+
+			food_eaten++;
 			
 			food_eaten_pos = food_eaten_pos + 60;
 			registry.overlay.emplace(food);
