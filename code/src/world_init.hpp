@@ -49,12 +49,17 @@ Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTU
 // book
 Entity createBook(RenderSystem* renderer, vec2 position);
 // text box
-Entity createTextBox(RenderSystem* renderer, vec2 position, std::string text, vec2 scale = { 1.f, 1.f });
+Entity createStaticTexture(RenderSystem* renderer, TEXTURE_ASSET_ID textureID, vec2 position, std::string text, vec2 scale = { 1.f, 1.f });
+// food
+Entity createFood(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID food, vec2 scale, bool overlay);
+
+// hearts
+Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 
 // This stores the zombies's starting position
-const std::vector<std::vector<vec2>> ZOMBIE_START_POS = { { { 1200, 600 }, {300, 440}, {200, 440} } }; //{300, 440}, {200, 440}
+const std::vector<std::vector<vec2>> ZOMBIE_START_POS = { { { 1200, 600 }, {300, 440}, {200, 440} } }; //{ 1200, 600 }, {300, 440}, {200, 440}
 const std::vector<std::vector<vec2>> STUDENT_START_POS = { { { 1000, 440 }, { 300, 440 }, { 900, 280 }, {400, window_height_px * 0.4 - 50.f}, {600, window_height_px * 0.2 - 50.f}} };
 
 // This stores level heights from bottom to top

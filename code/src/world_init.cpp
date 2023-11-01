@@ -88,7 +88,7 @@ Entity createStudent(RenderSystem* renderer, vec2 position)
 	registry.colors.insert(entity, { 1, 0.8f, 0.8f });
 
 	std::vector<int> spriteCounts = { 4, 6, 6 };
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.05f, 0.1f));
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.05f, 0.1f));
 
 	registry.renderRequests.insert(
 		entity,
@@ -380,7 +380,7 @@ Entity createBook(RenderSystem* renderer, vec2 position)
 	return entity;
 }
 
-Entity createTextBox(RenderSystem* renderer, vec2 position, std::string text, vec2 scale)
+Entity createStaticTexture(RenderSystem* renderer, TEXTURE_ASSET_ID textureID, vec2 position, std::string text, vec2 scale)
 {
 	// Reserve en entity
 	auto entity = Entity();
@@ -400,7 +400,62 @@ Entity createTextBox(RenderSystem* renderer, vec2 position, std::string text, ve
 	// Create an (empty) Book component to be able to refer to all books
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TUTORIAL1,
+		{ textureID,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createFood(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID food, vec2 scale, bool overlay = false)
+{
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	if (overlay) {
+		registry.overlay.emplace(entity);
+	}
+	else {
+		registry.food.emplace(entity);
+		registry.food.get(entity).food_id = (int) food;
+	}
+	registry.renderRequests.insert(
+		entity,
+		{ food,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale) {
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	registry.overlay.emplace(entity);
+
+
+	registry.renderRequests.insert(
+		entity,
+		{   TEXTURE_ASSET_ID::HEART,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 

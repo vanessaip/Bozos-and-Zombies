@@ -97,7 +97,7 @@ struct Collision
 // Data structure for toggling debug mode
 struct Debug
 {
-	bool in_debug_mode = 0;
+	bool in_zoom_mode = 0;
 	bool in_freeze_mode = 0;
 };
 extern Debug debugging;
@@ -123,6 +123,13 @@ struct DeathTimer
 
 // A timer that will be associated to a NPC player that converts into a Zombie
 struct InfectTimer
+{
+	float timer_ms = 3000.f;
+	bool direction = 0;
+};
+
+// When the player has lost a life, it should be invincible for a few seconds
+struct LostLife
 {
 	float timer_ms = 3000.f;
 	bool direction = 0;
@@ -198,6 +205,16 @@ struct TextBox
 	std::string text = "";
 };
 
+struct Food
+{
+	int food_id;
+};
+
+struct Overlay
+{
+
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -240,7 +257,16 @@ enum class TEXTURE_ASSET_ID
 	LADDER3 = LADDER2 + 1,
 	BOOK = LADDER3 + 1,
 	TUTORIAL1 = BOOK + 1,
-	TEXTURE_COUNT = TUTORIAL1 + 1
+	BURGER = TUTORIAL1 + 1,
+	MUFFIN = BURGER + 1,
+	NOODLES = MUFFIN + 1,
+	ONIGIRI = NOODLES + 1,
+	PIZZA = ONIGIRI + 1,
+	SODA = PIZZA + 1,
+	HEART = SODA + 1,
+  WIN_SCREEN = HEART + 1,
+	BASEMENT = WIN_SCREEN + 1,
+	TEXTURE_COUNT = BASEMENT + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -299,8 +325,8 @@ struct SpriteSheet
 		truncation = trunc;
 
 		double maxCount = *std::max_element(spriteCount.begin(), spriteCount.end());
-		spriteDim.x = 1.f / maxCount;
-		spriteDim.y = 1.f / animation_mode_count;
+		spriteDim.x = float(1.f / maxCount);
+		spriteDim.y = float(1.f / animation_mode_count);
 
 		updateAnimation(defaultMode);
 	}
