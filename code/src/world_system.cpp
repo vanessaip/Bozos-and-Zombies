@@ -191,8 +191,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				enemySpawnIndex = 0;
 
 			enemySpawnPos = ZOMBIE_START_POS[curr_level][enemySpawnIndex];
-		} while (enemySpawnPos.x > cameraBounds[0] && enemySpawnPos.x < cameraBounds[3]
-			&& enemySpawnPos.y > cameraBounds[1] && enemySpawnPos.y < cameraBounds[4]); // ensure new student is spawned off screen
+		} while (enemySpawnPos.x > cameraBounds[0] && enemySpawnPos.x < cameraBounds[2]
+			&& enemySpawnPos.y > cameraBounds[1] && enemySpawnPos.y < cameraBounds[3]); // ensure new student is spawned off screen
 
 		createZombie(renderer, enemySpawnPos);
 		enemySpawnTimer = 0.f;
@@ -957,6 +957,7 @@ void WorldSystem::restart_game()
 
 	// indoor background
 	Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
+	Entity basement = createBackground(renderer, TEXTURE_ASSET_ID::BASEMENT);
 
 	// Tutorial sign
 	Entity tutorial1 = createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL1, { 643, 550 }, "tutorial1", { 250.f, 150.f });

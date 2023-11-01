@@ -38,19 +38,20 @@ class RenderSystem {
 		textures_path("zombie_sprite_sheet.png"),
 		textures_path("bozo_sprite_sheet.png"),
 		textures_path("bozo_pointer.png"),
-		textures_path("business-background.png"),
+		textures_path("business-background-night.png"),
 		textures_path("Tile_40.png"),	// platform
 		textures_path("Tile_04.png"),	// step left section
 		textures_path("Tile_02.png"),	// step middle section
 		textures_path("Tiles_74.png"),	// wall
 		textures_path("egg.png"),
-		textures_path("2-2.png"),
+		textures_path("indoor-v3.png"),
 		textures_path("Ladder1.png"),
 		textures_path("Ladder2.png"),
 		textures_path("Ladder3.png"),
 		textures_path("book.png"),
 		textures_path("tutorial1.png"),
 		textures_path("win_screen.png"),
+		textures_path("basement.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

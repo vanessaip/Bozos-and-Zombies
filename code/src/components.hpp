@@ -241,7 +241,8 @@ enum class TEXTURE_ASSET_ID
 	BOOK = LADDER3 + 1,
 	TUTORIAL1 = BOOK + 1,
 	WIN_SCREEN = TUTORIAL1 + 1,
-	TEXTURE_COUNT = WIN_SCREEN + 1
+	BASEMENT = WIN_SCREEN + 1,
+	TEXTURE_COUNT = BASEMENT + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -300,8 +301,8 @@ struct SpriteSheet
 		truncation = trunc;
 
 		double maxCount = *std::max_element(spriteCount.begin(), spriteCount.end());
-		spriteDim.x = 1.f / maxCount;
-		spriteDim.y = 1.f / animation_mode_count;
+		spriteDim.x = float(1.f / maxCount);
+		spriteDim.y = float(1.f / animation_mode_count);
 
 		updateAnimation(defaultMode);
 	}
