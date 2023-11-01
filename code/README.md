@@ -94,13 +94,18 @@ Entry points:
 - in world_system.cpp line 481, we play a death sound as the play is killed.
 
 # Milestone 2 Proposal Alignment
-TODO
+For milestone 2, our team improved the gameplay by designing a more complex map, introducing multiple zombies and NPCs, adding interactions between player/NPCs (acquiring textbook) and zombie/NPCs (infection), ability to kill zombies by aiming and throwing collected textbook projectiles, implemented heuristics for zombies chasing the player and humans, introduced food items to collect, and lives system.
+
+We also hit all other requirements by adding camera movement that follows the player (with option to zoom in/out by pressing P), sprite animation for all our characters (player, zombies, NPCs), mesh collision, a tutorial, and plenty of new visual assets to support these features.
 
 # Milestone 2 Deliverables
 # Improved Gameplay
 
 ## Game Logic response to user input
-- A new logic for NPC and zombie interactions has been added, allowing NPCs to die and then turn into zombies that follow the player.
+- NPCs can die and then turn into zombies that follow the player, adding depth to the gameplay.
+    - **Code References**:
+      - Transformation logic in `world_system.cpp`: `step()` function on lines `413 - 421`; `526 - 560`.
+      - Collision handling in `world_system.cpp`: `handle_collisions()` on lines `1181 - 1220`.
 
 - world_system.cpp `handle_collisions()` Player - Human collisions: player receives a textbook when colliding with student NPCs 
 
@@ -138,18 +143,31 @@ Overlay rendering for food/lives feedback:
 - in world_init.cpp, the `createHeart()` method directly adds the heart to the overlay component
 
 ## Sprite sheet animation
-
+- Sprite sheet component defined in components.hpp line 293
+- initializeSpriteSheet creates a new sprite sheet component and binds vbo and ibo to unique buffer Id		
+	- Defined in render_system.cpp line 413
+	- Called in zombie, student, player create functions
+- updateSpriteSheetGeometryBuffer updates the coordinates on the sprite sheet
+	- Defined in render_system.cpp line 435
+	- Called in RenderSystem::step line 260
 
 ## New integrated assets
-- Introduction of new spike mesh assets to the game map.
-in world_system.cpp `restart()`:
+- **Introduction of New Spike Mesh Assets**:
+  - Spikes increase the game's challenge and visual appeal.
+    - **Code References**:
+      - Asset initialization in `world_system.cpp` within the `restart()` function.
+      - Definitions and shaders in `components.hpp` (lines `42 - 45`), `spike.fs.glsl`, `spike.vs.glsl`, and `spike.obj`.
+
 - new background assets initialized with `createBackground()`  
 - floors are created with fixed sized platforms stacked horizontally using `createPlatforms()`
 - steps are created with stacking platforms at an offset `createSteps()` 
 - different length ladders created by stacking 3 different sprite assets `createClimbable()`
 
 ## Mesh-based collision detection
-- A new collision detection function to handle interactions between mesh assets (like spikes) and the player, enhancing the collision detection system beyond simple bounding boxes.
+- **Enhanced Collision Detection Function**:
+  - Improved function for interactions between player and mesh assets.
+    - **Code Reference**:
+      - `bool checkCollision` on lines `46 to 74` of physics_system.cpp.
 
 ## Basic user tutorial/help
 
@@ -173,7 +191,17 @@ in world_system.cpp `restart()`:
 # Creative
 
 ## [21] Make the camera follow the player
+- createProjectionMatrix determines the camera window dimensions based on player position
+- defined in render_system.cpp line 265
+- called in RenderSystem::draw line 229
 
-## ??
-- complex assets?
-- mouse gestures
+## [24] Basic integrated assets
+- new sprites for platforms, walls, and ladders
+- (created) several sprites for background components (outdoor background, indoor background layers, nest egg)
+- (created) blackboard sprite for user tutorial
+- (created) book projectile
+- 3 spritesheets for our characters
+- 6 differnt sprites for collectable food items
+- 1 new heart sprite for player lives
+- (created) spike mesh object file
+- (created) arrow sprite for projectile direction
