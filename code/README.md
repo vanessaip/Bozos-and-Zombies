@@ -104,6 +104,39 @@ TODO
 
 - world_system.cpp `handle_collisions()` Player - Human collisions: player receives a textbook when colliding with student NPCs 
 
+Ladder interaction:
+- in world_system.cpp, Line 423 checks if the entity is a player and calls `updateClimbing()`
+- Line 862 has the implementation for updateClimbing which loops through every Climbable entity and checks if the player is touching it. If the player is touching it, allow the player to use keys W and S to climb up and down the ladder
+- Line 911 has a helper function `isBottomOfLadder()` to resolve glitches that arise when the player is at the bottom of the ladder but should not be able to move down
+
+Zombie heuristic/decision based movement:
+- in world_system.cpp, Line 469 checks if the entity is a zombie and calls `updateZombieMovement()`
+- Line 638 has the implementation for updateZombieMovement and is based on the following heuristics:
+1. If the player is on the same level as the player, move in the direction of the player.
+2. If the player is above the zombie, have the zombie move to the closest ladder of the player and climb up.
+3. If the player is below the zombie, have the zombie move to the closest ladder of the player and climb down.
+4. If the player is in the basement, head to the basement ladder and climb down. 
+5. If the player is out of the basement and the zombie is in the basement, head to the basement ladder and climb up.
+6. If the zombie encounters a step, then jump over it.
+- the helper function `checkLevel()` is implemented on Line 816
+- the helper function `getClosestLadder()` is implemented on Line 841
+
+Food collection:
+- in world_init.cpp, Line 410 has `createFood()` method 
+- in world_system.cpp, Line 1056 creates the food entities 
+- Line 1239 checks if the player has collided with the food and adds it to the overlay component
+
+Player lives:
+- in world_init.cpp, Line 410 has `createHeart()` method 
+- in world_system.cpp, Line 1066 creates the hearts
+- Line 1096 checks the player's lives, adds the player to the lostLifeTimer component, and moves the player back to the starting position
+- Line 239 checks if the player is in the "lost life" state, dims the player, and makes the player invincible for a small amount of time
+
+Overlay rendering for food/lives feedback:
+- in render_system.cpp Line 238, the logic blocks splits the call to drawTexturedMesh between the side scroller projection matrix and the basic projection matrix depending on if the overlay component has the entity
+- in world_system.cpp, Line 1241 adds the specific food entity to the overlay component, so that it can be rendered statically on top of the side scrolling image
+- in world_init.cpp, the `createHeart()` method directly adds the heart to the overlay component
+
 ## Sprite sheet animation
 
 
