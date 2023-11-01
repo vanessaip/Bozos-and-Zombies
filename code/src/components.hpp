@@ -97,7 +97,7 @@ struct Collision
 // Data structure for toggling debug mode
 struct Debug
 {
-	bool in_debug_mode = 0;
+	bool in_zoom_mode = 0;
 	bool in_freeze_mode = 0;
 };
 extern Debug debugging;
@@ -240,7 +240,8 @@ enum class TEXTURE_ASSET_ID
 	LADDER3 = LADDER2 + 1,
 	BOOK = LADDER3 + 1,
 	TUTORIAL1 = BOOK + 1,
-	TEXTURE_COUNT = TUTORIAL1 + 1
+	WIN_SCREEN = TUTORIAL1 + 1,
+	TEXTURE_COUNT = WIN_SCREEN + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
