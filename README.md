@@ -83,3 +83,20 @@ For milestone 1, our team met all our goals that aligned with the milestone deli
 - in world_system.cpp line 200, we detect when the player has just landed on the top of a playform, and play a landing noise
 - in world_system.cpp line 550, we play a jump sound the the player jumps
 - in world_system.cpp line 481, we play a death sound as the play is killed.
+
+# Milestone 2 Deliverables
+
+## Camera Controls
+- createProjectionMatrix determines the camera window dimensions based on player position
+- defined in render_system.cpp line 265
+- called in RenderSystem::draw line 229
+- 
+## Sprite Sheet Animation
+- Sprite sheet component defined in components.hpp line 293
+- initializeSpriteSheet creates a new sprite sheet component and binds vbo and ibo to unique buffer Id		
+	- Defined in render_system.cpp line 413
+	- Called in zombie, student, player create functions
+- updateSpriteSheetGeometryBuffer updates the coordinates on the sprite sheet
+	- Defined in render_system.cpp line 435
+	- Called in RenderSystem::step line 260
+
