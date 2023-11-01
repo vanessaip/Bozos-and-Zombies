@@ -102,12 +102,18 @@ TODO
 ## Game Logic response to user input
 - A new logic for NPC and zombie interactions has been added, allowing NPCs to die and then turn into zombies that follow the player.
 
+- world_system.cpp `handle_collisions()` Player - Human collisions: player receives a textbook when colliding with student NPCs 
 
 ## Sprite sheet animation
 
 
 ## New integrated assets
 - Introduction of new spike mesh assets to the game map.
+in world_system.cpp `restart()`:
+- new background assets initialized with `createBackground()`  
+- floors are created with fixed sized platforms stacked horizontally using `createPlatforms()`
+- steps are created with stacking platforms at an offset `createSteps()` 
+- different length ladders created by stacking 3 different sprite assets `createClimbable()`
 
 ## Mesh-based collision detection
 - A new collision detection function to handle interactions between mesh assets (like spikes) and the player, enhancing the collision detection system beyond simple bounding boxes.
@@ -126,6 +132,9 @@ TODO
 
 ## Consistent game resolution
 
+- world_system.cpp line 82: allow window to be resized
+- render_system_init.cpp line 23: keep the aspect ratio consistent
+- the viewport is resized on each call to `drawToScreen()` in render_system.cpp
 ## No crashes, glitches, unpredictable behaviour
 
 # Creative
