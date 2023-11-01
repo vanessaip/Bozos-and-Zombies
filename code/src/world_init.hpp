@@ -54,7 +54,7 @@ Entity createStaticTexture(RenderSystem* renderer, TEXTURE_ASSET_ID textureID, v
 // Index 0 is level 1, index 1 is level 2 etc.
 
 // This stores the zombies's starting position
-const std::vector<std::vector<vec2>> ZOMBIE_START_POS = { { {200, 440} } }; //{ 1200, 600 }, {300, 440}, {200, 440}
+const std::vector<std::vector<vec2>> ZOMBIE_START_POS = { { { 1200, 600 }, {300, 440}, {200, 440} } }; //{ 1200, 600 }, {300, 440}, {200, 440}
 const std::vector<std::vector<vec2>> STUDENT_START_POS = { { { 1000, 440 }, { 300, 440 }, { 900, 280 }, {400, window_height_px * 0.4 - 50.f}, {600, window_height_px * 0.2 - 50.f}} };
 
 // This stores level heights from bottom to top
