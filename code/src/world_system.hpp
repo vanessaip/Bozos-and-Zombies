@@ -75,6 +75,11 @@ private:
 	int npcSpawnIndex = 0;
 	int enemySpawnIndex = 0;
 	int curr_level = 0;
+	float food_eaten_pos = 50;
+
+	// This is actually 3 lives but 0 indexed.
+	int player_lives = 2;
+	std::vector<Entity> player_hearts;
 	bool game_over;
 
 	// Level definitions

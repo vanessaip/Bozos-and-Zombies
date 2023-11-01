@@ -16,6 +16,7 @@ public:
 	ComponentContainer<KeyframeAnimation> keyframeAnimations;
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<InfectTimer> infectTimers;
+	ComponentContainer<LostLife> lostLifeTimer;
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
 	ComponentContainer<Player> players;
@@ -34,6 +35,8 @@ public:
 	ComponentContainer<Climbable> climbables;
 	ComponentContainer<Book> books;
 	ComponentContainer<TextBox> textboxes;
+	ComponentContainer<Food> food;
+	ComponentContainer<Overlay> overlay;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -61,6 +64,9 @@ public:
 		registry_list.push_back(&spikes);
 		registry_list.push_back(&climbables);
 		registry_list.push_back(&books);
+		registry_list.push_back(&food);
+		registry_list.push_back(&overlay);
+		registry_list.push_back(&lostLifeTimer);
 	}
 
 	void clear_all_components() {

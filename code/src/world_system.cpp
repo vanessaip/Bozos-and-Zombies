@@ -231,18 +231,38 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		bool isZombie = registry.zombies.has(motion_container.entities[i]);
 		bool isBook = registry.books.has(motion_container.entities[i]);
 
-		if (registry.players.has(motion_container.entities[i]) && !registry.deathTimers.has(motion_container.entities[i]))
+		if (isPlayer && !registry.deathTimers.has(motion_container.entities[i]))
 		{
 			motion.velocity[0] = 0;
+			
+			// If player just lost a life, make invincible for a bit
+			if (registry.lostLifeTimer.has(player_bozo)) {
+				LostLife& timer = registry.lostLifeTimer.get(player_bozo);
+				timer.timer_ms -= elapsed_ms_since_last_update; 
+				
+				// Fade a bit to show invincibility
+				vec3& color = registry.colors.get(player_bozo);
+				color = { 0.5f, 0.5f, 0.5f };
+
+				if (timer.timer_ms <= 0) {
+					registry.lostLifeTimer.remove(player_bozo);
+				}
+			}
+			else {
+				vec3& color = registry.colors.get(player_bozo);
+				color = { 1.f, 1.f, 1.f };
+			}
+
 
 			if (player.keyPresses[0])
 			{
-				motion.velocity[0] -= 400;
+				motion.velocity[0] -= 200;
 			}
 			if (player.keyPresses[1])
 			{
-				motion.velocity[0] += 400;
+				motion.velocity[0] += 200;
 			}
+
 		}
 		// Bounding entities to window
 		if (isHuman || isZombie || isBook)
@@ -253,20 +273,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			float entityTop = motion.position.y - motion.scale[1] / 2.f;
 
 			vec4 entityBB = { entityRightSide, entityLeftSide, entityBottom, entityTop };
-
-			if (registry.players.has(motion_container.entities[i]) && !registry.deathTimers.has(motion_container.entities[i]))
-			{
-				motion.velocity[0] = 0;
-
-				if (player.keyPresses[0])
-				{
-					motion.velocity[0] -= 200;
-				}
-				if (player.keyPresses[1])
-				{
-					motion.velocity[0] += 200;
-				}
-			}
 
 			if (motion.position.x < 80.f + BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0)
 			{
@@ -308,7 +314,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				float yBlockTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
 				float yBlockBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
 
-				// Add this check so that the player can pass through platforms when on a ladder
+				// Add this check so that the player can pass through platforms when on a ladderd
 				if (!motion.climbing)
 				{
 					// Collision with Top of block
@@ -936,6 +942,8 @@ void WorldSystem::restart_game()
 	current_speed = 1.f;
 	enemySpawnTimer = 0.f;
 	npcSpawnTimer = 0.f;
+	food_eaten_pos = 50.f;
+	player_lives = 2;
 
 	// Reset sprite sheet buffer index
 
@@ -1044,6 +1052,23 @@ void WorldSystem::restart_game()
 		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
 	}
 
+	// Place food
+	Entity burger = createFood(renderer, { 1310, 136 }, TEXTURE_ASSET_ID::BURGER, {30, 30}, false);
+	Entity muffin = createFood(renderer, { 102, 298 }, TEXTURE_ASSET_ID::MUFFIN, { 30, 30 }, false);
+	Entity soda = createFood(renderer, { 660, 134 }, TEXTURE_ASSET_ID::SODA, { 30, 30 }, false);
+	Entity noodles = createFood(renderer, { 860, 296 }, TEXTURE_ASSET_ID::NOODLES, { 30, 30 }, false);
+	Entity onigiri = createFood(renderer, { 1200, 622 }, TEXTURE_ASSET_ID::ONIGIRI, { 30, 30 }, false);
+	Entity pizza = createFood(renderer, { 350, 770 }, TEXTURE_ASSET_ID::PIZZA, { 30, 30 }, false);
+
+	float heart_pos_x = 1385;
+	float heart_starting_pos_y = 40;
+
+	Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
+	Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
+	Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
+
+	player_hearts = { heart0, heart1, heart2 };
+
 	setup_keyframes(renderer);
 
 	points = 0;
@@ -1068,9 +1093,29 @@ void WorldSystem::handle_collisions()
 			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
 			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)))
 			{
-				// initiate death unless already dying
-				if (!registry.deathTimers.has(entity))
-				{
+				// Reduce hearts if player has lives left
+				if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives > 0) {
+					// Remove a heart
+					registry.remove_all_components_of(player_hearts[player_lives]);
+
+					// Play death sound
+					Mix_PlayChannel(-1, zombie_kill_sound, 0);
+
+					// Decrement the player lives
+					player_lives--;
+
+					// Move player back to start
+					Motion& bozo_motion = registry.motions.get(player_bozo);
+					bozo_motion.position = BOZO_STARTING_POS[curr_level];
+
+					// Add to lost life timer
+					if (!registry.lostLifeTimer.has(player_bozo)) {
+						registry.lostLifeTimer.emplace(player_bozo);
+					}
+				}
+				else if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives == 0)
+				{	
+					// Kill player if no lives left
 					// Scream, reset timer, and make the player [dying animation]
 					Motion& motion_player = registry.motions.get(entity);
 					Motion& motion_zombie = registry.motions.get(entity_other);
@@ -1190,6 +1235,18 @@ void WorldSystem::handle_collisions()
 		else if (registry.zombies.has(entity) && registry.spikes.has(entity_other)) {
 			registry.remove_all_components_of(entity);
 		}
+
+		// Player - Food collision
+
+		else if (registry.food.has(entity) && registry.players.has(entity_other)) {
+			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID) registry.food.get(entity).food_id;
+			Entity food = createFood(renderer, { food_eaten_pos, 50 }, id, { 60, 60 }, false);
+
+			registry.remove_all_components_of(entity);
+			
+			food_eaten_pos = food_eaten_pos + 60;
+			registry.overlay.emplace(food);
+		}
 	}
 
 	// Remove all collisions from this simulation step
@@ -1214,7 +1271,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	Motion& motion = registry.motions.get(player_bozo);
 	Player& player = registry.players.get(player_bozo);
 
-	if (action == GLFW_PRESS && (!registry.deathTimers.has(player_bozo)))
+	if (action == GLFW_PRESS && !registry.deathTimers.has(player_bozo))
 	{
 		if (key == GLFW_KEY_A)
 		{
@@ -1401,21 +1458,21 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 	// 					need to add walls or some other method of preventing characters from going under moving platforms
 	//					reconcile behaviour of moving platforms passing through static platforms
 	/*std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
-	Motion m1 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.8));
-	Motion m2 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.2));
+	Motion m1 = Motion(vec2(PLATFORM_WIDTH * 9.2, window_height_px * 0.4));
+	Motion m2 = Motion(vec2(PLATFORM_WIDTH * 16.2, window_height_px * 0.4));
 	std::vector<Motion> frames = { m1, m2 };
 
 	for (uint i = 0; i < moving_plat.size(); i++) {
 		Entity currplat = moving_plat[i];
 		registry.keyframeAnimations.emplace(currplat, KeyframeAnimation((int)frames.size(), 3000.f, true, frames));
-	}
+	}*/
 
-	std::vector<Entity> moving_plat2 = createPlatforms(renderer, { 0.f, 0.f }, 7);
-	Motion m3 = Motion(vec2(PLATFORM_WIDTH * 6, window_height_px * 0.8));
-	Motion m4 = Motion(vec2(PLATFORM_WIDTH * 6, window_height_px * 0.2));
+	/*std::vector<Entity> moving_plat2 = createPlatforms(renderer, {0.f, 0.f}, 7);
+	Motion m3 = Motion(vec2(PLATFORM_WIDTH * 9.2, window_height_px * 0.6));
+	Motion m4 = Motion(vec2(PLATFORM_WIDTH * 9.2, window_height_px * 0.4));
 	std::vector<Motion> frames2 = { m3, m4 };
 
 	for (uint i = 0; i < moving_plat2.size(); i++) {
-		registry.keyframeAnimations.emplace(moving_plat2[i], KeyframeAnimation((int)frames.size(), 2000.f, true, frames2));
+		registry.keyframeAnimations.emplace(moving_plat2[i], KeyframeAnimation((int)frames2.size(), 2000.f, true, frames2));
 	}*/
 }

@@ -50,6 +50,13 @@ class RenderSystem {
 		textures_path("Ladder3.png"),
 		textures_path("book.png"),
 		textures_path("tutorial1.png"),
+		textures_path("burger.png"),
+		textures_path("muffin.png"),
+		textures_path("noodles.png"),
+		textures_path("onigiri.png"),
+		textures_path("pizza.png"),
+		textures_path("soda.png"),
+		textures_path("heart.png"),
 		textures_path("win_screen.png"),
 		textures_path("basement.png"),
 	};
@@ -109,6 +116,8 @@ public:
 	void initializeSpriteSheet(Entity& entity, ANIMATION_MODE defaultMode, std::vector<int> spriteCounts, float switchTime, vec2 trunc);
 
 	mat3 createProjectionMatrix(float elapsed_time_ms);
+
+	mat3 RenderSystem::createBasicProjectionMatrix();
 
 	void resetCamera(vec2 defaultPos);
 

@@ -50,6 +50,11 @@ Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTU
 Entity createBook(RenderSystem* renderer, vec2 position);
 // text box
 Entity createStaticTexture(RenderSystem* renderer, TEXTURE_ASSET_ID textureID, vec2 position, std::string text, vec2 scale = { 1.f, 1.f });
+// food
+Entity createFood(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID food, vec2 scale, bool overlay);
+
+// hearts
+Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 

@@ -227,6 +227,7 @@ void RenderSystem::draw(float elapsed_time_ms)
 							  // sprites back to front
 	gl_has_errors();
 	mat3 projection_2D = createProjectionMatrix(elapsed_time_ms);
+	mat3 projectionBasic = createBasicProjectionMatrix();
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
@@ -234,7 +235,12 @@ void RenderSystem::draw(float elapsed_time_ms)
 			continue;
 		// Note, its not very efficient to access elements indirectly via the entity
 		// albeit iterating through all Sprites in sequence. A good point to optimize
-		drawTexturedMesh(entity, projection_2D);
+		if (registry.overlay.has(entity)) {
+			drawTexturedMesh(entity, projectionBasic);
+		}
+		else {
+			drawTexturedMesh(entity, projection_2D);
+		}
 	}
 
 	// Truely render to the screen
@@ -365,7 +371,23 @@ mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
 	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
-	}
+}
+
+mat3 RenderSystem::createBasicProjectionMatrix() {
+	// Fake projection matrix, scales with respect to window coordinates
+	float left = 0.f;
+	float top = 0.f;
+
+	gl_has_errors();
+	float right = (float)window_width_px;
+	float bottom = (float)window_height_px;
+
+	float sx = 2.f / (right - left);
+	float sy = 2.f / (top - bottom);
+	float tx = -(right + left) / (right - left);
+	float ty = -(top + bottom) / (top - bottom);
+	return { {sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f} };
+}
 
 void RenderSystem::resetCamera(vec2 defaultPos) 
 {
