@@ -154,8 +154,13 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
-	if (registry.zombies.entities.size() < 1)
-		restart_game(); // level is over
+	if (registry.zombies.entities.size() < 1 && this->game_over == false) {
+		// restart_game(); // level is over
+		createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
+		this->game_over = true;
+		debugging.in_zoom_mode = true;
+		printf("You win!\n");
+	}
 
 	// Updating window title with points
 	std::stringstream title_ss;
@@ -927,6 +932,7 @@ bool WorldSystem::isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& mot
 // Reset the world state to its initial state
 void WorldSystem::restart_game()
 {
+	this->game_over = false;
 	curr_level = 0;
 	// Debugging for memory/component leaks
 	registry.list_all_components();
@@ -959,9 +965,10 @@ void WorldSystem::restart_game()
 
 	// indoor background
 	Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
+	Entity basement = createBackground(renderer, TEXTURE_ASSET_ID::BASEMENT);
 
 	// Tutorial sign
-	Entity tutorial1 = createTextBox(renderer, { 643, 550 }, "tutorial1", { 250.f, 150.f });
+	Entity tutorial1 = createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL1, { 643, 550 }, "tutorial1", { 250.f, 150.f });
 
 	// egg
 	Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f });
@@ -1288,16 +1295,16 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		if (key == GLFW_KEY_SPACE && !motion.offGround)
 		{
 			motion.offGround = true;
-			motion.velocity[1] -= 300;
+			motion.velocity[1] -= 500;
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 
 		if (key == GLFW_KEY_P) {
-			debugging.in_debug_mode = !debugging.in_debug_mode;
+			debugging.in_zoom_mode = !debugging.in_zoom_mode;
 		}
 	}
 
-	// For debugging (because I don't have a mouse) - Justin
+	// For camera (because I don't have a mouse) - Justin
 	/*
 	if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT) { // && action == GLFW_RELEASE
 		auto& booksRegistry = registry.books;
@@ -1358,9 +1365,9 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	if (key == GLFW_KEY_BACKSLASH)
 	{
 		if (action == GLFW_RELEASE)
-			debugging.in_debug_mode = false;
+			debugging.in_zoom_mode = false;
 		else
-			debugging.in_debug_mode = true;
+			debugging.in_zoom_mode = true;
 	}
 
 	// Control the current speed with `<` `>`
@@ -1399,7 +1406,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 
 vec2 WorldSystem::relativePos(vec2 mouse_position) {
 	vec2 relativePos;
-	if (debugging.in_debug_mode == true) {
+	if (debugging.in_zoom_mode == true) {
 		relativePos = mouse_position;
 	}
 	else {

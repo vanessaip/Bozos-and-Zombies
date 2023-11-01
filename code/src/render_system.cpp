@@ -270,7 +270,7 @@ void RenderSystem::step(float elapsed_time_ms) {
 
 mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 {
-	if (debugging.in_debug_mode) {
+	if (debugging.in_zoom_mode) {
 		screen_width = window_width_px;
 		screen_height = window_height_px;
 	}

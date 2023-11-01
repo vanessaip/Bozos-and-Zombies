@@ -380,7 +380,7 @@ Entity createBook(RenderSystem* renderer, vec2 position)
 	return entity;
 }
 
-Entity createTextBox(RenderSystem* renderer, vec2 position, std::string text, vec2 scale)
+Entity createStaticTexture(RenderSystem* renderer, TEXTURE_ASSET_ID textureID, vec2 position, std::string text, vec2 scale)
 {
 	// Reserve en entity
 	auto entity = Entity();
@@ -400,7 +400,7 @@ Entity createTextBox(RenderSystem* renderer, vec2 position, std::string text, ve
 	// Create an (empty) Book component to be able to refer to all books
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TUTORIAL1,
+		{ textureID,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 

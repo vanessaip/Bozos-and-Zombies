@@ -97,7 +97,7 @@ struct Collision
 // Data structure for toggling debug mode
 struct Debug
 {
-	bool in_debug_mode = 0;
+	bool in_zoom_mode = 0;
 	bool in_freeze_mode = 0;
 };
 extern Debug debugging;
@@ -264,7 +264,9 @@ enum class TEXTURE_ASSET_ID
 	PIZZA = ONIGIRI + 1,
 	SODA = PIZZA + 1,
 	HEART = SODA + 1,
-	TEXTURE_COUNT = HEART + 1
+  WIN_SCREEN = HEART + 1,
+	BASEMENT = WIN_SCREEN + 1,
+	TEXTURE_COUNT = BASEMENT + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -323,8 +325,8 @@ struct SpriteSheet
 		truncation = trunc;
 
 		double maxCount = *std::max_element(spriteCount.begin(), spriteCount.end());
-		spriteDim.x = 1.f / maxCount;
-		spriteDim.y = 1.f / animation_mode_count;
+		spriteDim.x = float(1.f / maxCount);
+		spriteDim.y = float(1.f / animation_mode_count);
 
 		updateAnimation(defaultMode);
 	}

@@ -80,6 +80,7 @@ private:
 	// This is actually 3 lives but 0 indexed.
 	int player_lives = 2;
 	std::vector<Entity> player_hearts;
+	bool game_over;
 
 	// Level definitions
 	std::vector<float> floor_positions;
