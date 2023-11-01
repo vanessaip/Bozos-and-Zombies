@@ -124,6 +124,17 @@ Zombie heuristic/decision based movement:
 - the helper function `checkLevel()` is implemented on Line 816
 - the helper function `getClosestLadder()` is implemented on Line 841
 
+Aiming Cursor: 
+- in world_init.cpp, line 37 implements a createBozoPointer function that spawns a cursor that attaches to the player.
+- in world_system.cpp line 1387 we implement the logic for the mouse to follow the cursor.
+
+Help: Provide basic user tutorial/help.
+- Using createStaticTexture() in world_unit.cpp, we spawn a sign that explains the basic controls of the game in the center of the stage.
+
+Winning Screen:
+- Using createStaticTexture() defined in world_unit.cpp, when all the zombies have been deleted and all foods have been collected, we zoom the camera out to the full map and display a "You Win!" message.
+
+
 ## Sprite sheet animation
 - Sprite sheet component defined in components.hpp line 293
 - initializeSpriteSheet creates a new sprite sheet component and binds vbo and ibo to unique buffer Id		
