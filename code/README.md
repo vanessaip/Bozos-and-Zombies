@@ -94,7 +94,9 @@ Entry points:
 - in world_system.cpp line 481, we play a death sound as the play is killed.
 
 # Milestone 2 Proposal Alignment
-TODO
+For milestone 2, our team improved the gameplay by designing a more complex map, introducing multiple zombies and NPCs, adding interactions between player/NPCs (acquiring textbook) and zombie/NPCs (infection), ability to kill zombies by aiming and throwing collected textbook projectiles, implemented heuristics for zombies chasing the player and humans, introduced food items to collect, and lives system.
+
+We also hit all other requirements by adding camera movement that follows the player (with option to zoom in/out by pressing P), sprite animation for all our characters (player, zombies, NPCs), mesh collision, a tutorial, and plenty of new visual assets to support these features.
 
 # Milestone 2 Deliverables
 # Improved Gameplay
@@ -108,7 +110,13 @@ TODO
 - world_system.cpp `handle_collisions()` Player - Human collisions: player receives a textbook when colliding with student NPCs 
 
 ## Sprite sheet animation
-
+- Sprite sheet component defined in components.hpp line 293
+- initializeSpriteSheet creates a new sprite sheet component and binds vbo and ibo to unique buffer Id		
+	- Defined in render_system.cpp line 413
+	- Called in zombie, student, player create functions
+- updateSpriteSheetGeometryBuffer updates the coordinates on the sprite sheet
+	- Defined in render_system.cpp line 435
+	- Called in RenderSystem::step line 260
 
 ## New integrated assets
 - **Introduction of New Spike Mesh Assets**:
@@ -150,7 +158,17 @@ TODO
 # Creative
 
 ## [21] Make the camera follow the player
+- createProjectionMatrix determines the camera window dimensions based on player position
+- defined in render_system.cpp line 265
+- called in RenderSystem::draw line 229
 
-## ??
-- complex assets?
-- mouse gestures
+## [24] Basic integrated assets
+- new sprites for platforms, walls, and ladders
+- (created) several sprites for background components (outdoor background, indoor background layers, nest egg)
+- (created) blackboard sprite for user tutorial
+- (created) book projectile
+- 3 spritesheets for our characters
+- 6 differnt sprites for collectable food items
+- 1 new heart sprite for player lives
+- (created) spike mesh object file
+- (created) arrow sprite for projectile direction
