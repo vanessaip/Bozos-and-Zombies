@@ -75,6 +75,7 @@ private:
 	int npcSpawnIndex = 0;
 	int enemySpawnIndex = 0;
 	int curr_level = 0;
+	bool game_over;
 
 	// Level definitions
 	std::vector<float> floor_positions;
