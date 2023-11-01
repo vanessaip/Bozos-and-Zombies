@@ -1445,9 +1445,9 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 	// TODO(vanessa): currently all platforms using same Motion frames are stacked on top of each other, fix to make adjacent
 	// 					need to add walls or some other method of preventing characters from going under moving platforms
 	//					reconcile behaviour of moving platforms passing through static platforms
-	/*std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
-	Motion m1 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.8));
-	Motion m2 = Motion(vec2(window_width_px - PLATFORM_WIDTH*5, window_height_px*0.2));
+	std::vector<Entity> moving_plat = createPlatforms(renderer, { 0.f, 0.f }, 7);
+	Motion m1 = Motion(vec2(PLATFORM_WIDTH * 9.2, window_height_px * 0.4));
+	Motion m2 = Motion(vec2(PLATFORM_WIDTH * 16.2, window_height_px * 0.4));
 	std::vector<Motion> frames = { m1, m2 };
 
 	for (uint i = 0; i < moving_plat.size(); i++) {
@@ -1455,7 +1455,7 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 		registry.keyframeAnimations.emplace(currplat, KeyframeAnimation((int)frames.size(), 3000.f, true, frames));
 	}
 
-	std::vector<Entity> moving_plat2 = createPlatforms(renderer, { 0.f, 0.f }, 7);
+	/*std::vector<Entity> moving_plat2 = createPlatforms(renderer, {0.f, 0.f}, 7);
 	Motion m3 = Motion(vec2(PLATFORM_WIDTH * 9.2, window_height_px * 0.6));
 	Motion m4 = Motion(vec2(PLATFORM_WIDTH * 9.2, window_height_px * 0.4));
 	std::vector<Motion> frames2 = { m3, m4 };
