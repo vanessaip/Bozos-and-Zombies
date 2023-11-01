@@ -154,7 +154,7 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
-	if (registry.zombies.entities.size() < 1 && this->game_over == false) {
+	if (registry.zombies.entities.size() < 1 && food_eaten > 5 && this->game_over == false) {
 		// restart_game(); // level is over
 		createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
 		this->game_over = true;
@@ -943,7 +943,8 @@ void WorldSystem::restart_game()
 	enemySpawnTimer = 0.f;
 	npcSpawnTimer = 0.f;
 	food_eaten_pos = 50.f;
-	player_lives = 2;
+	player_lives = 4;
+	int food_eaten = 0;
 
 	// Reset sprite sheet buffer index
 
@@ -1066,8 +1067,10 @@ void WorldSystem::restart_game()
 	Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
 	Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
 	Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
+	Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
+	Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
 
-	player_hearts = { heart0, heart1, heart2 };
+	player_hearts = { heart0, heart1, heart2, heart3, heart4 };
 
 	setup_keyframes(renderer);
 
@@ -1243,6 +1246,8 @@ void WorldSystem::handle_collisions()
 			Entity food = createFood(renderer, { food_eaten_pos, 50 }, id, { 60, 60 }, false);
 
 			registry.remove_all_components_of(entity);
+
+			food_eaten++;
 			
 			food_eaten_pos = food_eaten_pos + 60;
 			registry.overlay.emplace(food);
@@ -1295,7 +1300,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		if (key == GLFW_KEY_SPACE && !motion.offGround)
 		{
 			motion.offGround = true;
-			motion.velocity[1] -= 500;
+			motion.velocity[1] -= 400;
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 
