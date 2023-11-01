@@ -299,8 +299,8 @@ struct SpriteSheet
 		truncation = trunc;
 
 		double maxCount = *std::max_element(spriteCount.begin(), spriteCount.end());
-		spriteDim.x = 1.f / maxCount;
-		spriteDim.y = 1.f / animation_mode_count;
+		spriteDim.x = float(1.f / maxCount);
+		spriteDim.y = float(1.f / animation_mode_count);
 
 		updateAnimation(defaultMode);
 	}
