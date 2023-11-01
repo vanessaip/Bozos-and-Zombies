@@ -107,8 +107,6 @@ We also hit all other requirements by adding camera movement that follows the pl
       - Transformation logic in `world_system.cpp`: `step()` function on lines `413 - 421`; `526 - 560`.
       - Collision handling in `world_system.cpp`: `handle_collisions()` on lines `1181 - 1220`.
 
-- world_system.cpp `handle_collisions()` Player - Human collisions: player receives a textbook when colliding with student NPCs 
-
 Ladder interaction:
 - in world_system.cpp, Line 423 checks if the entity is a player and calls `updateClimbing()`
 - Line 862 has the implementation for updateClimbing which loops through every Climbable entity and checks if the player is touching it. If the player is touching it, allow the player to use keys W and S to climb up and down the ladder
@@ -175,6 +173,10 @@ Overlay rendering for food/lives feedback:
 
 ## 2 minutes of non-repeptitive gameplay
 
+**Projectile system:**
+- in world_system.cpp `handle_collisions()`, when player collides with human NPC, player receives a book and will hold it. The number of books received will be shwon on title.
+- in world_system.cpp `on_mouse_button()`, player will launch the book when releasing the mouse left button, the direction is the same as the blue pointer
+
 # Stability
 
 ## Minimal Lag
@@ -186,8 +188,11 @@ Overlay rendering for food/lives feedback:
 - world_system.cpp line 82: allow window to be resized
 - render_system_init.cpp line 23: keep the aspect ratio consistent
 - the viewport is resized on each call to `drawToScreen()` in render_system.cpp
-## No crashes, glitches, unpredictable behaviour
 
+## No crashes, glitches, unpredictable behaviour
+**Bugs fixed including**:
+- mouse not pointing at cursor after zoomed in, fixed by calculate relative position to the camera
+- camera splits into 2 sometimes, fixed by changing the logic of timer
 # Creative
 
 ## [21] Make the camera follow the player
