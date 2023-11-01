@@ -100,14 +100,17 @@ TODO
 # Improved Gameplay
 
 ## Game Logic response to user input
+- A new logic for NPC and zombie interactions has been added, allowing NPCs to die and then turn into zombies that follow the player.
 
 
 ## Sprite sheet animation
 
 
 ## New integrated assets
+- Introduction of new spike mesh assets to the game map.
 
 ## Mesh-based collision detection
+- A new collision detection function to handle interactions between mesh assets (like spikes) and the player, enhancing the collision detection system beyond simple bounding boxes.
 
 ## Basic user tutorial/help
 
