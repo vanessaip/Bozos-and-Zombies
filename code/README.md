@@ -100,7 +100,10 @@ TODO
 # Improved Gameplay
 
 ## Game Logic response to user input
-- A new logic for NPC and zombie interactions has been added, allowing NPCs to die and then turn into zombies that follow the player.
+- NPCs can die and then turn into zombies that follow the player, adding depth to the gameplay.
+    - **Code References**:
+      - Transformation logic in `world_system.cpp`: `step()` function on lines `413 - 421`; `526 - 560`.
+      - Collision handling in `world_system.cpp`: `handle_collisions()` on lines `1181 - 1220`.
 
 - world_system.cpp `handle_collisions()` Player - Human collisions: player receives a textbook when colliding with student NPCs 
 
@@ -108,15 +111,22 @@ TODO
 
 
 ## New integrated assets
-- Introduction of new spike mesh assets to the game map.
-in world_system.cpp `restart()`:
+- **Introduction of New Spike Mesh Assets**:
+  - Spikes increase the game's challenge and visual appeal.
+    - **Code References**:
+      - Asset initialization in `world_system.cpp` within the `restart()` function.
+      - Definitions and shaders in `components.hpp` (lines `42 - 45`), `spike.fs.glsl`, `spike.vs.glsl`, and `spike.obj`.
+
 - new background assets initialized with `createBackground()`  
 - floors are created with fixed sized platforms stacked horizontally using `createPlatforms()`
 - steps are created with stacking platforms at an offset `createSteps()` 
 - different length ladders created by stacking 3 different sprite assets `createClimbable()`
 
 ## Mesh-based collision detection
-- A new collision detection function to handle interactions between mesh assets (like spikes) and the player, enhancing the collision detection system beyond simple bounding boxes.
+- **Enhanced Collision Detection Function**:
+  - Improved function for interactions between player and mesh assets.
+    - **Code Reference**:
+      - `bool checkCollision` on lines `46 to 74` of physics_system.cpp.
 
 ## Basic user tutorial/help
 
