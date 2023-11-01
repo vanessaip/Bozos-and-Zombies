@@ -92,3 +92,43 @@ Entry points:
 - in world_system.cpp line 200, we detect when the player has just landed on the top of a playform, and play a landing noise
 - in world_system.cpp line 550, we play a jump sound the the player jumps
 - in world_system.cpp line 481, we play a death sound as the play is killed.
+
+# Milestone 2 Proposal Alignment
+TODO
+
+# Milestone 2 Deliverables
+# Improved Gameplay
+
+## Game Logic response to user input
+
+
+## Sprite sheet animation
+
+
+## New integrated assets
+
+## Mesh-based collision detection
+
+## Basic user tutorial/help
+
+# Playability
+
+## 2 minutes of non-repeptitive gameplay
+
+# Stability
+
+## Minimal Lag
+
+- all code
+
+## Consistent game resolution
+
+## No crashes, glitches, unpredictable behaviour
+
+# Creative
+
+## [21] Make the camera follow the player
+
+## ??
+- complex assets?
+- mouse gestures
