@@ -8,6 +8,8 @@
 float screen_width = screen_width_px;
 float screen_height = screen_width_px;
 
+static int bufferIds[50];
+
 void RenderSystem::drawTexturedMesh(Entity entity,
 									const mat3 &projection)
 {
@@ -270,7 +272,7 @@ void RenderSystem::step(float elapsed_time_ms) {
 
 mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
 {
-	if (debugging.in_zoom_mode) {
+	if (debugging.in_full_view_mode) {
 		screen_width = window_width_px;
 		screen_height = window_height_px;
 	}
@@ -417,6 +419,14 @@ vec4 RenderSystem::getCameraBounds() {
 
 void RenderSystem::resetSpriteSheetTracker() {
 	RenderSystem::spriteSheetBuffersCount = geometry_count;
+	/* TODO (Justin): properly implement this later
+	std::fill_n(bufferIds, sizeof(bufferIds) / sizeof(int), -1);
+
+	for (int i = 0; i < geometry_count; i++)
+	{
+		bufferIds[i] = i;
+	}
+	*/
 }
 
 template <class T>

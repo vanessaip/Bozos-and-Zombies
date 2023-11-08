@@ -158,7 +158,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		// restart_game(); // level is over
 		createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
 		this->game_over = true;
-		debugging.in_zoom_mode = true;
+		debugging.in_full_view_mode = true;
 		printf("You win!\n");
 	}
 
@@ -181,8 +181,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// generate new zombie every 20s
 	enemySpawnTimer += elapsed_ms_since_last_update;
 	npcSpawnTimer += elapsed_ms_since_last_update;
-	vec4 cameraBounds = renderer->getCameraBounds();;
-	if (enemySpawnTimer / 1000.f > 25) {
+	vec4 cameraBounds = renderer->getCameraBounds();
+	if (enemySpawnTimer / 1000.f > 25 && !debugging.in_full_view_mode) {
 		vec2 enemySpawnPos;
 		vec4 cameraBounds = renderer->getCameraBounds();;
 		do
@@ -191,13 +191,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				enemySpawnIndex = 0;
 
 			enemySpawnPos = ZOMBIE_START_POS[curr_level][enemySpawnIndex];
+			enemySpawnIndex++;
 		} while (enemySpawnPos.x > cameraBounds[0] && enemySpawnPos.x < cameraBounds[2]
 			&& enemySpawnPos.y > cameraBounds[1] && enemySpawnPos.y < cameraBounds[3]); // ensure new student is spawned off screen
 
 		createZombie(renderer, enemySpawnPos);
 		enemySpawnTimer = 0.f;
 	}
-	if (npcSpawnTimer / 1000.f > 10) {
+	if (npcSpawnTimer / 1000.f > 10 && !debugging.in_full_view_mode) {
 		vec2 studentSpawnPos;
 		do
 		{
@@ -205,8 +206,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				npcSpawnIndex = 0;
 
 			studentSpawnPos = STUDENT_START_POS[curr_level][npcSpawnIndex];
-		} while (studentSpawnPos.x > cameraBounds[0] && studentSpawnPos.x < cameraBounds[3]
-			&& studentSpawnPos.y > cameraBounds[1] && studentSpawnPos.y < cameraBounds[4]); // ensure new student is spawned off screen
+			npcSpawnIndex++;
+		} while (studentSpawnPos.x > cameraBounds[0] && studentSpawnPos.x < cameraBounds[2]
+			&& studentSpawnPos.y > cameraBounds[1] && studentSpawnPos.y < cameraBounds[3]); // ensure new student is spawned off screen
 
 		Entity student = createStudent(renderer, studentSpawnPos);
 		Motion& student_motion = registry.motions.get(student);
@@ -1305,7 +1307,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 
 		if (key == GLFW_KEY_P) {
-			debugging.in_zoom_mode = !debugging.in_zoom_mode;
+			debugging.in_full_view_mode = !debugging.in_full_view_mode;
 		}
 	}
 
@@ -1370,9 +1372,9 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	if (key == GLFW_KEY_BACKSLASH)
 	{
 		if (action == GLFW_RELEASE)
-			debugging.in_zoom_mode = false;
+			debugging.in_full_view_mode = false;
 		else
-			debugging.in_zoom_mode = true;
+			debugging.in_full_view_mode = true;
 	}
 
 	// Control the current speed with `<` `>`
@@ -1411,7 +1413,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 
 vec2 WorldSystem::relativePos(vec2 mouse_position) {
 	vec2 relativePos;
-	if (debugging.in_zoom_mode == true) {
+	if (debugging.in_full_view_mode == true) {
 		relativePos = mouse_position;
 	}
 	else {

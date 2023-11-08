@@ -97,7 +97,7 @@ struct Collision
 // Data structure for toggling debug mode
 struct Debug
 {
-	bool in_zoom_mode = 0;
+	bool in_full_view_mode = 0;
 	bool in_freeze_mode = 0;
 };
 extern Debug debugging;
