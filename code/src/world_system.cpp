@@ -1245,14 +1245,13 @@ void WorldSystem::handle_collisions()
 
 		else if (registry.food.has(entity) && registry.players.has(entity_other)) {
 			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID) registry.food.get(entity).food_id;
-			Entity food = createFood(renderer, { food_eaten_pos, 50 }, id, { 60, 60 }, false);
+			Entity food = createFood(renderer, { food_eaten_pos, 50 }, id, { 60, 60 }, true);
 
 			registry.remove_all_components_of(entity);
 
 			food_eaten++;
 			
 			food_eaten_pos = food_eaten_pos + 60;
-			registry.overlay.emplace(food);
 		}
 	}
 
