@@ -195,7 +195,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		} while (enemySpawnPos.x > cameraBounds[0] && enemySpawnPos.x < cameraBounds[2]
 			&& enemySpawnPos.y > cameraBounds[1] && enemySpawnPos.y < cameraBounds[3]); // ensure new student is spawned off screen
 
-		createZombie(renderer, enemySpawnPos);
+		//createZombie(renderer, enemySpawnPos);
 		enemySpawnTimer = 0.f;
 	}
 	if (npcSpawnTimer / 1000.f > 10 && !debugging.in_full_view_mode) {
@@ -963,8 +963,17 @@ void WorldSystem::restart_game()
 	renderer->resetSpriteSheetTracker();
 
 	// Create background first (painter's algorithm for rendering)
-	// base colour
-	Entity background = createBackground(renderer);
+	float depth = 2.3f;
+	// NOTE: this only works if parallax background textures are defined at the end of TEXTURE_ASSET_ID enum
+	for (int i = 1; i <= NUM_OF_PARALLAX_LAYERS[curr_level]; i++) 
+	{
+		createBackground(renderer, static_cast<TEXTURE_ASSET_ID>(texture_count - i), depth);
+		depth -= 0.2;
+	}
+	//Entity backround3 = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_3, 2.3f);
+	//Entity backround2 = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_2, 2.2f);
+	//Entity backround1 = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_1, 2.1f);
+	//Entity background0 = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND, 2.f);
 
 	// indoor background
 	Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
@@ -974,7 +983,7 @@ void WorldSystem::restart_game()
 	Entity tutorial1 = createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL1, { 643, 550 }, "tutorial1", { 250.f, 150.f });
 
 	// egg
-	Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f });
+	Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, 0.f, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f });
 
 	// Create platform(s) at set positions, specify width
 	// TODO(vanesssa): define array of platform dimensions for each level
@@ -1040,10 +1049,10 @@ void WorldSystem::restart_game()
 	Motion& bozo_motion = registry.motions.get(player_bozo);
 	bozo_motion.velocity = { 0.f, 0.f };
 
-	player_bozo_pointer = createBozoPointer(renderer, { 200, 500 });
+	//player_bozo_pointer = createBozoPointer(renderer, { 200, 500 });
 	// Create zombie (one starter zombie per level?)
 	for (vec2 pos : ZOMBIE_START_POS[curr_level])
-		createZombie(renderer, pos);
+		//createZombie(renderer, pos);
 
 	// Create students
 	for (vec2 pos : STUDENT_START_POS[curr_level])
@@ -1153,14 +1162,14 @@ void WorldSystem::handle_collisions()
 				{
 					// random chance of spawning book at the same position as the "saved" student, plays different sound if a book is spawned
 					//int spawn_book = rng() % 2; // 0 or 1
-					int spawn_book = 1;
+					int spawn_book = 0;
 					if (spawn_book)
 					{
 						Motion& m = registry.motions.get(entity_other);
 						Entity book = createBook(renderer, m.position);
 						Book& b = registry.books.get(book);
 						b.offHand = false;
-						++points;
+						//++points;
 						Mix_PlayChannel(-1, collect_book_sound, 0);
 					}
 					else
@@ -1398,6 +1407,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+	/*
 	if (!registry.deathTimers.has(player_bozo))
 	{
 		Motion& motion = registry.motions.get(player_bozo_pointer);
@@ -1406,6 +1416,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 		// printf("Radians: %f\n", radians);
 		motion.angle = radians;
 	}
+	*/
 
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }

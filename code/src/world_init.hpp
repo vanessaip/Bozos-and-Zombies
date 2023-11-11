@@ -45,7 +45,7 @@ std::vector<Entity> createClimbable(RenderSystem* renderer, vec2 top_position, u
 // spikes
 Entity createSpike(RenderSystem* renderer, vec2 pos);
 // background
-Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::BACKGROUND, vec2 position = { window_width_px / 2, window_height_px / 2 }, vec2 scale = { window_width_px, window_height_px });
+Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_0, float depth = 0.f, vec2 position = { window_width_px / 2, window_height_px / 2 }, vec2 scale = { window_width_px, window_height_px });
 // book
 Entity createBook(RenderSystem* renderer, vec2 position);
 // text box
@@ -70,4 +70,4 @@ const std::vector<std::vector<float>> ZOMBIE_FLOOR_TRAVERSE_POINTS = { {760, 600
 const std::vector<vec2> BOZO_STARTING_POS = { {500, window_height_px * 0.8 - 50.f } };
 const std::vector<vec2> ENEMY_SPAWN_POS = { {  window_width_px - 100.f, 120.f } };
 
-
+const std::vector<int> NUM_OF_PARALLAX_LAYERS = { 4 };

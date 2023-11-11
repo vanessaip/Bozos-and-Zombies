@@ -57,7 +57,7 @@ Entity createBozoPointer(RenderSystem* renderer, vec2 pos)
 	registry.playerEffects.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::BOZO_POINTER,
+		{ TEXTURE_ASSET_ID::BOZO,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
@@ -277,7 +277,7 @@ std::vector<Entity> createClimbable(RenderSystem* renderer, vec2 top_position, u
 	return sections;
 }
 
-Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, vec2 position, vec2 scale)
+Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, float depth, vec2 position, vec2 scale)
 {
 	auto entity = Entity();
 
@@ -295,7 +295,9 @@ Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, vec2 p
 	motion.scale = scale;
 
 	// Create a Background component
-	registry.backgrounds.emplace(entity);
+	Background& background = registry.backgrounds.emplace(entity);
+	background.depth = depth;
+
 	registry.renderRequests.insert(
 		entity,
 		{ texture,

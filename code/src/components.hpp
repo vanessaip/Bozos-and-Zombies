@@ -27,10 +27,6 @@ struct Human
 {
 };
 
-struct Background
-{
-};
-
 struct Platform
 {
 };
@@ -200,6 +196,12 @@ struct Camera
 	}
 };
 
+struct Background
+{
+	float depth = 0.f;
+	Camera parallaxCam = Camera(0.f, 0.f, 0.f, 0.f);
+};
+
 struct TextBox
 {
 	std::string text = "";
@@ -244,9 +246,8 @@ enum class TEXTURE_ASSET_ID
 	STUDENT = 0,
 	ZOMBIE = STUDENT + 1,
 	BOZO = ZOMBIE + 1,
-	BOZO_POINTER = BOZO + 1,
-	BACKGROUND = BOZO_POINTER + 1,
-	PLATFORM = BACKGROUND + 1,
+	//BOZO_POINTER = BOZO + 1,
+	PLATFORM = BOZO + 1,
 	STEP0 = PLATFORM + 1,
 	STEP1 = STEP0 + 1,
 	WALL = STEP1 + 1,
@@ -264,9 +265,14 @@ enum class TEXTURE_ASSET_ID
 	PIZZA = ONIGIRI + 1,
 	SODA = PIZZA + 1,
 	HEART = SODA + 1,
-  WIN_SCREEN = HEART + 1,
+	WIN_SCREEN = HEART + 1,
 	BASEMENT = WIN_SCREEN + 1,
-	TEXTURE_COUNT = BASEMENT + 1
+	// Define "outside" backgrounds at the end
+	PARALLAX_BACKGROUND_0 = BASEMENT + 1,
+	PARALLAX_BACKGROUND_1 = PARALLAX_BACKGROUND_0 + 1,
+	PARALLAX_BACKGROUND_2 = PARALLAX_BACKGROUND_1 + 1,
+	PARALLAX_BACKGROUND_3 = PARALLAX_BACKGROUND_2 + 1,
+	TEXTURE_COUNT = PARALLAX_BACKGROUND_3 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
