@@ -70,4 +70,4 @@ const std::vector<std::vector<float>> ZOMBIE_FLOOR_TRAVERSE_POINTS = { {760, 600
 const std::vector<vec2> BOZO_STARTING_POS = { {500, window_height_px * 0.8 - 50.f } };
 const std::vector<vec2> ENEMY_SPAWN_POS = { {  window_width_px - 100.f, 120.f } };
 
-const std::vector<int> NUM_OF_PARALLAX_LAYERS = { 4 };
+const std::vector<int> NUM_OF_PARALLAX_LAYERS = { 8 };

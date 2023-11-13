@@ -210,9 +210,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		} while (studentSpawnPos.x > cameraBounds[0] && studentSpawnPos.x < cameraBounds[2]
 			&& studentSpawnPos.y > cameraBounds[1] && studentSpawnPos.y < cameraBounds[3]); // ensure new student is spawned off screen
 
-		Entity student = createStudent(renderer, studentSpawnPos);
-		Motion& student_motion = registry.motions.get(student);
-		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+		//Entity student = createStudent(renderer, studentSpawnPos);
+		//Motion& student_motion = registry.motions.get(student);
+		//student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
 		npcSpawnTimer = 0.f;
 	}
 
@@ -963,12 +963,12 @@ void WorldSystem::restart_game()
 	renderer->resetSpriteSheetTracker();
 
 	// Create background first (painter's algorithm for rendering)
-	float depth = 2.3f;
+	float depth = 1.f + 0.2f * NUM_OF_PARALLAX_LAYERS[curr_level];
 	// NOTE: this only works if parallax background textures are defined at the end of TEXTURE_ASSET_ID enum
 	for (int i = 1; i <= NUM_OF_PARALLAX_LAYERS[curr_level]; i++) 
 	{
 		createBackground(renderer, static_cast<TEXTURE_ASSET_ID>(texture_count - i), depth);
-		depth -= 0.2;
+		depth -= 0.2f;
 	}
 	//Entity backround3 = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_3, 2.3f);
 	//Entity backround2 = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_2, 2.2f);
@@ -976,7 +976,7 @@ void WorldSystem::restart_game()
 	//Entity background0 = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND, 2.f);
 
 	// indoor background
-	Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
+	//Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
 	Entity basement = createBackground(renderer, TEXTURE_ASSET_ID::BASEMENT);
 
 	// Tutorial sign
@@ -1056,7 +1056,7 @@ void WorldSystem::restart_game()
 
 	// Create students
 	for (vec2 pos : STUDENT_START_POS[curr_level])
-		createStudent(renderer, pos);
+		//createStudent(renderer, pos);
 
 	for (Entity student : registry.humans.entities)
 	{
