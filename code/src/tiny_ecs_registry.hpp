@@ -37,6 +37,7 @@ public:
 	ComponentContainer<TextBox> textboxes;
 	ComponentContainer<Food> food;
 	ComponentContainer<Overlay> overlay;
+	ComponentContainer<Label> labels;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -67,6 +68,7 @@ public:
 		registry_list.push_back(&food);
 		registry_list.push_back(&overlay);
 		registry_list.push_back(&lostLifeTimer);
+		registry_list.push_back(&labels);
 	}
 
 	void clear_all_components() {

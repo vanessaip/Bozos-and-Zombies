@@ -236,12 +236,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		if (isPlayer && !registry.deathTimers.has(motion_container.entities[i]))
 		{
 			motion.velocity[0] = 0;
-			
+
 			// If player just lost a life, make invincible for a bit
 			if (registry.lostLifeTimer.has(player_bozo)) {
 				LostLife& timer = registry.lostLifeTimer.get(player_bozo);
-				timer.timer_ms -= elapsed_ms_since_last_update; 
-				
+				timer.timer_ms -= elapsed_ms_since_last_update;
+
 				// Fade a bit to show invincibility
 				vec3& color = registry.colors.get(player_bozo);
 				color = { 0.5f, 0.5f, 0.5f };
@@ -560,7 +560,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			return true;
 		}
 	}
-
 	// reduce window brightness if any of the present salmons is dying
 	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
 
@@ -1056,7 +1055,7 @@ void WorldSystem::restart_game()
 	}
 
 	// Place food
-	Entity burger = createFood(renderer, { 1310, 136 }, TEXTURE_ASSET_ID::BURGER, {30, 30}, false);
+	Entity burger = createFood(renderer, { 1310, 136 }, TEXTURE_ASSET_ID::BURGER, { 30, 30 }, false);
 	Entity muffin = createFood(renderer, { 102, 298 }, TEXTURE_ASSET_ID::MUFFIN, { 30, 30 }, false);
 	Entity soda = createFood(renderer, { 660, 134 }, TEXTURE_ASSET_ID::SODA, { 30, 30 }, false);
 	Entity noodles = createFood(renderer, { 860, 296 }, TEXTURE_ASSET_ID::NOODLES, { 30, 30 }, false);
@@ -1073,6 +1072,10 @@ void WorldSystem::restart_game()
 	Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
 
 	player_hearts = { heart0, heart1, heart2, heart3, heart4 };
+
+
+	// Create label
+	Entity Label = createLabel(renderer, { 100, 600 }, { 150 , 75 });
 
 	setup_keyframes(renderer);
 
@@ -1119,7 +1122,7 @@ void WorldSystem::handle_collisions()
 					}
 				}
 				else if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives == 0)
-				{	
+				{
 					// Kill player if no lives left
 					// Scream, reset timer, and make the player [dying animation]
 					Motion& motion_player = registry.motions.get(entity);
@@ -1244,13 +1247,13 @@ void WorldSystem::handle_collisions()
 		// Player - Food collision
 
 		else if (registry.food.has(entity) && registry.players.has(entity_other)) {
-			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID) registry.food.get(entity).food_id;
+			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID)registry.food.get(entity).food_id;
 			Entity food = createFood(renderer, { food_eaten_pos, 50 }, id, { 60, 60 }, true);
 
 			registry.remove_all_components_of(entity);
 
 			food_eaten++;
-			
+
 			food_eaten_pos = food_eaten_pos + 60;
 		}
 	}

@@ -55,6 +55,8 @@ Entity createFood(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID food, 
 
 // hearts
 Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
+//label
+Entity createLabel(RenderSystem* renderer, vec2 position, vec2 scale);
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 

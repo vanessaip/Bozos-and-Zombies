@@ -34,9 +34,9 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 }
 
 
-Entity createBozoPointer(RenderSystem* renderer, vec2 pos) 
-{	
-	
+Entity createBozoPointer(RenderSystem* renderer, vec2 pos)
+{
+
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
@@ -426,7 +426,7 @@ Entity createFood(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID food, 
 	}
 	else {
 		registry.food.emplace(entity);
-		registry.food.get(entity).food_id = (int) food;
+		registry.food.get(entity).food_id = (int)food;
 	}
 	registry.renderRequests.insert(
 		entity,
@@ -455,9 +455,34 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale) {
 
 	registry.renderRequests.insert(
 		entity,
-		{   TEXTURE_ASSET_ID::HEART,
+		{ TEXTURE_ASSET_ID::HEART,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
+	return entity;
+}
+
+Entity createLabel(RenderSystem* renderer, vec2 position, vec2 scale) {
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	registry.labels.emplace(entity);
+
+	registry.overlay.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::LABEL_NEST,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
 	return entity;
 }

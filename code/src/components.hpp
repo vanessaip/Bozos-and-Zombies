@@ -14,7 +14,7 @@ struct Player
 
 struct PlayerEffects
 {
-	
+
 };
 
 // Zombies can turn Humans into Zombies
@@ -67,7 +67,7 @@ struct Motion
 	vec2 reflect;
 	bool offGround;
 	bool climbing;
-	float speedMultiplier; 
+	float speedMultiplier;
 	Motion(vec2 position = { 0.f, 0.f }, float angle = 0.f, vec2 velocity = { 0.f, 0.f }, vec2 scale = { 10.f, 10.f }, vec2 reflect = { false, false }, bool offGround = true, bool climbing = false, float speedMultiplier = 1.0)
 	{
 		this->position = position;
@@ -215,6 +215,11 @@ struct Overlay
 
 };
 
+struct Label
+{
+
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -264,9 +269,10 @@ enum class TEXTURE_ASSET_ID
 	PIZZA = ONIGIRI + 1,
 	SODA = PIZZA + 1,
 	HEART = SODA + 1,
-  WIN_SCREEN = HEART + 1,
+	WIN_SCREEN = HEART + 1,
 	BASEMENT = WIN_SCREEN + 1,
-	TEXTURE_COUNT = BASEMENT + 1
+	LABEL_NEST = BASEMENT + 1,
+	TEXTURE_COUNT = LABEL_NEST + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
