@@ -35,7 +35,7 @@ public:
 	ComponentContainer<Climbable> climbables;
 	ComponentContainer<Book> books;
 	ComponentContainer<TextBox> textboxes;
-	ComponentContainer<Food> food;
+	ComponentContainer<Collectible> collectible;
 	ComponentContainer<Overlay> overlay;
 
 	// constructor that adds all containers for looping over them
@@ -64,7 +64,7 @@ public:
 		registry_list.push_back(&spikes);
 		registry_list.push_back(&climbables);
 		registry_list.push_back(&books);
-		registry_list.push_back(&food);
+		registry_list.push_back(&collectible);
 		registry_list.push_back(&overlay);
 		registry_list.push_back(&lostLifeTimer);
 	}

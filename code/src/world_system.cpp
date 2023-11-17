@@ -7,6 +7,7 @@
 #include <sstream>
 #include <tuple>
 #include <iostream>
+#include <string.h>
 
 #include "physics_system.hpp"
 
@@ -116,7 +117,7 @@ GLFWwindow* WorldSystem::create_window()
 		return nullptr;
 	}
 
-	background_music = Mix_LoadMUS(audio_path("soundtrack.wav").c_str());
+	background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[curr_level]).c_str());
 	player_death_sound = Mix_LoadWAV(audio_path("player_death.wav").c_str());
 	student_disappear_sound = Mix_LoadWAV(audio_path("student_disappear.wav").c_str());
 	player_jump_sound = Mix_LoadWAV(audio_path("player_jump.wav").c_str());
@@ -127,7 +128,8 @@ GLFWwindow* WorldSystem::create_window()
 	if (background_music == nullptr || player_death_sound == nullptr || student_disappear_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr || zombie_kill_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-			audio_path("soundtrack.wav").c_str(),
+			audio_path("beach.wav").c_str(),
+      audio_path("soundtrack.wav").c_str(),
 			audio_path("player_death.wav").c_str(),
 			audio_path("student_disappear.wav").c_str(),
 			audio_path("player_jump.wav").c_str(),
@@ -154,7 +156,7 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
-	if (registry.zombies.entities.size() < 1 && food_eaten > 5 && this->game_over == false) {
+	if (registry.zombies.entities.size() < 1 && collectibles_collected > 5 && this->game_over == false) {
 		// restart_game(); // level is over
 		createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
 		this->game_over = true;
@@ -182,7 +184,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	enemySpawnTimer += elapsed_ms_since_last_update;
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
-	if (enemySpawnTimer / 1000.f > 25 && !debugging.in_full_view_mode) {
+	if (enemySpawnTimer / 1000.f > 25 && !debugging.in_full_view_mode && spawn_on) {
 		vec2 enemySpawnPos;
 		vec4 cameraBounds = renderer->getCameraBounds();;
 		do
@@ -198,7 +200,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		createZombie(renderer, enemySpawnPos);
 		enemySpawnTimer = 0.f;
 	}
-	if (npcSpawnTimer / 1000.f > 10 && !debugging.in_full_view_mode) {
+	if (npcSpawnTimer / 1000.f > 10 && !debugging.in_full_view_mode && spawn_on) {
 		vec2 studentSpawnPos;
 		do
 		{
@@ -276,11 +278,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 			vec4 entityBB = { entityRightSide, entityLeftSide, entityBottom, entityTop };
 
-			if (motion.position.x < 80.f + BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0)
+			if (motion.position.x < BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0)
 			{
 				motion.velocity.x = 0;
 			}
-			else if (motion.position.x > window_width_px - 100.f - BOZO_BB_WIDTH / 2.f && motion.velocity.x > 0)
+			else if (motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f && motion.velocity.x > 0)
 			{
 				motion.velocity.x = 0;
 			}
@@ -935,7 +937,6 @@ bool WorldSystem::isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& mot
 void WorldSystem::restart_game()
 {
 	this->game_over = false;
-	curr_level = 0;
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 	printf("Restarting\n");
@@ -944,9 +945,9 @@ void WorldSystem::restart_game()
 	current_speed = 1.f;
 	enemySpawnTimer = 0.f;
 	npcSpawnTimer = 0.f;
-	food_eaten_pos = 50.f;
+	collectibles_collected_pos = 50.f;
 	player_lives = 4;
-	int food_eaten = 0;
+	int collectibles_collected = 0;
 
 	// Reset sprite sheet buffer index
 
@@ -963,76 +964,55 @@ void WorldSystem::restart_game()
 	renderer->resetSpriteSheetTracker();
 
 	// Create background first (painter's algorithm for rendering)
-	// base colour
-	Entity background = createBackground(renderer);
+  if (curr_level == 0) {
+    // base colour
+    Entity background = createBackground(renderer);
 
-	// indoor background
-	Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
-	Entity basement = createBackground(renderer, TEXTURE_ASSET_ID::BASEMENT);
+    // indoor background
+    Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
+    Entity basement = createBackground(renderer, TEXTURE_ASSET_ID::BASEMENT);
 
-	// Tutorial sign
-	Entity tutorial1 = createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL1, { 643, 550 }, "tutorial1", { 250.f, 150.f });
+    // egg
+    Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f });
+  } else {
+    createBackground(renderer, BACKGROUND_ASSET[curr_level]);
+  }
 
-	// egg
-	Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f });
+	// Tutorial sign only for the first level
+  if (curr_level == 0) {
+    	Entity tutorial1 = createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL1, { 643, 550 }, "tutorial1", { 250.f, 150.f });
+  }
 
-	// Create platform(s) at set positions, specify width
-	// TODO(vanesssa): define array of platform dimensions for each level
-	uint center_x = window_width_px / 2;
-	// floors
-	std::vector<Entity> platform0 = createPlatforms(renderer, { center_x - PLATFORM_WIDTH * 7.5, window_height_px - 12.f }, 16);
-	std::vector<Entity> platform1 = createPlatforms(renderer, { PLATFORM_WIDTH * 4, window_height_px * 0.8 }, 8);
-	std::vector<Entity> platform2 = createPlatforms(renderer, { window_width_px - PLATFORM_WIDTH * 6, window_height_px * 0.8 }, 2);
-	std::vector<Entity> platform3 = createPlatforms(renderer, { 110.f, window_height_px * 0.6 }, 7);
-	std::vector<Entity> platform4 = createPlatforms(renderer, { window_width_px - PLATFORM_WIDTH * 7 - 80.f, window_height_px * 0.6 }, 7);
-	std::vector<Entity> platform5 = createPlatforms(renderer, { 110.f, window_height_px * 0.4 }, 7);
-	std::vector<Entity> platform6 = createPlatforms(renderer, { window_width_px - PLATFORM_WIDTH * 10 - 80.f, window_height_px * 0.4 }, 10);
-	std::vector<Entity> platform7 = createPlatforms(renderer, { 110.f, window_height_px * 0.2 }, 25);
+  // Render platforms
+	floor_positions = FLOOR_POSITIONS[curr_level];
 
-	floor_positions = {
-		window_height_px - 12.f,
-		window_height_px * 0.8,
-		window_height_px * 0.6,
-		window_height_px * 0.4,
-		window_height_px * 0.2 };
+  for (vec3 pos : PLATFORM_POSITIONS[curr_level]) {
+    createPlatforms(renderer, pos[0], pos[1], pos[2], PLATFORM_ASSET[curr_level]);
+  }
 
-	// stairs
-	std::vector<Entity> step0 = createSteps(renderer, { PLATFORM_WIDTH * 12 - 20.f, window_height_px * 0.8 }, 5, 3, false);
-	std::vector<Entity> step1 = createSteps(renderer, { window_width_px - PLATFORM_WIDTH * 6 - STEP_WIDTH * 6, window_height_px * 0.8 + PLATFORM_HEIGHT * 4 }, 5, 2, true);
+	// stairs for the first level
+  if (curr_level == 0) {
+    std::vector<Entity> step0 = createSteps(renderer, { PLATFORM_WIDTH * 12 - 20.f, window_height_px * 0.8 }, 5, 3, false);
+	  std::vector<Entity> step1 = createSteps(renderer, { window_width_px - PLATFORM_WIDTH * 6 - STEP_WIDTH * 6, window_height_px * 0.8 + PLATFORM_HEIGHT * 4 }, 5, 2, true);
+  }
 
-	// Create walls
-	Entity wall0 = createWall(renderer, { 320.f, window_height_px * 0.9 + 10.f }, window_height_px * 0.2 - 10.f);
-	Entity wall1 = createWall(renderer, { window_width_px - 320.f, window_height_px * 0.9 + 10.f }, window_height_px * 0.2 - 10.f);
-	Entity wall2 = createWall(renderer, { 180.f, window_height_px * 0.7 + 15.f }, window_height_px * 0.2);
-	Entity wall3 = createWall(renderer, { window_width_px - 220.f, window_height_px * 0.7 + 15.f }, window_height_px * 0.2);
-	Entity wall4 = createWall(renderer, { 80.f, window_height_px * 0.4 - 20.f }, window_height_px * 0.4 + 70.f);
-	Entity wall5 = createWall(renderer, { window_width_px - 100.f, window_height_px * 0.4 - 20 }, window_height_px * 0.4 + 70.f);
+  // Create walls
+  for (vec3 pos : WALL_POSITIONS[curr_level]) {
+    createWall(renderer, pos[0], pos[1], pos[2]);
+  }
+  
+  // Create climbables
+  for (vec3 pos : CLIMBABLE_POSITIONS[curr_level]) {
+    createClimbable(renderer, pos[0], pos[1], pos[2], CLIMBABLE_ASSET[curr_level]);
+  }
 
-	// Create climbables
-	std::vector<Entity> ladder0 = createClimbable(renderer, { PLATFORM_WIDTH * 9, window_height_px * 0.795 }, 5);
-	std::vector<Entity> ladder1 = createClimbable(renderer, { PLATFORM_WIDTH * 7, window_height_px * 0.6 }, 5);
-	std::vector<Entity> ladder2 = createClimbable(renderer, { window_width_px - PLATFORM_WIDTH * 6, window_height_px * 0.6 }, 5);
-	std::vector<Entity> ladder3 = createClimbable(renderer, { PLATFORM_WIDTH * 4, window_height_px * 0.2 }, 10);
-	std::vector<Entity> ladder4 = createClimbable(renderer, { window_width_px - PLATFORM_WIDTH * 4, window_height_px * 0.4 }, 5);
-	std::vector<Entity> ladder5 = createClimbable(renderer, { window_width_px - PLATFORM_WIDTH * 9, window_height_px * 0.2 }, 5);
-
-	ladder_positions = {
-		{PLATFORM_WIDTH * 9},
-		{PLATFORM_WIDTH * 7, window_width_px - PLATFORM_WIDTH * 6},
-		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 4},
-		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 9} };
+	ladder_positions = ZOMBIE_CLIMB_POINTS[curr_level];
 
 	// Create spikes
-	Entity spike1 = createSpike(renderer, { 260.f, 625.f });
-	Entity spike2 = createSpike(renderer, { 50.f , window_height_px - 5.f });
-	Entity spike3 = createSpike(renderer, { 150.f , window_height_px - 5.f });
-	Entity spike4 = createSpike(renderer, { window_width_px - 50.f , window_height_px - 5.f });
-	Entity spike5 = createSpike(renderer, { window_width_px - 150.f , window_height_px - 5.f });
-	registry.colors.insert(spike1, { 0.5f, 0.5f, 0.5f });
-	registry.colors.insert(spike2, { 0.5f, 0.5f, 0.5f });
-	registry.colors.insert(spike3, { 0.5f, 0.5f, 0.5f });
-	registry.colors.insert(spike4, { 0.5f, 0.5f, 0.5f });
-	registry.colors.insert(spike5, { 0.5f, 0.5f, 0.5f });
+  for (vec2 pos : SPIKE_POSITIONS[curr_level]) {
+    Entity spike = createSpike(renderer, pos);
+    registry.colors.insert(spike, { 0.5f, 0.5f, 0.5f });
+  }
 
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, BOZO_STARTING_POS[curr_level]);
@@ -1055,14 +1035,15 @@ void WorldSystem::restart_game()
 		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
 	}
 
-	// Place food
-	Entity burger = createFood(renderer, { 1310, 136 }, TEXTURE_ASSET_ID::BURGER, {30, 30}, false);
-	Entity muffin = createFood(renderer, { 102, 298 }, TEXTURE_ASSET_ID::MUFFIN, { 30, 30 }, false);
-	Entity soda = createFood(renderer, { 660, 134 }, TEXTURE_ASSET_ID::SODA, { 30, 30 }, false);
-	Entity noodles = createFood(renderer, { 860, 296 }, TEXTURE_ASSET_ID::NOODLES, { 30, 30 }, false);
-	Entity onigiri = createFood(renderer, { 1200, 622 }, TEXTURE_ASSET_ID::ONIGIRI, { 30, 30 }, false);
-	Entity pizza = createFood(renderer, { 350, 770 }, TEXTURE_ASSET_ID::PIZZA, { 30, 30 }, false);
+	// Place collectibles
+  std::vector<vec2> collectibles = COLLECTIBLE_POSITIONS[curr_level];
+  std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[curr_level];
+  for (int i = 0; i < collectibles.size(); i++) {
+     createCollectible(renderer, collectibles[i][0], collectibles[i][1], collectible_assets[i], {30, 30}, false);
+  }
 
+
+  // Lives can probably stay hardcoded?
 	float heart_pos_x = 1385;
 	float heart_starting_pos_y = 40;
 
@@ -1241,17 +1222,17 @@ void WorldSystem::handle_collisions()
 			registry.remove_all_components_of(entity);
 		}
 
-		// Player - Food collision
+		// Player - Collectible collision
 
-		else if (registry.food.has(entity) && registry.players.has(entity_other)) {
-			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID) registry.food.get(entity).food_id;
-			Entity food = createFood(renderer, { food_eaten_pos, 50 }, id, { 60, 60 }, true);
+		else if (registry.collectible.has(entity) && registry.players.has(entity_other)) {
+			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID) registry.collectible.get(entity).collectible_id;
+			Entity collectible = createCollectible(renderer, collectibles_collected_pos, 50, id, { 60, 60 }, true);
 
 			registry.remove_all_components_of(entity);
 
-			food_eaten++;
+			collectibles_collected++;
 			
-			food_eaten_pos = food_eaten_pos + 60;
+			collectibles_collected_pos = collectibles_collected_pos + 60;
 		}
 	}
 
@@ -1307,6 +1288,14 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 		if (key == GLFW_KEY_P) {
 			debugging.in_full_view_mode = !debugging.in_full_view_mode;
+		}
+
+    if (key == GLFW_KEY_L) {
+			curr_level++;
+      if (curr_level > max_level) {
+        curr_level = 0;
+      }
+      restart_game();
 		}
 	}
 
