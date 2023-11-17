@@ -1045,7 +1045,8 @@ void WorldSystem::restart_game()
 
   // This is specific to the beach level
   if (curr_level == 1) {
-     createDangerous(renderer, {350, 160}, { 40, 40 });
+     createDangerous(renderer, {280, 130}, { 30, 30 });
+     createBackground(renderer, TEXTURE_ASSET_ID::CANNON, {230, 155}, {80, 60});
   }
 
 

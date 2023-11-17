@@ -62,7 +62,8 @@ class RenderSystem {
     textures_path("beach-back-temp.png"),
     textures_path("beach-plat.png"),
     textures_path("beach-ladder.png"),
-    textures_path("spikeball.png")
+    textures_path("spikeball.png"),
+    textures_path("cannon_blue.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
