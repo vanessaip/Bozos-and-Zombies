@@ -1043,6 +1043,12 @@ void WorldSystem::restart_game()
   }
 
 
+  // This is specific to the beach level
+  if (curr_level == 1) {
+     createDangerous(renderer, {350, 160}, { 40, 40 });
+  }
+
+
   // Lives can probably stay hardcoded?
 	float heart_pos_x = 1385;
 	float heart_starting_pos_y = 40;

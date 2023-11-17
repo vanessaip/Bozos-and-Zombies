@@ -56,6 +56,9 @@ Entity createCollectible(RenderSystem* renderer, float position_x, float positio
 
 // hearts
 Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
+
+Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale);
+
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 

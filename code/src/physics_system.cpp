@@ -97,6 +97,29 @@ void PhysicsSystem::step(float elapsed_ms)
 			motion.velocity[1] += PhysicsSystem::GRAVITY;
 		}
 
+    // Step the spikeballs as per Bezier curves
+    if (registry.dangerous.has(entity)) {
+      vec2 p0 = {350, 150};
+      vec2 p1 = {450, 50};
+      vec2 p2 = {550, 250};
+
+      if (bezier_time > 1000) {
+        bezier_time = 0;
+        motion.position = p0;
+      }
+
+      bezier_time += 10;
+
+      float t = bezier_time / 1000;
+
+      vec2 L0 = (1 - t) * p0 + t * p1;
+      vec2 L1 = (1 - t) * p1 + t * p2;
+
+      vec2 Q0 = (1 - t) * L0 + t * L1; 
+
+      motion.position = Q0;
+    }
+
 		motion.position[0] += motion.velocity[0] * step_seconds;
 		motion.position[1] += motion.velocity[1] * step_seconds;
 	}
