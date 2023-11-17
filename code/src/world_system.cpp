@@ -184,7 +184,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	enemySpawnTimer += elapsed_ms_since_last_update;
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
-	if (enemySpawnTimer / 1000.f > 25 && !debugging.in_full_view_mode && spawn_on) {
+	if (enemySpawnTimer / 1000.f > 25 && !debugging.in_full_view_mode && spawn_on && curr_level != 1) {
 		vec2 enemySpawnPos;
 		vec4 cameraBounds = renderer->getCameraBounds();;
 		do
@@ -200,7 +200,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		createZombie(renderer, enemySpawnPos);
 		enemySpawnTimer = 0.f;
 	}
-	if (npcSpawnTimer / 1000.f > 10 && !debugging.in_full_view_mode && spawn_on) {
+	if (npcSpawnTimer / 1000.f > 10 && !debugging.in_full_view_mode && spawn_on && curr_level != 1) {
 		vec2 studentSpawnPos;
 		do
 		{

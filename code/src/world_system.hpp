@@ -105,6 +105,6 @@ private:
 	vec2 relativePos(vec2 mouse_position);
 
   // Debugging
-  bool spawn_on = false;
+  bool spawn_on = true;
 
 };
