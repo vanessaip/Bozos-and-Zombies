@@ -205,12 +205,17 @@ struct TextBox
 	std::string text = "";
 };
 
-struct Food
+struct Collectible
 {
-	int food_id;
+	int collectible_id;
 };
 
 struct Overlay
+{
+
+};
+
+struct Dangerous
 {
 
 };
@@ -266,7 +271,12 @@ enum class TEXTURE_ASSET_ID
 	HEART = SODA + 1,
   WIN_SCREEN = HEART + 1,
 	BASEMENT = WIN_SCREEN + 1,
-	TEXTURE_COUNT = BASEMENT + 1
+  BEACH_BACKGROUND = BASEMENT + 1,
+  BEACH_PLAT = BEACH_BACKGROUND + 1,
+  BEACH_LADDER = BEACH_PLAT + 1,
+  SPIKE_BALL = BEACH_LADDER + 1,
+  CANNON = SPIKE_BALL + 1,
+	TEXTURE_COUNT = CANNON + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

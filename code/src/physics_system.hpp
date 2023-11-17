@@ -12,6 +12,8 @@ public:
 	void step(float elapsed_ms);
 	float GRAVITY = 10.f;
 
+  float bezier_time = 0;
+
 	PhysicsSystem()
 	{
 	}
