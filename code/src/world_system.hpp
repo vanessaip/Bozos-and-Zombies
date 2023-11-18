@@ -74,10 +74,10 @@ private:
 	float npcSpawnTimer = 0.f;
 	int npcSpawnIndex = 0;
 	int enemySpawnIndex = 0;
-	int curr_level = 0;
 	int max_level = 2;
 	float collectibles_collected_pos = 50;
 	int collectibles_collected = 0;
+	vec2 platformDimensions{ 0.f, 0.f };
 
 	// This is actually 5 lives but 0 indexed.
 	int player_lives = 4;

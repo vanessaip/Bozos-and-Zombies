@@ -22,8 +22,19 @@ const vec2 CLIMBABLE_DIM = { 30.f, 32.f };
 const float ZOMBIE_SPEED = 100.f;
 
 // not constant since they can change from level to level
-static float PLATFORM_HEIGHT = 30.f;
-static float PLATFORM_WIDTH = 32.f;      // TODO (Justin): figure out how to set this per level
+//static float PLATFORM_HEIGHT;
+//static float PLATFORM_WIDTH;      // TODO (Justin): figure out how to set this per level
+
+static int curr_level = 0;
+
+const std::vector<vec2> PLATFORM_SCALES = {
+    { 32.f, 30.f },
+    { 50.f, 30.f },
+    { 50.f, 30.f }
+};
+
+static float PLATFORM_WIDTH = PLATFORM_SCALES[curr_level].x;
+static float PLATFORM_HEIGHT = PLATFORM_SCALES[curr_level].y;
 
 // the player
 Entity createBozo(RenderSystem* renderer, vec2 pos);
@@ -36,9 +47,9 @@ Entity createZombie(RenderSystem* renderer, vec2 position);
 // a red line for debugging purposes
 Entity createLine(vec2 position, vec2 size);
 // one platform
-Entity createPlatform(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID texture, vec2 scale = { PLATFORM_WIDTH, PLATFORM_HEIGHT });
+Entity createPlatform(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID texture, vec2 scale);
 // helper for multiple platforms lined up
-std::vector<Entity> createPlatforms(RenderSystem* renderer, float left_position_x, float left_position_y, uint num_tiles, TEXTURE_ASSET_ID texture);
+std::vector<Entity> createPlatforms(RenderSystem* renderer, float left_position_x, float left_position_y, uint num_tiles, TEXTURE_ASSET_ID texture, vec2 scale);
 // helper for steps
 std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, uint num_steps, uint step_blocks, bool left);
 // walls
@@ -70,7 +81,6 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> BACKGROUND_ASSET = {
     { TEXTURE_ASSET_ID::BACKGROUND, TEXTURE_ASSET_ID::BACKGROUND_INDOOR, TEXTURE_ASSET_ID::BASEMENT},
     { TEXTURE_ASSET_ID::BEACH_BACKGROUND }
 };
-
 
 // ---------------------PLATFORMS-------------------------
 const std::vector<std::vector<vec3>> PLATFORM_POSITIONS = {
@@ -104,13 +114,13 @@ const std::vector<std::vector<vec3>> PLATFORM_POSITIONS = {
         {window_width_px - 560.f, window_height_px - 310.f, 2},
     },
     {
-        {window_width_px / 2 - PLATFORM_WIDTH * 7.5, window_height_px - 12.f, 16},
-        {PLATFORM_WIDTH * 4, window_height_px * 0.8, 8},
-        {window_width_px - PLATFORM_WIDTH * 6, window_height_px * 0.8, 2},
+        {window_width_px / 2 - 50.f * 7.5, window_height_px - 12.f, 16},
+        {50.f * 4, window_height_px * 0.8, 8},
+        {window_width_px - 50.f * 6, window_height_px * 0.8, 2},
         {110.f, window_height_px * 0.6, 7},
-        {window_width_px - PLATFORM_WIDTH * 7 - 80.f, window_height_px * 0.6, 7},
+        {window_width_px - 50.f * 7 - 80.f, window_height_px * 0.6, 7},
         {110.f, window_height_px * 0.4, 7},
-        {window_width_px - PLATFORM_WIDTH * 10 - 80.f, window_height_px * 0.4, 10},
+        {window_width_px - 50.f * 10 - 80.f, window_height_px * 0.4, 10},
         {110.f, window_height_px * 0.2, 25}
     },
     {
@@ -124,12 +134,6 @@ const std::vector<std::vector<vec3>> PLATFORM_POSITIONS = {
         {window_width_px - 500, 110, 11},
         {window_width_px - 250, window_height_px / 2, 6},
     }
-};
-
-const std::vector<vec2> PLATFORM_SCALES = {
-    { 32.f, 10.f },
-    { 50.f, 30.f },
-    { 50.f, 30.f }
 };
 
 const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
@@ -182,12 +186,12 @@ const std::vector<std::vector<vec3>> CLIMBABLE_POSITIONS = {
         {15.f + 36 * PLATFORM_WIDTH, window_height_px - (20.f + 9 * CLIMBABLE_DIM.y + 2.f), 5},
     },
     {
-        {PLATFORM_WIDTH * 9, window_height_px * 0.795, 5},
-        {PLATFORM_WIDTH * 7, window_height_px * 0.6, 5},
-        {window_width_px - PLATFORM_WIDTH * 6, window_height_px * 0.6, 5},
-        {PLATFORM_WIDTH * 4, window_height_px * 0.2, 10},
-        {window_width_px - PLATFORM_WIDTH * 4, window_height_px * 0.4, 5},
-        {window_width_px - PLATFORM_WIDTH * 9, window_height_px * 0.2, 5}
+        {PLATFORM_SCALES[1].x * 9, window_height_px * 0.795, 5},
+        {PLATFORM_SCALES[1].x * 7, window_height_px * 0.6, 5},
+        {window_width_px - PLATFORM_SCALES[1].x * 6, window_height_px * 0.6, 5},
+        {PLATFORM_SCALES[1].x * 4, window_height_px * 0.2, 10},
+        {window_width_px - PLATFORM_SCALES[1].x * 4, window_height_px * 0.4, 5},
+        {window_width_px - PLATFORM_SCALES[1].x * 9, window_height_px * 0.2, 5}
     },
     { 
         {200, window_height_px - 485, 9},
@@ -211,10 +215,10 @@ const std::vector<std::vector<std::vector<float>>> ZOMBIE_CLIMB_POINTS = {
         {15.f + 36 * PLATFORM_WIDTH}
     },
     {
-		{PLATFORM_WIDTH * 9},
-		{PLATFORM_WIDTH * 7, window_width_px - PLATFORM_WIDTH * 6},
-		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 4},
-		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 9} 
+		{PLATFORM_SCALES[1].x * 9},
+		{PLATFORM_SCALES[1].x * 7, window_width_px - PLATFORM_SCALES[1].x * 6},
+		{PLATFORM_SCALES[1].x * 4, window_width_px - PLATFORM_SCALES[1].x * 4},
+		{PLATFORM_SCALES[1].x * 4, window_width_px - PLATFORM_SCALES[1].x * 9}
     },
     { 
         {400},

@@ -185,41 +185,58 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
 	
-	/*
-	if (enemySpawnTimer / 1000.f > 25 && !debugging.in_full_view_mode && spawn_on && curr_level != 1) {
+	if (enemySpawnTimer / 1000.f > 25 && spawn_on && curr_level != 0) {
 		vec2 enemySpawnPos;
-		vec4 cameraBounds = renderer->getCameraBounds();;
-		do
+		for (int i = 0; i < ZOMBIE_START_POS[curr_level].size(); i++)  // try a few times
 		{
-			if (enemySpawnIndex >= ZOMBIE_START_POS[curr_level].size())
-				enemySpawnIndex = 0;
+			int spawnIndex = rng() % ZOMBIE_START_POS[curr_level].size();
+			enemySpawnPos = ZOMBIE_START_POS[curr_level][spawnIndex];
 
-			enemySpawnPos = ZOMBIE_START_POS[curr_level][enemySpawnIndex];
-			enemySpawnIndex++;
-		} while (enemySpawnPos.x > cameraBounds[0] && enemySpawnPos.x < cameraBounds[2]
-			&& enemySpawnPos.y > cameraBounds[1] && enemySpawnPos.y < cameraBounds[3]); // ensure new student is spawned off screen
+			// only consider spawning off screen when not in full view mode
+			bool spawn = false;
+			if (!debugging.in_full_view_mode) 
+			{
+				if (enemySpawnPos.x < cameraBounds[0] || enemySpawnPos.x > cameraBounds[2]
+					&& enemySpawnPos.y < cameraBounds[1] || enemySpawnPos.y > cameraBounds[3]) { spawn = true; }
+			}
+			else { spawn = true; }
 
-		createZombie(renderer, enemySpawnPos);
-		enemySpawnTimer = 0.f;
+			if (spawn) 
+			{
+				createZombie(renderer, enemySpawnPos);
+				enemySpawnTimer = 0.f;
+				break;
+			}
+		}
 	}
-	if (npcSpawnTimer / 1000.f > 10 && !debugging.in_full_view_mode && spawn_on && curr_level != 1) {
-		vec2 studentSpawnPos;
-		do
+
+	if (npcSpawnTimer / 1000.f > 10 && spawn_on && curr_level != 0) {
+		vec2 npcSpawnPos;
+		for (int i = 0; i < NPC_START_POS[curr_level].size(); i++)  // try a few times
 		{
-			if (npcSpawnIndex >= STUDENT_START_POS[curr_level].size())
-				npcSpawnIndex = 0;
+			int spawnIndex = rng() % NPC_START_POS[curr_level].size();
+			npcSpawnPos = NPC_START_POS[curr_level][spawnIndex];
 
-			studentSpawnPos = STUDENT_START_POS[curr_level][npcSpawnIndex];
-			npcSpawnIndex++;
-		} while (studentSpawnPos.x > cameraBounds[0] && studentSpawnPos.x < cameraBounds[2]
-			&& studentSpawnPos.y > cameraBounds[1] && studentSpawnPos.y < cameraBounds[3]); // ensure new student is spawned off screen
+			// only consider spawning off screen when not in full view mode
+			bool spawn = false;
+			if (!debugging.in_full_view_mode)
+			{
+				if (npcSpawnPos.x < cameraBounds[0] || npcSpawnPos.x > cameraBounds[2]
+					&& npcSpawnPos.y < cameraBounds[1] || npcSpawnPos.y > cameraBounds[3]) { spawn = true; }
+			}
+			else { spawn = true; }
 
-		Entity student = createStudent(renderer, studentSpawnPos);
-		Motion& student_motion = registry.motions.get(student);
-		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
-		npcSpawnTimer = 0.f;
+			if (spawn) 
+			{
+				Entity student = createStudent(renderer, npcSpawnPos, NPC_ASSET[curr_level]);
+				Motion& student_motion = registry.motions.get(student);
+				student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+				npcSpawnTimer = 0.f;
+				break;
+			}
+		}
 	}
-	*/
+	
 
 	Player& player = registry.players.get(player_bozo);
 
@@ -945,9 +962,9 @@ void WorldSystem::restart_game()
 	player_lives = 4;
 	int collectibles_collected = 0;
 
+	//curr_level = 1;
 	// set paltform dimensions
-	PLATFORM_WIDTH = PLATFORM_SCALES[curr_level].x;
-	PLATFORM_HEIGHT = PLATFORM_SCALES[curr_level].y;
+	vec2 platformDimensions = PLATFORM_SCALES[curr_level];
 
 	// Reset sprite sheet buffer index
 
@@ -984,13 +1001,13 @@ void WorldSystem::restart_game()
 	floor_positions = FLOOR_POSITIONS[curr_level];
 
 	for (vec3 pos : PLATFORM_POSITIONS[curr_level]) {
-		createPlatforms(renderer, pos[0], pos[1], pos[2], PLATFORM_ASSET[curr_level]);
+		createPlatforms(renderer, pos[0], pos[1], pos[2], PLATFORM_ASSET[curr_level], platformDimensions);
 	}
 
 	// stairs for the first level
 	if (curr_level == 1) {
-		std::vector<Entity> step0 = createSteps(renderer, { PLATFORM_WIDTH * 12 - 20.f, window_height_px * 0.8 }, 5, 3, false);
-		std::vector<Entity> step1 = createSteps(renderer, { window_width_px - PLATFORM_WIDTH * 6 - STEP_WIDTH * 6, window_height_px * 0.8 + PLATFORM_HEIGHT * 4 }, 5, 2, true);
+		std::vector<Entity> step0 = createSteps(renderer, { platformDimensions.x * 12 - 20.f, window_height_px * 0.8 }, 5, 3, false);
+		std::vector<Entity> step1 = createSteps(renderer, { window_width_px - platformDimensions.x * 6 - STEP_WIDTH * 6, window_height_px * 0.8 + platformDimensions.y * 4 }, 5, 2, true);
 	}
 
 	// Create walls
