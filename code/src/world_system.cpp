@@ -823,6 +823,14 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 int WorldSystem::checkLevel(Motion& motion)
 {
 	float entityBottom = motion.position.y + abs(motion.scale[1]) / 2.f;
+	for (int i = 0; i < floor_positions.size() - 1; i++) 
+	{
+		if (entityBottom < floor_positions[i] && entityBottom > floor_positions[i + 1])
+			return i;
+	}
+
+	return floor_positions.size() - 1;
+	/*
 	if (entityBottom < floor_positions[0] && entityBottom > floor_positions[1])
 	{
 		return 0;
@@ -843,6 +851,7 @@ int WorldSystem::checkLevel(Motion& motion)
 	{
 		return 4;
 	}
+	*/
 }
 
 float WorldSystem::getClosestLadder(int zombie_level, Motion& bozo_motion)
@@ -979,8 +988,12 @@ void WorldSystem::restart_game()
 		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f }); // egg
 
 	// Tutorial sign only for the first level
-	if (curr_level == 1) {
-    	Entity tutorial1 = createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL1, { 643, 550 }, "tutorial1", { 250.f, 150.f });
+	if (curr_level == 0) {
+    	createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_MOVEMENT, { window_width_px - 120.f, window_height_px - 80.f }, "", { 150.f, 70.f });
+		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_CLIMB, { window_width_px - 480.f, window_height_px - 90.f }, "", { 115.f, 40.f });
+		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_NPCS, { window_width_px - 800.f, window_height_px - 350.f }, "", { 150.f, 60.f });
+		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_WEAPONS, { window_width_px - 900.f, window_height_px - 220.f }, "", { 200.f, 70.f });
+		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_GOAL, { 130.f, window_height_px - 200.f }, "", { 180.f, 100.f });
 	}
 
 	// Render platforms

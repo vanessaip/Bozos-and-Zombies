@@ -75,17 +75,16 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> BACKGROUND_ASSET = {
 // ---------------------PLATFORMS-------------------------
 const std::vector<std::vector<vec3>> PLATFORM_POSITIONS = {
     {
-        {15, window_height_px - 20.f, 45}, // floor
+        {15.f, window_height_px - 20.f, 45}, // floor
 
         {15.f, window_height_px - 315.f, 10}, // floor
         {79.f, window_height_px - 120.f, 3},
         {240.f, window_height_px - 200.f, 3},
 
-        {370.f, 235.f, 3},
-        {465.f, 170.f, 1},
-        {496.5f, 145.f, 1},
-        {527.5f, window_height_px / 2 - 70.f, 1},
-        {560.f, window_height_px / 2, 8},
+        {368.f, 235.f, 3},
+        {463.f, 145.f, 2},
+        {527.5f, window_height_px - 510.f, 1},
+        {560.f, window_height_px - 405.f, 8},
         {432.f, window_height_px - 283.f, 4},
         {432.f, window_height_px - 147.f, 9},
 
@@ -96,8 +95,7 @@ const std::vector<std::vector<vec3>> PLATFORM_POSITIONS = {
         {window_width_px - 174.f, window_height_px - 115.f, 1},
         {window_width_px - 240.f, window_height_px - 150.f, 2},
         {window_width_px - 404.f, window_height_px - 310.f, 5},
-        {window_width_px - 436.f, window_height_px - 375.f, 1},
-        {window_width_px - 496.f, window_height_px - 407.f, 2},
+        {window_width_px - 496.f, window_height_px - 407.f, 3},
         {window_width_px - 496.f, window_height_px - 150.f, 2},
         {window_width_px - 560.f, window_height_px - 310.f, 2},
     },
@@ -125,7 +123,7 @@ const std::vector<std::vector<vec3>> PLATFORM_POSITIONS = {
 };
 
 const std::vector<vec2> PLATFORM_SCALES = {
-    { 32.f, 20.f },
+    { 32.f, 10.f },
     { 50.f, 30.f },
     { 50.f, 30.f }
 };
@@ -136,22 +134,22 @@ const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
   TEXTURE_ASSET_ID::BEACH_PLAT
 };
 
+
+// Sorted from bottom of screen to top of screen
 const std::vector<std::vector<float>> FLOOR_POSITIONS = {
     {
-        235.f,
-
         window_height_px - 20.f,
+        window_height_px - 310.f,
         window_height_px - 315.f,
-        window_height_px - 120.f,
-        window_height_px - 200.f,
+        //window_height_px - 120.f,
+        //window_height_px - 200.f,
 
         window_height_px / 2,
         window_height_px - 283.f,
-        window_height_px - 115,
+        window_height_px - 147.f,
          
-        window_height_px - 150.f,
-        window_height_px - 310.f,
-        window_height_px - 407.f,
+        //window_height_px - 150.f,
+        //window_height_px - 407.f,
     },
     {
 		window_height_px - 12.f,
@@ -174,6 +172,7 @@ const std::vector<std::vector<vec3>> CLIMBABLE_POSITIONS = {
     {
         {20.f, window_height_px - (20.f + 9 * CLIMBABLE_DIM.y + 7.f), 9},
         {15.f + 13 * PLATFORM_WIDTH, 235.f, 9},
+        {15.f + 13 * PLATFORM_WIDTH, window_height_px - (20.f + 4 * CLIMBABLE_DIM.y + 2.f), 4},
         {15.f + 24 * PLATFORM_WIDTH, window_height_px - (20.f + 12 * CLIMBABLE_DIM.y + 2.f), 12},
         {15.f + 27 * PLATFORM_WIDTH, window_height_px - (20.f + 9 * CLIMBABLE_DIM.y + 2.f), 9},
         {15.f + 36 * PLATFORM_WIDTH, window_height_px - (20.f + 9 * CLIMBABLE_DIM.y + 2.f), 5},
@@ -201,7 +200,8 @@ const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
 
 const std::vector<std::vector<std::vector<float>>> ZOMBIE_CLIMB_POINTS = {
     {
-        {15.f},
+        {20.f},
+        {15.f + 13 * PLATFORM_WIDTH},
         {15.f + 24 * PLATFORM_WIDTH},
         {15.f + 27 * PLATFORM_WIDTH},
         {15.f + 36 * PLATFORM_WIDTH}
