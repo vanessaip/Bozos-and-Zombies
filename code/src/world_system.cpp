@@ -975,7 +975,13 @@ void WorldSystem::restart_game()
     // egg
     Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f });
   } else {
-    createBackground(renderer, BACKGROUND_ASSET[curr_level]);
+
+    std::vector<TEXTURE_ASSET_ID> backgrounds = BACKGROUND_ASSET[curr_level];
+
+    for (int i = 0; i < backgrounds.size(); i++) {
+      createBackground(renderer, backgrounds[i]);
+    }
+
   }
 
 	// Tutorial sign only for the first level
