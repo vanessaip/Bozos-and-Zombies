@@ -184,6 +184,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	enemySpawnTimer += elapsed_ms_since_last_update;
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
+	
+	/*
 	if (enemySpawnTimer / 1000.f > 25 && !debugging.in_full_view_mode && spawn_on && curr_level != 1) {
 		vec2 enemySpawnPos;
 		vec4 cameraBounds = renderer->getCameraBounds();;
@@ -217,6 +219,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
 		npcSpawnTimer = 0.f;
 	}
+	*/
 
 	Player& player = registry.players.get(player_bozo);
 
