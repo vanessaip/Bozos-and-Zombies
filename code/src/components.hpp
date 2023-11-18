@@ -207,12 +207,17 @@ struct TextBox
 	std::string text = "";
 };
 
-struct Food
+struct Collectible
 {
-	int food_id;
+	int collectible_id;
 };
 
 struct Overlay
+{
+
+};
+
+struct Dangerous
 {
 
 };
@@ -277,7 +282,15 @@ enum class TEXTURE_ASSET_ID
 	PARALLAX_BACKGROUND_2 = PARALLAX_BACKGROUND_3 + 1,
 	PARALLAX_BACKGROUND_1 = PARALLAX_BACKGROUND_2 + 1,
 	PARALLAX_BACKGROUND_0 = PARALLAX_BACKGROUND_1 + 1,
-	TEXTURE_COUNT = PARALLAX_BACKGROUND_0 + 1
+	BEACH_PLAT = PARALLAX_BACKGROUND_0 + 1,
+	BEACH_LADDER = BEACH_PLAT + 1,
+	SPIKE_BALL = BEACH_LADDER + 1,
+	CANNON = SPIKE_BALL + 1,
+	BEACH_SKY = CANNON + 1,
+	BEACH_SEA = BEACH_SKY + 1,
+	BEACH_LAND = BEACH_SEA + 1,
+	BEACH_CLOUD = BEACH_LAND + 1,
+	TEXTURE_COUNT = BEACH_CLOUD + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
