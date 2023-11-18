@@ -74,8 +74,12 @@ class RenderSystem {
 		textures_path("level0/tutorial_climb.png"),
 		textures_path("level0/tutorial_npcs.png"),
 		textures_path("level0/tutorial_weapons.png"),
-		textures_path("level0/tutorial_move.png"),
 		textures_path("level0/tutorial_goal.png"),
+		textures_path("level0/tutorial_npc_sprite_sheet.png"),
+		textures_path("level0/weapon.png"),
+		textures_path("level0/collectible1.png"),
+		textures_path("level0/collectible2.png"),
+		textures_path("level0/collectible3.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

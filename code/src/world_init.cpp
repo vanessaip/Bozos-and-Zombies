@@ -22,8 +22,8 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 	registry.players.emplace(entity);
 	registry.humans.emplace(entity); // zombies will target all entities with human component
 
-	std::vector<int> spriteCounts = { 4, 6, 6 };
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.05f, 0.1f));
+	std::vector<int> spriteCounts = { 4, 6, 6, 6};
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.05f, 0.08f));
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::BOZO,
@@ -65,7 +65,7 @@ Entity createBozoPointer(RenderSystem* renderer, vec2 pos)
 }
 
 
-Entity createStudent(RenderSystem* renderer, vec2 position)
+Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId)
 {
 	// Reserve en entity
 	auto entity = Entity();
@@ -87,12 +87,12 @@ Entity createStudent(RenderSystem* renderer, vec2 position)
 	registry.humans.emplace(entity);
 	registry.colors.insert(entity, { 1, 0.8f, 0.8f });
 
-	std::vector<int> spriteCounts = { 4, 6, 6 };
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.05f, 0.1f));
+	std::vector<int> spriteCounts = { 4, 6 };
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.f, 0.f));
 
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::STUDENT,
+		{ textureId,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE_SHEET });
 
@@ -341,7 +341,7 @@ Entity createSpike(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createBook(RenderSystem* renderer, vec2 position)
+Entity createBook(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId)
 {
 	// Reserve en entity
 	auto entity = Entity();
@@ -363,7 +363,7 @@ Entity createBook(RenderSystem* renderer, vec2 position)
 	registry.books.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::BOOK,
+		{ textureId,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 

@@ -269,6 +269,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			{
 				motion.velocity[0] += 200;
 			}
+			if (motion.climbing) 
+			{
+
+			}
 
 		}
 		// Bounding entities to window
@@ -634,7 +638,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// update animation mode
 	SpriteSheet& spriteSheet = registry.spriteSheets.get(player_bozo);
-	if (bozo_motion.velocity.x != 0.f && !bozo_motion.offGround)
+	if (bozo_motion.climbing)
+		spriteSheet.updateAnimation(ANIMATION_MODE::CLIMB);
+	else if (bozo_motion.velocity.x != 0.f && !bozo_motion.offGround)
 		spriteSheet.updateAnimation(ANIMATION_MODE::RUN);
 	else if (bozo_motion.velocity.x == 0 || bozo_motion.offGround)
 		spriteSheet.updateAnimation(ANIMATION_MODE::IDLE);
@@ -830,28 +836,6 @@ int WorldSystem::checkLevel(Motion& motion)
 	}
 
 	return floor_positions.size() - 1;
-	/*
-	if (entityBottom < floor_positions[0] && entityBottom > floor_positions[1])
-	{
-		return 0;
-	}
-	else if (entityBottom < floor_positions[1] && entityBottom > floor_positions[2])
-	{
-		return 1;
-	}
-	else if (entityBottom < floor_positions[2] && entityBottom > floor_positions[3])
-	{
-		return 2;
-	}
-	else if (entityBottom < floor_positions[3] && entityBottom > floor_positions[4])
-	{
-		return 3;
-	}
-	else
-	{
-		return 4;
-	}
-	*/
 }
 
 float WorldSystem::getClosestLadder(int zombie_level, Motion& bozo_motion)
@@ -1039,8 +1023,8 @@ void WorldSystem::restart_game()
 		createZombie(renderer, pos);
 
 	// Create students
-	for (vec2 pos : STUDENT_START_POS[curr_level])
-		createStudent(renderer, pos);
+	for (vec2 pos : NPC_START_POS[curr_level])
+		createStudent(renderer, pos, NPC_ASSET[curr_level]);
 
 	for (Entity student : registry.humans.entities)
 	{
@@ -1051,8 +1035,9 @@ void WorldSystem::restart_game()
 	// Place collectibles
 	std::vector<vec2> collectibles = COLLECTIBLE_POSITIONS[curr_level];
 	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[curr_level];
+	assert(collectibles.size() == collectible_assets.size());
 	for (int i = 0; i < collectibles.size(); i++) {
-		createCollectible(renderer, collectibles[i][0], collectibles[i][1], collectible_assets[i], {30, 30}, false);
+		createCollectible(renderer, collectibles[i][0], collectibles[i][1], collectible_assets[i], COLLECTIBLE_SCALES[curr_level], false);
 	}
 
 
@@ -1158,7 +1143,7 @@ void WorldSystem::handle_collisions()
 					if (spawn_book)
 					{
 						Motion& m = registry.motions.get(entity_other);
-						Entity book = createBook(renderer, m.position);
+						Entity book = createBook(renderer, m.position, WEAPON_ASSETS[curr_level]);
 						Book& b = registry.books.get(book);
 						b.offHand = false;
 						++points;

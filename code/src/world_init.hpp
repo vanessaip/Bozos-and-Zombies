@@ -30,7 +30,7 @@ Entity createBozo(RenderSystem* renderer, vec2 pos);
 // the pointer
 Entity createBozoPointer(RenderSystem* renderer, vec2 pos);
 // the prey
-Entity createStudent(RenderSystem* renderer, vec2 position);
+Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId);
 // the enemy
 Entity createZombie(RenderSystem* renderer, vec2 position);
 // a red line for debugging purposes
@@ -50,7 +50,7 @@ Entity createSpike(RenderSystem* renderer, vec2 pos);
 // background
 Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::BACKGROUND, vec2 position = { window_width_px / 2, window_height_px / 2 }, vec2 scale = { window_width_px, window_height_px });
 // book
-Entity createBook(RenderSystem* renderer, vec2 position);
+Entity createBook(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId);
 // text box
 Entity createStaticTexture(RenderSystem* renderer, TEXTURE_ASSET_ID textureID, vec2 position, std::string text, vec2 scale = { 1.f, 1.f });
 // collectible
@@ -75,12 +75,15 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> BACKGROUND_ASSET = {
 // ---------------------PLATFORMS-------------------------
 const std::vector<std::vector<vec3>> PLATFORM_POSITIONS = {
     {
-        {15.f, window_height_px - 20.f, 45}, // floor
+        // Ground
+        {15.f, window_height_px - 20.f, 45},
 
-        {15.f, window_height_px - 315.f, 10}, // floor
+        // Building 1
+        {15.f, window_height_px - 315.f, 10},
         {79.f, window_height_px - 120.f, 3},
         {240.f, window_height_px - 200.f, 3},
 
+        // Building 2
         {368.f, 235.f, 3},
         {463.f, 145.f, 2},
         {527.5f, window_height_px - 510.f, 1},
@@ -88,6 +91,7 @@ const std::vector<std::vector<vec3>> PLATFORM_POSITIONS = {
         {432.f, window_height_px - 283.f, 4},
         {432.f, window_height_px - 147.f, 9},
 
+        // Building 3
         {window_width_px - 50.f, window_height_px - 280.f, 1},
         {window_width_px - 80.f, window_height_px - 375.f, 1},
         {window_width_px - 110.f, window_height_px - 310.f, 1},
@@ -259,9 +263,11 @@ const std::vector<std::vector<vec2>> ZOMBIE_START_POS = {
     }, 
     {},
 };
-const std::vector<std::vector<vec2>> STUDENT_START_POS = { 
+
+// -----------------------NPCs---------------------------
+const std::vector<std::vector<vec2>> NPC_START_POS = { 
     {
-       {470.f, window_height_px - 285.f - STUDENT_BB_HEIGHT / 2.f},
+       {570.f, window_height_px - 405.f - STUDENT_BB_HEIGHT / 2.f},
     },
     { 
         { 1000, 440 }, { 300, 440 }, { 900, 280 }, {400, window_height_px * 0.4 - 50.f}, {600, window_height_px * 0.2 - 50.f}
@@ -269,7 +275,11 @@ const std::vector<std::vector<vec2>> STUDENT_START_POS = {
     {} 
 };
 
-
+const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
+  TEXTURE_ASSET_ID::TUTORIAL_NPC,
+  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::STUDENT
+};
 
 // ---------------------BOZO-------------------------
 const std::vector<vec2> BOZO_STARTING_POS = { 
@@ -288,7 +298,11 @@ const std::vector<vec2> ENEMY_SPAWN_POS = {
 
 // ---------------------COLLECTIBLES-------------------------
 const std::vector<std::vector<vec2>> COLLECTIBLE_POSITIONS = {
-    {},
+    {
+        {window_width_px - 80.f, window_height_px - 398.f},
+        {480.f, 121.f},
+        {50.f, window_height_px - 338.f}
+    },
     {
         {1310, 136},
         {102, 298},
@@ -301,7 +315,11 @@ const std::vector<std::vector<vec2>> COLLECTIBLE_POSITIONS = {
 };
 
 const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
-    {},
+    {
+        TEXTURE_ASSET_ID::TUTORIAL_COLLECTIBLE1,
+        TEXTURE_ASSET_ID::TUTORIAL_COLLECTIBLE2,
+        TEXTURE_ASSET_ID::TUTORIAL_COLLECTIBLE3,
+    },
     {
         TEXTURE_ASSET_ID::BURGER,
         TEXTURE_ASSET_ID::MUFFIN,
@@ -311,6 +329,19 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
         TEXTURE_ASSET_ID::PIZZA
     },
     {}
+};
+
+const std::vector<vec2> COLLECTIBLE_SCALES =
+{
+    { 20, 20 },
+    { 30, 30 },
+    { 30, 30 }
+};
+
+const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
+    TEXTURE_ASSET_ID::TUTORIAL_WEAPON,
+    TEXTURE_ASSET_ID::BOOK,
+    TEXTURE_ASSET_ID::BOOK,
 };
 
 // ---------------------SOUNDS-------------------------

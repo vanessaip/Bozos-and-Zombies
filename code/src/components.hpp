@@ -288,9 +288,13 @@ enum class TEXTURE_ASSET_ID
 	TUTORIAL_CLIMB = TUTORIAL_MOVEMENT + 1,
 	TUTORIAL_NPCS = TUTORIAL_CLIMB + 1,
 	TUTORIAL_WEAPONS = TUTORIAL_NPCS + 1,
-	TUTORIAL_COLLECTIBLES = TUTORIAL_WEAPONS + 1,
-	TUTORIAL_GOAL = TUTORIAL_COLLECTIBLES + 1,
-	TEXTURE_COUNT = TUTORIAL_GOAL + 1
+	TUTORIAL_GOAL = TUTORIAL_WEAPONS + 1,
+	TUTORIAL_NPC = TUTORIAL_GOAL + 1,
+	TUTORIAL_WEAPON = TUTORIAL_NPC + 1,
+	TUTORIAL_COLLECTIBLE1 = TUTORIAL_WEAPON + 1,
+	TUTORIAL_COLLECTIBLE2 = TUTORIAL_COLLECTIBLE1 + 1,
+	TUTORIAL_COLLECTIBLE3 = TUTORIAL_COLLECTIBLE2 + 1,
+	TEXTURE_COUNT = TUTORIAL_COLLECTIBLE3 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -326,7 +330,8 @@ enum class ANIMATION_MODE
 	IDLE = 0,
 	RUN = IDLE + 1,
 	ATTACK = RUN + 1,
-	MODE_COUNT = ATTACK + 1
+	CLIMB = ATTACK + 1,
+	MODE_COUNT = CLIMB + 1
 };
 const int animation_mode_count = (int)ANIMATION_MODE::MODE_COUNT;
 
@@ -334,6 +339,7 @@ struct SpriteSheet
 {
 	float timer_ms = 0.f;
 	float switchTime_ms;
+	float numberOfModes;
 	vec2 offset = { 0.f, 0.f };
 	vec2 spriteDim = { -1.f, -1.f };
 	vec2 truncation;
@@ -347,17 +353,18 @@ struct SpriteSheet
 		spriteCount = spriteCt;
 		switchTime_ms = switchTime;
 		truncation = trunc;
+		numberOfModes = spriteCt.size();
 
 		double maxCount = *std::max_element(spriteCount.begin(), spriteCount.end());
 		spriteDim.x = float(1.f / maxCount);
-		spriteDim.y = float(1.f / animation_mode_count);
+		spriteDim.y = float(1.f / numberOfModes);
 
 		updateAnimation(defaultMode);
 	}
 
 	void updateAnimation(ANIMATION_MODE newMode) {
 		mode = newMode;
-		if ((int)mode >= 0) {
+		if ((int)mode >= 0 && (int)mode < numberOfModes) {
 			offset.y = ((int)mode) * spriteDim.y;
 		}
 		else
