@@ -63,9 +63,9 @@ Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale);
 // Index 0 is level 1, index 1 is level 2 etc.
 
 // ---------------------BACKGROUNDS-------------------------
-const std::vector<TEXTURE_ASSET_ID> BACKGROUND_ASSET = {
-  TEXTURE_ASSET_ID::BACKGROUND,
-  TEXTURE_ASSET_ID::BEACH_BACKGROUND};
+const std::vector<std::vector<TEXTURE_ASSET_ID>> BACKGROUND_ASSET = {
+  {TEXTURE_ASSET_ID::BACKGROUND},
+  {TEXTURE_ASSET_ID::BEACH_SKY, TEXTURE_ASSET_ID::BEACH_SEA, TEXTURE_ASSET_ID::BEACH_LAND, TEXTURE_ASSET_ID::BEACH_CLOUD}};
 
 
 // ---------------------PLATFORMS-------------------------
