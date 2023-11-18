@@ -14,14 +14,16 @@ const float BOZO_BB_WIDTH = STUDENT_BB_WIDTH;
 const float BOZO_BB_HEIGHT = STUDENT_BB_HEIGHT;
 const float BOZO_POINTER_BB_WIDTH = 170.f;
 const float BOZO_POINTER_BB_HEIGHT = 170.f;
-const float PLATFORM_HEIGHT = 30.f;
-const float PLATFORM_WIDTH = 32.f;      // TODO (Justin): figure out how to set this per level
 const float WALL_WIDTH = 20.f;
 const float STEP_HEIGHT = 30.f;
 const float STEP_WIDTH = 30.f;
 const vec2 CLIMBABLE_DIM = { 30.f, 32.f };
 
 const float ZOMBIE_SPEED = 100.f;
+
+// not constant since they can change from level to level
+static float PLATFORM_HEIGHT = 30.f;
+static float PLATFORM_WIDTH = 32.f;      // TODO (Justin): figure out how to set this per level
 
 // the player
 Entity createBozo(RenderSystem* renderer, vec2 pos);
@@ -36,7 +38,7 @@ Entity createLine(vec2 position, vec2 size);
 // one platform
 Entity createPlatform(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID texture, vec2 scale = { PLATFORM_WIDTH, PLATFORM_HEIGHT });
 // helper for multiple platforms lined up
-std::vector<Entity> createPlatforms(RenderSystem* renderer, float left_position_x, float left_position_y, uint num_tiles, TEXTURE_ASSET_ID texture, vec2 scale);
+std::vector<Entity> createPlatforms(RenderSystem* renderer, float left_position_x, float left_position_y, uint num_tiles, TEXTURE_ASSET_ID texture);
 // helper for steps
 std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, uint num_steps, uint step_blocks, bool left);
 // walls
@@ -63,10 +65,10 @@ Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale);
 // Index 0 is level 1, index 1 is level 2 etc.
 
 // ---------------------BACKGROUNDS-------------------------
-const std::vector<TEXTURE_ASSET_ID> BACKGROUND_ASSET = {
-    TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND1,
-    TEXTURE_ASSET_ID::BACKGROUND,
-    TEXTURE_ASSET_ID::BEACH_BACKGROUND
+const std::vector<std::vector<TEXTURE_ASSET_ID>> BACKGROUND_ASSET = {
+    { TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND1, TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND2, TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND3, TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND4, TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND0 },
+    { TEXTURE_ASSET_ID::BACKGROUND, TEXTURE_ASSET_ID::BACKGROUND_INDOOR, TEXTURE_ASSET_ID::BASEMENT},
+    { TEXTURE_ASSET_ID::BEACH_BACKGROUND }
 };
 
 
@@ -123,9 +125,9 @@ const std::vector<std::vector<vec3>> PLATFORM_POSITIONS = {
 };
 
 const std::vector<vec2> PLATFORM_SCALES = {
-    { PLATFORM_WIDTH, PLATFORM_HEIGHT },
-    { PLATFORM_WIDTH, PLATFORM_HEIGHT },
-    { PLATFORM_WIDTH, PLATFORM_HEIGHT }
+    { 32.f, 20.f },
+    { 50.f, 30.f },
+    { 50.f, 30.f }
 };
 
 const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
@@ -170,7 +172,7 @@ const std::vector<std::vector<float>> FLOOR_POSITIONS = {
 // ---------------------CLIMBABLES-------------------------
 const std::vector<std::vector<vec3>> CLIMBABLE_POSITIONS = {
     {
-        {15.f, window_height_px - (20.f + 9 * CLIMBABLE_DIM.y + 12.f), 9},
+        {20.f, window_height_px - (20.f + 9 * CLIMBABLE_DIM.y + 7.f), 9},
         {15.f + 13 * PLATFORM_WIDTH, 235.f, 9},
         {15.f + 24 * PLATFORM_WIDTH, window_height_px - (20.f + 12 * CLIMBABLE_DIM.y + 2.f), 12},
         {15.f + 27 * PLATFORM_WIDTH, window_height_px - (20.f + 9 * CLIMBABLE_DIM.y + 2.f), 9},
@@ -259,7 +261,7 @@ const std::vector<std::vector<vec2>> ZOMBIE_START_POS = {
 };
 const std::vector<std::vector<vec2>> STUDENT_START_POS = { 
     {
-        { 25.f, window_height_px - 350.f }
+       {470.f, window_height_px - 285.f - STUDENT_BB_HEIGHT / 2.f},
     },
     { 
         { 1000, 440 }, { 300, 440 }, { 900, 280 }, {400, window_height_px * 0.4 - 50.f}, {600, window_height_px * 0.2 - 50.f}

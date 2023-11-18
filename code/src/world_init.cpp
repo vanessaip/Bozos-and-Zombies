@@ -162,13 +162,13 @@ Entity createPlatform(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID te
 }
 
 // creates a horizontal line of platforms starting at left_position from num_tiles repeated platform sprites
-std::vector<Entity> createPlatforms(RenderSystem* renderer, float left_position_x, float left_position_y, uint num_tiles, TEXTURE_ASSET_ID texture, vec2 scale)
+std::vector<Entity> createPlatforms(RenderSystem* renderer, float left_position_x, float left_position_y, uint num_tiles, TEXTURE_ASSET_ID texture)
 {
 	// TODO(vanessa): check platform dimensions in bounds
 	std::vector<Entity> platforms;
 	vec2 curr_pos = {left_position_x, left_position_y};
 	for (uint i = 0; i < num_tiles; i++) {
-		Entity p = createPlatform(renderer, curr_pos, texture, scale);
+		Entity p = createPlatform(renderer, curr_pos, texture);
 		platforms.push_back(p);
 		curr_pos.x += PLATFORM_WIDTH;
 	}

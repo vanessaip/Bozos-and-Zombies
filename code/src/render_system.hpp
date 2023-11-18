@@ -66,6 +66,10 @@ class RenderSystem {
 		textures_path("cannon_blue.png"),
 		textures_path("tutorial_plat.png"),
 		textures_path("tutorial_foreground.png"),
+		textures_path("tutorial_background1.png"),
+		textures_path("tutorial_background2.png"),
+		textures_path("tutorial_background3.png"),
+		textures_path("tutorial_background4.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

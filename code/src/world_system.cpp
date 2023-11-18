@@ -952,6 +952,10 @@ void WorldSystem::restart_game()
 	player_lives = 4;
 	int collectibles_collected = 0;
 
+	// set paltform dimensions
+	PLATFORM_WIDTH = PLATFORM_SCALES[curr_level].x;
+	PLATFORM_HEIGHT = PLATFORM_SCALES[curr_level].y;
+
 	// Reset sprite sheet buffer index
 
 	// Remove all entities that we created
@@ -967,20 +971,12 @@ void WorldSystem::restart_game()
 	renderer->resetSpriteSheetTracker();
 
 	// Create background first (painter's algorithm for rendering)
-	if (curr_level == 1) {
-	// base colour
-		Entity background = createBackground(renderer);
-
-		// indoor background
-		Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
-		Entity basement = createBackground(renderer, TEXTURE_ASSET_ID::BASEMENT);
-
-		// egg
-		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f });
-	} 
-	else {
-		createBackground(renderer, BACKGROUND_ASSET[curr_level]);
+	for (TEXTURE_ASSET_ID id : BACKGROUND_ASSET[curr_level]) {
+		createBackground(renderer, id);
 	}
+
+	if (curr_level == 1)
+		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f }); // egg
 
 	// Tutorial sign only for the first level
 	if (curr_level == 1) {
@@ -991,7 +987,7 @@ void WorldSystem::restart_game()
 	floor_positions = FLOOR_POSITIONS[curr_level];
 
 	for (vec3 pos : PLATFORM_POSITIONS[curr_level]) {
-		createPlatforms(renderer, pos[0], pos[1], pos[2], PLATFORM_ASSET[curr_level], PLATFORM_SCALES[curr_level]);
+		createPlatforms(renderer, pos[0], pos[1], pos[2], PLATFORM_ASSET[curr_level]);
 	}
 
 	// stairs for the first level
