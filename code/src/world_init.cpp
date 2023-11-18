@@ -87,8 +87,8 @@ Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID tex
 	registry.humans.emplace(entity);
 	registry.colors.insert(entity, { 1, 0.8f, 0.8f });
 
-	std::vector<int> spriteCounts = { 4, 6 };
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.f, 0.f));
+	std::vector<int> spriteCounts = { 4, 6, 6 };
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.05f, 0.1f));
 
 	registry.renderRequests.insert(
 		entity,
