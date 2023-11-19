@@ -22,7 +22,7 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 	registry.players.emplace(entity);
 	registry.humans.emplace(entity); // zombies will target all entities with human component
 
-	std::vector<int> spriteCounts = { 4, 6, 6, 6};
+	std::vector<int> spriteCounts = { 4, 6, 6, 6 };
 	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.05f, 0.08f));
 	registry.renderRequests.insert(
 		entity,
@@ -34,9 +34,9 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 }
 
 
-Entity createBozoPointer(RenderSystem* renderer, vec2 pos) 
-{	
-	
+Entity createBozoPointer(RenderSystem* renderer, vec2 pos)
+{
+
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
@@ -133,7 +133,7 @@ Entity createZombie(RenderSystem* renderer, vec2 position)
 }
 
 // Platform has variable width (possibly variable height in future)
-Entity createPlatform(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID texture, vec2 scale)
+Entity createPlatform(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID texture, bool visible, vec2 scale)
 {
 	auto entity = Entity();
 
@@ -152,23 +152,25 @@ Entity createPlatform(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID te
 
 	// Create a Platform component
 	registry.platforms.emplace(entity);
-	registry.renderRequests.insert(
-		entity,
-		{ texture,
-		 EFFECT_ASSET_ID::TEXTURED,
-		 GEOMETRY_BUFFER_ID::SPRITE });
+	if (visible == true) {
+		registry.renderRequests.insert(
+			entity,
+			{ texture,
+			 EFFECT_ASSET_ID::TEXTURED,
+			 GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
 	return entity;
 }
 
 // creates a horizontal line of platforms starting at left_position from num_tiles repeated platform sprites
-std::vector<Entity> createPlatforms(RenderSystem* renderer, float left_position_x, float left_position_y, uint num_tiles, TEXTURE_ASSET_ID texture, vec2 scale)
+std::vector<Entity> createPlatforms(RenderSystem* renderer, float left_position_x, float left_position_y, uint num_tiles, TEXTURE_ASSET_ID texture, bool visible, vec2 scale)
 {
 	// TODO(vanessa): check platform dimensions in bounds
 	std::vector<Entity> platforms;
-	vec2 curr_pos = {left_position_x, left_position_y};
+	vec2 curr_pos = { left_position_x, left_position_y };
 	for (uint i = 0; i < num_tiles; i++) {
-		Entity p = createPlatform(renderer, curr_pos, texture, scale);
+		Entity p = createPlatform(renderer, curr_pos, texture, visible, scale);
 		platforms.push_back(p);
 		curr_pos.x += scale.x;
 	}
@@ -182,19 +184,19 @@ std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, uint num_
 	vec2 curr_pos = left_pos;
 	for (uint i = 0; i < num_steps; i++) {
 		if (left) {
-			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, { STEP_WIDTH, STEP_HEIGHT });
+			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, true, { STEP_WIDTH, STEP_HEIGHT });
 			Motion& m = registry.motions.get(s0);
 			m.reflect.x = true; // TODO(vanessa): shouldn't it be reflect y?
 			steps.push_back(s0);
 			curr_pos.x += STEP_WIDTH;
 		}
 		for (uint j = 0; j < step_blocks - 1; j++) {
-			Entity s = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP1, { STEP_WIDTH, STEP_HEIGHT });
+			Entity s = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP1, true, { STEP_WIDTH, STEP_HEIGHT });
 			steps.push_back(s);
 			curr_pos.x += STEP_WIDTH;
 		}
 		if (!left) {
-			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, { STEP_WIDTH, STEP_HEIGHT });
+			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, true, { STEP_WIDTH, STEP_HEIGHT });
 			steps.push_back(s0);
 			curr_pos.y += STEP_HEIGHT;
 		}
@@ -207,7 +209,7 @@ std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, uint num_
 }
 
 // Wall has variable height
-Entity createWall(RenderSystem* renderer, float position_x, float position_y, float height)
+Entity createWall(RenderSystem* renderer, float position_x, float position_y, float height, bool visible)
 {
 	auto entity = Entity();
 
@@ -219,19 +221,20 @@ Entity createWall(RenderSystem* renderer, float position_x, float position_y, fl
 	auto& motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.position = {position_x, position_y};
+	motion.position = { position_x, position_y };
 
 	// Setting initial values
 	motion.scale = vec2({ WALL_WIDTH, height });
 
 	// Create a Wall component
 	registry.walls.emplace(entity);
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::WALL,
-		 EFFECT_ASSET_ID::TEXTURED,
-		 GEOMETRY_BUFFER_ID::SPRITE });
-
+	if (visible == true) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::WALL,
+			 EFFECT_ASSET_ID::TEXTURED,
+			 GEOMETRY_BUFFER_ID::SPRITE });
+	}
 	return entity;
 }
 
@@ -251,7 +254,7 @@ std::vector<Entity> createClimbable(RenderSystem* renderer, float top_position_x
 		auto& motion = registry.motions.emplace(entity);
 		motion.angle = 0.f;
 		motion.velocity = { 0.f, 0.f };
-		motion.position = {top_position_x, top_position_y};
+		motion.position = { top_position_x, top_position_y };
 		top_position_y += CLIMBABLE_DIM.y;
 
 		motion.scale = CLIMBABLE_DIM;
@@ -408,7 +411,7 @@ Entity createCollectible(RenderSystem* renderer, float position_x, float positio
 
 	// Initialize the position, scale, and physics components
 	auto& motion = registry.motions.emplace(entity);
-	motion.position = {position_x, position_y};
+	motion.position = { position_x, position_y };
 	motion.scale = scale;
 
 	if (overlay) {
@@ -416,7 +419,7 @@ Entity createCollectible(RenderSystem* renderer, float position_x, float positio
 	}
 	else {
 		registry.collectible.emplace(entity);
-		registry.collectible.get(entity).collectible_id = (int) collectible;
+		registry.collectible.get(entity).collectible_id = (int)collectible;
 	}
 	registry.renderRequests.insert(
 		entity,
@@ -445,7 +448,7 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale) {
 
 	registry.renderRequests.insert(
 		entity,
-		{   TEXTURE_ASSET_ID::HEART,
+		{ TEXTURE_ASSET_ID::HEART,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 

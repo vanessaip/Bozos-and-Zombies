@@ -74,7 +74,7 @@ private:
 	float npcSpawnTimer = 0.f;
 	int npcSpawnIndex = 0;
 	int enemySpawnIndex = 0;
-	int max_level = 2;
+	int max_level = 3;
 	float collectibles_collected_pos = 50;
 	int collectibles_collected = 0;
 	vec2 platformDimensions{ 0.f, 0.f };
@@ -104,7 +104,7 @@ private:
 	// Helpers
 	vec2 relativePos(vec2 mouse_position);
 
-  // Debugging
-  bool spawn_on = true;
+	// Debugging
+	bool spawn_on = true;
 
 };
