@@ -286,10 +286,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			{
 				motion.velocity[0] += 200;
 			}
-			if (motion.climbing) 
-			{
-
-			}
 
 		}
 		// Bounding entities to window
@@ -655,12 +651,22 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// update animation mode
 	SpriteSheet& spriteSheet = registry.spriteSheets.get(player_bozo);
-	if (bozo_motion.climbing)
+	if (bozo_motion.climbing) 
+	{
 		spriteSheet.updateAnimation(ANIMATION_MODE::CLIMB);
-	else if (bozo_motion.velocity.x != 0.f && !bozo_motion.offGround)
-		spriteSheet.updateAnimation(ANIMATION_MODE::RUN);
-	else if (bozo_motion.velocity.x == 0 || bozo_motion.offGround)
-		spriteSheet.updateAnimation(ANIMATION_MODE::IDLE);
+		spriteSheet.truncation.y = 0.f;
+		bozo_motion.scale.y = BOZO_BB_HEIGHT + 17.f;
+	}
+	else 
+	{
+		if (bozo_motion.velocity.x != 0.f && !bozo_motion.offGround)
+			spriteSheet.updateAnimation(ANIMATION_MODE::RUN);
+		else if (bozo_motion.velocity.x == 0 || bozo_motion.offGround)
+			spriteSheet.updateAnimation(ANIMATION_MODE::IDLE);
+
+		spriteSheet.truncation.y = 0.08f;
+		bozo_motion.scale.y = BOZO_BB_HEIGHT;
+	}
 
 	return true;
 }
