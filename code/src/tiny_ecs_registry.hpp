@@ -32,6 +32,7 @@ public:
 	ComponentContainer<Background> backgrounds;
 	ComponentContainer<Wall> walls;
 	ComponentContainer<Spike> spikes;
+	ComponentContainer<Wheel> wheels;
 	ComponentContainer<Climbable> climbables;
 	ComponentContainer<Book> books;
 	ComponentContainer<TextBox> textboxes;
@@ -62,6 +63,7 @@ public:
 		registry_list.push_back(&backgrounds);
 		registry_list.push_back(&walls);
 		registry_list.push_back(&spikes);
+		registry_list.push_back(&wheels);
 		registry_list.push_back(&climbables);
 		registry_list.push_back(&books);
 		registry_list.push_back(&food);

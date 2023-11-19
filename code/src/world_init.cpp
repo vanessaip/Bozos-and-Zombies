@@ -351,6 +351,31 @@ Entity createSpike(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
+Entity createWheel(RenderSystem* renderer, vec2 pos)
+{
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::WHEEL);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 100.f, 0.f };
+	motion.scale = mesh.original_size * 25.f;
+
+	registry.wheels.emplace(entity);
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
+			EFFECT_ASSET_ID::WHEEL,
+			GEOMETRY_BUFFER_ID::WHEEL });
+
+	return entity;
+}
+
 Entity createBook(RenderSystem* renderer, vec2 position)
 {
 	// Reserve en entity
