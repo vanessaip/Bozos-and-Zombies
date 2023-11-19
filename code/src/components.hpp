@@ -44,6 +44,11 @@ struct Spike
 
 };
 
+struct Wheel
+{
+
+};
+
 // Ladders and maybe stairs?
 struct Climbable
 {
@@ -310,7 +315,8 @@ enum class EFFECT_ASSET_ID
 {
 	COLOURED = 0,
 	SPIKE = COLOURED + 1, // can reuse if we end up having meshes
-	TEXTURED = SPIKE + 1,
+	WHEEL = SPIKE + 1,
+	TEXTURED = WHEEL + 1,
 	WATER = TEXTURED + 1,
 	EFFECT_COUNT = WATER + 1
 };
@@ -318,7 +324,8 @@ const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
 	SPIKE = 0,
-	SPRITE = SPIKE + 1,
+	WHEEL = SPIKE + 1,
+	SPRITE = WHEEL + 1,
 	DEBUG_LINE = SPRITE + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
 	SPRITE_SHEET = SCREEN_TRIANGLE + 1,

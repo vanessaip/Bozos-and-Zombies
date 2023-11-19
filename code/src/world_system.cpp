@@ -259,6 +259,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		bool isZombie = registry.zombies.has(motion_container.entities[i]);
 		bool isBook = registry.books.has(motion_container.entities[i]);
 
+		updateWheelRotation(elapsed_ms_since_last_update);
+		
 		if (isPlayer && !registry.deathTimers.has(motion_container.entities[i]))
 		{
 			motion.velocity[0] = 0;
@@ -956,6 +958,19 @@ bool WorldSystem::isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& mot
 	return true;
 }
 
+void WorldSystem::updateWheelRotation(float elapsed_ms_since_last_update)
+{
+    for (Entity wheel : registry.wheels.entities)
+    {
+        Motion& wheelMotion = registry.motions.get(wheel);
+        const float rotationSpeed = 0.001f; 
+        if (wheelMotion.velocity.x < 0)
+            wheelMotion.angle += rotationSpeed * elapsed_ms_since_last_update;
+        else if (wheelMotion.velocity.x > 0)
+            wheelMotion.angle -= rotationSpeed * elapsed_ms_since_last_update;
+    }
+}
+
 // Reset the world state to its initial state
 void WorldSystem::restart_game()
 {
@@ -1037,6 +1052,17 @@ void WorldSystem::restart_game()
 		Entity spike = createSpike(renderer, pos);
 		registry.colors.insert(spike, { 0.5f, 0.5f, 0.5f });
 	}
+
+	// Create wheels
+	Entity wheel1 = createWheel(renderer, {100.f, 600.f}); 
+	registry.colors.insert(wheel1, { 1.0f, 0, 0 });
+    Motion& motion1 = registry.motions.get(wheel1);
+    motion1.velocity = {50.f, 0.f}; 
+
+    Entity wheel2 = createWheel(renderer, {window_width_px - 100.f, 600.f}); 
+	registry.colors.insert(wheel2, { 1.0f, 0, 0 });
+    Motion& motion2 = registry.motions.get(wheel2);
+    motion2.velocity = {-50.f, 0.f};
 
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, BOZO_STARTING_POS[curr_level]);

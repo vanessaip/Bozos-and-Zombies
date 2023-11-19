@@ -59,6 +59,8 @@ Entity createWall(RenderSystem* renderer, float position_x, float position_y, fl
 std::vector<Entity> createClimbable(RenderSystem* renderer, float top_position_x, float top_position_y, uint num_sections, TEXTURE_ASSET_ID texture);
 // spikes
 Entity createSpike(RenderSystem* renderer, vec2 pos);
+// wheels
+Entity createWheel(RenderSystem* renderer, vec2 pos);
 // background
 Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::BACKGROUND, vec2 position = { window_width_px / 2, window_height_px / 2 }, vec2 scale = { window_width_px, window_height_px });
 // book
