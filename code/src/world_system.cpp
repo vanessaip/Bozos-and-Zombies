@@ -117,7 +117,7 @@ GLFWwindow* WorldSystem::create_window()
 		return nullptr;
 	}
 
-	background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[curr_level]).c_str());
+	background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[0]).c_str());
 	player_death_sound = Mix_LoadWAV(audio_path("player_death.wav").c_str());
 	student_disappear_sound = Mix_LoadWAV(audio_path("student_disappear.wav").c_str());
 	player_jump_sound = Mix_LoadWAV(audio_path("player_jump.wav").c_str());
@@ -134,7 +134,8 @@ GLFWwindow* WorldSystem::create_window()
 			audio_path("student_disappear.wav").c_str(),
 			audio_path("player_jump.wav").c_str(),
 			audio_path("player_land.wav").c_str(),
-			audio_path("Mario-coin-sound.wav").c_str());
+			audio_path("Mario-coin-sound.wav").c_str(),
+			audio_path("library.wav").c_str());
 		return nullptr;
 	}
 
@@ -179,7 +180,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
-
 	// generate new zombie every 20s
 	enemySpawnTimer += elapsed_ms_since_last_update;
 	npcSpawnTimer += elapsed_ms_since_last_update;
@@ -1327,6 +1327,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			if (curr_level > max_level) {
 				curr_level = 0;
 			}
+
+			background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[curr_level]).c_str());
+			Mix_PlayMusic(background_music, -1);
+			fprintf(stderr, "Switch music\n");
+			Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
 			restart_game();
 		}
 	}
