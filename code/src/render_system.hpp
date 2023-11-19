@@ -37,7 +37,7 @@ class RenderSystem {
 		textures_path("student_sprite_sheet.png"),
 		textures_path("zombie_sprite_sheet.png"),
 		textures_path("bozo_sprite_sheet.png"),
-		//textures_path("bozo_pointer.png"),
+		textures_path("bozo_pointer.png"),
 		textures_path("Tile_40.png"),	// platform
 		textures_path("Tile_04.png"),	// step left section
 		textures_path("Tile_02.png"),	// step middle section
@@ -60,7 +60,6 @@ class RenderSystem {
 		textures_path("basement.png"),
 		textures_path("indoor_4.png"),
 		textures_path("indoor_3.png"),
-		//textures_path("indoor_2.png"),
 		textures_path("indoor_1.png"),
 		textures_path("indoor_0.png"),
 		textures_path("background_0.png"),

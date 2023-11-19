@@ -57,7 +57,7 @@ Entity createBozoPointer(RenderSystem* renderer, vec2 pos)
 	registry.playerEffects.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::BOZO,
+		{ TEXTURE_ASSET_ID::BOZO_POINTER,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 

@@ -1015,14 +1015,14 @@ void WorldSystem::restart_game()
 	Motion& bozo_motion = registry.motions.get(player_bozo);
 	bozo_motion.velocity = { 0.f, 0.f };
 
-	//player_bozo_pointer = createBozoPointer(renderer, { 200, 500 });
+	player_bozo_pointer = createBozoPointer(renderer, { 200, 500 });
 	// Create zombie (one starter zombie per level?)
 	for (vec2 pos : ZOMBIE_START_POS[curr_level])
-		//createZombie(renderer, pos);
+		createZombie(renderer, pos);
 
 	// Create students
 	for (vec2 pos : STUDENT_START_POS[curr_level])
-		//createStudent(renderer, pos);
+		createStudent(renderer, pos);
 
 	for (Entity student : registry.humans.entities)
 	{
@@ -1136,14 +1136,14 @@ void WorldSystem::handle_collisions()
 				{
 					// random chance of spawning book at the same position as the "saved" student, plays different sound if a book is spawned
 					//int spawn_book = rng() % 2; // 0 or 1
-					int spawn_book = 0;
+					int spawn_book = 1;
 					if (spawn_book)
 					{
 						Motion& m = registry.motions.get(entity_other);
 						Entity book = createBook(renderer, m.position);
 						Book& b = registry.books.get(book);
 						b.offHand = false;
-						//++points;
+						++points;
 						Mix_PlayChannel(-1, collect_book_sound, 0);
 					}
 					else
@@ -1389,7 +1389,6 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	/*
 	if (!registry.deathTimers.has(player_bozo))
 	{
 		Motion& motion = registry.motions.get(player_bozo_pointer);
@@ -1398,9 +1397,6 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 		// printf("Radians: %f\n", radians);
 		motion.angle = radians;
 	}
-	*/
-
-	(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
 vec2 WorldSystem::relativePos(vec2 mouse_position) {

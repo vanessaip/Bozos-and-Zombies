@@ -246,16 +246,15 @@ void RenderSystem::draw(float elapsed_time_ms)
 			continue;
 		// Note, its not very efficient to access elements indirectly via the entity
 		// albeit iterating through all Sprites in sequence. A good point to optimize
-		// TODO: change projection matrix for background entities
 		bool isParallax  = false;
-		
 		if (registry.backgrounds.has(entity)) 
 		{
 			Background& background = registry.backgrounds.get(entity);
+			// adjust projection matrix based on depth of scrolling background
 			if (background.depth > 0) 
 			{
 				isParallax = true;
-				float horizontalShift = (currLeft - prevLeft) / background.depth;
+				float horizontalShift = (currLeft - prevLeft) / background.depth; // horizontal shift inversely proportional to depth
 				vec4 clampedBounds = clampCam(background.parallaxCam.left + horizontalShift, playerCamera.top);
 				background.parallaxCam.left = clampedBounds[0];
 				background.parallaxCam.top = clampedBounds[1];
@@ -510,19 +509,6 @@ void RenderSystem::updateCameraBounds(float elapsed_time_ms)
 
 	// bound camera to level boundaries
 	vec4 clampedBounds = clampCam(left, top);
-
-	/*
-	left = max<float>(left, 0);
-	right = min<float>(left + screen_width, window_width_px * 1.f);
-	if (right == window_width_px * 1.f)
-		left = right - screen_width;
-
-	top = max(top, 0.f);
-	bottom = min<float>(top + screen_height, window_height_px * 1.f);
-	if (bottom == window_height_px * 1.f)
-		top = bottom - screen_height;
-		*/
-
 
 	playerCamera.left = clampedBounds[0];
 	playerCamera.top = clampedBounds[1];
