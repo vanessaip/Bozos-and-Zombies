@@ -14,7 +14,7 @@ struct Player
 
 struct PlayerEffects
 {
-	
+
 };
 
 // Zombies can turn Humans into Zombies
@@ -72,7 +72,7 @@ struct Motion
 	vec2 reflect;
 	bool offGround;
 	bool climbing;
-	float speedMultiplier; 
+	float speedMultiplier;
 	Motion(vec2 position = { 0.f, 0.f }, float angle = 0.f, vec2 velocity = { 0.f, 0.f }, vec2 scale = { 10.f, 10.f }, vec2 reflect = { false, false }, bool offGround = true, bool climbing = false, float speedMultiplier = 1.0)
 	{
 		this->position = position;
@@ -302,7 +302,12 @@ enum class TEXTURE_ASSET_ID
 	TUTORIAL_COLLECTIBLE1 = TUTORIAL_WEAPON + 1,
 	TUTORIAL_COLLECTIBLE2 = TUTORIAL_COLLECTIBLE1 + 1,
 	TUTORIAL_COLLECTIBLE3 = TUTORIAL_COLLECTIBLE2 + 1,
-	TEXTURE_COUNT = TUTORIAL_COLLECTIBLE3 + 1
+	LIBRARY_FRAME = TUTORIAL_COLLECTIBLE3 + 1,
+	LIBRARY_OBJECTS = LIBRARY_FRAME + 1,
+	LIBRARY_FILL = LIBRARY_OBJECTS + 1,
+	LIBRARY_PLAT = LIBRARY_FILL + 1,
+	LIBRARY_LAD = LIBRARY_PLAT + 1,
+	TEXTURE_COUNT = LIBRARY_LAD + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

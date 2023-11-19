@@ -117,7 +117,7 @@ GLFWwindow* WorldSystem::create_window()
 		return nullptr;
 	}
 
-	background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[curr_level]).c_str());
+	background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[0]).c_str());
 	player_death_sound = Mix_LoadWAV(audio_path("player_death.wav").c_str());
 	student_disappear_sound = Mix_LoadWAV(audio_path("student_disappear.wav").c_str());
 	player_jump_sound = Mix_LoadWAV(audio_path("player_jump.wav").c_str());
@@ -129,12 +129,13 @@ GLFWwindow* WorldSystem::create_window()
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("beach.wav").c_str(),
-      audio_path("soundtrack.wav").c_str(),
+			audio_path("soundtrack.wav").c_str(),
 			audio_path("player_death.wav").c_str(),
 			audio_path("student_disappear.wav").c_str(),
 			audio_path("player_jump.wav").c_str(),
 			audio_path("player_land.wav").c_str(),
-			audio_path("Mario-coin-sound.wav").c_str());
+			audio_path("Mario-coin-sound.wav").c_str(),
+			audio_path("library.wav").c_str());
 		return nullptr;
 	}
 
@@ -179,12 +180,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
-
 	// generate new zombie every 20s
 	enemySpawnTimer += elapsed_ms_since_last_update;
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
-	
+
 	if (enemySpawnTimer / 1000.f > 25 && spawn_on && curr_level != 0) {
 		vec2 enemySpawnPos;
 		for (int i = 0; i < ZOMBIE_START_POS[curr_level].size(); i++)  // try a few times
@@ -194,14 +194,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 			// only consider spawning off screen when not in full view mode
 			bool spawn = false;
-			if (!debugging.in_full_view_mode) 
+			if (!debugging.in_full_view_mode)
 			{
 				if (enemySpawnPos.x < cameraBounds[0] || enemySpawnPos.x > cameraBounds[2]
-					&& enemySpawnPos.y < cameraBounds[1] || enemySpawnPos.y > cameraBounds[3]) { spawn = true; }
+					&& enemySpawnPos.y < cameraBounds[1] || enemySpawnPos.y > cameraBounds[3]) {
+					spawn = true;
+				}
 			}
 			else { spawn = true; }
 
-			if (spawn) 
+			if (spawn)
 			{
 				createZombie(renderer, enemySpawnPos);
 				enemySpawnTimer = 0.f;
@@ -222,11 +224,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			if (!debugging.in_full_view_mode)
 			{
 				if (npcSpawnPos.x < cameraBounds[0] || npcSpawnPos.x > cameraBounds[2]
-					&& npcSpawnPos.y < cameraBounds[1] || npcSpawnPos.y > cameraBounds[3]) { spawn = true; }
+					&& npcSpawnPos.y < cameraBounds[1] || npcSpawnPos.y > cameraBounds[3]) {
+					spawn = true;
+				}
 			}
 			else { spawn = true; }
 
-			if (spawn) 
+			if (spawn)
 			{
 				Entity student = createStudent(renderer, npcSpawnPos, NPC_ASSET[curr_level]);
 				Motion& student_motion = registry.motions.get(student);
@@ -236,7 +240,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			}
 		}
 	}
-	
+
 
 	Player& player = registry.players.get(player_bozo);
 
@@ -260,12 +264,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		if (isPlayer && !registry.deathTimers.has(motion_container.entities[i]))
 		{
 			motion.velocity[0] = 0;
-			
+
 			// If player just lost a life, make invincible for a bit
 			if (registry.lostLifeTimer.has(player_bozo)) {
 				LostLife& timer = registry.lostLifeTimer.get(player_bozo);
-				timer.timer_ms -= elapsed_ms_since_last_update; 
-				
+				timer.timer_ms -= elapsed_ms_since_last_update;
+
 				// Fade a bit to show invincibility
 				vec3& color = registry.colors.get(player_bozo);
 				color = { 0.5f, 0.5f, 0.5f };
@@ -653,13 +657,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// update animation mode
 	SpriteSheet& spriteSheet = registry.spriteSheets.get(player_bozo);
-	if (bozo_motion.climbing) 
+	if (bozo_motion.climbing)
 	{
 		spriteSheet.updateAnimation(ANIMATION_MODE::CLIMB);
 		spriteSheet.truncation.y = 0.f;
 		bozo_motion.scale.y = BOZO_BB_HEIGHT + 17.f;
 	}
-	else 
+	else
 	{
 		if (bozo_motion.velocity.x != 0.f && !bozo_motion.offGround)
 			spriteSheet.updateAnimation(ANIMATION_MODE::RUN);
@@ -854,7 +858,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 int WorldSystem::checkLevel(Motion& motion)
 {
 	float entityBottom = motion.position.y + abs(motion.scale[1]) / 2.f;
-	for (int i = 0; i < floor_positions.size() - 1; i++) 
+	for (int i = 0; i < floor_positions.size() - 1; i++)
 	{
 		if (entityBottom < floor_positions[i] && entityBottom > floor_positions[i + 1])
 			return i;
@@ -1011,7 +1015,7 @@ void WorldSystem::restart_game()
 
 	// Tutorial sign only for the first level
 	if (curr_level == 0) {
-    	createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_MOVEMENT, { window_width_px - 120.f, window_height_px - 80.f }, "", { 150.f, 70.f });
+		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_MOVEMENT, { window_width_px - 120.f, window_height_px - 80.f }, "", { 150.f, 70.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_CLIMB, { window_width_px - 480.f, window_height_px - 90.f }, "", { 115.f, 40.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_NPCS, { window_width_px - 800.f, window_height_px - 350.f }, "", { 150.f, 60.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_WEAPONS, { window_width_px - 900.f, window_height_px - 220.f }, "", { 200.f, 70.f });
@@ -1021,8 +1025,8 @@ void WorldSystem::restart_game()
 	// Render platforms
 	floor_positions = FLOOR_POSITIONS[curr_level];
 
-	for (vec3 pos : PLATFORM_POSITIONS[curr_level]) {
-		createPlatforms(renderer, pos[0], pos[1], pos[2], PLATFORM_ASSET[curr_level], platformDimensions);
+	for (vec4 pos : PLATFORM_POSITIONS[curr_level]) {
+		createPlatforms(renderer, pos[0], pos[1], pos[2], PLATFORM_ASSET[curr_level], pos[3], platformDimensions);
 	}
 
 	// stairs for the first level
@@ -1032,10 +1036,10 @@ void WorldSystem::restart_game()
 	}
 
 	// Create walls
-	for (vec3 pos : WALL_POSITIONS[curr_level]) {
-		createWall(renderer, pos[0], pos[1], pos[2]);
+	for (vec4 pos : WALL_POSITIONS[curr_level]) {
+		createWall(renderer, pos[0], pos[1], pos[2], pos[3]);
 	}
-  
+
 	// Create climbables
 	for (vec3 pos : CLIMBABLE_POSITIONS[curr_level]) {
 		createClimbable(renderer, pos[0], pos[1], pos[2], CLIMBABLE_ASSET[curr_level]);
@@ -1090,14 +1094,14 @@ void WorldSystem::restart_game()
 	}
 
 
-  // This is specific to the beach level
-  if (curr_level == 2) {
-     createDangerous(renderer, {280, 130}, { 30, 30 });
-     createBackground(renderer, TEXTURE_ASSET_ID::CANNON, {230, 155}, {80, 60});
-  }
+	// This is specific to the beach level
+	if (curr_level == 2) {
+		createDangerous(renderer, { 280, 130 }, { 30, 30 });
+		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, { 230, 155 }, { 80, 60 });
+	}
 
 
-  // Lives can probably stay hardcoded?
+	// Lives can probably stay hardcoded?
 	float heart_pos_x = 1385;
 	float heart_starting_pos_y = 40;
 
@@ -1154,7 +1158,7 @@ void WorldSystem::handle_collisions()
 					}
 				}
 				else if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives == 0)
-				{	
+				{
 					// Kill player if no lives left
 					// Scream, reset timer, and make the player [dying animation]
 					Motion& motion_player = registry.motions.get(entity);
@@ -1279,13 +1283,13 @@ void WorldSystem::handle_collisions()
 		// Player - Collectible collision
 
 		else if (registry.collectible.has(entity) && registry.players.has(entity_other)) {
-			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID) registry.collectible.get(entity).collectible_id;
+			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID)registry.collectible.get(entity).collectible_id;
 			Entity collectible = createCollectible(renderer, collectibles_collected_pos, 50, id, { 60, 60 }, true);
 
 			registry.remove_all_components_of(entity);
 
 			collectibles_collected++;
-			
+
 			collectibles_collected_pos = collectibles_collected_pos + 60;
 		}
 	}
@@ -1344,12 +1348,17 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			debugging.in_full_view_mode = !debugging.in_full_view_mode;
 		}
 
-    if (key == GLFW_KEY_L) {
+		if (key == GLFW_KEY_L) {
 			curr_level++;
-      if (curr_level > max_level) {
-        curr_level = 0;
-      }
-      restart_game();
+			if (curr_level > max_level) {
+				curr_level = 0;
+			}
+
+			background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[curr_level]).c_str());
+			Mix_PlayMusic(background_music, -1);
+			fprintf(stderr, "Switch music\n");
+			Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
+			restart_game();
 		}
 	}
 
