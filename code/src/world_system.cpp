@@ -184,39 +184,63 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	enemySpawnTimer += elapsed_ms_since_last_update;
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
-	if (enemySpawnTimer / 1000.f > 25 && !debugging.in_full_view_mode && spawn_on && curr_level == 0) {
+
+	if (enemySpawnTimer / 1000.f > 25 && spawn_on && curr_level != 0) {
 		vec2 enemySpawnPos;
-		vec4 cameraBounds = renderer->getCameraBounds();;
-		do
+		for (int i = 0; i < ZOMBIE_START_POS[curr_level].size(); i++)  // try a few times
 		{
-			if (enemySpawnIndex >= ZOMBIE_START_POS[curr_level].size())
-				enemySpawnIndex = 0;
+			int spawnIndex = rng() % ZOMBIE_START_POS[curr_level].size();
+			enemySpawnPos = ZOMBIE_START_POS[curr_level][spawnIndex];
 
-			enemySpawnPos = ZOMBIE_START_POS[curr_level][enemySpawnIndex];
-			enemySpawnIndex++;
-		} while (enemySpawnPos.x > cameraBounds[0] && enemySpawnPos.x < cameraBounds[2]
-			&& enemySpawnPos.y > cameraBounds[1] && enemySpawnPos.y < cameraBounds[3]); // ensure new student is spawned off screen
+			// only consider spawning off screen when not in full view mode
+			bool spawn = false;
+			if (!debugging.in_full_view_mode)
+			{
+				if (enemySpawnPos.x < cameraBounds[0] || enemySpawnPos.x > cameraBounds[2]
+					&& enemySpawnPos.y < cameraBounds[1] || enemySpawnPos.y > cameraBounds[3]) {
+					spawn = true;
+				}
+			}
+			else { spawn = true; }
 
-		createZombie(renderer, enemySpawnPos);
-		enemySpawnTimer = 0.f;
+			if (spawn)
+			{
+				createZombie(renderer, enemySpawnPos);
+				enemySpawnTimer = 0.f;
+				break;
+			}
+		}
 	}
-	if (npcSpawnTimer / 1000.f > 10 && !debugging.in_full_view_mode && spawn_on && curr_level == 0) {
-		vec2 studentSpawnPos;
-		do
+
+	if (npcSpawnTimer / 1000.f > 10 && spawn_on && curr_level != 0) {
+		vec2 npcSpawnPos;
+		for (int i = 0; i < NPC_START_POS[curr_level].size(); i++)  // try a few times
 		{
-			if (npcSpawnIndex >= STUDENT_START_POS[curr_level].size())
-				npcSpawnIndex = 0;
+			int spawnIndex = rng() % NPC_START_POS[curr_level].size();
+			npcSpawnPos = NPC_START_POS[curr_level][spawnIndex];
 
-			studentSpawnPos = STUDENT_START_POS[curr_level][npcSpawnIndex];
-			npcSpawnIndex++;
-		} while (studentSpawnPos.x > cameraBounds[0] && studentSpawnPos.x < cameraBounds[2]
-			&& studentSpawnPos.y > cameraBounds[1] && studentSpawnPos.y < cameraBounds[3]); // ensure new student is spawned off screen
+			// only consider spawning off screen when not in full view mode
+			bool spawn = false;
+			if (!debugging.in_full_view_mode)
+			{
+				if (npcSpawnPos.x < cameraBounds[0] || npcSpawnPos.x > cameraBounds[2]
+					&& npcSpawnPos.y < cameraBounds[1] || npcSpawnPos.y > cameraBounds[3]) {
+					spawn = true;
+				}
+			}
+			else { spawn = true; }
 
-		Entity student = createStudent(renderer, studentSpawnPos);
-		Motion& student_motion = registry.motions.get(student);
-		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
-		npcSpawnTimer = 0.f;
+			if (spawn)
+			{
+				Entity student = createStudent(renderer, npcSpawnPos, NPC_ASSET[curr_level]);
+				Motion& student_motion = registry.motions.get(student);
+				student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+				npcSpawnTimer = 0.f;
+				break;
+			}
+		}
 	}
+
 
 	Player& player = registry.players.get(player_bozo);
 
@@ -286,7 +310,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			{
 				motion.velocity.x = 0;
 			}
-			if (motion.position.y < 0.f + BOZO_BB_HEIGHT / 2.f)
+			if (motion.position.y < 0.f + (BOZO_BB_HEIGHT) / 2.f)
 			{
 				motion.position.y = 0.f + BOZO_BB_HEIGHT / 2.f;
 			}
@@ -631,10 +655,22 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// update animation mode
 	SpriteSheet& spriteSheet = registry.spriteSheets.get(player_bozo);
-	if (bozo_motion.velocity.x != 0.f && !bozo_motion.offGround)
-		spriteSheet.updateAnimation(ANIMATION_MODE::RUN);
-	else if (bozo_motion.velocity.x == 0 || bozo_motion.offGround)
-		spriteSheet.updateAnimation(ANIMATION_MODE::IDLE);
+	if (bozo_motion.climbing)
+	{
+		spriteSheet.updateAnimation(ANIMATION_MODE::CLIMB);
+		spriteSheet.truncation.y = 0.f;
+		bozo_motion.scale.y = BOZO_BB_HEIGHT + 17.f;
+	}
+	else
+	{
+		if (bozo_motion.velocity.x != 0.f && !bozo_motion.offGround)
+			spriteSheet.updateAnimation(ANIMATION_MODE::RUN);
+		else if (bozo_motion.velocity.x == 0 || bozo_motion.offGround)
+			spriteSheet.updateAnimation(ANIMATION_MODE::IDLE);
+
+		spriteSheet.truncation.y = 0.08f;
+		bozo_motion.scale.y = BOZO_BB_HEIGHT;
+	}
 
 	return true;
 }
@@ -820,26 +856,13 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 int WorldSystem::checkLevel(Motion& motion)
 {
 	float entityBottom = motion.position.y + abs(motion.scale[1]) / 2.f;
-	if (entityBottom < floor_positions[0] && entityBottom > floor_positions[1])
+	for (int i = 0; i < floor_positions.size() - 1; i++)
 	{
-		return 0;
+		if (entityBottom < floor_positions[i] && entityBottom > floor_positions[i + 1])
+			return i;
 	}
-	else if (entityBottom < floor_positions[1] && entityBottom > floor_positions[2])
-	{
-		return 1;
-	}
-	else if (entityBottom < floor_positions[2] && entityBottom > floor_positions[3])
-	{
-		return 2;
-	}
-	else if (entityBottom < floor_positions[3] && entityBottom > floor_positions[4])
-	{
-		return 3;
-	}
-	else
-	{
-		return 4;
-	}
+
+	return floor_positions.size() - 1;
 }
 
 float WorldSystem::getClosestLadder(int zombie_level, Motion& bozo_motion)
@@ -949,6 +972,10 @@ void WorldSystem::restart_game()
 	player_lives = 4;
 	int collectibles_collected = 0;
 
+	//curr_level = 1;
+	// set paltform dimensions
+	vec2 platformDimensions = PLATFORM_SCALES[curr_level];
+
 	// Reset sprite sheet buffer index
 
 	// Remove all entities that we created
@@ -964,43 +991,33 @@ void WorldSystem::restart_game()
 	renderer->resetSpriteSheetTracker();
 
 	// Create background first (painter's algorithm for rendering)
-	if (curr_level == 0) {
-		// base colour
-		Entity background = createBackground(renderer);
-
-		// indoor background
-		Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
-		Entity basement = createBackground(renderer, TEXTURE_ASSET_ID::BASEMENT);
-
-		// egg
-		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f });
+	for (TEXTURE_ASSET_ID id : BACKGROUND_ASSET[curr_level]) {
+		createBackground(renderer, id);
 	}
-	else {
 
-		std::vector<TEXTURE_ASSET_ID> backgrounds = BACKGROUND_ASSET[curr_level];
-
-		for (int i = 0; i < backgrounds.size(); i++) {
-			createBackground(renderer, backgrounds[i]);
-		}
-
-	}
+	if (curr_level == 1)
+		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f }); // egg
 
 	// Tutorial sign only for the first level
 	if (curr_level == 0) {
-		Entity tutorial1 = createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL1, { 643, 550 }, "tutorial1", { 250.f, 150.f });
+		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_MOVEMENT, { window_width_px - 120.f, window_height_px - 80.f }, "", { 150.f, 70.f });
+		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_CLIMB, { window_width_px - 480.f, window_height_px - 90.f }, "", { 115.f, 40.f });
+		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_NPCS, { window_width_px - 800.f, window_height_px - 350.f }, "", { 150.f, 60.f });
+		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_WEAPONS, { window_width_px - 900.f, window_height_px - 220.f }, "", { 200.f, 70.f });
+		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_GOAL, { 130.f, window_height_px - 200.f }, "", { 180.f, 100.f });
 	}
 
 	// Render platforms
 	floor_positions = FLOOR_POSITIONS[curr_level];
 
 	for (vec4 pos : PLATFORM_POSITIONS[curr_level]) {
-		createPlatforms(renderer, pos[0], pos[1], pos[2], PLATFORM_ASSET[curr_level], pos[3]);
+		createPlatforms(renderer, pos[0], pos[1], pos[2], PLATFORM_ASSET[curr_level], pos[3], platformDimensions);
 	}
 
 	// stairs for the first level
-	if (curr_level == 0) {
-		std::vector<Entity> step0 = createSteps(renderer, { PLATFORM_WIDTH * 12 - 20.f, window_height_px * 0.8 }, 5, 3, false);
-		std::vector<Entity> step1 = createSteps(renderer, { window_width_px - PLATFORM_WIDTH * 6 - STEP_WIDTH * 6, window_height_px * 0.8 + PLATFORM_HEIGHT * 4 }, 5, 2, true);
+	if (curr_level == 1) {
+		std::vector<Entity> step0 = createSteps(renderer, { platformDimensions.x * 12 - 20.f, window_height_px * 0.8 }, 5, 3, false);
+		std::vector<Entity> step1 = createSteps(renderer, { window_width_px - platformDimensions.x * 6 - STEP_WIDTH * 6, window_height_px * 0.8 + platformDimensions.y * 4 }, 5, 2, true);
 	}
 
 	// Create walls
@@ -1033,8 +1050,8 @@ void WorldSystem::restart_game()
 		createZombie(renderer, pos);
 
 	// Create students
-	for (vec2 pos : STUDENT_START_POS[curr_level])
-		createStudent(renderer, pos);
+	for (vec2 pos : NPC_START_POS[curr_level])
+		createStudent(renderer, pos, NPC_ASSET[curr_level]);
 
 	for (Entity student : registry.humans.entities)
 	{
@@ -1045,13 +1062,14 @@ void WorldSystem::restart_game()
 	// Place collectibles
 	std::vector<vec2> collectibles = COLLECTIBLE_POSITIONS[curr_level];
 	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[curr_level];
+	assert(collectibles.size() == collectible_assets.size());
 	for (int i = 0; i < collectibles.size(); i++) {
-		createCollectible(renderer, collectibles[i][0], collectibles[i][1], collectible_assets[i], { 30, 30 }, false);
+		createCollectible(renderer, collectibles[i][0], collectibles[i][1], collectible_assets[i], COLLECTIBLE_SCALES[curr_level], false);
 	}
 
 
 	// This is specific to the beach level
-	if (curr_level == 1) {
+	if (curr_level == 2) {
 		createDangerous(renderer, { 280, 130 }, { 30, 30 });
 		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, { 230, 155 }, { 80, 60 });
 	}
@@ -1152,7 +1170,7 @@ void WorldSystem::handle_collisions()
 					if (spawn_book)
 					{
 						Motion& m = registry.motions.get(entity_other);
-						Entity book = createBook(renderer, m.position);
+						Entity book = createBook(renderer, m.position, WEAPON_ASSETS[curr_level]);
 						Book& b = registry.books.get(book);
 						b.offHand = false;
 						++points;

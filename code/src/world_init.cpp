@@ -22,8 +22,8 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 	registry.players.emplace(entity);
 	registry.humans.emplace(entity); // zombies will target all entities with human component
 
-	std::vector<int> spriteCounts = { 4, 6, 6 };
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.05f, 0.1f));
+	std::vector<int> spriteCounts = { 4, 6, 6, 6 };
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.05f, 0.08f));
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::BOZO,
@@ -65,7 +65,7 @@ Entity createBozoPointer(RenderSystem* renderer, vec2 pos)
 }
 
 
-Entity createStudent(RenderSystem* renderer, vec2 position)
+Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId)
 {
 	// Reserve en entity
 	auto entity = Entity();
@@ -92,7 +92,7 @@ Entity createStudent(RenderSystem* renderer, vec2 position)
 
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::STUDENT,
+		{ textureId,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE_SHEET });
 
@@ -164,15 +164,15 @@ Entity createPlatform(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID te
 }
 
 // creates a horizontal line of platforms starting at left_position from num_tiles repeated platform sprites
-std::vector<Entity> createPlatforms(RenderSystem* renderer, float left_position_x, float left_position_y, uint num_tiles, TEXTURE_ASSET_ID texture, bool visible)
+std::vector<Entity> createPlatforms(RenderSystem* renderer, float left_position_x, float left_position_y, uint num_tiles, TEXTURE_ASSET_ID texture, bool visible, vec2 scale)
 {
 	// TODO(vanessa): check platform dimensions in bounds
 	std::vector<Entity> platforms;
 	vec2 curr_pos = { left_position_x, left_position_y };
 	for (uint i = 0; i < num_tiles; i++) {
-		Entity p = createPlatform(renderer, curr_pos, texture, visible);
+		Entity p = createPlatform(renderer, curr_pos, texture, visible, scale);
 		platforms.push_back(p);
-		curr_pos.x += PLATFORM_WIDTH;
+		curr_pos.x += scale.x;
 	}
 	return platforms;
 }
@@ -344,7 +344,7 @@ Entity createSpike(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createBook(RenderSystem* renderer, vec2 position)
+Entity createBook(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId)
 {
 	// Reserve en entity
 	auto entity = Entity();
@@ -366,7 +366,7 @@ Entity createBook(RenderSystem* renderer, vec2 position)
 	registry.books.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::BOOK,
+		{ textureId,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 

@@ -246,6 +246,7 @@ struct Dangerous
 
 enum class TEXTURE_ASSET_ID
 {
+	// define parallax scrolling backgrounds at start
 	STUDENT = 0,
 	ZOMBIE = STUDENT + 1,
 	BOZO = ZOMBIE + 1,
@@ -279,7 +280,24 @@ enum class TEXTURE_ASSET_ID
 	BEACH_SEA = BEACH_SKY + 1,
 	BEACH_LAND = BEACH_SEA + 1,
 	BEACH_CLOUD = BEACH_LAND + 1,
-	LIBRARY_FRAME = BEACH_CLOUD + 1,
+	// tutorial assets
+	TUTORIAL_PLAT = BEACH_CLOUD + 1,
+	TUTORIAL_BACKGROUND0 = TUTORIAL_PLAT + 1,
+	TUTORIAL_BACKGROUND1 = TUTORIAL_BACKGROUND0 + 1,
+	TUTORIAL_BACKGROUND2 = TUTORIAL_BACKGROUND1 + 1,
+	TUTORIAL_BACKGROUND3 = TUTORIAL_BACKGROUND2 + 1,
+	TUTORIAL_BACKGROUND4 = TUTORIAL_BACKGROUND3 + 1,
+	TUTORIAL_MOVEMENT = TUTORIAL_BACKGROUND4 + 1,
+	TUTORIAL_CLIMB = TUTORIAL_MOVEMENT + 1,
+	TUTORIAL_NPCS = TUTORIAL_CLIMB + 1,
+	TUTORIAL_WEAPONS = TUTORIAL_NPCS + 1,
+	TUTORIAL_GOAL = TUTORIAL_WEAPONS + 1,
+	TUTORIAL_NPC = TUTORIAL_GOAL + 1,
+	TUTORIAL_WEAPON = TUTORIAL_NPC + 1,
+	TUTORIAL_COLLECTIBLE1 = TUTORIAL_WEAPON + 1,
+	TUTORIAL_COLLECTIBLE2 = TUTORIAL_COLLECTIBLE1 + 1,
+	TUTORIAL_COLLECTIBLE3 = TUTORIAL_COLLECTIBLE2 + 1,
+	LIBRARY_FRAME = TUTORIAL_COLLECTIBLE3 + 1,
 	LIBRARY_OBJECTS = LIBRARY_FRAME + 1,
 	LIBRARY_FILL = LIBRARY_OBJECTS + 1,
 	LIBRARY_PLAT = LIBRARY_FILL + 1,
@@ -320,7 +338,8 @@ enum class ANIMATION_MODE
 	IDLE = 0,
 	RUN = IDLE + 1,
 	ATTACK = RUN + 1,
-	MODE_COUNT = ATTACK + 1
+	CLIMB = ATTACK + 1,
+	MODE_COUNT = CLIMB + 1
 };
 const int animation_mode_count = (int)ANIMATION_MODE::MODE_COUNT;
 
@@ -328,6 +347,7 @@ struct SpriteSheet
 {
 	float timer_ms = 0.f;
 	float switchTime_ms;
+	float numberOfModes;
 	vec2 offset = { 0.f, 0.f };
 	vec2 spriteDim = { -1.f, -1.f };
 	vec2 truncation;
@@ -341,17 +361,18 @@ struct SpriteSheet
 		spriteCount = spriteCt;
 		switchTime_ms = switchTime;
 		truncation = trunc;
+		numberOfModes = spriteCt.size();
 
 		double maxCount = *std::max_element(spriteCount.begin(), spriteCount.end());
 		spriteDim.x = float(1.f / maxCount);
-		spriteDim.y = float(1.f / animation_mode_count);
+		spriteDim.y = float(1.f / numberOfModes);
 
 		updateAnimation(defaultMode);
 	}
 
 	void updateAnimation(ANIMATION_MODE newMode) {
 		mode = newMode;
-		if ((int)mode >= 0) {
+		if ((int)mode >= 0 && (int)mode < numberOfModes) {
 			offset.y = ((int)mode) * spriteDim.y;
 		}
 		else
