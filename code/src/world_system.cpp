@@ -964,8 +964,8 @@ void WorldSystem::restart_game()
 	renderer->resetSpriteSheetTracker();
 
 	// Create background first (painter's algorithm for rendering)
-	for (TEXTURE_ASSET_ID id : BACKGROUND_ASSET[curr_level]) {
-		createBackground(renderer, id);
+	for (std::tuple<TEXTURE_ASSET_ID, float> background : BACKGROUND_ASSET[curr_level]) {
+		createBackground(renderer, std::get<0>(background), std::get<1>(background));
 	}
 
 	

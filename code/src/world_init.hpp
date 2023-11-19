@@ -63,28 +63,27 @@ Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale);
 // Index 0 is level 1, index 1 is level 2 etc.
 
 // ---------------------BACKGROUNDS-------------------------
-const std::vector<std::vector<TEXTURE_ASSET_ID>> BACKGROUND_ASSET = {
+const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_ASSET = { 
     {
-        TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_0, 
-        TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_1, 
-        TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_2, 
-        TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_3,
-        TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_0,
-        TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_1,
-        TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_3,
-        TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_4,
-        TEXTURE_ASSET_ID::BACKGROUND_INDOOR,
-        TEXTURE_ASSET_ID::BASEMENT
+        // texture id, depth (set depth to 0 if not scrolling)
+        { TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_0, 8.0f },
+        { TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_1, 6.0f},
+        { TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_2, 4.0f},
+        { TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_3, 2.0f},
+        //{ TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_0, 1.7f},
+        //{ TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_1, 1.5f},
+        //{ TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_3, 1.3f},
+        //{ TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_4, 1.1f},
+        { TEXTURE_ASSET_ID::BACKGROUND_INDOOR, 0.f},
+        { TEXTURE_ASSET_ID::BASEMENT, 0.f},
     },
     {
-        TEXTURE_ASSET_ID::BEACH_SKY, 
-        TEXTURE_ASSET_ID::BEACH_SEA, 
-        TEXTURE_ASSET_ID::BEACH_LAND, 
-        TEXTURE_ASSET_ID::BEACH_CLOUD
+        { TEXTURE_ASSET_ID::BEACH_SKY, 16.0f},
+        { TEXTURE_ASSET_ID::BEACH_SEA, 8.0f},
+        { TEXTURE_ASSET_ID::BEACH_LAND, 2.0f},
+        { TEXTURE_ASSET_ID::BEACH_CLOUD, 4.0f}
     }
 };
-
-const std::vector<int> NUM_OF_PARALLAX_LAYERS = { 8 };
 
 // ---------------------PLATFORMS-------------------------
 const std::vector<std::vector<vec3>> PLATFORM_POSITIONS = {
