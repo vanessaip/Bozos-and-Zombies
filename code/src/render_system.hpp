@@ -59,14 +59,17 @@ class RenderSystem {
 		textures_path("heart.png"),
 		textures_path("win_screen.png"),
 		textures_path("basement.png"),
-    textures_path("beach-plat.png"),
-    textures_path("beach-ladder.png"),
-    textures_path("spikeball.png"),
-    textures_path("cannon_blue.png"),
-    textures_path("beach-sky.png"),
-    textures_path("beach-sea.png"),
-    textures_path("beach-land.png"),
-    textures_path("beach-cloud.png")
+	textures_path("beach-plat.png"),
+	textures_path("beach-ladder.png"),
+	textures_path("spikeball.png"),
+	textures_path("cannon_blue.png"),
+	textures_path("beach-sky.png"),
+	textures_path("beach-sea.png"),
+	textures_path("beach-land.png"),
+	textures_path("beach-cloud.png"),
+	textures_path("library/frame.png"),
+	textures_path("library/objects.png"),
+	textures_path("library/fill.jpg"),
 	};
 
 	std::array<GLuint, effect_count> effects;

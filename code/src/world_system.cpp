@@ -129,7 +129,7 @@ GLFWwindow* WorldSystem::create_window()
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("beach.wav").c_str(),
-      audio_path("soundtrack.wav").c_str(),
+			audio_path("soundtrack.wav").c_str(),
 			audio_path("player_death.wav").c_str(),
 			audio_path("student_disappear.wav").c_str(),
 			audio_path("player_jump.wav").c_str(),
@@ -238,12 +238,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		if (isPlayer && !registry.deathTimers.has(motion_container.entities[i]))
 		{
 			motion.velocity[0] = 0;
-			
+
 			// If player just lost a life, make invincible for a bit
 			if (registry.lostLifeTimer.has(player_bozo)) {
 				LostLife& timer = registry.lostLifeTimer.get(player_bozo);
-				timer.timer_ms -= elapsed_ms_since_last_update; 
-				
+				timer.timer_ms -= elapsed_ms_since_last_update;
+
 				// Fade a bit to show invincibility
 				vec3& color = registry.colors.get(player_bozo);
 				color = { 0.5f, 0.5f, 0.5f };
@@ -964,61 +964,62 @@ void WorldSystem::restart_game()
 	renderer->resetSpriteSheetTracker();
 
 	// Create background first (painter's algorithm for rendering)
-  if (curr_level == 0) {
-    // base colour
-    Entity background = createBackground(renderer);
+	if (curr_level == 0) {
+		// base colour
+		Entity background = createBackground(renderer);
 
-    // indoor background
-    Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
-    Entity basement = createBackground(renderer, TEXTURE_ASSET_ID::BASEMENT);
+		// indoor background
+		Entity indoor = createBackground(renderer, TEXTURE_ASSET_ID::BACKGROUND_INDOOR);
+		Entity basement = createBackground(renderer, TEXTURE_ASSET_ID::BASEMENT);
 
-    // egg
-    Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f });
-  } else {
+		// egg
+		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f });
+	}
+	else {
 
-    std::vector<TEXTURE_ASSET_ID> backgrounds = BACKGROUND_ASSET[curr_level];
+		std::vector<TEXTURE_ASSET_ID> backgrounds = BACKGROUND_ASSET[curr_level];
 
-    for (int i = 0; i < backgrounds.size(); i++) {
-      createBackground(renderer, backgrounds[i]);
-    }
+		for (int i = 0; i < backgrounds.size(); i++) {
+			createBackground(renderer, backgrounds[i]);
+		}
 
-  }
+	}
 
 	// Tutorial sign only for the first level
-  if (curr_level == 0) {
-    	Entity tutorial1 = createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL1, { 643, 550 }, "tutorial1", { 250.f, 150.f });
-  }
+	if (curr_level == 0) {
+		Entity tutorial1 = createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL1, { 643, 550 }, "tutorial1", { 250.f, 150.f });
+	}
 
-  // Render platforms
+	// Render platforms
 	floor_positions = FLOOR_POSITIONS[curr_level];
 
-  for (vec3 pos : PLATFORM_POSITIONS[curr_level]) {
-    createPlatforms(renderer, pos[0], pos[1], pos[2], PLATFORM_ASSET[curr_level]);
-  }
+	for (vec3 pos : PLATFORM_POSITIONS[curr_level]) {
+		createPlatforms(renderer, pos[0], pos[1], pos[2], PLATFORM_ASSET[curr_level]);
+	}
 
 	// stairs for the first level
-  if (curr_level == 0) {
-    std::vector<Entity> step0 = createSteps(renderer, { PLATFORM_WIDTH * 12 - 20.f, window_height_px * 0.8 }, 5, 3, false);
-	  std::vector<Entity> step1 = createSteps(renderer, { window_width_px - PLATFORM_WIDTH * 6 - STEP_WIDTH * 6, window_height_px * 0.8 + PLATFORM_HEIGHT * 4 }, 5, 2, true);
-  }
+	if (curr_level == 0) {
+		std::vector<Entity> step0 = createSteps(renderer, { PLATFORM_WIDTH * 12 - 20.f, window_height_px * 0.8 }, 5, 3, false);
+		std::vector<Entity> step1 = createSteps(renderer, { window_width_px - PLATFORM_WIDTH * 6 - STEP_WIDTH * 6, window_height_px * 0.8 + PLATFORM_HEIGHT * 4 }, 5, 2, true);
+	}
 
-  // Create walls
-  for (vec3 pos : WALL_POSITIONS[curr_level]) {
-    createWall(renderer, pos[0], pos[1], pos[2]);
-  }
-  
-  // Create climbables
-  for (vec3 pos : CLIMBABLE_POSITIONS[curr_level]) {
-    createClimbable(renderer, pos[0], pos[1], pos[2], CLIMBABLE_ASSET[curr_level]);
-  }
+	// Create walls
+	for (vec3 pos : WALL_POSITIONS[curr_level]) {
+		createWall(renderer, pos[0], pos[1], pos[2]);
+	}
+
+	// Create climbables
+	for (vec3 pos : CLIMBABLE_POSITIONS[curr_level]) {
+		createClimbable(renderer, pos[0], pos[1], pos[2], CLIMBABLE_ASSET[curr_level]);
+	}
 
 	ladder_positions = ZOMBIE_CLIMB_POINTS[curr_level];
 
 	// Create spikes
-  for (vec2 pos : SPIKE_POSITIONS[curr_level]) {
-    Entity spike = createSpike(renderer, pos);
-    registry.colors.insert(spike, { 0.5f, 0.5f, 0.5f });
-  }
+	for (vec2 pos : SPIKE_POSITIONS[curr_level]) {
+		Entity spike = createSpike(renderer, pos);
+		registry.colors.insert(spike, { 0.5f, 0.5f, 0.5f });
+	}
 
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, BOZO_STARTING_POS[curr_level]);
@@ -1042,21 +1043,21 @@ void WorldSystem::restart_game()
 	}
 
 	// Place collectibles
-  std::vector<vec2> collectibles = COLLECTIBLE_POSITIONS[curr_level];
-  std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[curr_level];
-  for (int i = 0; i < collectibles.size(); i++) {
-     createCollectible(renderer, collectibles[i][0], collectibles[i][1], collectible_assets[i], {30, 30}, false);
-  }
+	std::vector<vec2> collectibles = COLLECTIBLE_POSITIONS[curr_level];
+	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[curr_level];
+	for (int i = 0; i < collectibles.size(); i++) {
+		createCollectible(renderer, collectibles[i][0], collectibles[i][1], collectible_assets[i], { 30, 30 }, false);
+	}
 
 
-  // This is specific to the beach level
-  if (curr_level == 1) {
-     createDangerous(renderer, {280, 130}, { 30, 30 });
-     createBackground(renderer, TEXTURE_ASSET_ID::CANNON, {230, 155}, {80, 60});
-  }
+	// This is specific to the beach level
+	if (curr_level == 1) {
+		createDangerous(renderer, { 280, 130 }, { 30, 30 });
+		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, { 230, 155 }, { 80, 60 });
+	}
 
 
-  // Lives can probably stay hardcoded?
+	// Lives can probably stay hardcoded?
 	float heart_pos_x = 1385;
 	float heart_starting_pos_y = 40;
 
@@ -1113,7 +1114,7 @@ void WorldSystem::handle_collisions()
 					}
 				}
 				else if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives == 0)
-				{	
+				{
 					// Kill player if no lives left
 					// Scream, reset timer, and make the player [dying animation]
 					Motion& motion_player = registry.motions.get(entity);
@@ -1238,13 +1239,13 @@ void WorldSystem::handle_collisions()
 		// Player - Collectible collision
 
 		else if (registry.collectible.has(entity) && registry.players.has(entity_other)) {
-			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID) registry.collectible.get(entity).collectible_id;
+			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID)registry.collectible.get(entity).collectible_id;
 			Entity collectible = createCollectible(renderer, collectibles_collected_pos, 50, id, { 60, 60 }, true);
 
 			registry.remove_all_components_of(entity);
 
 			collectibles_collected++;
-			
+
 			collectibles_collected_pos = collectibles_collected_pos + 60;
 		}
 	}
@@ -1303,12 +1304,12 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			debugging.in_full_view_mode = !debugging.in_full_view_mode;
 		}
 
-    if (key == GLFW_KEY_L) {
+		if (key == GLFW_KEY_L) {
 			curr_level++;
-      if (curr_level > max_level) {
-        curr_level = 0;
-      }
-      restart_game();
+			if (curr_level > max_level) {
+				curr_level = 0;
+			}
+			restart_game();
 		}
 	}
 

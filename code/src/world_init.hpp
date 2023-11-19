@@ -65,36 +65,42 @@ Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale);
 // ---------------------BACKGROUNDS-------------------------
 const std::vector<std::vector<TEXTURE_ASSET_ID>> BACKGROUND_ASSET = {
   {TEXTURE_ASSET_ID::BACKGROUND},
-  {TEXTURE_ASSET_ID::BEACH_SKY, TEXTURE_ASSET_ID::BEACH_SEA, TEXTURE_ASSET_ID::BEACH_LAND, TEXTURE_ASSET_ID::BEACH_CLOUD}};
+  {TEXTURE_ASSET_ID::BEACH_SKY, TEXTURE_ASSET_ID::BEACH_SEA, TEXTURE_ASSET_ID::BEACH_LAND, TEXTURE_ASSET_ID::BEACH_CLOUD},
+  {TEXTURE_ASSET_ID::LIBRARY_FILL, TEXTURE_ASSET_ID::LIBRARY_OBJECTS, TEXTURE_ASSET_ID::LIBRARY_FRAME}
+};
 
 
 // ---------------------PLATFORMS-------------------------
 const std::vector<std::vector<vec3>> PLATFORM_POSITIONS = {
   {
-    {window_width_px / 2 - PLATFORM_WIDTH * 7.5, window_height_px - 12.f, 16},
-    {PLATFORM_WIDTH * 4, window_height_px * 0.8, 8},
-    {window_width_px - PLATFORM_WIDTH * 6, window_height_px * 0.8, 2},
-    {110.f, window_height_px * 0.6, 7},
-    {window_width_px - PLATFORM_WIDTH * 7 - 80.f, window_height_px * 0.6, 7},
-    {110.f, window_height_px * 0.4, 7},
-    {window_width_px - PLATFORM_WIDTH * 10 - 80.f, window_height_px * 0.4, 10},
-    {110.f, window_height_px * 0.2, 25}
+	{window_width_px / 2 - PLATFORM_WIDTH * 7.5, window_height_px - 12.f, 16},
+	{PLATFORM_WIDTH * 4, window_height_px * 0.8, 8},
+	{window_width_px - PLATFORM_WIDTH * 6, window_height_px * 0.8, 2},
+	{110.f, window_height_px * 0.6, 7},
+	{window_width_px - PLATFORM_WIDTH * 7 - 80.f, window_height_px * 0.6, 7},
+	{110.f, window_height_px * 0.4, 7},
+	{window_width_px - PLATFORM_WIDTH * 10 - 80.f, window_height_px * 0.4, 10},
+	{110.f, window_height_px * 0.2, 25}
   },
   {
-    {0, window_height_px - 12.f, 30},
-    {window_width_px - 300, window_height_px - 120.f, 10},
-    {0, window_height_px - 200.f, 10},
-    {0, 200.f, 6},
-    {600, window_height_px - 320.f, 8},
-    {200, window_height_px - 485.f, 11},
-    {450, 110, 2},
-    {window_width_px - 500, 110, 11},
-    {window_width_px - 250, window_height_px / 2, 6},
-  }};
+	{0, window_height_px - 12.f, 30},
+	{window_width_px - 300, window_height_px - 120.f, 10},
+	{0, window_height_px - 200.f, 10},
+	{0, 200.f, 6},
+	{600, window_height_px - 320.f, 8},
+	{200, window_height_px - 485.f, 11},
+	{450, 110, 2},
+	{window_width_px - 500, 110, 11},
+	{window_width_px - 250, window_height_px / 2, 6},
+  },
+  {
+
+  } };
 
 const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
   TEXTURE_ASSET_ID::STEP1,
-  TEXTURE_ASSET_ID::BEACH_PLAT
+  TEXTURE_ASSET_ID::BEACH_PLAT,
+  TEXTURE_ASSET_ID::STEP1,
 };
 
 
@@ -106,32 +112,35 @@ const std::vector<std::vector<float>> FLOOR_POSITIONS = {
 		window_height_px * 0.4,
 		window_height_px * 0.2 },
   { window_height_px - 12.f,
-    window_height_px - 200.f,
-    window_height_px - 485.f,
-    110}
+	window_height_px - 200.f,
+	window_height_px - 485.f,
+	110},
+  {},
 };
 
 
 // ---------------------CLIMBABLES-------------------------
 const std::vector<std::vector<vec3>> CLIMBABLE_POSITIONS = {
   {
-    {PLATFORM_WIDTH * 9, window_height_px * 0.795, 5},
-    {PLATFORM_WIDTH * 7, window_height_px * 0.6, 5},
-    {window_width_px - PLATFORM_WIDTH * 6, window_height_px * 0.6, 5},
-    {PLATFORM_WIDTH * 4, window_height_px * 0.2, 10},
-    {window_width_px - PLATFORM_WIDTH * 4, window_height_px * 0.4, 5},
-    {window_width_px - PLATFORM_WIDTH * 9, window_height_px * 0.2, 5}
+	{PLATFORM_WIDTH * 9, window_height_px * 0.795, 5},
+	{PLATFORM_WIDTH * 7, window_height_px * 0.6, 5},
+	{window_width_px - PLATFORM_WIDTH * 6, window_height_px * 0.6, 5},
+	{PLATFORM_WIDTH * 4, window_height_px * 0.2, 10},
+	{window_width_px - PLATFORM_WIDTH * 4, window_height_px * 0.4, 5},
+	{window_width_px - PLATFORM_WIDTH * 9, window_height_px * 0.2, 5}
   },
-  { 
-    {200, window_height_px - 485, 9},
-    {400, window_height_px - 200, 6},
-    {window_width_px - 500, 110, 12}
-  }
+  {
+	{200, window_height_px - 485, 9},
+	{400, window_height_px - 200, 6},
+	{window_width_px - 500, 110, 12}
+  },
+  {},
 };
 
 const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
   TEXTURE_ASSET_ID::LADDER2,
-  TEXTURE_ASSET_ID::BEACH_LADDER
+  TEXTURE_ASSET_ID::BEACH_LADDER,
+  TEXTURE_ASSET_ID::LADDER2,
 };
 
 const std::vector<std::vector<std::vector<float>>> ZOMBIE_CLIMB_POINTS = {
@@ -139,23 +148,25 @@ const std::vector<std::vector<std::vector<float>>> ZOMBIE_CLIMB_POINTS = {
 		{PLATFORM_WIDTH * 9},
 		{PLATFORM_WIDTH * 7, window_width_px - PLATFORM_WIDTH * 6},
 		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 4},
-		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 9} 
+		{PLATFORM_WIDTH * 4, window_width_px - PLATFORM_WIDTH * 9}
   },
   { {400},
-    {200},
-    {window_width_px - 500}}
+	{200},
+	{window_width_px - 500}},
+  {},
 };
 
 
 // ---------------------WALLS-------------------------
 const std::vector<std::vector<vec3>> WALL_POSITIONS = {
   {{ 320.f, window_height_px * 0.9 + 10.f, window_height_px * 0.2 - 10.f},
-    { window_width_px - 320.f, window_height_px * 0.9 + 10.f , window_height_px * 0.2 - 10.f},
-    {180.f, window_height_px * 0.7 + 15.f , window_height_px * 0.2},
-    {window_width_px - 220.f, window_height_px * 0.7 + 15.f , window_height_px * 0.2},
-    {80.f, window_height_px * 0.4 - 20.f , window_height_px * 0.4 + 70.f},
-    {window_width_px - 100.f, window_height_px * 0.4 - 20 , window_height_px * 0.4 + 70.f}
+	{ window_width_px - 320.f, window_height_px * 0.9 + 10.f , window_height_px * 0.2 - 10.f},
+	{180.f, window_height_px * 0.7 + 15.f , window_height_px * 0.2},
+	{window_width_px - 220.f, window_height_px * 0.7 + 15.f , window_height_px * 0.2},
+	{80.f, window_height_px * 0.4 - 20.f , window_height_px * 0.4 + 70.f},
+	{window_width_px - 100.f, window_height_px * 0.4 - 20 , window_height_px * 0.4 + 70.f}
   },
+  {},
   {}
 };
 
@@ -163,64 +174,67 @@ const std::vector<std::vector<vec3>> WALL_POSITIONS = {
 // ---------------------SPIKES-------------------------
 const std::vector<std::vector<vec2>> SPIKE_POSITIONS = {
   {
-    { 260.f, 625.f },
-    { 50.f , window_height_px - 5.f },
-    { 150.f , window_height_px - 5.f },
-    { window_width_px - 50.f , window_height_px - 5.f },
-    { window_width_px - 150.f , window_height_px - 5.f }
+	{ 260.f, 625.f },
+	{ 50.f , window_height_px - 5.f },
+	{ 150.f , window_height_px - 5.f },
+	{ window_width_px - 50.f , window_height_px - 5.f },
+	{ window_width_px - 150.f , window_height_px - 5.f }
   },
+  {},
   {}
 };
 
 
 // ---------------------ZOMBIES-------------------------
-const std::vector<std::vector<vec2>> ZOMBIE_START_POS = { 
-  { { 1200, 600 }, {300, 440}, {200, 440} }, 
-  {} };
-const std::vector<std::vector<vec2>> STUDENT_START_POS = { 
+const std::vector<std::vector<vec2>> ZOMBIE_START_POS = {
+  { { 1200, 600 }, {300, 440}, {200, 440} },
+  {},{} };
+const std::vector<std::vector<vec2>> STUDENT_START_POS = {
   { { 1000, 440 }, { 300, 440 }, { 900, 280 }, {400, window_height_px * 0.4 - 50.f}, {600, window_height_px * 0.2 - 50.f}},
-  {} };
+  {},{} };
 
 
 
 // ---------------------BOZO-------------------------
-const std::vector<vec2> BOZO_STARTING_POS = { 
+const std::vector<vec2> BOZO_STARTING_POS = {
   {500, window_height_px * 0.8 - 50.f },
-  {window_width_px / 2, window_height_px - 50} };
+  {window_width_px / 2, window_height_px - 50},
+  {100,100} };
 
-const std::vector<vec2> ENEMY_SPAWN_POS = { 
+const std::vector<vec2> ENEMY_SPAWN_POS = {
   {  window_width_px - 100.f, 120.f },
-  {} };
+  {},{} };
 
 
 
 // ---------------------COLLECTIBLES-------------------------
 const std::vector<std::vector<vec2>> COLLECTIBLE_POSITIONS = {
   {
-    {1310, 136},
-    {102, 298},
-    {660, 134},
-    {860, 296},
-    {1200, 622},
-    {350, 770}
+	{1310, 136},
+	{102, 298},
+	{660, 134},
+	{860, 296},
+	{1200, 622},
+	{350, 770}
   },
-  {}
+  {},{}
 };
 
 const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
   {
-    TEXTURE_ASSET_ID::BURGER,
-    TEXTURE_ASSET_ID::MUFFIN,
-    TEXTURE_ASSET_ID::SODA,
-    TEXTURE_ASSET_ID::NOODLES,
-    TEXTURE_ASSET_ID::ONIGIRI,
-    TEXTURE_ASSET_ID::PIZZA
+	TEXTURE_ASSET_ID::BURGER,
+	TEXTURE_ASSET_ID::MUFFIN,
+	TEXTURE_ASSET_ID::SODA,
+	TEXTURE_ASSET_ID::NOODLES,
+	TEXTURE_ASSET_ID::ONIGIRI,
+	TEXTURE_ASSET_ID::PIZZA
   },
-  {}
+  {},{}
 };
 
 // ---------------------SOUNDS-------------------------
 const std::vector<std::string> BACKGROUND_MUSIC = {
   "soundtrack.wav",
-  "beach.wav"
+  "beach.wav",
+  "soundtrack.wav"
 };
