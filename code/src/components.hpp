@@ -14,7 +14,7 @@ struct Player
 
 struct PlayerEffects
 {
-	
+
 };
 
 // Zombies can turn Humans into Zombies
@@ -67,7 +67,7 @@ struct Motion
 	vec2 reflect;
 	bool offGround;
 	bool climbing;
-	float speedMultiplier; 
+	float speedMultiplier;
 	Motion(vec2 position = { 0.f, 0.f }, float angle = 0.f, vec2 velocity = { 0.f, 0.f }, vec2 scale = { 10.f, 10.f }, vec2 reflect = { false, false }, bool offGround = true, bool climbing = false, float speedMultiplier = 1.0)
 	{
 		this->position = position;
@@ -269,20 +269,22 @@ enum class TEXTURE_ASSET_ID
 	PIZZA = ONIGIRI + 1,
 	SODA = PIZZA + 1,
 	HEART = SODA + 1,
-  WIN_SCREEN = HEART + 1,
+	WIN_SCREEN = HEART + 1,
 	BASEMENT = WIN_SCREEN + 1,
-  BEACH_PLAT = BASEMENT + 1,
-  BEACH_LADDER = BEACH_PLAT + 1,
-  SPIKE_BALL = BEACH_LADDER + 1,
-  CANNON = SPIKE_BALL + 1,
-  BEACH_SKY = CANNON + 1,
-  BEACH_SEA = BEACH_SKY + 1,
-  BEACH_LAND = BEACH_SEA + 1,
-  BEACH_CLOUD = BEACH_LAND + 1,
-  LIBRARY_FRAME = BEACH_CLOUD + 1,
-  LIBRARY_OBJECTS = LIBRARY_FRAME + 1,
-  LIBRARY_FILL = LIBRARY_OBJECTS + 1,
-	TEXTURE_COUNT = LIBRARY_FILL + 1
+	BEACH_PLAT = BASEMENT + 1,
+	BEACH_LADDER = BEACH_PLAT + 1,
+	SPIKE_BALL = BEACH_LADDER + 1,
+	CANNON = SPIKE_BALL + 1,
+	BEACH_SKY = CANNON + 1,
+	BEACH_SEA = BEACH_SKY + 1,
+	BEACH_LAND = BEACH_SEA + 1,
+	BEACH_CLOUD = BEACH_LAND + 1,
+	LIBRARY_FRAME = BEACH_CLOUD + 1,
+	LIBRARY_OBJECTS = LIBRARY_FRAME + 1,
+	LIBRARY_FILL = LIBRARY_OBJECTS + 1,
+	LIBRARY_PLAT = LIBRARY_FILL + 1,
+	LIBRARY_LAD = LIBRARY_PLAT + 1,
+	TEXTURE_COUNT = LIBRARY_LAD + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

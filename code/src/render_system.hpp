@@ -70,6 +70,8 @@ class RenderSystem {
 	textures_path("library/frame.png"),
 	textures_path("library/objects.png"),
 	textures_path("library/fill.jpg"),
+	textures_path("library/plat.png"),
+	textures_path("library/ladder.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

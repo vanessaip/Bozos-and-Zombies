@@ -184,7 +184,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	enemySpawnTimer += elapsed_ms_since_last_update;
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
-	if (enemySpawnTimer / 1000.f > 25 && !debugging.in_full_view_mode && spawn_on && curr_level != 1) {
+	if (enemySpawnTimer / 1000.f > 25 && !debugging.in_full_view_mode && spawn_on && curr_level == 0) {
 		vec2 enemySpawnPos;
 		vec4 cameraBounds = renderer->getCameraBounds();;
 		do
@@ -200,7 +200,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		createZombie(renderer, enemySpawnPos);
 		enemySpawnTimer = 0.f;
 	}
-	if (npcSpawnTimer / 1000.f > 10 && !debugging.in_full_view_mode && spawn_on && curr_level != 1) {
+	if (npcSpawnTimer / 1000.f > 10 && !debugging.in_full_view_mode && spawn_on && curr_level == 0) {
 		vec2 studentSpawnPos;
 		do
 		{
@@ -993,8 +993,8 @@ void WorldSystem::restart_game()
 	// Render platforms
 	floor_positions = FLOOR_POSITIONS[curr_level];
 
-	for (vec3 pos : PLATFORM_POSITIONS[curr_level]) {
-		createPlatforms(renderer, pos[0], pos[1], pos[2], PLATFORM_ASSET[curr_level]);
+	for (vec4 pos : PLATFORM_POSITIONS[curr_level]) {
+		createPlatforms(renderer, pos[0], pos[1], pos[2], PLATFORM_ASSET[curr_level], pos[3]);
 	}
 
 	// stairs for the first level
@@ -1004,8 +1004,8 @@ void WorldSystem::restart_game()
 	}
 
 	// Create walls
-	for (vec3 pos : WALL_POSITIONS[curr_level]) {
-		createWall(renderer, pos[0], pos[1], pos[2]);
+	for (vec4 pos : WALL_POSITIONS[curr_level]) {
+		createWall(renderer, pos[0], pos[1], pos[2], pos[3]);
 	}
 
 	// Create climbables
