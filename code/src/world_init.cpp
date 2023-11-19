@@ -22,8 +22,8 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 	registry.players.emplace(entity);
 	registry.humans.emplace(entity); // zombies will target all entities with human component
 
-	std::vector<int> spriteCounts = { 4, 6, 6 };
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.05f, 0.1f));
+	std::vector<int> spriteCounts = { 4, 6, 6, 6};
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.05f, 0.08f));
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::BOZO,
@@ -65,7 +65,7 @@ Entity createBozoPointer(RenderSystem* renderer, vec2 pos)
 }
 
 
-Entity createStudent(RenderSystem* renderer, vec2 position)
+Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId)
 {
 	// Reserve en entity
 	auto entity = Entity();
@@ -92,7 +92,7 @@ Entity createStudent(RenderSystem* renderer, vec2 position)
 
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::STUDENT,
+		{ textureId,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE_SHEET });
 
@@ -162,15 +162,15 @@ Entity createPlatform(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID te
 }
 
 // creates a horizontal line of platforms starting at left_position from num_tiles repeated platform sprites
-std::vector<Entity> createPlatforms(RenderSystem* renderer, vec2 left_position, uint num_tiles)
+std::vector<Entity> createPlatforms(RenderSystem* renderer, float left_position_x, float left_position_y, uint num_tiles, TEXTURE_ASSET_ID texture, vec2 scale)
 {
 	// TODO(vanessa): check platform dimensions in bounds
 	std::vector<Entity> platforms;
-	vec2 curr_pos = left_position;
+	vec2 curr_pos = {left_position_x, left_position_y};
 	for (uint i = 0; i < num_tiles; i++) {
-		Entity p = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP1);
+		Entity p = createPlatform(renderer, curr_pos, texture, scale);
 		platforms.push_back(p);
-		curr_pos.x += PLATFORM_WIDTH;
+		curr_pos.x += scale.x;
 	}
 	return platforms;
 }
@@ -207,7 +207,7 @@ std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, uint num_
 }
 
 // Wall has variable height
-Entity createWall(RenderSystem* renderer, vec2 position, float height)
+Entity createWall(RenderSystem* renderer, float position_x, float position_y, float height)
 {
 	auto entity = Entity();
 
@@ -219,7 +219,7 @@ Entity createWall(RenderSystem* renderer, vec2 position, float height)
 	auto& motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.position = position;
+	motion.position = {position_x, position_y};
 
 	// Setting initial values
 	motion.scale = vec2({ WALL_WIDTH, height });
@@ -235,20 +235,10 @@ Entity createWall(RenderSystem* renderer, vec2 position, float height)
 	return entity;
 }
 
-std::vector<Entity> createClimbable(RenderSystem* renderer, vec2 top_position, uint num_sections)
+std::vector<Entity> createClimbable(RenderSystem* renderer, float top_position_x, float top_position_y, uint num_sections, TEXTURE_ASSET_ID texture)
 {
 	std::vector<Entity> sections;
-	TEXTURE_ASSET_ID texture;
 	for (uint i = 0; i < num_sections; i++) {
-		if (i == 0) {
-			texture = TEXTURE_ASSET_ID::LADDER1;
-		}
-		else if (i == num_sections - 1) {
-			texture = TEXTURE_ASSET_ID::LADDER3;
-		}
-		else {
-			texture = TEXTURE_ASSET_ID::LADDER2;
-		}
 
 		auto entity = Entity();
 		sections.push_back(entity);
@@ -261,8 +251,8 @@ std::vector<Entity> createClimbable(RenderSystem* renderer, vec2 top_position, u
 		auto& motion = registry.motions.emplace(entity);
 		motion.angle = 0.f;
 		motion.velocity = { 0.f, 0.f };
-		motion.position = top_position;
-		top_position.y += CLIMBABLE_DIM.y;
+		motion.position = {top_position_x, top_position_y};
+		top_position_y += CLIMBABLE_DIM.y;
 
 		motion.scale = CLIMBABLE_DIM;
 
@@ -376,7 +366,7 @@ Entity createWheel(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createBook(RenderSystem* renderer, vec2 position)
+Entity createBook(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId)
 {
 	// Reserve en entity
 	auto entity = Entity();
@@ -398,7 +388,7 @@ Entity createBook(RenderSystem* renderer, vec2 position)
 	registry.books.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::BOOK,
+		{ textureId,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
@@ -432,7 +422,7 @@ Entity createStaticTexture(RenderSystem* renderer, TEXTURE_ASSET_ID textureID, v
 	return entity;
 }
 
-Entity createFood(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID food, vec2 scale, bool overlay = false)
+Entity createCollectible(RenderSystem* renderer, float position_x, float position_y, TEXTURE_ASSET_ID collectible, vec2 scale, bool overlay = false)
 {
 	// Reserve en entity
 	auto entity = Entity();
@@ -443,19 +433,19 @@ Entity createFood(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID food, 
 
 	// Initialize the position, scale, and physics components
 	auto& motion = registry.motions.emplace(entity);
-	motion.position = position;
+	motion.position = {position_x, position_y};
 	motion.scale = scale;
 
 	if (overlay) {
 		registry.overlay.emplace(entity);
 	}
 	else {
-		registry.food.emplace(entity);
-		registry.food.get(entity).food_id = (int) food;
+		registry.collectible.emplace(entity);
+		registry.collectible.get(entity).collectible_id = (int) collectible;
 	}
 	registry.renderRequests.insert(
 		entity,
-		{ food,
+		{ collectible,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
@@ -481,6 +471,30 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale) {
 	registry.renderRequests.insert(
 		entity,
 		{   TEXTURE_ASSET_ID::HEART,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale) {
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	registry.dangerous.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::SPIKE_BALL,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
