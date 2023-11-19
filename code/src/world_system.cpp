@@ -306,7 +306,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			{
 				motion.velocity.x = 0;
 			}
-			if (motion.position.y < 0.f + BOZO_BB_HEIGHT / 2.f)
+			if (motion.position.y < 0.f + (BOZO_BB_HEIGHT) / 2.f)
 			{
 				motion.position.y = 0.f + BOZO_BB_HEIGHT / 2.f;
 			}
