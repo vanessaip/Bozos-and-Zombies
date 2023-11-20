@@ -45,5 +45,6 @@
     "collectibles": {
         "scale": {"x": 30, "y":30},
         "positions": []
-    }
+    },
+    "bgm": "library.wav"
 }

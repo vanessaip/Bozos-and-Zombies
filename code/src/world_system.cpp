@@ -1006,6 +1006,11 @@ void WorldSystem::restart_game()
 	Json::Value jsonData;
 	file >> jsonData;
 
+	// update BGM
+	background_music = Mix_LoadMUS(audio_path(jsonData["bgm"].asString()).c_str());
+	Mix_PlayMusic(background_music, -1);
+	Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
+
 	// set paltform dimensions
 	PLATFORM_WIDTH = jsonData["platform_scale"]["x"].asFloat();
 	PLATFORM_HEIGHT = jsonData["platform_scale"]["y"].asFloat();
@@ -1377,10 +1382,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 				curr_level = 0;
 			}
 
-			background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[curr_level]).c_str());
-			Mix_PlayMusic(background_music, -1);
-			fprintf(stderr, "Switch music\n");
-			Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
 			restart_game();
 		}
 	}
