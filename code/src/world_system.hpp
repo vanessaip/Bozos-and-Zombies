@@ -78,6 +78,9 @@ private:
 	float collectibles_collected_pos = 50;
 	int collectibles_collected = 0;
 	vec2 platformDimensions{ 0.f, 0.f };
+	Entity loadingScreen;
+	bool loading = false;
+	float gameTimer = 0.f;
 
 	// This is actually 5 lives but 0 indexed.
 	int player_lives = 4;
