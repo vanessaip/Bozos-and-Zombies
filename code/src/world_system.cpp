@@ -280,6 +280,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		bool isHuman = isNPC || isPlayer;
 		bool isZombie = registry.zombies.has(motion_container.entities[i]);
 		bool isBook = registry.books.has(motion_container.entities[i]);
+		bool isWheel = registry.wheels.has(motion_container.entities[i]);
 
 		updateWheelRotation(elapsed_ms_since_last_update);
 
@@ -317,7 +318,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 		}
 		// Bounding entities to window
-		if (isHuman || isZombie || isBook)
+		if (isHuman || isZombie || isBook || isWheel)
 		{
 			float entityRightSide = motion.position.x + abs(motion.scale[0]) / 2.f;
 			float entityLeftSide = motion.position.x - abs(motion.scale[0]) / 2.f;
@@ -326,7 +327,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 			vec4 entityBB = { entityRightSide, entityLeftSide, entityBottom, entityTop };
 
-      // Bounding entities to window
+			if (!isWheel){
+				// Bounding entities to window
 			if (motion.position.x < BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0 || motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f && motion.velocity.x > 0)
 			{
         if (isPlayer) {
@@ -334,19 +336,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
         } else {
           motion.velocity.x = -motion.velocity.x;
         }
+				if (motion.position.y < 0.f + (BOZO_BB_HEIGHT) / 2.f)
+				{
+					motion.position.y = 0.f + BOZO_BB_HEIGHT / 2.f;
+				}
+				else if (motion.position.y > window_height_px - BOZO_BB_HEIGHT / 2.f)
+				{
+					motion.position.y = window_height_px - BOZO_BB_HEIGHT / 2.f;
+					motion.velocity.y = 0.f;
+					motion.offGround = false;
+				}
 			}
-
-			if (motion.position.y < 0.f + (BOZO_BB_HEIGHT) / 2.f)
-			{
-				motion.position.y = 0.f + BOZO_BB_HEIGHT / 2.f;
-			}
-			else if (motion.position.y > window_height_px - BOZO_BB_HEIGHT / 2.f)
-			{
-				motion.position.y = window_height_px - BOZO_BB_HEIGHT / 2.f;
-				motion.velocity.y = 0.f;
-				motion.offGround = false;
-			}
-
 			bool offAll = true;
 
 			std::vector<Entity> blocks;
@@ -407,7 +407,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 					entityTop < yBlockBottom &&
 					entityBottom > yBlockTop && (player.keyPresses[0] || isZombie || isNPC))
 				{
-					if (isNPC) {
+					if (isNPC || isWheel) {
 						if (registry.platforms.has(blocks[i])) {
 							motion.offGround = true;
 							motion.velocity[1] -= 50;
@@ -433,7 +433,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 					entityTop < yBlockBottom &&
 					entityBottom > yBlockTop && (player.keyPresses[1] || isZombie || isNPC))
 				{
-					if (isNPC) {
+					if (isNPC || isWheel) {
 						if (registry.platforms.has(blocks[i])) {
 							motion.offGround = true;
 							motion.velocity[1] -= 50;
@@ -464,7 +464,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				motion.offGround = offAll;
 			}
 
-			if (isNPC && offAll && !registry.infectTimers.has(motion_container.entities[i])) {
+			if ((isWheel || isNPC) && offAll && !registry.infectTimers.has(motion_container.entities[i])) {
 				if (motion.velocity.x > 0) {
 					motion.position.x -= 10.f;
 				}
@@ -486,7 +486,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
       }
 		}
 
-		if (isNPC)
+		if (isNPC || isWheel)
 		{
 			if (motion.velocity.x < 0)
 			{
@@ -501,8 +501,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		{
 			if (motion.position.x + abs(motion.scale.x) < 0.f)
 			{
-				if (isNPC) // don't remove the player
-					removeEntity(motion_container.entities[i]);
+				if (isNPC || isWheel) // don't remove the player
+					registry.remove_all_components_of(motion_container.entities[i]);
 			}
 		}
 
@@ -1040,10 +1040,10 @@ void WorldSystem::updateWheelRotation(float elapsed_ms_since_last_update)
 	{
 		Motion& wheelMotion = registry.motions.get(wheel);
 		const float rotationSpeed = 0.001f;
-		if (wheelMotion.velocity.x < 0)
-			wheelMotion.angle += rotationSpeed * elapsed_ms_since_last_update;
-		else if (wheelMotion.velocity.x > 0)
-			wheelMotion.angle -= rotationSpeed * elapsed_ms_since_last_update;
+		if (wheelMotion.velocity.x > 0)
+			wheelMotion.angle += rotationSpeed*abs(elapsed_ms_since_last_update) ;
+		else if (wheelMotion.velocity.x < 0)
+			wheelMotion.angle -= rotationSpeed*abs(elapsed_ms_since_last_update) ;
 	}
 }
 
@@ -1160,7 +1160,7 @@ void WorldSystem::restart_level()
 	// Create wheels
 	for (const auto& data : jsonData["wheels"]) {
 		Entity wheel = createWheel(renderer, { data["position"][0].asFloat(), data["position"][1].asFloat() });
-		registry.colors.insert(wheel, { data["colour"][0].asFloat(), data["colour"][1].asFloat(), data["colour"][2].asFloat() });
+		// registry.colors.insert(wheel, { data["colour"][0].asFloat(), data["colour"][1].asFloat(), data["colour"][2].asFloat() });
 		Motion& motion1 = registry.motions.get(wheel);
 		motion1.velocity = { data["velocity"][0].asFloat(), data["velocity"][1].asFloat() };
 	}
@@ -1270,7 +1270,7 @@ void WorldSystem::handle_collisions()
 			// Player& player = registry.players.get(entity);
 
 			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
-			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)) || registry.dangerous.has(entity_other))
+			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)) || registry.dangerous.has(entity_other) || registry.wheels.has(entity_other))
 			{
 				// Reduce hearts if player has lives left
 				if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives > 0) {

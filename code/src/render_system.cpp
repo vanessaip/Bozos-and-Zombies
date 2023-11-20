@@ -135,6 +135,19 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::WHEEL)
 	{
+		GLint wheelColor_uloc = glGetUniformLocation(program, "wheelColor");
+		GLint spikeColor_uloc = glGetUniformLocation(program, "spikeColor");
+		gl_has_errors();
+
+		// Define colors for the wheel and spikes
+		vec3 wheelColor = vec3(1.0, 0.0, 0.0); // Red color for the wheel
+		vec3 spikeColor = vec3(1.0, 1.0, 0.0); // Yellow color for the spikes
+
+		// Set the uniform values for the colors
+		glUniform3fv(wheelColor_uloc, 1, (float*)&wheelColor);
+		glUniform3fv(spikeColor_uloc, 1, (float*)&spikeColor);
+		gl_has_errors();
+	
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_color_loc = glGetAttribLocation(program, "in_color");
 		gl_has_errors();
