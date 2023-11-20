@@ -686,12 +686,13 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 
 	int bozo_level = checkLevel(bozo_motion);
 	int zombie_level = checkLevel(motion);
+  printf("bozo %d zomb %d\n", bozo_level, zombie_level);
 
-	if ((zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1)))
+	if (curr_level == NEST && (zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1)))
 	{
 		// Zombie is on the same level as bozo
 
-		if (bozo_level == 0 && zombie_level == 1 && bozo_motion.position.x < 700)
+		if (curr_level == NEST && bozo_level == 0 && zombie_level == 1 && bozo_motion.position.x < 700)
 		{
 			float target_ladder = getClosestLadder(zombie_level - 1, bozo_motion);
 
@@ -719,7 +720,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 				motion.climbing = false;
 			}
 		}
-		else if (bozo_level == 0 && zombie_level == 0 && bozo_motion.position.x > 700 && motion.position.x < 700)
+		else if (curr_level == NEST && bozo_level == 0 && zombie_level == 0 && bozo_motion.position.x > 700 && motion.position.x < 700)
 		{
 			float target_ladder = getClosestLadder(zombie_level, motion);
 
@@ -774,10 +775,23 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 			*/
 		}
 	}
+  else if (zombie_level == bozo_level) 
+  {
+    motion.climbing = false;
+    float direction = -1;
+    if ((bozo_motion.position.x - motion.position.x) > 0)
+    {
+      direction = 1;
+    }
+    float speed = ZOMBIE_SPEED;
+    motion.velocity.x = direction * speed;
+  }
 	else if (zombie_level < bozo_level)
 	{
 		// Zombie is a level below bozo and needs to climb up
-		if (zombie_level == 0)
+
+    // Hardcoded exception for basement
+		if (curr_level == NEST && zombie_level == 0)
 		{
 			zombie_level++;
 		}
@@ -831,7 +845,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		{
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
-			motion.velocity.y = 2 * ZOMBIE_SPEED;
+			motion.velocity.y = 3 * ZOMBIE_SPEED;
 			motion.climbing = true;
 		}
 		else
@@ -1027,11 +1041,11 @@ void WorldSystem::restart_game()
 		createBackground(renderer, id);
 	}
 
-	if (curr_level == 1)
+	if (curr_level == NEST)
 		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f }); // egg
 
 	// Tutorial sign only for the first level
-	if (curr_level == 0) {
+	if (curr_level == TUTORIAL) {
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_MOVEMENT, { window_width_px - 120.f, window_height_px - 80.f }, "", { 150.f, 70.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_CLIMB, { window_width_px - 480.f, window_height_px - 90.f }, "", { 115.f, 40.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_NPCS, { window_width_px - 800.f, window_height_px - 350.f }, "", { 150.f, 60.f });
@@ -1125,7 +1139,7 @@ void WorldSystem::restart_game()
 	}                                                                                                                                                                                                                                                                                                               
 
 	// This is specific to the beach level
-	if (curr_level == 2) {
+	if (curr_level == BEACH) {
 		createDangerous(renderer, { 280, 130 }, { 30, 30 });
 		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, { 230, 155 }, { 80, 60 });
 	}
@@ -1163,7 +1177,7 @@ void WorldSystem::handle_collisions()
 			// Player& player = registry.players.get(entity);
 
 			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
-			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)))
+			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)) || registry.dangerous.has(entity_other))
 			{
 				// Reduce hearts if player has lives left
 				if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives > 0) {

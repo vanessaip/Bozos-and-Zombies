@@ -60,6 +60,13 @@ Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale);
 
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
+
+enum level {
+  TUTORIAL = 0,
+  NEST = 1,
+  BEACH = 2,
+  LIBRARY = 3
+};
 const std::vector<std::string> LEVEL_DESCRIPTORS = {
   level_path("0_tutorial.json"),
   level_path("1_nest.json"),
@@ -110,7 +117,14 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::ONIGIRI,
 		TEXTURE_ASSET_ID::PIZZA
 	},
-	{},
+	{
+    TEXTURE_ASSET_ID::BEACH_APPLE,
+		TEXTURE_ASSET_ID::BEACH_CHEST,
+		TEXTURE_ASSET_ID::BEACH_CHEST2,
+		TEXTURE_ASSET_ID::BEACH_DIAMOND,
+		TEXTURE_ASSET_ID::BEACH_STAR,
+		TEXTURE_ASSET_ID::BEACH_COIN
+  },
 	{}
 };
 
