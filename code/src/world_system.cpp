@@ -875,7 +875,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		{
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
-			motion.velocity.y = -2 * ZOMBIE_SPEED;
+			motion.velocity.y = -1.2 * ZOMBIE_SPEED;
 			motion.climbing = true;
 		}
 		else
@@ -905,7 +905,8 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		{
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
-			motion.velocity.y = 3 * ZOMBIE_SPEED;
+      motion.position.y += 15;
+			motion.velocity.y = 2 *ZOMBIE_SPEED;
 			motion.climbing = true;
 		}
 		else
