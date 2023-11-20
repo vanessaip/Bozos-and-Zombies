@@ -97,7 +97,11 @@
       "sections": 11
     }
   ],
-  "zombie_climb_points": [],
+  "zombie_climb_points": [
+    [ 300, 335 ],
+    [ 600, 500 ],
+    [ 1100, 200 ]
+  ],
   "spikes": [],
   "wheels": [
     {
@@ -119,13 +123,35 @@
   },
   "zombies": {
     "num_starting": 0,
-    "positions": [],
+    "positions": [
+      {
+        "x": 1200,
+        "y": 600
+      },
+      {
+        "x": 300,
+        "y": 440
+      },
+      {
+        "x": 200,
+        "y": 440
+      }
+    ],
     "spawn_timer": null
   },
   "students": {
-    "num_starting": 0,
-    "positions": [],
-    "spawn_timer": null
+    "num_starting": 2,
+    "positions": [
+      {
+        "x": 300,
+        "y": 300
+      },
+      {
+        "x": 1100,
+        "y": 500
+      }
+    ],
+    "spawn_timer": 10
   },
   "collectibles": {
     "scale": {
