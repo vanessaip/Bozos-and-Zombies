@@ -32,11 +32,13 @@ public:
 	ComponentContainer<Background> backgrounds;
 	ComponentContainer<Wall> walls;
 	ComponentContainer<Spike> spikes;
+	ComponentContainer<Wheel> wheels;
 	ComponentContainer<Climbable> climbables;
 	ComponentContainer<Book> books;
 	ComponentContainer<TextBox> textboxes;
-	ComponentContainer<Food> food;
+	ComponentContainer<Collectible> collectible;
 	ComponentContainer<Overlay> overlay;
+  ComponentContainer<Dangerous> dangerous;
 	ComponentContainer<Label> labels;
 
 	// constructor that adds all containers for looping over them
@@ -63,11 +65,13 @@ public:
 		registry_list.push_back(&backgrounds);
 		registry_list.push_back(&walls);
 		registry_list.push_back(&spikes);
+		registry_list.push_back(&wheels);
 		registry_list.push_back(&climbables);
 		registry_list.push_back(&books);
-		registry_list.push_back(&food);
+		registry_list.push_back(&collectible);
 		registry_list.push_back(&overlay);
 		registry_list.push_back(&lostLifeTimer);
+    registry_list.push_back(&dangerous);
 		registry_list.push_back(&labels);
 	}
 
