@@ -106,7 +106,7 @@ std::vector<glm::vec2> getTransformedVertices(const Mesh *mesh, const Motion &mo
 	return transformedVertices;
 }
 
-void resolve_collision(Entity entity1, Entity entity2)
+void resolve_bounce_collision(Entity entity1, Entity entity2)
 {
 	Motion &motion1 = registry.motions.get(entity1);
 	Motion &motion2 = registry.motions.get(entity2);
@@ -118,7 +118,7 @@ void resolve_collision(Entity entity1, Entity entity2)
 	if (normalVelocity > 0)
 		return;
 
-	float impact = -(1 + 0.5) * normalVelocity / (2 / mass); // 0.5 because I wanted a realistic collision
+	float impact = -(2) * normalVelocity / (2 / mass); // 0.5 because I wanted a realistic collision
 	vec2 impulse = impact * collisionNormal / mass;
 	motion1.velocity -= impulse;
 	motion2.velocity += impulse;
@@ -206,33 +206,50 @@ void PhysicsSystem::step(float elapsed_ms)
 			else if (motion.velocity.x < 0)
 				motion.reflect.x = true;
 		}
-		if ((registry.humans.has(entity) || registry.zombies.has(entity) || registry.books.has(entity)) && motion.offGround)
+		if ((registry.humans.has(entity) || registry.zombies.has(entity) || registry.books.has(entity) || registry.wheels.has(entity)) && motion.offGround)
 		{
 			motion.velocity[1] += PhysicsSystem::GRAVITY;
 		}
 
     // Step the spikeballs as per Bezier curves
+    // Bezier curve equations from https://en.wikipedia.org/wiki/B%C3%A9zier_curve
     if (registry.dangerous.has(entity)) {
-      vec2 p0 = {280, 130};
-      vec2 p1 = {500, 10};
-      vec2 p2 = {650, 250};
 
-      if (bezier_time < 2000) {
-        bezier_time += 10;
+      Dangerous& dangerous = registry.dangerous.get(entity);
 
-        float t = bezier_time / 1000;
+      vec2 p0 = dangerous.p0;
+      vec2 p1 = dangerous.p1;
+      vec2 p2 = dangerous.p2;
+      vec2 p3 = dangerous.p3;
+
+      if (dangerous.bezier_time < 2000) {
+
+        float t = dangerous.bezier_time / 1000;
 
         vec2 L0 = (1 - t) * p0 + t * p1;
         vec2 L1 = (1 - t) * p1 + t * p2;
 
         vec2 Q0 = (1 - t) * L0 + t * L1; 
+        
+        if (!dangerous.cubic) {
+          motion.position = Q0;
+          dangerous.bezier_time += 10;
+        } else {
+          vec2 L2 = (1 - t) * p2 + t * p3;
 
-        motion.position = Q0;
-      } else if (bezier_time > 4000) {
-        bezier_time = 0;
+          vec2 Q1 = (1 - t) * L1 + t * L2;
+
+          vec2 C0 = (1 - t) * Q0 + t * Q1;
+
+          motion.position = C0;
+          dangerous.bezier_time += 4;
+        }
+
+      } else if (dangerous.bezier_time > 4000) {
+        dangerous.bezier_time = 0;
         motion.position = p0;
       } else {
-        bezier_time += 10;
+        dangerous.bezier_time += 10;
       }
     }
 
@@ -272,7 +289,7 @@ void PhysicsSystem::step(float elapsed_ms)
 
 				if (checkSATIntersection(transformedVertices1, transformedVertices2))
 				{
-					resolve_collision(entity_i, entity_j);
+					resolve_bounce_collision(entity_i, entity_j);
 				}
 			}
 			else

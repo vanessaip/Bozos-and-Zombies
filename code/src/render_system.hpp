@@ -100,12 +100,19 @@ class RenderSystem {
 		textures_path("locations/label_beach.png"),
 		textures_path("locations/label_library.png"),
 		textures_path("locations/label_tutorial.png"),
-	    textures_path("beach/beach-apple.png"),
-	    textures_path("beach/beach-chest.png"),
-	    textures_path("beach/beach-chest2.png"),
-	    textures_path("beach/beach-diamond.png"),
-	    textures_path("beach/beach-star.png"),
-	    textures_path("beach/beach-coin_01.png")
+    textures_path("beach/beach-apple.png"),
+    textures_path("beach/beach-chest.png"),
+    textures_path("beach/beach-chest2.png"),
+    textures_path("beach/beach-diamond.png"),
+    textures_path("beach/beach-star.png"),
+    textures_path("beach/beach-coin_01.png"),
+    textures_path("door.png"),
+    textures_path("beach/beach-bird.png"),
+	textures_path("library/coll1.png"),
+	textures_path("library/coll2.png"),
+	textures_path("library/coll3.png"),
+	textures_path("library/coll4.png"),
+	textures_path("library/coll5.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -173,12 +180,15 @@ public:
 
 	void resetSpriteSheetTracker();
 
+	static void deleteBufferId(int index);
+
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
 	void updateCameraBounds(float elapsed_time_ms);
 	vec4 clampCam(float left, float top);
+	int findFirstAvailableBufferSlot();
 
 	// Window handle
 	GLFWwindow* window;
