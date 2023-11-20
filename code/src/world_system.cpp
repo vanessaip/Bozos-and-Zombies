@@ -186,7 +186,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
 
-	if (zombie_spawn_on && enemySpawnTimer / 1000.f > zombie_spawn_threshold) {
+	if (zombie_spawn_on && enemySpawnTimer / 1000.f > zombie_spawn_threshold && spawn_on) {
 		vec2 enemySpawnPos;
 		for (int i = 0; i < zombie_spawn_pos.size(); i++)  // try a few times
 		{
@@ -213,7 +213,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 
-	if (student_spawn_on && npcSpawnTimer / 1000.f > student_spawn_threshold && curr_level != 0) {
+	if (student_spawn_on && npcSpawnTimer / 1000.f > student_spawn_threshold && spawn_on) {
 		vec2 npcSpawnPos;
 		for (int i = 0; i < npc_spawn_pos.size(); i++)  // try a few times
 		{
@@ -1070,9 +1070,9 @@ void WorldSystem::restart_game()
 	}
 
 	// Create spikes
-	for (const auto& pos : jsonData["spikes"]) {
-		Entity spike = createSpike(renderer, {pos["x"].asFloat(), pos["y"].asFloat()});
-		registry.colors.insert(spike, { 0.5f, 0.5f, 0.5f });
+	for (const auto& spikeData : jsonData["spikes"]) {
+		Entity spike = createSpike(renderer, {spikeData["x"].asFloat(), spikeData["y"].asFloat()});
+		registry.colors.insert(spike, { spikeData["colour"][0].asFloat(), spikeData["colour"][1].asFloat(), spikeData["colour"][2].asFloat() });
 	}
 
 	// Create wheels
