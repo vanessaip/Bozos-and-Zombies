@@ -9,6 +9,9 @@
 #include <iostream>
 #include <string.h>
 #include <fstream>
+#include <chrono>
+
+using Clock = std::chrono::high_resolution_clock;
 
 #include "physics_system.hpp"
 
@@ -278,7 +281,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		bool isBook = registry.books.has(motion_container.entities[i]);
 
 		updateWheelRotation(elapsed_ms_since_last_update);
-		
+
 		if (isPlayer && !registry.deathTimers.has(motion_container.entities[i]))
 		{
 			motion.velocity[0] = 0;
@@ -606,9 +609,29 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			return true;
 		}
 	}
-
 	// reduce window brightness if any of the present salmons is dying
 	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
+
+
+
+	for (Entity entity : registry.labels.entities)
+	{
+		// progress timer, make the rotation happening based on time
+		// Set fading factor 
+		Label& label = registry.labels.get(entity);
+		auto now = Clock::now();
+
+		float elapsed_ms =
+			(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - label.fading_timer)).count() / 1000;
+
+		if (elapsed_ms > 3000.f)
+		{
+			registry.remove_all_components_of(entity);
+			break;
+		}
+		label.fading_factor = cos(0.0005 * elapsed_ms);
+	}
+
 
 	// update keyframe animated entity motions
 	for (Entity entity : registry.keyframeAnimations.entities)
@@ -700,12 +723,13 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 
 	int bozo_level = checkLevel(bozo_motion);
 	int zombie_level = checkLevel(motion);
+  printf("bozo %d zomb %d\n", bozo_level, zombie_level);
 
-	if ((zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1)))
+	if (curr_level == NEST && (zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1)))
 	{
 		// Zombie is on the same level as bozo
 
-		if (bozo_level == 0 && zombie_level == 1 && bozo_motion.position.x < 700)
+		if (curr_level == NEST && bozo_level == 0 && zombie_level == 1 && bozo_motion.position.x < 700)
 		{
 			float target_ladder = getClosestLadder(zombie_level - 1, bozo_motion);
 
@@ -733,7 +757,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 				motion.climbing = false;
 			}
 		}
-		else if (bozo_level == 0 && zombie_level == 0 && bozo_motion.position.x > 700 && motion.position.x < 700)
+		else if (curr_level == NEST && bozo_level == 0 && zombie_level == 0 && bozo_motion.position.x > 700 && motion.position.x < 700)
 		{
 			float target_ladder = getClosestLadder(zombie_level, motion);
 
@@ -788,10 +812,23 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 			*/
 		}
 	}
+  else if (zombie_level == bozo_level) 
+  {
+    motion.climbing = false;
+    float direction = -1;
+    if ((bozo_motion.position.x - motion.position.x) > 0)
+    {
+      direction = 1;
+    }
+    float speed = ZOMBIE_SPEED;
+    motion.velocity.x = direction * speed;
+  }
 	else if (zombie_level < bozo_level)
 	{
 		// Zombie is a level below bozo and needs to climb up
-		if (zombie_level == 0)
+
+    // Hardcoded exception for basement
+		if (curr_level == NEST && zombie_level == 0)
 		{
 			zombie_level++;
 		}
@@ -845,7 +882,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		{
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
-			motion.velocity.y = 2 * ZOMBIE_SPEED;
+			motion.velocity.y = 3 * ZOMBIE_SPEED;
 			motion.climbing = true;
 		}
 		else
@@ -978,15 +1015,15 @@ bool WorldSystem::isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& mot
 
 void WorldSystem::updateWheelRotation(float elapsed_ms_since_last_update)
 {
-    for (Entity wheel : registry.wheels.entities)
-    {
-        Motion& wheelMotion = registry.motions.get(wheel);
-        const float rotationSpeed = 0.001f; 
-        if (wheelMotion.velocity.x < 0)
-            wheelMotion.angle += rotationSpeed * elapsed_ms_since_last_update;
-        else if (wheelMotion.velocity.x > 0)
-            wheelMotion.angle -= rotationSpeed * elapsed_ms_since_last_update;
-    }
+	for (Entity wheel : registry.wheels.entities)
+	{
+		Motion& wheelMotion = registry.motions.get(wheel);
+		const float rotationSpeed = 0.001f;
+		if (wheelMotion.velocity.x < 0)
+			wheelMotion.angle += rotationSpeed * elapsed_ms_since_last_update;
+		else if (wheelMotion.velocity.x > 0)
+			wheelMotion.angle -= rotationSpeed * elapsed_ms_since_last_update;
+	}
 }
 
 // Reset the world state to its initial state
@@ -1028,7 +1065,7 @@ void WorldSystem::restart_level()
 	PLATFORM_HEIGHT = jsonData["platform_scale"]["y"].asFloat();
 
 	const Json::Value& playerData = jsonData["player"];
-	bozo_start_pos = {playerData["position"]["x"].asFloat(), playerData["position"]["y"].asFloat()};
+	bozo_start_pos = { playerData["position"]["x"].asFloat(), playerData["position"]["y"].asFloat() };
 
 	// reset camera on restart
 	renderer->resetCamera(bozo_start_pos);
@@ -1039,11 +1076,11 @@ void WorldSystem::restart_level()
 		createBackground(renderer, id);
 	}
 
-	if (curr_level == 1)
+	if (curr_level == NEST)
 		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f }); // egg
 
 	// Tutorial sign only for the first level
-	if (curr_level == 0) {
+	if (curr_level == TUTORIAL) {
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_MOVEMENT, { window_width_px - 120.f, window_height_px - 80.f }, "", { 150.f, 70.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_CLIMB, { window_width_px - 480.f, window_height_px - 90.f }, "", { 115.f, 40.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_NPCS, { window_width_px - 800.f, window_height_px - 350.f }, "", { 150.f, 60.f });
@@ -1058,12 +1095,12 @@ void WorldSystem::restart_level()
 	}
 
 	for (const auto& platform_data : jsonData["platforms"]) {
-		createPlatforms(renderer, platform_data["x"].asFloat(), platform_data["y"].asFloat(), platform_data["num_tiles"].asInt(), PLATFORM_ASSET[curr_level], platform_data["visible"].asBool(), {PLATFORM_WIDTH, PLATFORM_HEIGHT});
+		createPlatforms(renderer, platform_data["x"].asFloat(), platform_data["y"].asFloat(), platform_data["num_tiles"].asInt(), PLATFORM_ASSET[curr_level], platform_data["visible"].asBool(), { PLATFORM_WIDTH, PLATFORM_HEIGHT });
 	}
 
 	// Create stairs
 	for (const auto& steps_data : jsonData["stairs"]) {
-		createSteps(renderer, {steps_data["x"].asFloat(), steps_data["y"].asFloat()}, {steps_data["scale_x"].asFloat(), steps_data["scale_y"].asFloat()}, steps_data["num_steps"].asInt(), steps_data["step_blocks"].asInt(), steps_data["left"].asBool());
+		createSteps(renderer, { steps_data["x"].asFloat(), steps_data["y"].asFloat() }, { steps_data["scale_x"].asFloat(), steps_data["scale_y"].asFloat() }, steps_data["num_steps"].asInt(), steps_data["step_blocks"].asInt(), steps_data["left"].asBool());
 	}
 
 	// Create walls
@@ -1079,7 +1116,7 @@ void WorldSystem::restart_level()
 	ladder_positions.clear();
 	for (const auto levelPoints : jsonData["zombie_climb_points"]) {
 		std::vector<float> level_climb_points;
-		for (const auto point: levelPoints) {
+		for (const auto point : levelPoints) {
 			level_climb_points.push_back(point.asFloat());
 		}
 		ladder_positions.push_back(level_climb_points);
@@ -1093,10 +1130,10 @@ void WorldSystem::restart_level()
 
 	// Create wheels
 	for (const auto& data : jsonData["wheels"]) {
-		Entity wheel = createWheel(renderer, {data["position"][0].asFloat(), data["position"][1].asFloat()}); 
-		registry.colors.insert(wheel, {data["colour"][0].asFloat(), data["colour"][1].asFloat(), data["colour"][2].asFloat()});
-   		Motion& motion1 = registry.motions.get(wheel);
-    	motion1.velocity = {data["velocity"][0].asFloat(), data["velocity"][1].asFloat()}; 
+		Entity wheel = createWheel(renderer, { data["position"][0].asFloat(), data["position"][1].asFloat() });
+		registry.colors.insert(wheel, { data["colour"][0].asFloat(), data["colour"][1].asFloat(), data["colour"][2].asFloat() });
+		Motion& motion1 = registry.motions.get(wheel);
+		motion1.velocity = { data["velocity"][0].asFloat(), data["velocity"][1].asFloat() };
 	}
 
 	// Create a new Bozo player
@@ -1159,10 +1196,10 @@ void WorldSystem::restart_level()
 	assert(num_collectibles == collectible_assets.size());
 	for (uint i = 0; i < num_collectibles; i++) {
 		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false);
-	}                                                                                                                                                                                                                                                                                                               
+	}
 
 	// This is specific to the beach level
-	if (curr_level == 2) {
+	if (curr_level == BEACH) {
 		createDangerous(renderer, { 280, 130 }, { 30, 30 });
 		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, { 230, 155 }, { 80, 60 });
 	}
@@ -1177,6 +1214,9 @@ void WorldSystem::restart_level()
 	Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
 
 	player_hearts = { heart0, heart1, heart2, heart3, heart4 };
+
+	// Create label
+	Entity label = createLabel(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[curr_level]);
 
 	setup_keyframes(renderer);
 
@@ -1200,7 +1240,7 @@ void WorldSystem::handle_collisions()
 			// Player& player = registry.players.get(entity);
 
 			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
-			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)))
+			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)) || registry.dangerous.has(entity_other))
 			{
 				// Reduce hearts if player has lives left
 				if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives > 0) {
