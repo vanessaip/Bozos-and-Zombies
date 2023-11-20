@@ -1041,8 +1041,6 @@ void WorldSystem::restart_level()
 	player_lives = 4;
 	collectibles_collected = 0;
 
-	// Reset sprite sheet buffer index
-
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
@@ -1072,12 +1070,13 @@ void WorldSystem::restart_level()
 	renderer->resetSpriteSheetTracker();
 
 	// Create background first (painter's algorithm for rendering)
-	for (TEXTURE_ASSET_ID id : BACKGROUND_ASSET[curr_level]) {
-		createBackground(renderer, id);
+
+	for (std::tuple<TEXTURE_ASSET_ID, float> background : BACKGROUND_ASSET[curr_level]) {
+		createBackground(renderer, std::get<0>(background), std::get<1>(background));
 	}
 
 	if (curr_level == NEST)
-		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f }); // egg
+		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, 0.f, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f }); // egg
 
 	// Tutorial sign only for the first level
 	if (curr_level == TUTORIAL) {
@@ -1201,7 +1200,7 @@ void WorldSystem::restart_level()
 	// This is specific to the beach level
 	if (curr_level == BEACH) {
 		createDangerous(renderer, { 280, 130 }, { 30, 30 });
-		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, { 230, 155 }, { 80, 60 });
+		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, { 230, 155 }, { 80, 60 });
 	}
 	// Lives can probably stay hardcoded?
 	float heart_pos_x = 1385;
@@ -1546,8 +1545,6 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 		// printf("Radians: %f\n", radians);
 		motion.angle = radians;
 	}
-
-	(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
 vec2 WorldSystem::relativePos(vec2 mouse_position) {
