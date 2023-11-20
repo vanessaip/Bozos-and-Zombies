@@ -146,24 +146,41 @@ GLFWwindow* WorldSystem::create_window()
 void WorldSystem::init(RenderSystem* renderer_arg)
 {
 	this->renderer = renderer_arg;
-	// Playing background music indefinitely
-	Mix_PlayMusic(background_music, -1);
-	fprintf(stderr, "Loaded music\n");
-	Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
 
-	// Set all states to default
-	restart_game();
+	Json::Value save_state;
+	std::ifstream file(level_path("save_state.json"));
+	file >> save_state;
+	curr_level = save_state["current_level"].asInt();
+	// Set all states to default for current level
+	restart_level();
 }
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
-	if (registry.zombies.entities.size() < 1 && collectibles_collected >= num_collectibles && this->game_over == false) {
-		// restart_game(); // level is over
+	if (registry.zombies.entities.size() < 1 && (num_collectibles > 0 && collectibles_collected >= num_collectibles) && this->game_over == false) {
 		createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
 		this->game_over = true;
 		debugging.in_full_view_mode = true;
 		printf("You win!\n");
+		
+		// press a key to transition to next level?
+		// option to retry level? (display current and high scores?)
+
+		// save level                                                                                                                                                                                                                     
+		Json::Value save;
+		save["current_level"] = curr_level + 1 > max_level ? 0 : curr_level + 1;
+		Json::StreamWriterBuilder writer;
+		std::string jsonString = Json::writeString(writer, save);
+	
+		std::ofstream outputFile(level_path("save_state.json"));
+		if (outputFile.is_open()) {
+			outputFile << jsonString;
+			outputFile.close();
+			printf("data written to save_state.json\n");
+		} else {
+			printf("ERROR: unable to open save_state.json for writing\n");
+		}
 	}
 
 	// Updating window title with points
@@ -549,7 +566,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		{
 			registry.deathTimers.remove(entity);
 			screen.screen_darken_factor = 0;
-			restart_game();
+			restart_level();
 			return true;
 		}
 	}
@@ -973,7 +990,7 @@ void WorldSystem::updateWheelRotation(float elapsed_ms_since_last_update)
 }
 
 // Reset the world state to its initial state
-void WorldSystem::restart_game()
+void WorldSystem::restart_level()
 {
 	this->game_over = false;
 	// Debugging for memory/component leaks
@@ -981,7 +998,6 @@ void WorldSystem::restart_game()
 	printf("Restarting\n");
 
 	// Reset the game state variables
-	current_speed = 1.f;
 	enemySpawnTimer = 0.f;
 	npcSpawnTimer = 0.f;
 	collectibles_collected_pos = 50.f;
@@ -1403,7 +1419,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 				curr_level = 0;
 			}
 
-			restart_game();
+			restart_level();
 		}
 	}
 
@@ -1461,7 +1477,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
 
-		restart_game();
+		restart_level();
 	}
 
 	// Debugging
@@ -1472,19 +1488,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		else
 			debugging.in_full_view_mode = true;
 	}
-
-	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA)
-	{
-		current_speed -= 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
-	{
-		current_speed += 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	current_speed = fmax(0.f, current_speed);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position)

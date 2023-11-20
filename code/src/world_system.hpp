@@ -62,7 +62,7 @@ private:
 	void updateWheelRotation(float elapsed_ms_since_last_update);
 
 	// restart level
-	void restart_game();
+	void restart_level();
 
 	// OpenGL window handle
 	GLFWwindow* window;
@@ -72,7 +72,6 @@ private:
 
 	// Game state
 	RenderSystem* renderer;
-	float current_speed;
 	Entity player_bozo;
 	Entity player_bozo_pointer;
 	float enemySpawnTimer = 0.f;
