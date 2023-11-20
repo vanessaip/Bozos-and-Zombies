@@ -158,7 +158,7 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
-	if (registry.zombies.entities.size() < 1 && collectibles_collected > 5 && this->game_over == false) {
+	if (registry.zombies.entities.size() < 1 && collectibles_collected >= num_collectibles && this->game_over == false) {
 		// restart_game(); // level is over
 		createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
 		this->game_over = true;
@@ -1136,11 +1136,12 @@ void WorldSystem::restart_game()
 	}
 
 	// Place collectibles
-	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[curr_level];
 	const Json::Value& collectiblesPositions = jsonData["collectibles"]["positions"];
+	num_collectibles = collectiblesPositions.size(); // set number of collectibles
 	vec2 collectible_scale = {jsonData["collectibles"]["scale"]["x"].asFloat(), jsonData["collectibles"]["scale"]["y"].asFloat()};
-	assert(collectiblesPositions.size() == collectible_assets.size());
-	for (uint i = 0; i < collectiblesPositions.size(); i++) {
+	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[curr_level];
+	assert(num_collectibles == collectible_assets.size());
+	for (uint i = 0; i < num_collectibles; i++) {
 		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false);
 	}                                                                                                                                                                                                                                                                                                               
 

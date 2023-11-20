@@ -99,10 +99,11 @@ private:
 	std::vector<std::vector<float>> ladder_positions;
 	float PLATFORM_WIDTH;
 	float PLATFORM_HEIGHT;
-	bool zombie_spawn_on; // can toggle spawning for debugging here
+	bool zombie_spawn_on;
 	bool student_spawn_on;
 	float zombie_spawn_threshold;
 	float student_spawn_threshold;
+	uint num_collectibles;
 
 	// music references
 	Mix_Music* background_music;
