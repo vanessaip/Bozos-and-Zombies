@@ -8,6 +8,10 @@
 #include <tuple>
 #include <iostream>
 #include <string.h>
+#include <fstream>
+
+// level loading
+#include<json/json.h>
 
 #include "physics_system.hpp"
 
@@ -187,10 +191,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	if (enemySpawnTimer / 1000.f > 25 && spawn_on && curr_level != 0) {
 		vec2 enemySpawnPos;
-		for (int i = 0; i < ZOMBIE_START_POS[curr_level].size(); i++)  // try a few times
+		for (int i = 0; i < zombie_spawn_pos.size(); i++)  // try a few times
 		{
-			int spawnIndex = rng() % ZOMBIE_START_POS[curr_level].size();
-			enemySpawnPos = ZOMBIE_START_POS[curr_level][spawnIndex];
+			int spawnIndex = rng() % zombie_spawn_pos.size();
+			enemySpawnPos = zombie_spawn_pos[spawnIndex];
 
 			// only consider spawning off screen when not in full view mode
 			bool spawn = false;
@@ -214,10 +218,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	if (npcSpawnTimer / 1000.f > 10 && spawn_on && curr_level != 0) {
 		vec2 npcSpawnPos;
-		for (int i = 0; i < NPC_START_POS[curr_level].size(); i++)  // try a few times
+		for (int i = 0; i < npc_spawn_pos.size(); i++)  // try a few times
 		{
-			int spawnIndex = rng() % NPC_START_POS[curr_level].size();
-			npcSpawnPos = NPC_START_POS[curr_level][spawnIndex];
+			int spawnIndex = rng() % npc_spawn_pos.size();
+			npcSpawnPos = npc_spawn_pos[spawnIndex];
 
 			// only consider spawning off screen when not in full view mode
 			bool spawn = false;
@@ -985,11 +989,7 @@ void WorldSystem::restart_game()
 	npcSpawnTimer = 0.f;
 	collectibles_collected_pos = 50.f;
 	player_lives = 4;
-	int collectibles_collected = 0;
-
-	//curr_level = 1;
-	// set paltform dimensions
-	vec2 platformDimensions = PLATFORM_SCALES[curr_level];
+	collectibles_collected = 0;
 
 	// Reset sprite sheet buffer index
 
@@ -1001,8 +1001,25 @@ void WorldSystem::restart_game()
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
+	// load from json
+	std::ifstream file(LEVEL_DESCRIPTORS[curr_level]);
+	Json::Value jsonData;
+	file >> jsonData;
+
+	// update BGM
+	background_music = Mix_LoadMUS(audio_path(jsonData["bgm"].asString()).c_str());
+	Mix_PlayMusic(background_music, -1);
+	Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
+
+	// set paltform dimensions
+	PLATFORM_WIDTH = jsonData["platform_scale"]["x"].asFloat();
+	PLATFORM_HEIGHT = jsonData["platform_scale"]["y"].asFloat();
+
+	const Json::Value& playerData = jsonData["player"];
+	bozo_start_pos = {playerData["position"]["x"].asFloat(), playerData["position"]["y"].asFloat()};
+
 	// reset camera on restart
-	renderer->resetCamera(BOZO_STARTING_POS[curr_level]);
+	renderer->resetCamera(bozo_start_pos);
 	renderer->resetSpriteSheetTracker();
 
 	// Create background first (painter's algorithm for rendering)
@@ -1022,85 +1039,96 @@ void WorldSystem::restart_game()
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_GOAL, { 130.f, window_height_px - 200.f }, "", { 180.f, 100.f });
 	}
 
-	// Render platforms
-	floor_positions = FLOOR_POSITIONS[curr_level];
-
-	for (vec4 pos : PLATFORM_POSITIONS[curr_level]) {
-		createPlatforms(renderer, pos[0], pos[1], pos[2], PLATFORM_ASSET[curr_level], pos[3], platformDimensions);
+	// Create platforms
+	floor_positions.clear();
+	for (const auto pos : jsonData["floor_positions"]) {
+		floor_positions.push_back(pos.asFloat());
 	}
 
-	// stairs for the first level
-	if (curr_level == 1) {
-		std::vector<Entity> step0 = createSteps(renderer, { platformDimensions.x * 12 - 20.f, window_height_px * 0.8 }, 5, 3, false);
-		std::vector<Entity> step1 = createSteps(renderer, { window_width_px - platformDimensions.x * 6 - STEP_WIDTH * 6, window_height_px * 0.8 + platformDimensions.y * 4 }, 5, 2, true);
+	for (const auto& platform_data : jsonData["platforms"]) {
+		createPlatforms(renderer, platform_data["x"].asFloat(), platform_data["y"].asFloat(), platform_data["num_tiles"].asInt(), PLATFORM_ASSET[curr_level], platform_data["visible"].asBool(), {PLATFORM_WIDTH, PLATFORM_HEIGHT});
+	}
+
+	// Create stairs
+	for (const auto& steps_data : jsonData["stairs"]) {
+		createSteps(renderer, {steps_data["x"].asFloat(), steps_data["y"].asFloat()}, {steps_data["scale_x"].asFloat(), steps_data["scale_y"].asFloat()}, steps_data["num_steps"].asInt(), steps_data["step_blocks"].asInt(), steps_data["left"].asBool());
 	}
 
 	// Create walls
-	for (vec4 pos : WALL_POSITIONS[curr_level]) {
-		createWall(renderer, pos[0], pos[1], pos[2], pos[3]);
+	for (const auto& wall_data : jsonData["walls"]) {
+		createWall(renderer, wall_data["x"].asFloat(), wall_data["y"].asFloat(), wall_data["height"].asFloat(), wall_data["visible"].asBool());
 	}
 
 	// Create climbables
-	for (vec3 pos : CLIMBABLE_POSITIONS[curr_level]) {
-		createClimbable(renderer, pos[0], pos[1], pos[2], CLIMBABLE_ASSET[curr_level]);
+	for (const auto& data : jsonData["climbables"]) {
+		createClimbable(renderer, data["x"].asFloat(), data["y"].asFloat(), data["sections"].asInt(), CLIMBABLE_ASSET[curr_level]);
 	}
 
-	ladder_positions = ZOMBIE_CLIMB_POINTS[curr_level];
+	ladder_positions.clear();
+	for (const auto levelPoints : jsonData["zombie_climb_points"]) {
+		std::vector<float> level_climb_points;
+		for (const auto point: levelPoints) {
+			level_climb_points.push_back(point.asFloat());
+		}
+		ladder_positions.push_back(level_climb_points);
+	}
 
 	// Create spikes
-	for (vec2 pos : SPIKE_POSITIONS[curr_level]) {
-		Entity spike = createSpike(renderer, pos);
+	for (const auto& pos : jsonData["spikes"]) {
+		Entity spike = createSpike(renderer, {pos["x"].asFloat(), pos["y"].asFloat()});
 		registry.colors.insert(spike, { 0.5f, 0.5f, 0.5f });
 	}
 
 	// Create wheels
-	Entity wheel1 = createWheel(renderer, {100.f, 600.f}); 
-	registry.colors.insert(wheel1, { 1.0f, 0, 0 });
-    Motion& motion1 = registry.motions.get(wheel1);
-    motion1.velocity = {50.f, 0.f}; 
-
-    Entity wheel2 = createWheel(renderer, {window_width_px - 100.f, 600.f}); 
-	registry.colors.insert(wheel2, { 1.0f, 0, 0 });
-    Motion& motion2 = registry.motions.get(wheel2);
-    motion2.velocity = {-50.f, 0.f};
+	for (const auto& data : jsonData["wheels"]) {
+		Entity wheel = createWheel(renderer, {data["position"][0].asFloat(), data["position"][1].asFloat()}); 
+		registry.colors.insert(wheel, {data["colour"][0].asFloat(), data["colour"][1].asFloat(), data["colour"][2].asFloat()});
+   		Motion& motion1 = registry.motions.get(wheel);
+    	motion1.velocity = {data["velocity"][0].asFloat(), data["velocity"][1].asFloat()}; 
+	}
 
 	// Create a new Bozo player
-	player_bozo = createBozo(renderer, BOZO_STARTING_POS[curr_level]);
+	player_bozo = createBozo(renderer, bozo_start_pos);
 	registry.colors.insert(player_bozo, { 1, 0.8f, 0.8f });
 	Motion& bozo_motion = registry.motions.get(player_bozo);
 	bozo_motion.velocity = { 0.f, 0.f };
 
+	// Create aiming arrow for player
 	player_bozo_pointer = createBozoPointer(renderer, { 200, 500 });
-	// Create zombie (one starter zombie per level?)
-	for (vec2 pos : ZOMBIE_START_POS[curr_level])
+
+	// Create zombies
+	zombie_spawn_pos.clear();
+	for (const auto& zombie_pos : jsonData["zombies"]["zombie_positions"]) {
+		vec2 pos = {zombie_pos["x"].asFloat(), zombie_pos["y"].asFloat()};
+		zombie_spawn_pos.push_back(pos);
 		createZombie(renderer, pos);
+	}
 
 	// Create students
-	for (vec2 pos : NPC_START_POS[curr_level])
-		createStudent(renderer, pos, NPC_ASSET[curr_level]);
-
-	for (Entity student : registry.humans.entities)
-	{
+	npc_spawn_pos.clear();
+	for (const auto& student_pos : jsonData["students"]["student_positions"]) {
+		vec2 pos = {student_pos["x"].asFloat(), student_pos["y"].asFloat()};
+		npc_spawn_pos.push_back(pos);
+		Entity student = createStudent(renderer, pos, NPC_ASSET[curr_level]);
+		// coded back+forth motion
 		Motion& student_motion = registry.motions.get(student);
 		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
 	}
 
 	// Place collectibles
-	std::vector<vec2> collectibles = COLLECTIBLE_POSITIONS[curr_level];
 	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[curr_level];
-	assert(collectibles.size() == collectible_assets.size());
-	for (int i = 0; i < collectibles.size(); i++) {
-		createCollectible(renderer, collectibles[i][0], collectibles[i][1], collectible_assets[i], COLLECTIBLE_SCALES[curr_level], false);
-	}
-
+	const Json::Value& collectiblesPositions = jsonData["collectibles"]["positions"];
+	vec2 collectible_scale = {jsonData["collectibles"]["scale"]["x"].asFloat(), jsonData["collectibles"]["scale"]["y"].asFloat()};
+	assert(collectiblesPositions.size() == collectible_assets.size());
+	for (uint i = 0; i < collectiblesPositions.size(); i++) {
+		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false);
+	}                                                                                                                                                                                                                                                                                                               
 
 	// This is specific to the beach level
 	if (curr_level == 2) {
 		createDangerous(renderer, { 280, 130 }, { 30, 30 });
 		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, { 230, 155 }, { 80, 60 });
 	}
-
-
 	// Lives can probably stay hardcoded?
 	float heart_pos_x = 1385;
 	float heart_starting_pos_y = 40;
@@ -1150,7 +1178,7 @@ void WorldSystem::handle_collisions()
 
 					// Move player back to start
 					Motion& bozo_motion = registry.motions.get(player_bozo);
-					bozo_motion.position = BOZO_STARTING_POS[curr_level];
+					bozo_motion.position = bozo_start_pos;
 
 					// Add to lost life timer
 					if (!registry.lostLifeTimer.has(player_bozo)) {
@@ -1354,10 +1382,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 				curr_level = 0;
 			}
 
-			background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[curr_level]).c_str());
-			Mix_PlayMusic(background_music, -1);
-			fprintf(stderr, "Switch music\n");
-			Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
 			restart_game();
 		}
 	}

@@ -178,31 +178,31 @@ std::vector<Entity> createPlatforms(RenderSystem* renderer, float left_position_
 }
 
 // TODO(vanessa): maybe make new component for steps, step blocks must be >0
-std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, uint num_steps, uint step_blocks, bool left)
+std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, vec2 step_scale, uint num_steps, uint step_blocks, bool left)
 {
 	std::vector<Entity> steps;
 	vec2 curr_pos = left_pos;
 	for (uint i = 0; i < num_steps; i++) {
 		if (left) {
-			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, true, { STEP_WIDTH, STEP_HEIGHT });
+			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, true, step_scale);
 			Motion& m = registry.motions.get(s0);
 			m.reflect.x = true; // TODO(vanessa): shouldn't it be reflect y?
 			steps.push_back(s0);
-			curr_pos.x += STEP_WIDTH;
+			curr_pos.x += step_scale.x;
 		}
 		for (uint j = 0; j < step_blocks - 1; j++) {
-			Entity s = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP1, true, { STEP_WIDTH, STEP_HEIGHT });
+			Entity s = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP1, true, step_scale);
 			steps.push_back(s);
-			curr_pos.x += STEP_WIDTH;
+			curr_pos.x += step_scale.x;
 		}
 		if (!left) {
-			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, true, { STEP_WIDTH, STEP_HEIGHT });
+			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, true, step_scale);
 			steps.push_back(s0);
-			curr_pos.y += STEP_HEIGHT;
+			curr_pos.y += step_scale.y;
 		}
 		else {
-			curr_pos.x -= STEP_WIDTH;
-			curr_pos.y -= STEP_HEIGHT;
+			curr_pos.x -= step_scale.x;
+			curr_pos.y -= step_scale.y;
 		}
 	}
 	return steps;

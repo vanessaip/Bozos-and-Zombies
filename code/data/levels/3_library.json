@@ -1,0 +1,50 @@
+{
+    "platform_scale": {"x": 48.0, "y": 17.0},
+    "platforms": [
+        {"x": 45.0, "y": 765.0, "num_tiles": 30, "visible": false},
+        {"x": 400.0, "y": 650.0, "num_tiles": 6, "visible": true},
+        {"x": 75.0, "y": 545.0, "num_tiles": 6, "visible": true},
+        {"x": 250.0, "y": 330.0, "num_tiles": 2, "visible": true},
+        {"x": 600.0, "y": 495.0, "num_tiles": 3, "visible": true},
+        {"x": 750.0, "y": 400.0, "num_tiles": 2, "visible": true},
+        {"x": 1100.0, "y": 545.0, "num_tiles": 1, "visible": true},
+        {"x": 1100.0, "y": 195.0, "num_tiles": 3, "visible": true},
+        {"x": 45.0, "y": 45.0, "num_tiles": 30, "visible": false}
+    ],
+    "floor_positions": [
+        600,
+        500,
+        350,
+        250
+    ],
+    "stairs": [],
+    "walls": [
+        {"x": 32.0, "y": 405.0, "height": 810, "visible": false},
+        {"x": 1408.0, "y": 405.0, "height": 810, "visible": false}
+    ],
+    "climbables": [
+        {"x": 300, "y": 335, "sections": 7},
+        {"x": 600, "y": 500, "sections": 5},
+        {"x": 1100, "y": 200, "sections": 11}
+    ],
+    "zombie_climb_points": [],
+    "spikes": [],
+    "wheels": [
+        {"position":[100, 600], "colour": [1.0,0,0], "velocity": [50, 0]},
+        {"position":[1340, 600], "colour": [1.0,0,0], "velocity": [-50, 0]}
+    ],
+    "player": {
+        "position": {"x": 100, "y": 710}
+    },
+    "zombies": {
+        "zombie_positions": []
+    },
+    "students": {
+        "student_positions": []
+    },
+    "collectibles": {
+        "scale": {"x": 30, "y":30},
+        "positions": []
+    },
+    "bgm": "library.wav"
+}
