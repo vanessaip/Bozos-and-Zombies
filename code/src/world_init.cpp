@@ -360,6 +360,7 @@ Entity createWheel(RenderSystem* renderer, vec2 pos)
 	motion.angle = 0.f;
 	motion.velocity = { 100.f, 0.f };
 	motion.scale = mesh.original_size * 25.f;
+	motion.offGround = true;
 
 	registry.wheels.emplace(entity);
 	registry.renderRequests.insert(
