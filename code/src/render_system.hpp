@@ -22,7 +22,7 @@ class RenderSystem {
 
 	vec2 lastRestingPlayerPos;
 	bool lastPlayerDirectionIsPos = true; // true = +x, false = -x
-	Camera camera = Camera(0.f, 0.f, screen_width_px, screen_height_px);
+	Camera playerCamera = Camera(0.f, 0.f, screen_width_px, screen_height_px);
 
 	// Make sure these paths remain in sync with the associated enumerators.
 	// Associated id with .obj path
@@ -39,7 +39,6 @@ class RenderSystem {
 		textures_path("zombie_sprite_sheet.png"),
 		textures_path("bozo_sprite_sheet.png"),
 		textures_path("bozo_pointer.png"),
-		textures_path("business-background-night.png"),
 		textures_path("Tile_40.png"),	// platform
 		textures_path("Tile_04.png"),	// step left section
 		textures_path("Tile_02.png"),	// step middle section
@@ -60,6 +59,14 @@ class RenderSystem {
 		textures_path("heart.png"),
 		textures_path("win_screen.png"),
 		textures_path("basement.png"),
+		textures_path("indoor_4.png"),
+		textures_path("indoor_3.png"),
+		textures_path("indoor_1.png"),
+		textures_path("indoor_0.png"),
+		textures_path("background_0.png"),
+		textures_path("background_1.png"),
+		textures_path("background_2.png"),
+		textures_path("background_3.png"),
 		textures_path("beach/beach-plat.png"),
 		textures_path("beach/beach-ladder.png"),
 		textures_path("beach/spikeball.png"),
@@ -93,12 +100,12 @@ class RenderSystem {
 		textures_path("locations/label_beach.png"),
 		textures_path("locations/label_library.png"),
 		textures_path("locations/label_tutorial.png"),
-    textures_path("beach/beach-apple.png"),
-    textures_path("beach/beach-chest.png"),
-    textures_path("beach/beach-chest2.png"),
-    textures_path("beach/beach-diamond.png"),
-    textures_path("beach/beach-star.png"),
-    textures_path("beach/beach-coin_01.png")
+	    textures_path("beach/beach-apple.png"),
+	    textures_path("beach/beach-chest.png"),
+	    textures_path("beach/beach-chest2.png"),
+	    textures_path("beach/beach-diamond.png"),
+	    textures_path("beach/beach-star.png"),
+	    textures_path("beach/beach-coin_01.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -156,7 +163,7 @@ public:
 
 	void initializeSpriteSheet(Entity& entity, ANIMATION_MODE defaultMode, std::vector<int> spriteCounts, float switchTime, vec2 trunc);
 
-	mat3 createProjectionMatrix(float elapsed_time_ms);
+	mat3 createProjectionMatrix(float left, float top, float right, float bottom);
 
 	mat3 RenderSystem::createBasicProjectionMatrix();
 
@@ -170,6 +177,8 @@ private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
+	void updateCameraBounds(float elapsed_time_ms);
+	vec4 clampCam(float left, float top);
 
 	// Window handle
 	GLFWwindow* window;
