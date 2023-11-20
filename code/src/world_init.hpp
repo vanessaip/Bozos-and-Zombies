@@ -58,6 +58,8 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
 
 Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale);
 
+//label
+Entity createLabel(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId);
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 
@@ -141,4 +143,11 @@ const std::vector<std::string> BACKGROUND_MUSIC = {
 	"soundtrack.wav",
 	"beach.wav",
 	"library.wav"
+};
+
+const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
+	TEXTURE_ASSET_ID::LABEL_TUTORIAL,
+	TEXTURE_ASSET_ID::LABEL_NEST,
+	TEXTURE_ASSET_ID::LABEL_BEACH,
+	TEXTURE_ASSET_ID::LABEL_LIB,
 };
