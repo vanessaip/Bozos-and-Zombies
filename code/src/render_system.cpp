@@ -92,6 +92,10 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			Label& label = registry.labels.get(entity);
 			glUniform1f(fade_timer_uloc, label.fading_factor);
 		}
+    else if (registry.doors.has(entity)) {
+			Door& door = registry.doors.get(entity);
+			glUniform1f(fade_timer_uloc, door.fading_factor);
+		}
 		else {
 			glUniform1f(fade_timer_uloc, 0.f);
 		}

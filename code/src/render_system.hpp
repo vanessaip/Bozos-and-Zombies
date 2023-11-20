@@ -98,7 +98,9 @@ class RenderSystem {
     textures_path("beach/beach-chest2.png"),
     textures_path("beach/beach-diamond.png"),
     textures_path("beach/beach-star.png"),
-    textures_path("beach/beach-coin_01.png")
+    textures_path("beach/beach-coin_01.png"),
+    textures_path("door.png"),
+    textures_path("beach/beach-bird.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

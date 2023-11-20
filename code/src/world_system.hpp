@@ -38,7 +38,7 @@ public:
 	// Should the game be over ?
 	bool is_over()const;
 
-	void updateZombieMovement(Motion& motion, Motion& bozo_motion, Entity& zombie);
+	void updateZombieMovement(Motion& motion, Motion& bozo_motion, Entity& zombie, bool offAll);
 
 	void updateClimbing(Motion& motion, vec4 entityBB, ComponentContainer<Motion>& motion_container);
 
@@ -95,6 +95,8 @@ private:
 	std::vector<std::vector<float>> ladder_positions;
 	float PLATFORM_WIDTH;
 	float PLATFORM_HEIGHT;
+  vec2 door_win_pos;
+  int total_collectables;
 
 	// music references
 	Mix_Music* background_music;

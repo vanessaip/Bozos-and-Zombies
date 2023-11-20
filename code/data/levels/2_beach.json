@@ -5,7 +5,7 @@
         {"x": 1140.0, "y": 690.0, "num_tiles": 10, "visible": true},
         {"x": 0.0, "y": 610.0, "num_tiles": 10, "visible": true},
         {"x": 0.0, "y": 200.0, "num_tiles": 6, "visible": true},
-        {"x": 600.0, "y": 490.0, "num_tiles": 8, "visible": true},
+        {"x": 520.0, "y": 490.0, "num_tiles": 10, "visible": true},
         {"x": 200.0, "y": 325.0, "num_tiles": 11, "visible": true},
         {"x": 450.0, "y": 110.0, "num_tiles": 2, "visible": true},
         {"x": 940.0, "y": 110.0, "num_tiles": 11, "visible": true},
@@ -26,7 +26,7 @@
     ],
     "zombie_climb_points": [
         [400],
-        [200],
+        [200, 940],
         [940]
     ],
     "spikes": [],
@@ -38,10 +38,16 @@
         "position": {"x": 720, "y": 760}
     },
     "zombies": {
-        "zombie_positions": [{"x": 1200, "y": 600}]
+        "zombie_positions": [
+          {"x": 1200, "y": 600},
+          {"x": 1200, "y": 50}
+        ]
     },
     "students": {
-        "student_positions": []
+        "student_positions": [
+          {"x": 550, "y": 290},
+          {"x": 1300, "y": 350}
+        ]
     },
     "collectibles": {
         "scale": {"x": 30, "y":30},
@@ -54,5 +60,7 @@
           {"x": 20, "y": 770}
         ]
     },
-    "bgm": "beach.wav"
+    "bgm": "beach.wav",
+    "door_win_pos": {"x": 100, "y": 754},
+    "total_collectables": 6
 }

@@ -56,10 +56,12 @@ Entity createCollectible(RenderSystem* renderer, float position_x, float positio
 // hearts
 Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
 
-Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale);
+Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic);
 
 //label
 Entity createLabel(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId);
+
+Entity createDoor(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId);
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 

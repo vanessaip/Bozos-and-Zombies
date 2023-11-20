@@ -164,10 +164,12 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
-	if (registry.zombies.entities.size() < 1 && collectibles_collected > 5 && this->game_over == false) {
+	if (registry.zombies.entities.size() < 1 && collectibles_collected == total_collectables && this->game_over == false) {
+  // if (collectibles_collected > 0 && this->game_over == false) {
 		// restart_game(); // level is over
-		createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
+		// createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
 		this->game_over = true;
+    createDoor(renderer, door_win_pos, {40, 60}, TEXTURE_ASSET_ID::WIN_DOOR);
 		debugging.in_full_view_mode = true;
 		printf("You win!\n");
 	}
@@ -311,14 +313,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 			vec4 entityBB = { entityRightSide, entityLeftSide, entityBottom, entityTop };
 
-			if (motion.position.x < BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0)
+      // Bounding entities to window
+			if (motion.position.x < BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0 || motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f && motion.velocity.x > 0)
 			{
-				motion.velocity.x = 0;
+        if (isPlayer) {
+          motion.velocity.x = 0;
+        } else {
+          motion.velocity.x = -motion.velocity.x;
+        }
 			}
-			else if (motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f && motion.velocity.x > 0)
-			{
-				motion.velocity.x = 0;
-			}
+
 			if (motion.position.y < 0.f + (BOZO_BB_HEIGHT) / 2.f)
 			{
 				motion.position.y = 0.f + BOZO_BB_HEIGHT / 2.f;
@@ -461,6 +465,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			{
 				updateClimbing(motion, entityBB, motion_container);
 			}
+
+      // If entity is a zombie, update its direction to always move towards Bozo
+      if (registry.zombies.has(motion_container.entities[i]))
+      {
+        updateZombieMovement(motion, bozo_motion, motion_container.entities[i], offAll);
+      }
 		}
 
 		if (isNPC)
@@ -500,12 +510,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			{
 				motion.velocity = { 0.f, 0.f };
 			}
-		}
-
-		// If entity is a zombie, update its direction to always move towards Bozo
-		if (registry.zombies.has(motion_container.entities[i]))
-		{
-			updateZombieMovement(motion, bozo_motion, motion_container.entities[i]);
 		}
 
 		// If entity if a player effect, for example bozo_pointer, move it along with the player
@@ -618,6 +622,21 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		label.fading_factor = cos(0.0005 * elapsed_ms);
 	}
 
+  for (Entity entity : registry.doors.entities)
+	{
+		// progress timer, make the rotation happening based on time
+		// Set fading factor 
+		Door& door = registry.doors.get(entity);
+		auto now = Clock::now();
+
+		float elapsed_ms =
+			(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - door.fading_timer)).count() / 1000;
+
+    if (door.fading_factor < 1) {
+      door.fading_factor += 0.02;
+    }
+	}
+
 
 	// update keyframe animated entity motions
 	for (Entity entity : registry.keyframeAnimations.entities)
@@ -704,14 +723,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	return true;
 }
 
-void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Entity& zombie)
+void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Entity& zombie, bool offAll)
 {
 
 	int bozo_level = checkLevel(bozo_motion);
 	int zombie_level = checkLevel(motion);
-  printf("bozo %d zomb %d\n", bozo_level, zombie_level);
 
-	if (curr_level == NEST && (zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1)))
+  if (curr_level == TUTORIAL) {
+
+  }
+	else if (curr_level == NEST && (zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1)))
 	{
 		// Zombie is on the same level as bozo
 
@@ -808,6 +829,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
     }
     float speed = ZOMBIE_SPEED;
     motion.velocity.x = direction * speed;
+
   }
 	else if (zombie_level < bozo_level)
 	{
@@ -1015,6 +1037,7 @@ void WorldSystem::updateWheelRotation(float elapsed_ms_since_last_update)
 // Reset the world state to its initial state
 void WorldSystem::restart_game()
 {
+  debugging.in_full_view_mode = false;
 	this->game_over = false;
 	// Debugging for memory/component leaks
 	registry.list_all_components();
@@ -1101,6 +1124,14 @@ void WorldSystem::restart_game()
 		createClimbable(renderer, data["x"].asFloat(), data["y"].asFloat(), data["sections"].asInt(), CLIMBABLE_ASSET[curr_level]);
 	}
 
+  door_win_pos = { jsonData["door_win_pos"]["x"].asFloat(), jsonData["door_win_pos"]["y"].asFloat() };
+
+  total_collectables = jsonData["total_collectables"].asInt();
+
+  // for (const auto& pos : jsonData["door_win_pos"]) {
+	// 	 door_win_pos = pos;
+	// }
+
 	ladder_positions.clear();
 	for (const auto levelPoints : jsonData["zombie_climb_points"]) {
 		std::vector<float> level_climb_points;
@@ -1163,7 +1194,8 @@ void WorldSystem::restart_game()
 
 	// This is specific to the beach level
 	if (curr_level == BEACH) {
-		createDangerous(renderer, { 280, 130 }, { 30, 30 });
+		createDangerous(renderer, { 280, 130 }, { 30, 30 }, TEXTURE_ASSET_ID::SPIKE_BALL, {280, 130}, {500, 10}, {650, 250}, {0, 0}, false);
+    createDangerous(renderer, { 280, 130 }, { 30, 30 }, TEXTURE_ASSET_ID::BEACH_BIRD, {0, 400}, {500, 50}, {1000, 750}, {1450, 400}, true);
 		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, { 230, 155 }, { 80, 60 });
 	}
 	// Lives can probably stay hardcoded?
@@ -1288,6 +1320,14 @@ void WorldSystem::handle_collisions()
 					++points;
 				}
 			}
+      else if (registry.doors.has(entity_other))
+      {
+        curr_level++;
+        if (curr_level > max_level) {
+          curr_level = 0;
+        }
+        restart_game();
+      }
 		}
 		// Check NPC - Zombie Collision
 		else if (registry.humans.has(entity) && registry.zombies.has(entity_other))
