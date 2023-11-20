@@ -175,12 +175,15 @@ public:
 
 	void resetSpriteSheetTracker();
 
+	static void deleteBufferId(int index);
+
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
 	void updateCameraBounds(float elapsed_time_ms);
 	vec4 clampCam(float left, float top);
+	int findFirstAvailableBufferSlot();
 
 	// Window handle
 	GLFWwindow* window;
