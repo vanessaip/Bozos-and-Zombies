@@ -79,7 +79,7 @@ private:
 	int max_level = 3;
 	float collectibles_collected_pos = 50;
 	int collectibles_collected = 0;
-	vec2 platformDimensions{ 0.f, 0.f };
+	vec2 platformDimensions{ 0.f, 0.f }; // unused
 
 	// This is actually 5 lives but 0 indexed.
 	int player_lives = 4;
@@ -87,8 +87,14 @@ private:
 	bool game_over;
 
 	// Level definitions
+	int curr_level = 0;
+	vec2 bozo_start_pos;
+	std::vector<vec2> zombie_spawn_pos;
+	std::vector<vec2> npc_spawn_pos;
 	std::vector<float> floor_positions;
 	std::vector<std::vector<float>> ladder_positions;
+	float PLATFORM_WIDTH;
+	float PLATFORM_HEIGHT;
 
 	// music references
 	Mix_Music* background_music;

@@ -29,6 +29,7 @@ inline std::string shader_path(const std::string& name) {return std::string(PROJ
 inline std::string textures_path(const std::string& name) {return data_path() + "/textures/" + std::string(name);};
 inline std::string audio_path(const std::string& name) {return data_path() + "/audio/" + std::string(name);};
 inline std::string mesh_path(const std::string& name) {return data_path() + "/meshes/" + std::string(name);};
+inline std::string level_path(const std::string& name) {return data_path() + "/levels/" + std::string(name);};
 
 // Set to dimensions of background sprite, can be changed when we make custom backgrounds
 const int window_width_px = 1440;
