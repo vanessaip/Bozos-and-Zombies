@@ -106,7 +106,7 @@ std::vector<glm::vec2> getTransformedVertices(const Mesh *mesh, const Motion &mo
 	return transformedVertices;
 }
 
-void resolve_collision(Entity entity1, Entity entity2)
+void resolve_bounce_collision(Entity entity1, Entity entity2)
 {
 	Motion &motion1 = registry.motions.get(entity1);
 	Motion &motion2 = registry.motions.get(entity2);
@@ -118,7 +118,7 @@ void resolve_collision(Entity entity1, Entity entity2)
 	if (normalVelocity > 0)
 		return;
 
-	float impact = -(1 + 0.5) * normalVelocity / (2 / mass); // 0.5 because I wanted a realistic collision
+	float impact = -(2) * normalVelocity / (2 / mass); // 0.5 because I wanted a realistic collision
 	vec2 impulse = impact * collisionNormal / mass;
 	motion1.velocity -= impulse;
 	motion2.velocity += impulse;
@@ -206,7 +206,7 @@ void PhysicsSystem::step(float elapsed_ms)
 			else if (motion.velocity.x < 0)
 				motion.reflect.x = true;
 		}
-		if ((registry.humans.has(entity) || registry.zombies.has(entity) || registry.books.has(entity)) && motion.offGround)
+		if ((registry.humans.has(entity) || registry.zombies.has(entity) || registry.books.has(entity) || registry.wheels.has(entity)) && motion.offGround)
 		{
 			motion.velocity[1] += PhysicsSystem::GRAVITY;
 		}
@@ -289,7 +289,7 @@ void PhysicsSystem::step(float elapsed_ms)
 
 				if (checkSATIntersection(transformedVertices1, transformedVertices2))
 				{
-					resolve_collision(entity_i, entity_j);
+					resolve_bounce_collision(entity_i, entity_j);
 				}
 			}
 			else
