@@ -45,7 +45,7 @@ Entity createSpike(RenderSystem* renderer, vec2 pos);
 // wheels
 Entity createWheel(RenderSystem* renderer, vec2 pos);
 // background
-Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::BACKGROUND, vec2 position = { window_width_px / 2, window_height_px / 2 }, vec2 scale = { window_width_px, window_height_px });
+Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_0, float depth = 0.f, vec2 position = { window_width_px / 2, window_height_px / 2 }, vec2 scale = { window_width_px, window_height_px });
 // book
 Entity createBook(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId);
 // text box
@@ -56,10 +56,15 @@ Entity createCollectible(RenderSystem* renderer, float position_x, float positio
 // hearts
 Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
 
-Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale);
+Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic);
 
 //label
 Entity createLabel(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId);
+
+Entity createDoor(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId);
+
+void removeEntity(Entity e);
+
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 
@@ -77,12 +82,48 @@ const std::vector<std::string> LEVEL_DESCRIPTORS = {
 };
 
 // ---------------------BACKGROUNDS-------------------------
+const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_ASSET = {
+	{
+	  { TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND1, 16.f },
+	  { TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND2, 8.f },
+	  { TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND3, 4.f },
+	  { TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND4, 2.f },
+	  { TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND0, 0.f }
+	},
+	{
+		// texture id, depth (set depth to 0 if not scrolling)
+		{ TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_0, 8.0f },
+		{ TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_1, 6.0f},
+		{ TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_2, 4.0f},
+		{ TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_3, 2.0f},
+		//{ TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_0, 1.7f},
+		//{ TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_1, 1.5f},
+		//{ TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_3, 1.3f},
+		//{ TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_4, 1.1f},
+		{ TEXTURE_ASSET_ID::BACKGROUND_INDOOR, 0.f},
+		{ TEXTURE_ASSET_ID::BASEMENT, 0.f},
+	},
+	{
+		{ TEXTURE_ASSET_ID::BEACH_SKY, 16.0f},
+		{ TEXTURE_ASSET_ID::BEACH_SEA, 8.0f},
+		{ TEXTURE_ASSET_ID::BEACH_LAND, 2.0f},
+		{ TEXTURE_ASSET_ID::BEACH_CLOUD, 4.0f}
+	},
+	{
+		{ TEXTURE_ASSET_ID::LIBRARY_FILL, 4.f }, 
+		{ TEXTURE_ASSET_ID::LIBRARY_OBJECTS, 2.f },
+		{ TEXTURE_ASSET_ID::LIBRARY_FRAME, 0.f }
+	}
+};
+
+/*
 const std::vector<std::vector<TEXTURE_ASSET_ID>> BACKGROUND_ASSET = {
 	{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND1, TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND2, TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND3, TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND4, TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND0 },
 	{ TEXTURE_ASSET_ID::BACKGROUND, TEXTURE_ASSET_ID::BACKGROUND_INDOOR, TEXTURE_ASSET_ID::BASEMENT},
 	{ TEXTURE_ASSET_ID::BEACH_SKY, TEXTURE_ASSET_ID::BEACH_SEA, TEXTURE_ASSET_ID::BEACH_LAND, TEXTURE_ASSET_ID::BEACH_CLOUD},
 	{ TEXTURE_ASSET_ID::LIBRARY_FILL, TEXTURE_ASSET_ID::LIBRARY_OBJECTS, TEXTURE_ASSET_ID::LIBRARY_FRAME}
 };
+*/
 
 const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
   TEXTURE_ASSET_ID::TUTORIAL_PLAT,

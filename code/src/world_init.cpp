@@ -112,7 +112,7 @@ Entity createZombie(RenderSystem* renderer, vec2 position)
 	// Initialize the motion
 	auto& motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
-	motion.velocity = { 0.f, 0.f };
+	motion.velocity = { 100.f, 0.f };
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way
@@ -272,7 +272,7 @@ std::vector<Entity> createClimbable(RenderSystem* renderer, float top_position_x
 	return sections;
 }
 
-Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, vec2 position, vec2 scale)
+Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, float depth, vec2 position, vec2 scale)
 {
 	auto entity = Entity();
 
@@ -290,7 +290,9 @@ Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, vec2 p
 	motion.scale = scale;
 
 	// Create a Background component
-	registry.backgrounds.emplace(entity);
+	Background& background = registry.backgrounds.emplace(entity);
+	background.depth = depth;
+
 	registry.renderRequests.insert(
 		entity,
 		{ texture,
@@ -483,7 +485,7 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale) {
 	return entity;
 }
 
-Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale) {
+Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic) {
 	// Reserve en entity
 	auto entity = Entity();
 
@@ -496,11 +498,17 @@ Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale) {
 	motion.position = position;
 	motion.scale = scale;
 
-	registry.dangerous.emplace(entity);
+	Dangerous& dangerous = registry.dangerous.emplace(entity);
+
+  dangerous.p0 = p0;
+  dangerous.p1 = p1;
+  dangerous.p2 = p2;
+  dangerous.p3 = p3;
+  dangerous.cubic = cubic;
 
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::SPIKE_BALL,
+		{ assetID,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
@@ -532,4 +540,43 @@ Entity createLabel(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_AS
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 	return entity;
+}
+
+Entity createDoor(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID) {
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	registry.doors.emplace(entity);
+	Door& door = registry.doors.get(entity);
+	door.fading_timer = Clock::now();
+
+	registry.overlay.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ assetID,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+	return entity;
+}
+
+// Wrapper method for removing entities
+// Removes all entity components and resets buffer id for sprite sheet components
+void removeEntity(Entity e) {
+	if (registry.spriteSheets.has(e))
+	{
+		SpriteSheet& spriteSheet = registry.spriteSheets.get(e);
+		RenderSystem::deleteBufferId(static_cast<int>(spriteSheet.bufferId));
+	}
+
+	registry.remove_all_components_of(e);
 }

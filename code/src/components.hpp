@@ -28,10 +28,6 @@ struct Human
 {
 };
 
-struct Background
-{
-};
-
 struct Platform
 {
 };
@@ -59,6 +55,12 @@ struct Climbable
 struct Book
 {
 	bool offHand = true;
+};
+
+struct Door
+{
+  float fading_factor = 0.f;
+	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
 };
 
 // All data relevant to the shape and motion of entities
@@ -205,6 +207,12 @@ struct Camera
 	}
 };
 
+struct Background
+{
+	float depth = 0.f;
+	Camera parallaxCam = Camera(0.f, 0.f, 0.f, 0.f);
+};
+
 struct TextBox
 {
 	std::string text = "";
@@ -222,7 +230,12 @@ struct Overlay
 
 struct Dangerous
 {
-
+  vec2 p0;
+  vec2 p1;
+  vec2 p2;
+  vec2 p3;
+  bool cubic;
+  float bezier_time = 0;
 };
 
 struct Label
@@ -262,8 +275,7 @@ enum class TEXTURE_ASSET_ID
 	ZOMBIE = STUDENT + 1,
 	BOZO = ZOMBIE + 1,
 	BOZO_POINTER = BOZO + 1,
-	BACKGROUND = BOZO_POINTER + 1,
-	PLATFORM = BACKGROUND + 1,
+	PLATFORM = BOZO_POINTER + 1,
 	STEP0 = PLATFORM + 1,
 	STEP1 = STEP0 + 1,
 	WALL = STEP1 + 1,
@@ -283,7 +295,15 @@ enum class TEXTURE_ASSET_ID
 	HEART = SODA + 1,
 	WIN_SCREEN = HEART + 1,
 	BASEMENT = WIN_SCREEN + 1,
-	BEACH_PLAT = BASEMENT + 1,
+	PARALLAX_FOREGROUND_4 = BASEMENT + 1,
+	PARALLAX_FOREGROUND_3 = PARALLAX_FOREGROUND_4 + 1,
+	PARALLAX_FOREGROUND_1 = PARALLAX_FOREGROUND_3 + 1,
+	PARALLAX_FOREGROUND_0 = PARALLAX_FOREGROUND_1 + 1,
+	PARALLAX_BACKGROUND_3 = PARALLAX_FOREGROUND_0 + 1,
+	PARALLAX_BACKGROUND_2 = PARALLAX_BACKGROUND_3 + 1,
+	PARALLAX_BACKGROUND_1 = PARALLAX_BACKGROUND_2 + 1,
+	PARALLAX_BACKGROUND_0 = PARALLAX_BACKGROUND_1 + 1,
+	BEACH_PLAT = PARALLAX_BACKGROUND_0 + 1,
 	BEACH_LADDER = BEACH_PLAT + 1,
 	SPIKE_BALL = BEACH_LADDER + 1,
 	CANNON = SPIKE_BALL + 1,
@@ -291,7 +311,6 @@ enum class TEXTURE_ASSET_ID
 	BEACH_SEA = BEACH_SKY + 1,
 	BEACH_LAND = BEACH_SEA + 1,
 	BEACH_CLOUD = BEACH_LAND + 1,
-	// tutorial assets
 	TUTORIAL_PLAT = BEACH_CLOUD + 1,
 	TUTORIAL_BACKGROUND0 = TUTORIAL_PLAT + 1,
 	TUTORIAL_BACKGROUND1 = TUTORIAL_BACKGROUND0 + 1,
@@ -323,7 +342,9 @@ enum class TEXTURE_ASSET_ID
   BEACH_DIAMOND = BEACH_CHEST2 + 1,
   BEACH_STAR = BEACH_DIAMOND + 1,
   BEACH_COIN = BEACH_STAR + 1,
-	TEXTURE_COUNT = BEACH_COIN + 1
+  WIN_DOOR = BEACH_COIN + 1,
+  BEACH_BIRD = WIN_DOOR + 1,
+	TEXTURE_COUNT = BEACH_BIRD + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

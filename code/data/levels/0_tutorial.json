@@ -4,8 +4,8 @@
         {"x": 15.0, "y": 790.0, "num_tiles": 45, "visible": true},
 
         {"x": 15.0, "y": 495, "num_tiles": 10, "visible": true},
-		{"x": 79.0, "y": 670.0, "num_tiles": 3, "visible": true},
-		{"x": 240.0, "y": 610.0, "num_tiles": 3, "visible": true},
+        {"x": 79.0, "y": 670.0, "num_tiles": 3, "visible": true},
+        {"x": 240.0, "y": 610.0, "num_tiles": 3, "visible": true},
 
         {"x": 368.0, "y": 235.0, "num_tiles": 3, "visible": true},
         {"x": 463.0, "y": 145.0, "num_tiles": 2, "visible": true},
@@ -18,7 +18,7 @@
         {"x": 1360.0, "y": 435.0, "num_tiles": 1, "visible": true},
         {"x": 1330.0, "y": 500.0, "num_tiles": 1, "visible": true},
         {"x": 1298.0, "y": 595.0, "num_tiles": 1, "visible": true},
-        {"x": 1266.0, "y": 695.0, "num_tiles": 1, "visible": true},
+        {"x": 1266.0, "y": 690.0, "num_tiles": 1, "visible": true},
         {"x": 1200.0, "y": 660.0, "num_tiles": 2, "visible": true},
         {"x": 1036.0, "y": 500.0, "num_tiles": 5, "visible": true},
         {"x": 944.0, "y": 403.0, "num_tiles": 3, "visible": true},
@@ -63,7 +63,7 @@
     "zombies": {
         "num_starting": 1,
         "positions": [
-            {"x": 25, "y": 785}
+            {"x": 50, "y": 740}
         ],
         "spawn_timer": null
     },
@@ -82,5 +82,6 @@
             {"x": 50, "y": 472}
         ]
     },
-    "bgm": "soundtrack.wav"
+    "bgm": "soundtrack.wav",
+    "door_win_pos": {"x": 710, "y": 747}
 }
