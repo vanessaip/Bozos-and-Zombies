@@ -59,6 +59,8 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
 
 Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale);
 
+void removeEntity(Entity e);
+
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 

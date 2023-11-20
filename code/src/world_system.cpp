@@ -446,7 +446,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			if (motion.position.x + abs(motion.scale.x) < 0.f)
 			{
 				if (isNPC) // don't remove the player
-					registry.remove_all_components_of(motion_container.entities[i]);
+					removeEntity(motion_container.entities[i]);
 			}
 		}
 
@@ -557,7 +557,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		{
 			registry.infectTimers.remove(entity);
 			Motion lastStudentLocation = registry.motions.get(entity);
-			registry.remove_all_components_of(entity);
+			removeEntity(entity);
 			Entity new_zombie = createZombie(renderer, lastStudentLocation.position);
 			return true;
 		}
@@ -1160,7 +1160,7 @@ void WorldSystem::handle_collisions()
 					else
 					{
 					}
-					registry.remove_all_components_of(entity_other);
+					removeEntity(entity_other);
 					Mix_PlayChannel(-1, student_disappear_sound, 0);
 				}
 			}
@@ -1225,14 +1225,14 @@ void WorldSystem::handle_collisions()
 			if (motion_book.offGround == true)
 			{
 				Mix_PlayChannel(-1, zombie_kill_sound, 0);
-				registry.remove_all_components_of(entity);
-				registry.remove_all_components_of(entity_other);
+				removeEntity(entity);
+				removeEntity(entity_other);
 			}
 		}
 
 		// Check Spike - Zombie collision
 		else if (registry.zombies.has(entity) && registry.spikes.has(entity_other)) {
-			registry.remove_all_components_of(entity);
+			removeEntity(entity);
 		}
 
 		// Player - Collectible collision
@@ -1241,7 +1241,7 @@ void WorldSystem::handle_collisions()
 			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID) registry.collectible.get(entity).collectible_id;
 			Entity collectible = createCollectible(renderer, collectibles_collected_pos, 50, id, { 60, 60 }, true);
 
-			registry.remove_all_components_of(entity);
+			removeEntity(entity);
 
 			collectibles_collected++;
 			

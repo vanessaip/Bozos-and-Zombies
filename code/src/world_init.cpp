@@ -475,3 +475,15 @@ Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale) {
 
 	return entity;
 }
+
+// Wrapper method for removing entities
+// Removes all entity components and resets buffer id for sprite sheet components
+void removeEntity(Entity e) {
+	if (registry.spriteSheets.has(e)) 
+	{
+		SpriteSheet& spriteSheet = registry.spriteSheets.get(e);
+		RenderSystem::deleteBufferId(static_cast<int>(spriteSheet.bufferId));
+	}
+
+	registry.remove_all_components_of(e);
+}

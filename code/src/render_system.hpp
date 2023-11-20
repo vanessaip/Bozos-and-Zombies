@@ -133,10 +133,13 @@ public:
 
 	void resetSpriteSheetTracker();
 
+	static void deleteBufferId(int index);
+
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
+	int findFirstAvailableBufferSlot();
 
 	// Window handle
 	GLFWwindow* window;
