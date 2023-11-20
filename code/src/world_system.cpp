@@ -1092,10 +1092,16 @@ void WorldSystem::restart_game()
 
 	// Create zombies
 	zombie_spawn_pos.clear();
-	for (const auto& zombie_pos : jsonData["zombies"]["zombie_positions"]) {
+	uint num_starting_zombies = jsonData["zombies"]["num_starting"].asInt(); // so that zombie positions are separate from how many start
+	assert(num_starting_zombies <= jsonData["zombies"]["positions"].size());
+	uint z = 0;
+	for (const auto& zombie_pos : jsonData["zombies"]["positions"]) {
 		vec2 pos = {zombie_pos["x"].asFloat(), zombie_pos["y"].asFloat()};
 		zombie_spawn_pos.push_back(pos);
-		createZombie(renderer, pos);
+		if (z < num_starting_zombies) {
+			createZombie(renderer, pos);
+		}
+		z++;
 	}
 	// Set zombie spawn timer if not null
 	if (jsonData["zombies"]["spawn_timer"]) {
@@ -1107,13 +1113,19 @@ void WorldSystem::restart_game()
 
 	// Create students
 	npc_spawn_pos.clear();
-	for (const auto& student_pos : jsonData["students"]["student_positions"]) {
+	uint num_starting_students = jsonData["students"]["num_starting"].asInt();
+	assert(num_starting_students <= jsonData["students"]["positions"].size());
+	uint s = 0;
+	for (const auto& student_pos : jsonData["students"]["positions"]) {
 		vec2 pos = {student_pos["x"].asFloat(), student_pos["y"].asFloat()};
 		npc_spawn_pos.push_back(pos);
-		Entity student = createStudent(renderer, pos, NPC_ASSET[curr_level]);
-		// coded back+forth motion
-		Motion& student_motion = registry.motions.get(student);
-		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+		if (s < num_starting_students) {
+			Entity student = createStudent(renderer, pos, NPC_ASSET[curr_level]);
+			// coded back+forth motion
+			Motion& student_motion = registry.motions.get(student);
+			student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+		}
+		s++;
 	}
 	// Set student spawn timer if not null
 	if (jsonData["students"]["spawn_timer"]) {

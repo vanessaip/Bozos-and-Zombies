@@ -61,13 +61,15 @@
         "position": {"x": 1240, "y": 760}
     },
     "zombies": {
-        "zombie_positions": [
+        "num_starting": 1,
+        "positions": [
             {"x": 25, "y": 785}
         ],
         "spawn_timer": null
     },
     "students": {
-        "student_positions": [
+        "num_starting": 1,
+        "positions": [
             {"x": 570, "y": 380}
         ],
         "spawn_timer": null
