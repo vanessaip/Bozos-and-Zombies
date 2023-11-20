@@ -10,6 +10,9 @@ float screen_height = screen_width_px;
 
 static int bufferIds[50];
 
+float previousLeft = 0.f;
+float currentLeft = 0.f;
+
 void RenderSystem::drawTexturedMesh(Entity entity,
 	const mat3& projection)
 {
@@ -270,8 +273,14 @@ void RenderSystem::draw(float elapsed_time_ms)
 	// and alpha blending, one would have to sort
 	// sprites back to front
 	gl_has_errors();
-	mat3 projection_2D = createProjectionMatrix(elapsed_time_ms);
+
+	float prevLeft = playerCamera.left;
+	updateCameraBounds(elapsed_time_ms);
+	float currLeft = playerCamera.left;
+
+	mat3 projection_2D = createProjectionMatrix(playerCamera.left, playerCamera.top, playerCamera.right, playerCamera.bottom);
 	mat3 projectionBasic = createBasicProjectionMatrix();
+	mat3 projectionParallax;
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
@@ -279,11 +288,39 @@ void RenderSystem::draw(float elapsed_time_ms)
 			continue;
 		// Note, its not very efficient to access elements indirectly via the entity
 		// albeit iterating through all Sprites in sequence. A good point to optimize
+		bool isParallax  = false;
+		if (registry.backgrounds.has(entity)) 
+		{
+			Background& background = registry.backgrounds.get(entity);
+			// adjust projection matrix based on depth of scrolling background
+			if (background.depth > 0) 
+			{
+				isParallax = true;
+				float horizontalShift = (currLeft - prevLeft) / background.depth; // horizontal shift inversely proportional to depth
+				vec4 clampedBounds = clampCam(background.parallaxCam.left + horizontalShift, playerCamera.top);
+				background.parallaxCam.left = clampedBounds[0];
+				background.parallaxCam.top = clampedBounds[1];
+				background.parallaxCam.right = clampedBounds[2];
+				background.parallaxCam.bottom = clampedBounds[3];
+
+				projectionParallax = createProjectionMatrix(
+					background.parallaxCam.left,
+					background.parallaxCam.top,
+					background.parallaxCam.right,
+					background.parallaxCam.bottom );
+			}
+		}
+		
 		if (registry.overlay.has(entity)) {
 			drawTexturedMesh(entity, projectionBasic);
 		}
 		else {
-			drawTexturedMesh(entity, projection_2D);
+			
+			if (isParallax)
+				drawTexturedMesh(entity, projectionParallax);
+			else
+				drawTexturedMesh(entity, projection_2D);
+				
 		}
 	}
 
@@ -312,104 +349,8 @@ void RenderSystem::step(float elapsed_time_ms) {
 	}
 }
 
-mat3 RenderSystem::createProjectionMatrix(float elapsed_time_ms)
+mat3 RenderSystem::createProjectionMatrix(float left, float top, float right, float bottom)
 {
-	if (debugging.in_full_view_mode) {
-		screen_width = window_width_px;
-		screen_height = window_height_px;
-	}
-	else {
-		screen_width = screen_width_px;
-		screen_height = screen_height_px;
-	}
-	// Set projection matrix to define camera bounds
-	float left = camera.left;
-	float top = camera.top;
-	float right = camera.right;
-	float bottom = camera.bottom;
-
-	Motion& playerMotion = registry.motions.get(registry.players.entities[0]);
-
-	// handle x-position of camera
-	if (playerMotion.velocity.x > 0) {
-		camera.xOffset = 100.f;
-		if (!lastPlayerDirectionIsPos)
-		{
-			lastPlayerDirectionIsPos = true;
-			camera.shiftHorizontal = true;
-			camera.timer_ms_x = 0;
-		}
-	}
-	else if (playerMotion.velocity.x < 0) {
-		camera.xOffset = -100.f;
-		if (lastPlayerDirectionIsPos)
-		{
-			lastPlayerDirectionIsPos = false;
-			camera.shiftHorizontal = true;
-			camera.timer_ms_x = 0;
-		}
-	}
-	else
-		lastRestingPlayerPos = playerMotion.position;
-
-	if (camera.shiftHorizontal && abs(lastRestingPlayerPos.x - playerMotion.position.x) < 32.f)
-	{
-		// Don't adjust camera if little steps are taken to allow small position adjustments without disorienting the user
-	}
-	else
-	{
-		// inerpolate camera "position" to get smooth movement
-		float nextLeft = (playerMotion.position.x + playerMotion.velocity.x * 2.f * elapsed_time_ms / 1000.f - (screen_width / 2.0)) + camera.xOffset;
-		if (camera.timer_ms_x / camera.timer_stop_ms < 1.f)
-			left = left + (nextLeft - left) * (camera.timer_ms_x / camera.timer_stop_ms);
-		else
-		{
-			left = nextLeft;
-			camera.timer_ms_x = 0.f;
-		}
-
-		camera.timer_ms_x += elapsed_time_ms;
-		camera.shiftHorizontal = false;
-	}
-
-	// handle y-position changes
-	float nextTop = (playerMotion.position.y - (screen_height / 2.0));
-	float verticalDiff = abs(nextTop - top);
-
-	if (verticalDiff > (screen_height / 3.f - 60.f))  // this comparison depends on how we set up the level (may need to adjust)
-		camera.shiftVertical = true;
-
-	if (camera.shiftVertical)
-	{
-		top = top + (nextTop - top) * (camera.timer_ms_y / camera.timer_stop_ms); // interpolate for smooth movement
-		camera.timer_ms_y += 2.f * elapsed_time_ms;
-
-		if (camera.timer_ms_y / camera.timer_stop_ms >= 1 || verticalDiff < 1)  // takes too long if we wait for it to be exactly 0
-		{
-			top = nextTop;
-			camera.shiftVertical = false;
-			camera.timer_ms_y = 0.f;
-		}
-	}
-
-	// bound camera to level boundaries
-	left = max<float>(left, 0);
-	right = min<float>(left + screen_width, window_width_px * 1.f);
-	if (right == window_width_px * 1.f)
-		left = right - screen_width;
-
-	top = max(top, 0.f);
-	bottom = min<float>(top + screen_height, window_height_px * 1.f);
-	if (bottom == window_height_px * 1.f)
-		top = bottom - screen_height;
-
-	camera.left = left;
-	camera.top = top;
-	camera.right = right;
-	camera.bottom = bottom;
-
-	gl_has_errors();
-
 	float sx = 2.f / (right - left);
 	float sy = 2.f / (top - bottom);
 	float tx = -(right + left) / (right - left);
@@ -446,17 +387,17 @@ void RenderSystem::resetCamera(vec2 defaultPos)
 	if (camera.bottom == window_height_px * 1.f)
 		camera.top = camera.bottom - screen_height_px;
 	*/
-	camera.left = 0.f;
-	camera.top = 0.f;
-	camera.right = camera.left + screen_width;
-	camera.bottom = camera.top + screen_height;
+	playerCamera.left = 0.f;
+	playerCamera.top = 0.f;
+	playerCamera.right = playerCamera.left + screen_width;
+	playerCamera.bottom = playerCamera.top + screen_height;
 
-	camera.timer_ms_x = 0.f;
-	camera.timer_ms_y = 0.f;
+	playerCamera.timer_ms_x = 0.f;
+	playerCamera.timer_ms_y = 0.f;
 }
 
 vec4 RenderSystem::getCameraBounds() {
-	return { camera.left, camera.top, camera.right, camera.bottom };
+	return { playerCamera.left, playerCamera.top, playerCamera.right, playerCamera.bottom };
 }
 
 void RenderSystem::resetSpriteSheetTracker() {
@@ -524,4 +465,110 @@ void RenderSystem::updateSpriteSheetGeometryBuffer(SpriteSheet& sheet) {
 	// Counterclockwise as it's the default opengl front winding direction.
 	const std::vector<uint16_t> textured_indices = { 0, 3, 1, 1, 3, 2 };
 	bindVBOandIBO(sheet.bufferId, textured_vertices, textured_indices);
+}
+
+void RenderSystem::updateCameraBounds(float elapsed_time_ms)
+{
+	if (debugging.in_full_view_mode) {
+		screen_width = window_width_px;
+		screen_height = window_height_px;
+	}
+	else {
+		screen_width = screen_width_px;
+		screen_height = screen_height_px;
+	}
+	// Set projection matrix to define camera bounds
+	float left = playerCamera.left;
+	float top = playerCamera.top;
+	float right = playerCamera.right;
+	float bottom = playerCamera.bottom;
+
+	Motion& playerMotion = registry.motions.get(registry.players.entities[0]);
+
+	// handle x-position of camera
+	if (playerMotion.velocity.x > 0) {
+		playerCamera.xOffset = 100.f;
+		if (!lastPlayerDirectionIsPos)
+		{
+			lastPlayerDirectionIsPos = true;
+			playerCamera.shiftHorizontal = true;
+			playerCamera.timer_ms_x = 0;
+		}
+	}
+	else if (playerMotion.velocity.x < 0) {
+		playerCamera.xOffset = -100.f;
+		if (lastPlayerDirectionIsPos)
+		{
+			lastPlayerDirectionIsPos = false;
+			playerCamera.shiftHorizontal = true;
+			playerCamera.timer_ms_x = 0;
+		}
+	}
+	else
+		lastRestingPlayerPos = playerMotion.position;
+
+	if (playerCamera.shiftHorizontal && abs(lastRestingPlayerPos.x - playerMotion.position.x) < 32.f)
+	{
+		// Don't adjust camera if little steps are taken to allow small position adjustments without disorienting the user
+	}
+	else
+	{
+		// inerpolate camera "position" to get smooth movement
+		float nextLeft = (playerMotion.position.x + playerMotion.velocity.x * 2.f * elapsed_time_ms / 1000.f - (screen_width / 2.0)) + playerCamera.xOffset;
+
+		
+		if (playerCamera.timer_ms_x / playerCamera.timer_stop_ms < 1.f)
+			left = left + (nextLeft - left) * (playerCamera.timer_ms_x / playerCamera.timer_stop_ms);
+		else
+		{
+			left = nextLeft;
+			playerCamera.timer_ms_x = 0.f;
+		}
+
+		playerCamera.timer_ms_x += elapsed_time_ms;
+		playerCamera.shiftHorizontal = false;
+	}
+
+	// handle y-position changes
+	float nextTop = (playerMotion.position.y - (screen_height / 2.0));
+	float verticalDiff = abs(nextTop - top);
+
+	if (verticalDiff > (screen_height / 3.f - 60.f))  // this comparison depends on how we set up the level (may need to adjust)
+		playerCamera.shiftVertical = true;
+
+	if (playerCamera.shiftVertical)
+	{
+		top = top + (nextTop - top) * (playerCamera.timer_ms_y / playerCamera.timer_stop_ms); // interpolate for smooth movement
+		playerCamera.timer_ms_y += 2.f * elapsed_time_ms;
+
+		if (playerCamera.timer_ms_y / playerCamera.timer_stop_ms >= 1 || verticalDiff < 1)  // takes too long if we wait for it to be exactly 0
+		{
+			top = nextTop;
+			playerCamera.shiftVertical = false;
+			playerCamera.timer_ms_y = 0.f;
+		}
+	}
+
+	// bound camera to level boundaries
+	vec4 clampedBounds = clampCam(left, top);
+
+	playerCamera.left = clampedBounds[0];
+	playerCamera.top = clampedBounds[1];
+	playerCamera.right = clampedBounds[2];
+	playerCamera.bottom = clampedBounds[3];
+}
+
+vec4 RenderSystem::clampCam(float left, float top) 
+{
+	left = max<float>(left, 0);
+	float right = min<float>(left + screen_width, window_width_px * 1.f);
+	if (right == window_width_px * 1.f)
+		left = right - screen_width;
+
+	top = max(top, 0.f);
+	float bottom = min<float>(top + screen_height, window_height_px * 1.f);
+	if (bottom == window_height_px * 1.f)
+		top = bottom - screen_height;
+
+	return { left, top, right, bottom };
 }
