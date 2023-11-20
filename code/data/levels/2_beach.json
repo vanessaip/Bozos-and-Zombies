@@ -38,16 +38,16 @@
         "position": {"x": 720, "y": 760}
     },
     "zombies": {
-        "zombie_positions": [
-          {"x": 1200, "y": 600},
-          {"x": 1200, "y": 50}
-        ]
+        "num_starting": 2,
+        "positions": [{"x": 1200, "y": 600},
+        {"x": 1200, "y": 50}],
+        "spawn_timer": null
     },
     "students": {
-        "student_positions": [
-          {"x": 550, "y": 290},
-          {"x": 1300, "y": 350}
-        ]
+        "num_starting": 2,
+        "positions": [{"x": 550, "y": 290},
+        {"x": 1300, "y": 350}],
+        "spawn_timer": null
     },
     "collectibles": {
         "scale": {"x": 30, "y":30},
@@ -61,6 +61,5 @@
         ]
     },
     "bgm": "beach.wav",
-    "door_win_pos": {"x": 100, "y": 754},
-    "total_collectables": 6
+    "door_win_pos": {"x": 100, "y": 754}
 }

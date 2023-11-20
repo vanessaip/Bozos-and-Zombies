@@ -11,6 +11,9 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
+// level loading
+#include<json/json.h>
+
 #include "render_system.hpp"
 
 // Container for all our entities and game logic. Individual rendering / update is
@@ -59,7 +62,7 @@ private:
 	void updateWheelRotation(float elapsed_ms_since_last_update);
 
 	// restart level
-	void restart_game();
+	void restart_level();
 
 	// OpenGL window handle
 	GLFWwindow* window;
@@ -69,7 +72,6 @@ private:
 
 	// Game state
 	RenderSystem* renderer;
-	float current_speed;
 	Entity player_bozo;
 	Entity player_bozo_pointer;
 	float enemySpawnTimer = 0.f;
@@ -88,6 +90,7 @@ private:
 
 	// Level definitions
 	int curr_level = 0;
+	Json::Value jsonData;
 	vec2 bozo_start_pos;
 	std::vector<vec2> zombie_spawn_pos;
 	std::vector<vec2> npc_spawn_pos;
@@ -97,6 +100,11 @@ private:
 	float PLATFORM_HEIGHT;
   vec2 door_win_pos;
   int total_collectables;
+	bool zombie_spawn_on;
+	bool student_spawn_on;
+	float zombie_spawn_threshold;
+	float student_spawn_threshold;
+	uint num_collectibles;
 
 	// music references
 	Mix_Music* background_music;

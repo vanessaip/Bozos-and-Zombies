@@ -110,7 +110,6 @@ struct Collision
 struct Debug
 {
 	bool in_full_view_mode = 0;
-	bool in_freeze_mode = 0;
 };
 extern Debug debugging;
 

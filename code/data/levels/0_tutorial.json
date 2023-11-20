@@ -61,14 +61,18 @@
         "position": {"x": 1240, "y": 760}
     },
     "zombies": {
-        "zombie_positions": [
+        "num_starting": 1,
+        "positions": [
             {"x": 50, "y": 740}
-        ]
+        ],
+        "spawn_timer": null
     },
     "students": {
-        "student_positions": [
+        "num_starting": 1,
+        "positions": [
             {"x": 570, "y": 380}
-        ]
+        ],
+        "spawn_timer": null
     },
     "collectibles": {
         "scale": {"x": 20, "y":20},
@@ -79,6 +83,5 @@
         ]
     },
     "bgm": "soundtrack.wav",
-    "door_win_pos": {"x": 710, "y": 747},
-    "total_collectables": 3
+    "door_win_pos": {"x": 710, "y": 747}
 }
