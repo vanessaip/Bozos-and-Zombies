@@ -1,6 +1,8 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
 
+using Clock = std::chrono::high_resolution_clock;
+
 Entity createBozo(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
@@ -518,6 +520,8 @@ Entity createLabel(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_AS
 	motion.scale = scale;
 
 	registry.labels.emplace(entity);
+	Label& label = registry.labels.get(entity);
+	label.fading_timer = Clock::now();
 
 	registry.overlay.emplace(entity);
 

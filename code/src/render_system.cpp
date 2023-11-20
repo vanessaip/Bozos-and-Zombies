@@ -87,20 +87,15 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		gl_has_errors();
 
 		// Fading
-		GLint label_uloc = glGetUniformLocation(program, "label");
-		assert(label_uloc >= 0);
-
-		GLint time_uloc = glGetUniformLocation(program, "time");
-		assert(time_uloc >= 0);
-		glUniform1f(time_uloc, (float)(glfwGetTime()));
-
+		GLuint fade_timer_uloc = glGetUniformLocation(program, "fading_factor");
 		if (registry.labels.has(entity)) {
-			glUniform1i(label_uloc, 1);
+			Label& label = registry.labels.get(entity);
+			glUniform1f(fade_timer_uloc, label.fading_factor);
 		}
 		else {
-			glUniform1i(label_uloc, 0);
+			glUniform1f(fade_timer_uloc, 0.f);
 		}
-		gl_has_errors();
+
 	}
 
 	// FUTURE: won't need for now, could reuse if we end up having meshes
@@ -130,7 +125,8 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
 			gl_has_errors();
 		}
-	} else if (render_request.used_effect == EFFECT_ASSET_ID::WHEEL)
+	}
+	else if (render_request.used_effect == EFFECT_ASSET_ID::WHEEL)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_color_loc = glGetAttribLocation(program, "in_color");
@@ -138,12 +134,12 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		glEnableVertexAttribArray(in_position_loc);
 		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)0);
+			sizeof(ColoredVertex), (void*)0);
 		gl_has_errors();
 
 		glEnableVertexAttribArray(in_color_loc);
 		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)sizeof(vec3));
+			sizeof(ColoredVertex), (void*)sizeof(vec3));
 		gl_has_errors();
 
 		if (render_request.used_effect == EFFECT_ASSET_ID::WHEEL)

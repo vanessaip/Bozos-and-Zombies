@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <cassert>
 #include "../ext/stb_image/stb_image.h"
+#include <chrono>
 
 // Player component
 struct Player
@@ -227,7 +228,8 @@ struct Dangerous
 
 struct Label
 {
-
+	float fading_factor = 1.f;
+	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
 };
 
 /**

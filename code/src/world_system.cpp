@@ -9,6 +9,9 @@
 #include <iostream>
 #include <string.h>
 #include <fstream>
+#include <chrono>
+
+using Clock = std::chrono::high_resolution_clock;
 
 // level loading
 #include<json/json.h>
@@ -595,6 +598,27 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// reduce window brightness if any of the present salmons is dying
 	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
 
+
+
+	for (Entity entity : registry.labels.entities)
+	{
+		// progress timer, make the rotation happening based on time
+		// Set fading factor 
+		Label& label = registry.labels.get(entity);
+		auto now = Clock::now();
+
+		float elapsed_ms =
+			(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - label.fading_timer)).count() / 1000;
+
+		if (elapsed_ms > 3000.f)
+		{
+			registry.remove_all_components_of(entity);
+			break;
+		}
+		label.fading_factor = cos(0.0005 * elapsed_ms);
+	}
+
+
 	// update keyframe animated entity motions
 	for (Entity entity : registry.keyframeAnimations.entities)
 	{
@@ -1026,9 +1050,6 @@ void WorldSystem::restart_game()
 		createBackground(renderer, id);
 	}
 
-	// Create label
-	createLabel(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[curr_level]);
-
 	if (curr_level == 1)
 		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f }); // egg
 
@@ -1142,6 +1163,9 @@ void WorldSystem::restart_game()
 	Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
 
 	player_hearts = { heart0, heart1, heart2, heart3, heart4 };
+
+	// Create label
+	Entity label = createLabel(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[curr_level]);
 
 	setup_keyframes(renderer);
 
