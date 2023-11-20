@@ -10,9 +10,6 @@
 #include <string.h>
 #include <fstream>
 
-// level loading
-#include<json/json.h>
-
 #include "physics_system.hpp"
 
 // Game configuration
@@ -189,7 +186,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
 
-	if (enemySpawnTimer / 1000.f > 25 && spawn_on && curr_level != 0) {
+	if (zombie_spawn_on && enemySpawnTimer / 1000.f > zombie_spawn_threshold) {
 		vec2 enemySpawnPos;
 		for (int i = 0; i < zombie_spawn_pos.size(); i++)  // try a few times
 		{
@@ -216,7 +213,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 
-	if (npcSpawnTimer / 1000.f > 10 && spawn_on && curr_level != 0) {
+	if (student_spawn_on && npcSpawnTimer / 1000.f > student_spawn_threshold && curr_level != 0) {
 		vec2 npcSpawnPos;
 		for (int i = 0; i < npc_spawn_pos.size(); i++)  // try a few times
 		{
@@ -1003,7 +1000,6 @@ void WorldSystem::restart_game()
 
 	// load from json
 	std::ifstream file(LEVEL_DESCRIPTORS[curr_level]);
-	Json::Value jsonData;
 	file >> jsonData;
 
 	// update BGM
@@ -1090,8 +1086,6 @@ void WorldSystem::restart_game()
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, bozo_start_pos);
 	registry.colors.insert(player_bozo, { 1, 0.8f, 0.8f });
-	Motion& bozo_motion = registry.motions.get(player_bozo);
-	bozo_motion.velocity = { 0.f, 0.f };
 
 	// Create aiming arrow for player
 	player_bozo_pointer = createBozoPointer(renderer, { 200, 500 });
@@ -1103,6 +1097,13 @@ void WorldSystem::restart_game()
 		zombie_spawn_pos.push_back(pos);
 		createZombie(renderer, pos);
 	}
+	// Set zombie spawn timer if not null
+	if (jsonData["zombies"]["spawn_timer"]) {
+		zombie_spawn_threshold = jsonData["zombies"]["spawn_timer"].asFloat();
+		zombie_spawn_on = true;
+	} else {
+		zombie_spawn_on = false;
+	}
 
 	// Create students
 	npc_spawn_pos.clear();
@@ -1113,6 +1114,13 @@ void WorldSystem::restart_game()
 		// coded back+forth motion
 		Motion& student_motion = registry.motions.get(student);
 		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+	}
+	// Set student spawn timer if not null
+	if (jsonData["students"]["spawn_timer"]) {
+		student_spawn_threshold = jsonData["students"]["spawn_timer"].asFloat();
+		student_spawn_on = true;
+	} else {
+		student_spawn_on = false;
 	}
 
 	// Place collectibles

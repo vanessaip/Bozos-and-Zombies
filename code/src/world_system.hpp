@@ -11,6 +11,9 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
+// level loading
+#include<json/json.h>
+
 #include "render_system.hpp"
 
 // Container for all our entities and game logic. Individual rendering / update is
@@ -88,6 +91,7 @@ private:
 
 	// Level definitions
 	int curr_level = 0;
+	Json::Value jsonData;
 	vec2 bozo_start_pos;
 	std::vector<vec2> zombie_spawn_pos;
 	std::vector<vec2> npc_spawn_pos;
@@ -95,6 +99,10 @@ private:
 	std::vector<std::vector<float>> ladder_positions;
 	float PLATFORM_WIDTH;
 	float PLATFORM_HEIGHT;
+	bool zombie_spawn_on; // can toggle spawning for debugging here
+	bool student_spawn_on;
+	float zombie_spawn_threshold;
+	float student_spawn_threshold;
 
 	// music references
 	Mix_Music* background_music;
@@ -113,6 +121,6 @@ private:
 	vec2 relativePos(vec2 mouse_position);
 
 	// Debugging
-	bool spawn_on = true;
+	// bool spawn_on = true;
 
 };
