@@ -57,6 +57,12 @@ struct Book
 	bool offHand = true;
 };
 
+struct Door
+{
+	float fading_factor = 0.f;
+	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
+};
+
 // All data relevant to the shape and motion of entities
 struct Motion
 {
@@ -224,7 +230,12 @@ struct Overlay
 
 struct Dangerous
 {
-
+	vec2 p0;
+	vec2 p1;
+	vec2 p2;
+	vec2 p3;
+	bool cubic;
+	float bezier_time = 0;
 };
 
 struct Label
@@ -331,7 +342,9 @@ enum class TEXTURE_ASSET_ID
 	BEACH_DIAMOND = BEACH_CHEST2 + 1,
 	BEACH_STAR = BEACH_DIAMOND + 1,
 	BEACH_COIN = BEACH_STAR + 1,
-	LIB_COLL1 = BEACH_COIN + 1,
+	WIN_DOOR = BEACH_COIN + 1,
+	BEACH_BIRD = WIN_DOOR + 1,
+	LIB_COLL1 = BEACH_BIRD + 1,
 	LIB_COLL2 = LIB_COLL1 + 1,
 	LIB_COLL3 = LIB_COLL2 + 1,
 	LIB_COLL4 = LIB_COLL3 + 1,

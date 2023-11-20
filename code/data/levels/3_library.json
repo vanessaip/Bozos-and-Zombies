@@ -181,5 +181,9 @@
       }
     ]
   },
-  "bgm": "library.wav"
+  "bgm": "library.wav",
+  "door_win_pos": {
+    "x": 100,
+    "y": 754
+  }
 }

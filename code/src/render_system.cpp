@@ -8,7 +8,7 @@
 float screen_width = screen_width_px;
 float screen_height = screen_width_px;
 
-static int bufferIds[50];
+int bufferIds[50];
 
 float previousLeft = 0.f;
 float currentLeft = 0.f;
@@ -94,6 +94,10 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		if (registry.labels.has(entity)) {
 			Label& label = registry.labels.get(entity);
 			glUniform1f(fade_timer_uloc, label.fading_factor);
+		}
+    else if (registry.doors.has(entity)) {
+			Door& door = registry.doors.get(entity);
+			glUniform1f(fade_timer_uloc, door.fading_factor);
 		}
 		else {
 			glUniform1f(fade_timer_uloc, 0.f);
@@ -397,15 +401,12 @@ vec4 RenderSystem::getCameraBounds() {
 }
 
 void RenderSystem::resetSpriteSheetTracker() {
-	RenderSystem::spriteSheetBuffersCount = geometry_count;
-	/* TODO (Justin): properly implement this later
 	std::fill_n(bufferIds, sizeof(bufferIds) / sizeof(int), -1);
 
 	for (int i = 0; i < geometry_count; i++)
 	{
 		bufferIds[i] = i;
 	}
-	*/
 }
 
 template <class T>
@@ -422,8 +423,9 @@ void RenderSystem::bindVBOandIBO(uint gid, std::vector<T> vertices, std::vector<
 }
 
 void RenderSystem::initializeSpriteSheet(Entity& entity, ANIMATION_MODE defaultMode, std::vector<int> spriteCounts, float switchTime, vec2 trunc) {
-	GLuint id = RenderSystem::spriteSheetBuffersCount + 1;
-	RenderSystem::spriteSheetBuffersCount++;
+	GLuint id = findFirstAvailableBufferSlot();
+	assert(id != -1);
+	bufferIds[id] = id;
 
 	SpriteSheet& sheet = registry.spriteSheets.emplace(entity, SpriteSheet(id, defaultMode, spriteCounts, switchTime, trunc));
 
@@ -567,4 +569,20 @@ vec4 RenderSystem::clampCam(float left, float top)
 		top = bottom - screen_height;
 
 	return { left, top, right, bottom };
+}
+
+int RenderSystem::findFirstAvailableBufferSlot()
+{
+	int size = sizeof(bufferIds) / sizeof(int);
+	for (int i = geometry_count; i < size; i++) 
+	{
+		if (bufferIds[i] == -1)
+			return i;
+	}
+	return -1;
+}
+
+void RenderSystem::deleteBufferId(int index) {
+	assert(index >= geometry_count && index < sizeof(bufferIds) / sizeof(int));
+	bufferIds[index] = -1;
 }
