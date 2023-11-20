@@ -70,7 +70,7 @@
     "students": {
         "num_starting": 1,
         "positions": [
-            {"x": 570, "y": 380}
+            {"x": 570, "y": 384}
         ],
         "spawn_timer": null
     },
