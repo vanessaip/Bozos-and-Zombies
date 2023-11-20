@@ -1406,6 +1406,10 @@ void WorldSystem::handle_collisions()
 						timer.direction = 1;
 					}
 					Mix_PlayChannel(-1, player_death_sound, 0);
+
+					// set sprite sheet animation to idle
+					SpriteSheet& spriteSheet = registry.spriteSheets.get(entity);
+					spriteSheet.updateAnimation(ANIMATION_MODE::IDLE);
 				}
 			}
 		}
