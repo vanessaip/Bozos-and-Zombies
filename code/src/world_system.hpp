@@ -76,8 +76,6 @@ private:
 	Entity player_bozo_pointer;
 	float enemySpawnTimer = 0.f;
 	float npcSpawnTimer = 0.f;
-	int npcSpawnIndex = 0;
-	int enemySpawnIndex = 0;
 	int max_level = 3;
 	float collectibles_collected_pos = 50;
 	int collectibles_collected = 0;
