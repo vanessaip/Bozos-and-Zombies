@@ -38,10 +38,14 @@
         "position": {"x": 720, "y": 760}
     },
     "zombies": {
-        "zombie_positions": [{"x": 1200, "y": 600}]
+        "num_starting": 0,
+        "positions": [{"x": 1200, "y": 600}],
+        "spawn_timer": null
     },
     "students": {
-        "student_positions": []
+        "num_starting": 0,
+        "positions": [],
+        "spawn_timer": null
     },
     "collectibles": {
         "scale": {"x": 30, "y":30},

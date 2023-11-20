@@ -13,9 +13,6 @@
 
 using Clock = std::chrono::high_resolution_clock;
 
-// level loading
-#include<json/json.h>
-
 #include "physics_system.hpp"
 
 // Game configuration
@@ -152,24 +149,41 @@ GLFWwindow* WorldSystem::create_window()
 void WorldSystem::init(RenderSystem* renderer_arg)
 {
 	this->renderer = renderer_arg;
-	// Playing background music indefinitely
-	Mix_PlayMusic(background_music, -1);
-	fprintf(stderr, "Loaded music\n");
-	Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
 
-	// Set all states to default
-	restart_game();
+	Json::Value save_state;
+	std::ifstream file(level_path("save_state.json"));
+	file >> save_state;
+	curr_level = save_state["current_level"].asInt();
+	// Set all states to default for current level
+	restart_level();
 }
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
-	if (registry.zombies.entities.size() < 1 && collectibles_collected > 5 && this->game_over == false) {
-		// restart_game(); // level is over
+	if (registry.zombies.entities.size() < 1 && (num_collectibles > 0 && collectibles_collected >= num_collectibles) && this->game_over == false) {
 		createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
 		this->game_over = true;
 		debugging.in_full_view_mode = true;
 		printf("You win!\n");
+		
+		// press a key to transition to next level?
+		// option to retry level? (display current and high scores?)
+
+		// save level                                                                                                                                                                                                                     
+		Json::Value save;
+		save["current_level"] = curr_level + 1 > max_level ? 0 : curr_level + 1;
+		Json::StreamWriterBuilder writer;
+		std::string jsonString = Json::writeString(writer, save);
+	
+		std::ofstream outputFile(level_path("save_state.json"));
+		if (outputFile.is_open()) {
+			outputFile << jsonString;
+			outputFile.close();
+			printf("data written to save_state.json\n");
+		} else {
+			printf("ERROR: unable to open save_state.json for writing\n");
+		}
 	}
 
 	// Updating window title with points
@@ -192,7 +206,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
 
-	if (enemySpawnTimer / 1000.f > 25 && spawn_on && curr_level != 0) {
+	if (zombie_spawn_on && enemySpawnTimer / 1000.f > zombie_spawn_threshold && spawn_on) {
 		vec2 enemySpawnPos;
 		for (int i = 0; i < zombie_spawn_pos.size(); i++)  // try a few times
 		{
@@ -219,7 +233,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 
-	if (npcSpawnTimer / 1000.f > 10 && spawn_on && curr_level != 0) {
+	if (student_spawn_on && npcSpawnTimer / 1000.f > student_spawn_threshold && spawn_on) {
 		vec2 npcSpawnPos;
 		for (int i = 0; i < npc_spawn_pos.size(); i++)  // try a few times
 		{
@@ -557,7 +571,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		{
 			registry.deathTimers.remove(entity);
 			screen.screen_darken_factor = 0;
-			restart_game();
+			restart_level();
 			return true;
 		}
 	}
@@ -1015,7 +1029,7 @@ void WorldSystem::updateWheelRotation(float elapsed_ms_since_last_update)
 }
 
 // Reset the world state to its initial state
-void WorldSystem::restart_game()
+void WorldSystem::restart_level()
 {
 	this->game_over = false;
 	// Debugging for memory/component leaks
@@ -1023,7 +1037,6 @@ void WorldSystem::restart_game()
 	printf("Restarting\n");
 
 	// Reset the game state variables
-	current_speed = 1.f;
 	enemySpawnTimer = 0.f;
 	npcSpawnTimer = 0.f;
 	collectibles_collected_pos = 50.f;
@@ -1042,7 +1055,6 @@ void WorldSystem::restart_game()
 
 	// load from json
 	std::ifstream file(LEVEL_DESCRIPTORS[curr_level]);
-	Json::Value jsonData;
 	file >> jsonData;
 
 	// update BGM
@@ -1113,9 +1125,9 @@ void WorldSystem::restart_game()
 	}
 
 	// Create spikes
-	for (const auto& pos : jsonData["spikes"]) {
-		Entity spike = createSpike(renderer, { pos["x"].asFloat(), pos["y"].asFloat() });
-		registry.colors.insert(spike, { 0.5f, 0.5f, 0.5f });
+	for (const auto& spikeData : jsonData["spikes"]) {
+		Entity spike = createSpike(renderer, {spikeData["x"].asFloat(), spikeData["y"].asFloat()});
+		registry.colors.insert(spike, { spikeData["colour"][0].asFloat(), spikeData["colour"][1].asFloat(), spikeData["colour"][2].asFloat() });
 	}
 
 	// Create wheels
@@ -1129,37 +1141,62 @@ void WorldSystem::restart_game()
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, bozo_start_pos);
 	registry.colors.insert(player_bozo, { 1, 0.8f, 0.8f });
-	Motion& bozo_motion = registry.motions.get(player_bozo);
-	bozo_motion.velocity = { 0.f, 0.f };
 
 	// Create aiming arrow for player
 	player_bozo_pointer = createBozoPointer(renderer, { 200, 500 });
 
 	// Create zombies
 	zombie_spawn_pos.clear();
-	for (const auto& zombie_pos : jsonData["zombies"]["zombie_positions"]) {
-		vec2 pos = { zombie_pos["x"].asFloat(), zombie_pos["y"].asFloat() };
+	uint num_starting_zombies = jsonData["zombies"]["num_starting"].asInt(); // so that zombie positions are separate from how many start
+	assert(num_starting_zombies <= jsonData["zombies"]["positions"].size());
+	uint z = 0;
+	for (const auto& zombie_pos : jsonData["zombies"]["positions"]) {
+		vec2 pos = {zombie_pos["x"].asFloat(), zombie_pos["y"].asFloat()};
 		zombie_spawn_pos.push_back(pos);
-		createZombie(renderer, pos);
+		if (z < num_starting_zombies) {
+			createZombie(renderer, pos);
+		}
+		z++;
+	}
+	// Set zombie spawn timer if not null
+	if (jsonData["zombies"]["spawn_timer"]) {
+		zombie_spawn_threshold = jsonData["zombies"]["spawn_timer"].asFloat();
+		zombie_spawn_on = true;
+	} else {
+		zombie_spawn_on = false;
 	}
 
 	// Create students
 	npc_spawn_pos.clear();
-	for (const auto& student_pos : jsonData["students"]["student_positions"]) {
-		vec2 pos = { student_pos["x"].asFloat(), student_pos["y"].asFloat() };
+	uint num_starting_students = jsonData["students"]["num_starting"].asInt();
+	assert(num_starting_students <= jsonData["students"]["positions"].size());
+	uint s = 0;
+	for (const auto& student_pos : jsonData["students"]["positions"]) {
+		vec2 pos = {student_pos["x"].asFloat(), student_pos["y"].asFloat()};
 		npc_spawn_pos.push_back(pos);
-		Entity student = createStudent(renderer, pos, NPC_ASSET[curr_level]);
-		// coded back+forth motion
-		Motion& student_motion = registry.motions.get(student);
-		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+		if (s < num_starting_students) {
+			Entity student = createStudent(renderer, pos, NPC_ASSET[curr_level]);
+			// coded back+forth motion
+			Motion& student_motion = registry.motions.get(student);
+			student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+		}
+		s++;
+	}
+	// Set student spawn timer if not null
+	if (jsonData["students"]["spawn_timer"]) {
+		student_spawn_threshold = jsonData["students"]["spawn_timer"].asFloat();
+		student_spawn_on = true;
+	} else {
+		student_spawn_on = false;
 	}
 
 	// Place collectibles
-	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[curr_level];
 	const Json::Value& collectiblesPositions = jsonData["collectibles"]["positions"];
-	vec2 collectible_scale = { jsonData["collectibles"]["scale"]["x"].asFloat(), jsonData["collectibles"]["scale"]["y"].asFloat() };
-	assert(collectiblesPositions.size() == collectible_assets.size());
-	for (uint i = 0; i < collectiblesPositions.size(); i++) {
+	num_collectibles = collectiblesPositions.size(); // set number of collectibles
+	vec2 collectible_scale = {jsonData["collectibles"]["scale"]["x"].asFloat(), jsonData["collectibles"]["scale"]["y"].asFloat()};
+	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[curr_level];
+	assert(num_collectibles == collectible_assets.size());
+	for (uint i = 0; i < num_collectibles; i++) {
 		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false);
 	}
 
@@ -1423,7 +1460,8 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			if (curr_level > max_level) {
 				curr_level = 0;
 			}
-			restart_game();
+
+			restart_level();
 		}
 	}
 
@@ -1481,7 +1519,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
 
-		restart_game();
+		restart_level();
 	}
 
 	// Debugging
@@ -1492,19 +1530,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		else
 			debugging.in_full_view_mode = true;
 	}
-
-	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA)
-	{
-		current_speed -= 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
-	{
-		current_speed += 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	current_speed = fmax(0.f, current_speed);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position)
