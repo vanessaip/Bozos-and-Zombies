@@ -88,5 +88,6 @@
             {"x": 350, "y": 770}
         ]
     },
-    "bgm": "soundtrack.wav"
+    "bgm": "soundtrack.wav",
+    "door_win_pos": {"x": 700, "y": 754}
 }

@@ -50,5 +50,6 @@
         "scale": {"x": 30, "y":30},
         "positions": []
     },
-    "bgm": "library.wav"
+    "bgm": "library.wav",
+    "door_win_pos": {"x": 100, "y": 754}
 }
