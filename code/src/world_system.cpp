@@ -264,7 +264,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		bool isBook = registry.books.has(motion_container.entities[i]);
 
 		updateWheelRotation(elapsed_ms_since_last_update);
-		
+
 		if (isPlayer && !registry.deathTimers.has(motion_container.entities[i]))
 		{
 			motion.velocity[0] = 0;
@@ -963,15 +963,15 @@ bool WorldSystem::isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& mot
 
 void WorldSystem::updateWheelRotation(float elapsed_ms_since_last_update)
 {
-    for (Entity wheel : registry.wheels.entities)
-    {
-        Motion& wheelMotion = registry.motions.get(wheel);
-        const float rotationSpeed = 0.001f; 
-        if (wheelMotion.velocity.x < 0)
-            wheelMotion.angle += rotationSpeed * elapsed_ms_since_last_update;
-        else if (wheelMotion.velocity.x > 0)
-            wheelMotion.angle -= rotationSpeed * elapsed_ms_since_last_update;
-    }
+	for (Entity wheel : registry.wheels.entities)
+	{
+		Motion& wheelMotion = registry.motions.get(wheel);
+		const float rotationSpeed = 0.001f;
+		if (wheelMotion.velocity.x < 0)
+			wheelMotion.angle += rotationSpeed * elapsed_ms_since_last_update;
+		else if (wheelMotion.velocity.x > 0)
+			wheelMotion.angle -= rotationSpeed * elapsed_ms_since_last_update;
+	}
 }
 
 // Reset the world state to its initial state
@@ -1015,7 +1015,7 @@ void WorldSystem::restart_game()
 	PLATFORM_HEIGHT = jsonData["platform_scale"]["y"].asFloat();
 
 	const Json::Value& playerData = jsonData["player"];
-	bozo_start_pos = {playerData["position"]["x"].asFloat(), playerData["position"]["y"].asFloat()};
+	bozo_start_pos = { playerData["position"]["x"].asFloat(), playerData["position"]["y"].asFloat() };
 
 	// reset camera on restart
 	renderer->resetCamera(bozo_start_pos);
@@ -1025,6 +1025,9 @@ void WorldSystem::restart_game()
 	for (TEXTURE_ASSET_ID id : BACKGROUND_ASSET[curr_level]) {
 		createBackground(renderer, id);
 	}
+
+	// Create label
+	createLabel(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[curr_level]);
 
 	if (curr_level == 1)
 		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f }); // egg
@@ -1045,12 +1048,12 @@ void WorldSystem::restart_game()
 	}
 
 	for (const auto& platform_data : jsonData["platforms"]) {
-		createPlatforms(renderer, platform_data["x"].asFloat(), platform_data["y"].asFloat(), platform_data["num_tiles"].asInt(), PLATFORM_ASSET[curr_level], platform_data["visible"].asBool(), {PLATFORM_WIDTH, PLATFORM_HEIGHT});
+		createPlatforms(renderer, platform_data["x"].asFloat(), platform_data["y"].asFloat(), platform_data["num_tiles"].asInt(), PLATFORM_ASSET[curr_level], platform_data["visible"].asBool(), { PLATFORM_WIDTH, PLATFORM_HEIGHT });
 	}
 
 	// Create stairs
 	for (const auto& steps_data : jsonData["stairs"]) {
-		createSteps(renderer, {steps_data["x"].asFloat(), steps_data["y"].asFloat()}, {steps_data["scale_x"].asFloat(), steps_data["scale_y"].asFloat()}, steps_data["num_steps"].asInt(), steps_data["step_blocks"].asInt(), steps_data["left"].asBool());
+		createSteps(renderer, { steps_data["x"].asFloat(), steps_data["y"].asFloat() }, { steps_data["scale_x"].asFloat(), steps_data["scale_y"].asFloat() }, steps_data["num_steps"].asInt(), steps_data["step_blocks"].asInt(), steps_data["left"].asBool());
 	}
 
 	// Create walls
@@ -1066,7 +1069,7 @@ void WorldSystem::restart_game()
 	ladder_positions.clear();
 	for (const auto levelPoints : jsonData["zombie_climb_points"]) {
 		std::vector<float> level_climb_points;
-		for (const auto point: levelPoints) {
+		for (const auto point : levelPoints) {
 			level_climb_points.push_back(point.asFloat());
 		}
 		ladder_positions.push_back(level_climb_points);
@@ -1074,16 +1077,16 @@ void WorldSystem::restart_game()
 
 	// Create spikes
 	for (const auto& pos : jsonData["spikes"]) {
-		Entity spike = createSpike(renderer, {pos["x"].asFloat(), pos["y"].asFloat()});
+		Entity spike = createSpike(renderer, { pos["x"].asFloat(), pos["y"].asFloat() });
 		registry.colors.insert(spike, { 0.5f, 0.5f, 0.5f });
 	}
 
 	// Create wheels
 	for (const auto& data : jsonData["wheels"]) {
-		Entity wheel = createWheel(renderer, {data["position"][0].asFloat(), data["position"][1].asFloat()}); 
-		registry.colors.insert(wheel, {data["colour"][0].asFloat(), data["colour"][1].asFloat(), data["colour"][2].asFloat()});
-   		Motion& motion1 = registry.motions.get(wheel);
-    	motion1.velocity = {data["velocity"][0].asFloat(), data["velocity"][1].asFloat()}; 
+		Entity wheel = createWheel(renderer, { data["position"][0].asFloat(), data["position"][1].asFloat() });
+		registry.colors.insert(wheel, { data["colour"][0].asFloat(), data["colour"][1].asFloat(), data["colour"][2].asFloat() });
+		Motion& motion1 = registry.motions.get(wheel);
+		motion1.velocity = { data["velocity"][0].asFloat(), data["velocity"][1].asFloat() };
 	}
 
 	// Create a new Bozo player
@@ -1098,7 +1101,7 @@ void WorldSystem::restart_game()
 	// Create zombies
 	zombie_spawn_pos.clear();
 	for (const auto& zombie_pos : jsonData["zombies"]["zombie_positions"]) {
-		vec2 pos = {zombie_pos["x"].asFloat(), zombie_pos["y"].asFloat()};
+		vec2 pos = { zombie_pos["x"].asFloat(), zombie_pos["y"].asFloat() };
 		zombie_spawn_pos.push_back(pos);
 		createZombie(renderer, pos);
 	}
@@ -1106,7 +1109,7 @@ void WorldSystem::restart_game()
 	// Create students
 	npc_spawn_pos.clear();
 	for (const auto& student_pos : jsonData["students"]["student_positions"]) {
-		vec2 pos = {student_pos["x"].asFloat(), student_pos["y"].asFloat()};
+		vec2 pos = { student_pos["x"].asFloat(), student_pos["y"].asFloat() };
 		npc_spawn_pos.push_back(pos);
 		Entity student = createStudent(renderer, pos, NPC_ASSET[curr_level]);
 		// coded back+forth motion
@@ -1117,11 +1120,11 @@ void WorldSystem::restart_game()
 	// Place collectibles
 	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[curr_level];
 	const Json::Value& collectiblesPositions = jsonData["collectibles"]["positions"];
-	vec2 collectible_scale = {jsonData["collectibles"]["scale"]["x"].asFloat(), jsonData["collectibles"]["scale"]["y"].asFloat()};
+	vec2 collectible_scale = { jsonData["collectibles"]["scale"]["x"].asFloat(), jsonData["collectibles"]["scale"]["y"].asFloat() };
 	assert(collectiblesPositions.size() == collectible_assets.size());
 	for (uint i = 0; i < collectiblesPositions.size(); i++) {
 		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false);
-	}                                                                                                                                                                                                                                                                                                               
+	}
 
 	// This is specific to the beach level
 	if (curr_level == 2) {
@@ -1139,10 +1142,6 @@ void WorldSystem::restart_game()
 	Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
 
 	player_hearts = { heart0, heart1, heart2, heart3, heart4 };
-
-
-	// Create label
-	Entity Label = createLabel(renderer, { 100, 600 }, { 150 , 75 });
 
 	setup_keyframes(renderer);
 
@@ -1384,7 +1383,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			if (curr_level > max_level) {
 				curr_level = 0;
 			}
-
 			restart_game();
 		}
 	}

@@ -38,7 +38,7 @@ public:
 	ComponentContainer<TextBox> textboxes;
 	ComponentContainer<Collectible> collectible;
 	ComponentContainer<Overlay> overlay;
-  ComponentContainer<Dangerous> dangerous;
+	ComponentContainer<Dangerous> dangerous;
 	ComponentContainer<Label> labels;
 
 	// constructor that adds all containers for looping over them
@@ -71,7 +71,7 @@ public:
 		registry_list.push_back(&collectible);
 		registry_list.push_back(&overlay);
 		registry_list.push_back(&lostLifeTimer);
-    registry_list.push_back(&dangerous);
+		registry_list.push_back(&dangerous);
 		registry_list.push_back(&labels);
 	}
 

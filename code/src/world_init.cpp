@@ -504,7 +504,7 @@ Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale) {
 	return entity;
 }
 
-Entity createLabel(RenderSystem* renderer, vec2 position, vec2 scale) {
+Entity createLabel(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID) {
 	// Reserve en entity
 	auto entity = Entity();
 
@@ -523,7 +523,7 @@ Entity createLabel(RenderSystem* renderer, vec2 position, vec2 scale) {
 
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::LABEL_NEST,
+		{ assetID,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 	return entity;
