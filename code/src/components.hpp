@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <cassert>
 #include "../ext/stb_image/stb_image.h"
+#include <chrono>
 
 // Player component
 struct Player
@@ -225,6 +226,12 @@ struct Dangerous
 
 };
 
+struct Label
+{
+	float fading_factor = 1.f;
+	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -307,7 +314,11 @@ enum class TEXTURE_ASSET_ID
 	LIBRARY_FILL = LIBRARY_OBJECTS + 1,
 	LIBRARY_PLAT = LIBRARY_FILL + 1,
 	LIBRARY_LAD = LIBRARY_PLAT + 1,
-	TEXTURE_COUNT = LIBRARY_LAD + 1
+	LABEL_NEST = LIBRARY_LAD + 1,
+	LABEL_BEACH = LABEL_NEST + 1,
+	LABEL_LIB = LABEL_BEACH + 1,
+	LABEL_TUTORIAL = LABEL_LIB + 1,
+	TEXTURE_COUNT = LABEL_TUTORIAL + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
