@@ -69,10 +69,10 @@ void removeEntity(Entity e);
 // Index 0 is level 1, index 1 is level 2 etc.
 
 enum level {
-  TUTORIAL = 0,
-  NEST = 1,
-  BEACH = 2,
-  LIBRARY = 3
+	TUTORIAL = 0,
+	NEST = 1,
+	BEACH = 2,
+	LIBRARY = 3
 };
 const std::vector<std::string> LEVEL_DESCRIPTORS = {
   level_path("0_tutorial.json"),
@@ -110,7 +110,7 @@ const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_A
 		{ TEXTURE_ASSET_ID::BEACH_CLOUD, 4.0f}
 	},
 	{
-		{ TEXTURE_ASSET_ID::LIBRARY_FILL, 4.f }, 
+		{ TEXTURE_ASSET_ID::LIBRARY_FILL, 4.f },
 		{ TEXTURE_ASSET_ID::LIBRARY_OBJECTS, 2.f },
 		{ TEXTURE_ASSET_ID::LIBRARY_FRAME, 0.f }
 	}
@@ -161,14 +161,19 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::PIZZA
 	},
 	{
-    TEXTURE_ASSET_ID::BEACH_APPLE,
+	TEXTURE_ASSET_ID::BEACH_APPLE,
 		TEXTURE_ASSET_ID::BEACH_CHEST,
 		TEXTURE_ASSET_ID::BEACH_CHEST2,
 		TEXTURE_ASSET_ID::BEACH_DIAMOND,
 		TEXTURE_ASSET_ID::BEACH_STAR,
 		TEXTURE_ASSET_ID::BEACH_COIN
   },
-	{}
+	{
+		TEXTURE_ASSET_ID::LIB_COLL1,
+		TEXTURE_ASSET_ID::LIB_COLL5,
+		TEXTURE_ASSET_ID::LIB_COLL3,
+		TEXTURE_ASSET_ID::LIB_COLL4,
+		TEXTURE_ASSET_ID::LIB_COLL2}
 };
 
 const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
