@@ -8,6 +8,10 @@
 #include <tuple>
 #include <iostream>
 #include <string.h>
+#include <fstream>
+#include <chrono>
+
+using Clock = std::chrono::high_resolution_clock;
 
 #include "physics_system.hpp"
 
@@ -117,7 +121,7 @@ GLFWwindow* WorldSystem::create_window()
 		return nullptr;
 	}
 
-	background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[curr_level]).c_str());
+	background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[0]).c_str());
 	player_death_sound = Mix_LoadWAV(audio_path("player_death.wav").c_str());
 	student_disappear_sound = Mix_LoadWAV(audio_path("student_disappear.wav").c_str());
 	player_jump_sound = Mix_LoadWAV(audio_path("player_jump.wav").c_str());
@@ -129,12 +133,13 @@ GLFWwindow* WorldSystem::create_window()
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("beach.wav").c_str(),
-      audio_path("soundtrack.wav").c_str(),
+			audio_path("soundtrack.wav").c_str(),
 			audio_path("player_death.wav").c_str(),
 			audio_path("student_disappear.wav").c_str(),
 			audio_path("player_jump.wav").c_str(),
 			audio_path("player_land.wav").c_str(),
-			audio_path("Mario-coin-sound.wav").c_str());
+			audio_path("Mario-coin-sound.wav").c_str(),
+			audio_path("library.wav").c_str());
 		return nullptr;
 	}
 
@@ -144,24 +149,41 @@ GLFWwindow* WorldSystem::create_window()
 void WorldSystem::init(RenderSystem* renderer_arg)
 {
 	this->renderer = renderer_arg;
-	// Playing background music indefinitely
-	Mix_PlayMusic(background_music, -1);
-	fprintf(stderr, "Loaded music\n");
-	Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
 
-	// Set all states to default
-	restart_game();
+	Json::Value save_state;
+	std::ifstream file(level_path("save_state.json"));
+	file >> save_state;
+	curr_level = save_state["current_level"].asInt();
+	// Set all states to default for current level
+	restart_level();
 }
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
-	if (registry.zombies.entities.size() < 1 && collectibles_collected > 5 && this->game_over == false) {
-		// restart_game(); // level is over
+	if (registry.zombies.entities.size() < 1 && (num_collectibles > 0 && collectibles_collected >= num_collectibles) && this->game_over == false) {
 		createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
 		this->game_over = true;
 		debugging.in_full_view_mode = true;
 		printf("You win!\n");
+		
+		// press a key to transition to next level?
+		// option to retry level? (display current and high scores?)
+
+		// save level                                                                                                                                                                                                                     
+		Json::Value save;
+		save["current_level"] = curr_level + 1 > max_level ? 0 : curr_level + 1;
+		Json::StreamWriterBuilder writer;
+		std::string jsonString = Json::writeString(writer, save);
+	
+		std::ofstream outputFile(level_path("save_state.json"));
+		if (outputFile.is_open()) {
+			outputFile << jsonString;
+			outputFile.close();
+			printf("data written to save_state.json\n");
+		} else {
+			printf("ERROR: unable to open save_state.json for writing\n");
+		}
 	}
 
 	// Updating window title with points
@@ -179,44 +201,67 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
-
 	// generate new zombie every 20s
 	enemySpawnTimer += elapsed_ms_since_last_update;
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
-	if (enemySpawnTimer / 1000.f > 25 && !debugging.in_full_view_mode && spawn_on && curr_level != 1) {
+
+	if (zombie_spawn_on && enemySpawnTimer / 1000.f > zombie_spawn_threshold && spawn_on) {
 		vec2 enemySpawnPos;
-		vec4 cameraBounds = renderer->getCameraBounds();;
-		do
+		for (int i = 0; i < zombie_spawn_pos.size(); i++)  // try a few times
 		{
-			if (enemySpawnIndex >= ZOMBIE_START_POS[curr_level].size())
-				enemySpawnIndex = 0;
+			int spawnIndex = rng() % zombie_spawn_pos.size();
+			enemySpawnPos = zombie_spawn_pos[spawnIndex];
 
-			enemySpawnPos = ZOMBIE_START_POS[curr_level][enemySpawnIndex];
-			enemySpawnIndex++;
-		} while (enemySpawnPos.x > cameraBounds[0] && enemySpawnPos.x < cameraBounds[2]
-			&& enemySpawnPos.y > cameraBounds[1] && enemySpawnPos.y < cameraBounds[3]); // ensure new student is spawned off screen
+			// only consider spawning off screen when not in full view mode
+			bool spawn = false;
+			if (!debugging.in_full_view_mode)
+			{
+				if (enemySpawnPos.x < cameraBounds[0] || enemySpawnPos.x > cameraBounds[2]
+					&& enemySpawnPos.y < cameraBounds[1] || enemySpawnPos.y > cameraBounds[3]) {
+					spawn = true;
+				}
+			}
+			else { spawn = true; }
 
-		//createZombie(renderer, enemySpawnPos);
-		enemySpawnTimer = 0.f;
+			if (spawn)
+			{
+				createZombie(renderer, enemySpawnPos);
+				enemySpawnTimer = 0.f;
+				break;
+			}
+		}
 	}
-	if (npcSpawnTimer / 1000.f > 10 && !debugging.in_full_view_mode && spawn_on && curr_level != 1) {
-		vec2 studentSpawnPos;
-		do
+
+	if (student_spawn_on && npcSpawnTimer / 1000.f > student_spawn_threshold && spawn_on) {
+		vec2 npcSpawnPos;
+		for (int i = 0; i < npc_spawn_pos.size(); i++)  // try a few times
 		{
-			if (npcSpawnIndex >= STUDENT_START_POS[curr_level].size())
-				npcSpawnIndex = 0;
+			int spawnIndex = rng() % npc_spawn_pos.size();
+			npcSpawnPos = npc_spawn_pos[spawnIndex];
 
-			studentSpawnPos = STUDENT_START_POS[curr_level][npcSpawnIndex];
-			npcSpawnIndex++;
-		} while (studentSpawnPos.x > cameraBounds[0] && studentSpawnPos.x < cameraBounds[2]
-			&& studentSpawnPos.y > cameraBounds[1] && studentSpawnPos.y < cameraBounds[3]); // ensure new student is spawned off screen
+			// only consider spawning off screen when not in full view mode
+			bool spawn = false;
+			if (!debugging.in_full_view_mode)
+			{
+				if (npcSpawnPos.x < cameraBounds[0] || npcSpawnPos.x > cameraBounds[2]
+					&& npcSpawnPos.y < cameraBounds[1] || npcSpawnPos.y > cameraBounds[3]) {
+					spawn = true;
+				}
+			}
+			else { spawn = true; }
 
-		//Entity student = createStudent(renderer, studentSpawnPos);
-		//Motion& student_motion = registry.motions.get(student);
-		//student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
-		npcSpawnTimer = 0.f;
+			if (spawn)
+			{
+				Entity student = createStudent(renderer, npcSpawnPos, NPC_ASSET[curr_level]);
+				Motion& student_motion = registry.motions.get(student);
+				student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+				npcSpawnTimer = 0.f;
+				break;
+			}
+		}
 	}
+
 
 	Player& player = registry.players.get(player_bozo);
 
@@ -235,15 +280,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		bool isZombie = registry.zombies.has(motion_container.entities[i]);
 		bool isBook = registry.books.has(motion_container.entities[i]);
 
+		updateWheelRotation(elapsed_ms_since_last_update);
+
 		if (isPlayer && !registry.deathTimers.has(motion_container.entities[i]))
 		{
 			motion.velocity[0] = 0;
-			
+
 			// If player just lost a life, make invincible for a bit
 			if (registry.lostLifeTimer.has(player_bozo)) {
 				LostLife& timer = registry.lostLifeTimer.get(player_bozo);
-				timer.timer_ms -= elapsed_ms_since_last_update; 
-				
+				timer.timer_ms -= elapsed_ms_since_last_update;
+
 				// Fade a bit to show invincibility
 				vec3& color = registry.colors.get(player_bozo);
 				color = { 0.5f, 0.5f, 0.5f };
@@ -286,7 +333,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			{
 				motion.velocity.x = 0;
 			}
-			if (motion.position.y < 0.f + BOZO_BB_HEIGHT / 2.f)
+			if (motion.position.y < 0.f + (BOZO_BB_HEIGHT) / 2.f)
 			{
 				motion.position.y = 0.f + BOZO_BB_HEIGHT / 2.f;
 			}
@@ -522,7 +569,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		{
 			registry.deathTimers.remove(entity);
 			screen.screen_darken_factor = 0;
-			restart_game();
+			restart_level();
 			return true;
 		}
 	}
@@ -562,9 +609,29 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			return true;
 		}
 	}
-
 	// reduce window brightness if any of the present salmons is dying
 	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
+
+
+
+	for (Entity entity : registry.labels.entities)
+	{
+		// progress timer, make the rotation happening based on time
+		// Set fading factor 
+		Label& label = registry.labels.get(entity);
+		auto now = Clock::now();
+
+		float elapsed_ms =
+			(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - label.fading_timer)).count() / 1000;
+
+		if (elapsed_ms > 3000.f)
+		{
+			registry.remove_all_components_of(entity);
+			break;
+		}
+		label.fading_factor = cos(0.0005 * elapsed_ms);
+	}
+
 
 	// update keyframe animated entity motions
 	for (Entity entity : registry.keyframeAnimations.entities)
@@ -631,10 +698,22 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// update animation mode
 	SpriteSheet& spriteSheet = registry.spriteSheets.get(player_bozo);
-	if (bozo_motion.velocity.x != 0.f && !bozo_motion.offGround)
-		spriteSheet.updateAnimation(ANIMATION_MODE::RUN);
-	else if (bozo_motion.velocity.x == 0 || bozo_motion.offGround)
-		spriteSheet.updateAnimation(ANIMATION_MODE::IDLE);
+	if (bozo_motion.climbing)
+	{
+		spriteSheet.updateAnimation(ANIMATION_MODE::CLIMB);
+		spriteSheet.truncation.y = 0.f;
+		bozo_motion.scale.y = BOZO_BB_HEIGHT + 17.f;
+	}
+	else
+	{
+		if (bozo_motion.velocity.x != 0.f && !bozo_motion.offGround)
+			spriteSheet.updateAnimation(ANIMATION_MODE::RUN);
+		else if (bozo_motion.velocity.x == 0 || bozo_motion.offGround)
+			spriteSheet.updateAnimation(ANIMATION_MODE::IDLE);
+
+		spriteSheet.truncation.y = 0.08f;
+		bozo_motion.scale.y = BOZO_BB_HEIGHT;
+	}
 
 	return true;
 }
@@ -644,12 +723,13 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 
 	int bozo_level = checkLevel(bozo_motion);
 	int zombie_level = checkLevel(motion);
+  printf("bozo %d zomb %d\n", bozo_level, zombie_level);
 
-	if ((zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1)))
+	if (curr_level == NEST && (zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1)))
 	{
 		// Zombie is on the same level as bozo
 
-		if (bozo_level == 0 && zombie_level == 1 && bozo_motion.position.x < 700)
+		if (curr_level == NEST && bozo_level == 0 && zombie_level == 1 && bozo_motion.position.x < 700)
 		{
 			float target_ladder = getClosestLadder(zombie_level - 1, bozo_motion);
 
@@ -677,7 +757,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 				motion.climbing = false;
 			}
 		}
-		else if (bozo_level == 0 && zombie_level == 0 && bozo_motion.position.x > 700 && motion.position.x < 700)
+		else if (curr_level == NEST && bozo_level == 0 && zombie_level == 0 && bozo_motion.position.x > 700 && motion.position.x < 700)
 		{
 			float target_ladder = getClosestLadder(zombie_level, motion);
 
@@ -732,10 +812,23 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 			*/
 		}
 	}
+  else if (zombie_level == bozo_level) 
+  {
+    motion.climbing = false;
+    float direction = -1;
+    if ((bozo_motion.position.x - motion.position.x) > 0)
+    {
+      direction = 1;
+    }
+    float speed = ZOMBIE_SPEED;
+    motion.velocity.x = direction * speed;
+  }
 	else if (zombie_level < bozo_level)
 	{
 		// Zombie is a level below bozo and needs to climb up
-		if (zombie_level == 0)
+
+    // Hardcoded exception for basement
+		if (curr_level == NEST && zombie_level == 0)
 		{
 			zombie_level++;
 		}
@@ -789,7 +882,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		{
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
-			motion.velocity.y = 2 * ZOMBIE_SPEED;
+			motion.velocity.y = 3 * ZOMBIE_SPEED;
 			motion.climbing = true;
 		}
 		else
@@ -820,26 +913,13 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 int WorldSystem::checkLevel(Motion& motion)
 {
 	float entityBottom = motion.position.y + abs(motion.scale[1]) / 2.f;
-	if (entityBottom < floor_positions[0] && entityBottom > floor_positions[1])
+	for (int i = 0; i < floor_positions.size() - 1; i++)
 	{
-		return 0;
+		if (entityBottom < floor_positions[i] && entityBottom > floor_positions[i + 1])
+			return i;
 	}
-	else if (entityBottom < floor_positions[1] && entityBottom > floor_positions[2])
-	{
-		return 1;
-	}
-	else if (entityBottom < floor_positions[2] && entityBottom > floor_positions[3])
-	{
-		return 2;
-	}
-	else if (entityBottom < floor_positions[3] && entityBottom > floor_positions[4])
-	{
-		return 3;
-	}
-	else
-	{
-		return 4;
-	}
+
+	return floor_positions.size() - 1;
 }
 
 float WorldSystem::getClosestLadder(int zombie_level, Motion& bozo_motion)
@@ -933,8 +1013,21 @@ bool WorldSystem::isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& mot
 	return true;
 }
 
+void WorldSystem::updateWheelRotation(float elapsed_ms_since_last_update)
+{
+	for (Entity wheel : registry.wheels.entities)
+	{
+		Motion& wheelMotion = registry.motions.get(wheel);
+		const float rotationSpeed = 0.001f;
+		if (wheelMotion.velocity.x < 0)
+			wheelMotion.angle += rotationSpeed * elapsed_ms_since_last_update;
+		else if (wheelMotion.velocity.x > 0)
+			wheelMotion.angle -= rotationSpeed * elapsed_ms_since_last_update;
+	}
+}
+
 // Reset the world state to its initial state
-void WorldSystem::restart_game()
+void WorldSystem::restart_level()
 {
 	this->game_over = false;
 	// Debugging for memory/component leaks
@@ -942,14 +1035,11 @@ void WorldSystem::restart_game()
 	printf("Restarting\n");
 
 	// Reset the game state variables
-	current_speed = 1.f;
 	enemySpawnTimer = 0.f;
 	npcSpawnTimer = 0.f;
 	collectibles_collected_pos = 50.f;
 	player_lives = 4;
-	int collectibles_collected = 0;
-
-	// Reset sprite sheet buffer index
+	collectibles_collected = 0;
 
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
@@ -959,93 +1049,160 @@ void WorldSystem::restart_game()
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
+	// load from json
+	std::ifstream file(LEVEL_DESCRIPTORS[curr_level]);
+	file >> jsonData;
+
+	// update BGM
+	background_music = Mix_LoadMUS(audio_path(jsonData["bgm"].asString()).c_str());
+	Mix_PlayMusic(background_music, -1);
+	Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
+
+	// set paltform dimensions
+	PLATFORM_WIDTH = jsonData["platform_scale"]["x"].asFloat();
+	PLATFORM_HEIGHT = jsonData["platform_scale"]["y"].asFloat();
+
+	const Json::Value& playerData = jsonData["player"];
+	bozo_start_pos = { playerData["position"]["x"].asFloat(), playerData["position"]["y"].asFloat() };
+
 	// reset camera on restart
-	renderer->resetCamera(BOZO_STARTING_POS[curr_level]);
+	renderer->resetCamera(bozo_start_pos);
 	renderer->resetSpriteSheetTracker();
 
 	// Create background first (painter's algorithm for rendering)
+
 	for (std::tuple<TEXTURE_ASSET_ID, float> background : BACKGROUND_ASSET[curr_level]) {
 		createBackground(renderer, std::get<0>(background), std::get<1>(background));
 	}
 
-	
-	if (curr_level == 0)
+	if (curr_level == NEST)
 		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, 0.f, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f }); // egg
 
-
 	// Tutorial sign only for the first level
-	if (curr_level == 0) {
-    	Entity tutorial1 = createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL1, { 643, 550 }, "tutorial1", { 250.f, 150.f });
+	if (curr_level == TUTORIAL) {
+		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_MOVEMENT, { window_width_px - 120.f, window_height_px - 80.f }, "", { 150.f, 70.f });
+		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_CLIMB, { window_width_px - 480.f, window_height_px - 90.f }, "", { 115.f, 40.f });
+		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_NPCS, { window_width_px - 800.f, window_height_px - 350.f }, "", { 150.f, 60.f });
+		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_WEAPONS, { window_width_px - 900.f, window_height_px - 220.f }, "", { 200.f, 70.f });
+		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_GOAL, { 130.f, window_height_px - 200.f }, "", { 180.f, 100.f });
 	}
 
-	// Render platforms
-	floor_positions = FLOOR_POSITIONS[curr_level];
-
-	for (vec3 pos : PLATFORM_POSITIONS[curr_level]) {
-	createPlatforms(renderer, pos[0], pos[1], pos[2], PLATFORM_ASSET[curr_level]);
+	// Create platforms
+	floor_positions.clear();
+	for (const auto pos : jsonData["floor_positions"]) {
+		floor_positions.push_back(pos.asFloat());
 	}
 
-	// stairs for the first level
-	if (curr_level == 0) {
-	std::vector<Entity> step0 = createSteps(renderer, { PLATFORM_WIDTH * 12 - 20.f, window_height_px * 0.8 }, 5, 3, false);
-		std::vector<Entity> step1 = createSteps(renderer, { window_width_px - PLATFORM_WIDTH * 6 - STEP_WIDTH * 6, window_height_px * 0.8 + PLATFORM_HEIGHT * 4 }, 5, 2, true);
+	for (const auto& platform_data : jsonData["platforms"]) {
+		createPlatforms(renderer, platform_data["x"].asFloat(), platform_data["y"].asFloat(), platform_data["num_tiles"].asInt(), PLATFORM_ASSET[curr_level], platform_data["visible"].asBool(), { PLATFORM_WIDTH, PLATFORM_HEIGHT });
+	}
+
+	// Create stairs
+	for (const auto& steps_data : jsonData["stairs"]) {
+		createSteps(renderer, { steps_data["x"].asFloat(), steps_data["y"].asFloat() }, { steps_data["scale_x"].asFloat(), steps_data["scale_y"].asFloat() }, steps_data["num_steps"].asInt(), steps_data["step_blocks"].asInt(), steps_data["left"].asBool());
 	}
 
 	// Create walls
-	for (vec3 pos : WALL_POSITIONS[curr_level]) {
-	createWall(renderer, pos[0], pos[1], pos[2]);
-	}
-  
-	// Create climbables
-	for (vec3 pos : CLIMBABLE_POSITIONS[curr_level]) {
-	createClimbable(renderer, pos[0], pos[1], pos[2], CLIMBABLE_ASSET[curr_level]);
+	for (const auto& wall_data : jsonData["walls"]) {
+		createWall(renderer, wall_data["x"].asFloat(), wall_data["y"].asFloat(), wall_data["height"].asFloat(), wall_data["visible"].asBool());
 	}
 
-	ladder_positions = ZOMBIE_CLIMB_POINTS[curr_level];
+	// Create climbables
+	for (const auto& data : jsonData["climbables"]) {
+		createClimbable(renderer, data["x"].asFloat(), data["y"].asFloat(), data["sections"].asInt(), CLIMBABLE_ASSET[curr_level]);
+	}
+
+	ladder_positions.clear();
+	for (const auto levelPoints : jsonData["zombie_climb_points"]) {
+		std::vector<float> level_climb_points;
+		for (const auto point : levelPoints) {
+			level_climb_points.push_back(point.asFloat());
+		}
+		ladder_positions.push_back(level_climb_points);
+	}
 
 	// Create spikes
-	for (vec2 pos : SPIKE_POSITIONS[curr_level]) {
-	Entity spike = createSpike(renderer, pos);
-	registry.colors.insert(spike, { 0.5f, 0.5f, 0.5f });
+	for (const auto& spikeData : jsonData["spikes"]) {
+		Entity spike = createSpike(renderer, {spikeData["x"].asFloat(), spikeData["y"].asFloat()});
+		registry.colors.insert(spike, { spikeData["colour"][0].asFloat(), spikeData["colour"][1].asFloat(), spikeData["colour"][2].asFloat() });
+	}
+
+	// Create wheels
+	for (const auto& data : jsonData["wheels"]) {
+		Entity wheel = createWheel(renderer, { data["position"][0].asFloat(), data["position"][1].asFloat() });
+		registry.colors.insert(wheel, { data["colour"][0].asFloat(), data["colour"][1].asFloat(), data["colour"][2].asFloat() });
+		Motion& motion1 = registry.motions.get(wheel);
+		motion1.velocity = { data["velocity"][0].asFloat(), data["velocity"][1].asFloat() };
 	}
 
 	// Create a new Bozo player
-	player_bozo = createBozo(renderer, BOZO_STARTING_POS[curr_level]);
+	player_bozo = createBozo(renderer, bozo_start_pos);
 	registry.colors.insert(player_bozo, { 1, 0.8f, 0.8f });
-	Motion& bozo_motion = registry.motions.get(player_bozo);
-	bozo_motion.velocity = { 0.f, 0.f };
 
+	// Create aiming arrow for player
 	player_bozo_pointer = createBozoPointer(renderer, { 200, 500 });
-	// Create zombie (one starter zombie per level?)
-	for (vec2 pos : ZOMBIE_START_POS[curr_level])
-		createZombie(renderer, pos);
+
+	// Create zombies
+	zombie_spawn_pos.clear();
+	uint num_starting_zombies = jsonData["zombies"]["num_starting"].asInt(); // so that zombie positions are separate from how many start
+	assert(num_starting_zombies <= jsonData["zombies"]["positions"].size());
+	uint z = 0;
+	for (const auto& zombie_pos : jsonData["zombies"]["positions"]) {
+		vec2 pos = {zombie_pos["x"].asFloat(), zombie_pos["y"].asFloat()};
+		zombie_spawn_pos.push_back(pos);
+		if (z < num_starting_zombies) {
+			createZombie(renderer, pos);
+		}
+		z++;
+	}
+	// Set zombie spawn timer if not null
+	if (jsonData["zombies"]["spawn_timer"]) {
+		zombie_spawn_threshold = jsonData["zombies"]["spawn_timer"].asFloat();
+		zombie_spawn_on = true;
+	} else {
+		zombie_spawn_on = false;
+	}
 
 	// Create students
-	for (vec2 pos : STUDENT_START_POS[curr_level])
-		createStudent(renderer, pos);
-
-	for (Entity student : registry.humans.entities)
-	{
-		Motion& student_motion = registry.motions.get(student);
-		student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+	npc_spawn_pos.clear();
+	uint num_starting_students = jsonData["students"]["num_starting"].asInt();
+	assert(num_starting_students <= jsonData["students"]["positions"].size());
+	uint s = 0;
+	for (const auto& student_pos : jsonData["students"]["positions"]) {
+		vec2 pos = {student_pos["x"].asFloat(), student_pos["y"].asFloat()};
+		npc_spawn_pos.push_back(pos);
+		if (s < num_starting_students) {
+			Entity student = createStudent(renderer, pos, NPC_ASSET[curr_level]);
+			// coded back+forth motion
+			Motion& student_motion = registry.motions.get(student);
+			student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+		}
+		s++;
+	}
+	// Set student spawn timer if not null
+	if (jsonData["students"]["spawn_timer"]) {
+		student_spawn_threshold = jsonData["students"]["spawn_timer"].asFloat();
+		student_spawn_on = true;
+	} else {
+		student_spawn_on = false;
 	}
 
 	// Place collectibles
-  std::vector<vec2> collectibles = COLLECTIBLE_POSITIONS[curr_level];
-  std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[curr_level];
-  for (int i = 0; i < collectibles.size(); i++) {
-     createCollectible(renderer, collectibles[i][0], collectibles[i][1], collectible_assets[i], {30, 30}, false);
-  }
+	const Json::Value& collectiblesPositions = jsonData["collectibles"]["positions"];
+	num_collectibles = collectiblesPositions.size(); // set number of collectibles
+	vec2 collectible_scale = {jsonData["collectibles"]["scale"]["x"].asFloat(), jsonData["collectibles"]["scale"]["y"].asFloat()};
+	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[curr_level];
+	assert(num_collectibles == collectible_assets.size());
+	for (uint i = 0; i < num_collectibles; i++) {
+		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false);
+	}
 
-
-  // This is specific to the beach level
-  if (curr_level == 1) {
-     createDangerous(renderer, {280, 130}, { 30, 30 });
-     createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, {230, 155}, {80, 60});
-  }
-
-
-  // Lives can probably stay hardcoded?
+	// This is specific to the beach level
+	if (curr_level == BEACH) {
+		createDangerous(renderer, { 280, 130 }, { 30, 30 });
+		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, { 230, 155 }, { 80, 60 });
+	}
+	// Lives can probably stay hardcoded?
 	float heart_pos_x = 1385;
 	float heart_starting_pos_y = 40;
 
@@ -1056,6 +1213,9 @@ void WorldSystem::restart_game()
 	Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
 
 	player_hearts = { heart0, heart1, heart2, heart3, heart4 };
+
+	// Create label
+	Entity label = createLabel(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[curr_level]);
 
 	setup_keyframes(renderer);
 
@@ -1079,7 +1239,7 @@ void WorldSystem::handle_collisions()
 			// Player& player = registry.players.get(entity);
 
 			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
-			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)))
+			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)) || registry.dangerous.has(entity_other))
 			{
 				// Reduce hearts if player has lives left
 				if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives > 0) {
@@ -1094,7 +1254,7 @@ void WorldSystem::handle_collisions()
 
 					// Move player back to start
 					Motion& bozo_motion = registry.motions.get(player_bozo);
-					bozo_motion.position = BOZO_STARTING_POS[curr_level];
+					bozo_motion.position = bozo_start_pos;
 
 					// Add to lost life timer
 					if (!registry.lostLifeTimer.has(player_bozo)) {
@@ -1102,7 +1262,7 @@ void WorldSystem::handle_collisions()
 					}
 				}
 				else if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives == 0)
-				{	
+				{
 					// Kill player if no lives left
 					// Scream, reset timer, and make the player [dying animation]
 					Motion& motion_player = registry.motions.get(entity);
@@ -1140,7 +1300,7 @@ void WorldSystem::handle_collisions()
 					if (spawn_book)
 					{
 						Motion& m = registry.motions.get(entity_other);
-						Entity book = createBook(renderer, m.position);
+						Entity book = createBook(renderer, m.position, WEAPON_ASSETS[curr_level]);
 						Book& b = registry.books.get(book);
 						b.offHand = false;
 						++points;
@@ -1227,13 +1387,13 @@ void WorldSystem::handle_collisions()
 		// Player - Collectible collision
 
 		else if (registry.collectible.has(entity) && registry.players.has(entity_other)) {
-			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID) registry.collectible.get(entity).collectible_id;
+			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID)registry.collectible.get(entity).collectible_id;
 			Entity collectible = createCollectible(renderer, collectibles_collected_pos, 50, id, { 60, 60 }, true);
 
 			registry.remove_all_components_of(entity);
 
 			collectibles_collected++;
-			
+
 			collectibles_collected_pos = collectibles_collected_pos + 60;
 		}
 	}
@@ -1292,12 +1452,13 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			debugging.in_full_view_mode = !debugging.in_full_view_mode;
 		}
 
-    if (key == GLFW_KEY_L) {
+		if (key == GLFW_KEY_L) {
 			curr_level++;
-      if (curr_level > max_level) {
-        curr_level = 0;
-      }
-      restart_game();
+			if (curr_level > max_level) {
+				curr_level = 0;
+			}
+
+			restart_level();
 		}
 	}
 
@@ -1355,7 +1516,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
 
-		restart_game();
+		restart_level();
 	}
 
 	// Debugging
@@ -1366,19 +1527,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		else
 			debugging.in_full_view_mode = true;
 	}
-
-	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA)
-	{
-		current_speed -= 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
-	{
-		current_speed += 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	current_speed = fmax(0.f, current_speed);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position)

@@ -66,6 +66,24 @@ set_target_properties(${PROJECT_NAME} PROPERTIES ENABLE_EXPORTS 0)
 target_include_directories(${PROJECT_NAME} PUBLIC ext/stb_image/)
 target_include_directories(${PROJECT_NAME} PUBLIC ext/gl3w)
 
+# JsonCpp
+include(FetchContent)
+
+FetchContent_Declare(
+  jsoncpp
+  GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp.git
+  GIT_TAG master
+)
+
+FetchContent_GetProperties(jsoncpp)
+
+if (NOT jsoncpp_POPULATED)
+  FetchContent_Populate(jsoncpp)
+  add_subdirectory(${jsoncpp_SOURCE_DIR} ${jsoncpp_BINARY_DIR})
+endif()
+
+target_link_libraries(${PROJECT_NAME} PUBLIC jsoncpp_static)
+
 # Find OpenGL
 find_package(OpenGL REQUIRED)
 

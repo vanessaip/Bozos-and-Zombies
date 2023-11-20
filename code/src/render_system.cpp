@@ -14,9 +14,9 @@ float previousLeft = 0.f;
 float currentLeft = 0.f;
 
 void RenderSystem::drawTexturedMesh(Entity entity,
-									const mat3 &projection)
+	const mat3& projection)
 {
-	Motion &motion = registry.motions.get(entity);
+	Motion& motion = registry.motions.get(entity);
 	// Transformation code, see Rendering and Transformation in the template
 	// specification for more info Incrementally updates transformation matrix,
 	// thus ORDER IS IMPORTANT
@@ -27,7 +27,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	transform.reflect(motion.reflect);
 
 	assert(registry.renderRequests.has(entity));
-	const RenderRequest &render_request = registry.renderRequests.get(entity);
+	const RenderRequest& render_request = registry.renderRequests.get(entity);
 
 	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
 	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
@@ -38,8 +38,8 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	gl_has_errors();
 
 	assert(render_request.used_geometry != GEOMETRY_BUFFER_ID::GEOMETRY_COUNT);
-	
-	GLuint vbo; 
+
+	GLuint vbo;
 	GLuint ibo;
 	if (render_request.used_geometry == GEOMETRY_BUFFER_ID::SPRITE_SHEET)
 	{
@@ -48,7 +48,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		vbo = spriteSheet.bufferId + 1;
 		ibo = vertex_buffers.size() + vbo;
 	}
-	else 
+	else
 	{
 		vbo = vertex_buffers[(GLuint)render_request.used_geometry];
 		ibo = index_buffers[(GLuint)render_request.used_geometry];
@@ -70,13 +70,13 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		glEnableVertexAttribArray(in_position_loc);
 		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(TexturedVertex), (void *)0);
+			sizeof(TexturedVertex), (void*)0);
 		gl_has_errors();
 
 		glEnableVertexAttribArray(in_texcoord_loc);
 		glVertexAttribPointer(
 			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
-			(void *)sizeof(
+			(void*)sizeof(
 				vec3)); // note the stride to skip the preceeding vertex position
 
 		// Enabling and binding texture to slot 0
@@ -88,8 +88,19 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
+
+		// Fading
+		GLuint fade_timer_uloc = glGetUniformLocation(program, "fading_factor");
+		if (registry.labels.has(entity)) {
+			Label& label = registry.labels.get(entity);
+			glUniform1f(fade_timer_uloc, label.fading_factor);
+		}
+		else {
+			glUniform1f(fade_timer_uloc, 0.f);
+		}
+
 	}
-	
+
 	// FUTURE: won't need for now, could reuse if we end up having meshes
 	else if (render_request.used_effect == EFFECT_ASSET_ID::SPIKE)
 	{
@@ -99,15 +110,42 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		glEnableVertexAttribArray(in_position_loc);
 		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)0);
+			sizeof(ColoredVertex), (void*)0);
 		gl_has_errors();
 
 		glEnableVertexAttribArray(in_color_loc);
 		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)sizeof(vec3));
+			sizeof(ColoredVertex), (void*)sizeof(vec3));
 		gl_has_errors();
 
 		if (render_request.used_effect == EFFECT_ASSET_ID::SPIKE)
+		{
+			// Light up?
+			GLint light_up_uloc = glGetUniformLocation(program, "light_up");
+			assert(light_up_uloc >= 0);
+
+			// !!! TODO A1: set the light_up shader variable using glUniform1i,
+			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
+			gl_has_errors();
+		}
+	}
+	else if (render_request.used_effect == EFFECT_ASSET_ID::WHEEL)
+	{
+		GLint in_position_loc = glGetAttribLocation(program, "in_position");
+		GLint in_color_loc = glGetAttribLocation(program, "in_color");
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(ColoredVertex), (void*)0);
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_color_loc);
+		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(ColoredVertex), (void*)sizeof(vec3));
+		gl_has_errors();
+
+		if (render_request.used_effect == EFFECT_ASSET_ID::WHEEL)
 		{
 			// Light up?
 			GLint light_up_uloc = glGetUniformLocation(program, "light_up");
@@ -126,7 +164,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	// Getting uniform locations for glUniform* calls
 	GLint color_uloc = glGetUniformLocation(program, "fcolor");
 	const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
-	glUniform3fv(color_uloc, 1, (float *)&color);
+	glUniform3fv(color_uloc, 1, (float*)&color);
 	gl_has_errors();
 
 	// Get number of indices from index buffer, which has elements uint16_t
@@ -141,9 +179,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 	// Setting uniform values to the currently bound program
 	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
-	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float *)&transform.mat);
+	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
 	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
-	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
+	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
 	gl_has_errors();
 	// Drawing of num_indices/3 triangles specified in the index buffer
 	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
@@ -178,21 +216,21 @@ void RenderSystem::drawToScreen()
 	glBindBuffer(
 		GL_ELEMENT_ARRAY_BUFFER,
 		index_buffers[(GLuint)GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE]); // Note, GL_ELEMENT_ARRAY_BUFFER associates
-																	 // indices to the bound GL_ARRAY_BUFFER
+	// indices to the bound GL_ARRAY_BUFFER
 	gl_has_errors();
 	const GLuint water_program = effects[(GLuint)EFFECT_ASSET_ID::WATER];
 	// Set clock
 	GLuint time_uloc = glGetUniformLocation(water_program, "time");
 	GLuint dead_timer_uloc = glGetUniformLocation(water_program, "screen_darken_factor");
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
-	ScreenState &screen = registry.screenStates.get(screen_state_entity);
+	ScreenState& screen = registry.screenStates.get(screen_state_entity);
 	glUniform1f(dead_timer_uloc, screen.screen_darken_factor);
 	gl_has_errors();
 	// Set the vertex position and vertex texture coordinates (both stored in the
 	// same VBO)
 	GLint in_position_loc = glGetAttribLocation(water_program, "in_position");
 	glEnableVertexAttribArray(in_position_loc);
-	glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void *)0);
+	glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
 	gl_has_errors();
 
 	// Bind our texture in Texture Unit 0
@@ -204,7 +242,7 @@ void RenderSystem::drawToScreen()
 	glDrawElements(
 		GL_TRIANGLES, 3, GL_UNSIGNED_SHORT,
 		nullptr); // one triangle = 3 vertices; nullptr indicates that there is
-				  // no offset from the bound index buffer
+	// no offset from the bound index buffer
 	gl_has_errors();
 }
 
@@ -215,7 +253,7 @@ void RenderSystem::draw(float elapsed_time_ms)
 	// Getting size of window
 	int w, h;
 	glfwGetFramebufferSize(window, &w, &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
-	
+
 	// First render to the custom framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
 	gl_has_errors();
@@ -228,8 +266,8 @@ void RenderSystem::draw(float elapsed_time_ms)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST); // native OpenGL does not work with a depth buffer
-							  // and alpha blending, one would have to sort
-							  // sprites back to front
+	// and alpha blending, one would have to sort
+	// sprites back to front
 	gl_has_errors();
 
 	float prevLeft = playerCamera.left;
@@ -313,7 +351,7 @@ mat3 RenderSystem::createProjectionMatrix(float left, float top, float right, fl
 	float sy = 2.f / (top - bottom);
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
-	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
+	return { {sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f} };
 }
 
 mat3 RenderSystem::createBasicProjectionMatrix() {
@@ -332,7 +370,7 @@ mat3 RenderSystem::createBasicProjectionMatrix() {
 	return { {sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f} };
 }
 
-void RenderSystem::resetCamera(vec2 defaultPos) 
+void RenderSystem::resetCamera(vec2 defaultPos)
 {
 	/*
 	camera.left = max<float>((defaultPos.x - (screen_width_px / 2.0)) + camera.xOffset, 0);

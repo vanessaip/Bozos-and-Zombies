@@ -11,6 +11,9 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
+// level loading
+#include<json/json.h>
+
 #include "render_system.hpp"
 
 // Container for all our entities and game logic. Individual rendering / update is
@@ -56,8 +59,10 @@ private:
 	// Sets up keyframe interpolation for given entity
 	void setup_keyframes(RenderSystem* rendered);
 
+	void updateWheelRotation(float elapsed_ms_since_last_update);
+
 	// restart level
-	void restart_game();
+	void restart_level();
 
 	// OpenGL window handle
 	GLFWwindow* window;
@@ -67,17 +72,14 @@ private:
 
 	// Game state
 	RenderSystem* renderer;
-	float current_speed;
 	Entity player_bozo;
 	Entity player_bozo_pointer;
 	float enemySpawnTimer = 0.f;
 	float npcSpawnTimer = 0.f;
-	int npcSpawnIndex = 0;
-	int enemySpawnIndex = 0;
-	int curr_level = 0;
-	int max_level = 1;
+	int max_level = 3;
 	float collectibles_collected_pos = 50;
 	int collectibles_collected = 0;
+	vec2 platformDimensions{ 0.f, 0.f }; // unused
 
 	// This is actually 5 lives but 0 indexed.
 	int player_lives = 4;
@@ -85,8 +87,20 @@ private:
 	bool game_over;
 
 	// Level definitions
+	int curr_level = 0;
+	Json::Value jsonData;
+	vec2 bozo_start_pos;
+	std::vector<vec2> zombie_spawn_pos;
+	std::vector<vec2> npc_spawn_pos;
 	std::vector<float> floor_positions;
 	std::vector<std::vector<float>> ladder_positions;
+	float PLATFORM_WIDTH;
+	float PLATFORM_HEIGHT;
+	bool zombie_spawn_on;
+	bool student_spawn_on;
+	float zombie_spawn_threshold;
+	float student_spawn_threshold;
+	uint num_collectibles;
 
 	// music references
 	Mix_Music* background_music;
@@ -104,7 +118,7 @@ private:
 	// Helpers
 	vec2 relativePos(vec2 mouse_position);
 
-  // Debugging
-  bool spawn_on = true;
+	// Debugging
+	bool spawn_on = true;
 
 };

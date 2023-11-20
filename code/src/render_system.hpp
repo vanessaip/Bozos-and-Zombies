@@ -28,7 +28,8 @@ class RenderSystem {
 	// Associated id with .obj path
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
-		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPIKE, mesh_path("spike.obj"))
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPIKE, mesh_path("spike.obj")),
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::WHEEL, mesh_path("wheel.obj"))
 		// specify meshes of other assets here
 	};
 
@@ -66,14 +67,45 @@ class RenderSystem {
 		textures_path("background_1.png"),
 		textures_path("background_2.png"),
 		textures_path("background_3.png"),
-		textures_path("beach-plat.png"),
-		textures_path("beach-ladder.png"),
-		textures_path("spikeball.png"),
-		textures_path("cannon_blue.png"),
-		textures_path("beach-sky.png"),
-		textures_path("beach-sea.png"),
-		textures_path("beach-land.png"),
-		textures_path("beach-cloud.png")
+		textures_path("beach/beach-plat.png"),
+		textures_path("beach/beach-ladder.png"),
+		textures_path("beach/spikeball.png"),
+		textures_path("beach/cannon_blue.png"),
+		textures_path("beach/beach-sky.png"),
+		textures_path("beach/beach-sea.png"),
+		textures_path("beach/beach-land.png"),
+		textures_path("beach/beach-cloud.png"),
+		textures_path("level0/tutorial_plat.png"),
+		textures_path("level0/tutorial_foreground.png"),
+		textures_path("level0/tutorial_background1.png"),
+		textures_path("level0/tutorial_background2.png"),
+		textures_path("level0/tutorial_background3.png"),
+		textures_path("level0/tutorial_background4.png"),
+		textures_path("level0/tutorial_move.png"),
+		textures_path("level0/tutorial_climb.png"),
+		textures_path("level0/tutorial_npcs.png"),
+		textures_path("level0/tutorial_weapons.png"),
+		textures_path("level0/tutorial_goal.png"),
+		textures_path("level0/tutorial_npc_sprite_sheet.png"),
+		textures_path("level0/weapon.png"),
+		textures_path("level0/collectible1.png"),
+		textures_path("level0/collectible2.png"),
+		textures_path("level0/collectible3.png"),
+		textures_path("library/frame.png"),
+		textures_path("library/objects.png"),
+		textures_path("library/fill.jpg"),
+		textures_path("library/plat.png"),
+		textures_path("library/ladder.png"),
+		textures_path("locations/label_nest.png"),
+		textures_path("locations/label_beach.png"),
+		textures_path("locations/label_library.png"),
+		textures_path("locations/label_tutorial.png"),
+	    textures_path("beach/beach-apple.png"),
+	    textures_path("beach/beach-chest.png"),
+	    textures_path("beach/beach-chest2.png"),
+	    textures_path("beach/beach-diamond.png"),
+	    textures_path("beach/beach-star.png"),
+	    textures_path("beach/beach-coin_01.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -81,6 +113,7 @@ class RenderSystem {
 	const std::array<std::string, effect_count> effect_paths = {
 		shader_path("coloured"),
 		shader_path("spike"),
+		shader_path("wheel"),
 		shader_path("textured"),
 		shader_path("water") };
 
