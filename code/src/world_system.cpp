@@ -205,11 +205,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		loadingScreen = createLoadingScreen(this->renderer, { window_width_px / 2, window_height_px / 2 }, { 2 * window_width_px, 3 * window_height_px });
 		loading = true;
 		printf("Loading...\n");
-	} else if (loading && gameTimer >= 5 * 1000) {
+	} else if (loading && gameTimer >= 5 * 1000 && !registry.labels.has(loadingScreen)) {
+		registry.labels.emplace(loadingScreen);
+		Label& label = registry.labels.get(loadingScreen);
+		label.fading_timer = Clock::now();
+	}
+	else if (loading && gameTimer >= 7 * 1000 && registry.labels.has(loadingScreen)) {
+		debugging.in_full_view_mode = false;
 		registry.remove_all_components_of(loadingScreen);
 		loading = false;
 		printf("Done loading!\n");
-		debugging.in_full_view_mode = false;
+
 	}
 
 
