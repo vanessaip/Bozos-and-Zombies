@@ -246,7 +246,7 @@
       }
     ]
   },
-  "bgm": "soundtrack.wav",
+  "bgm": "tutorial.wav",
   "door_win_pos": {
     "x": 710,
     "y": 747

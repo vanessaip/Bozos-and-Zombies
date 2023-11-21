@@ -128,6 +128,9 @@ GLFWwindow* WorldSystem::create_window()
 	player_land_sound = Mix_LoadWAV(audio_path("player_land.wav").c_str());
 	collect_book_sound = Mix_LoadWAV(audio_path("Mario-coin-sound.wav").c_str());
 	zombie_kill_sound = Mix_LoadWAV(audio_path("splat.wav").c_str());
+  level_success_sound = Mix_LoadWAV(audio_path("level-success.wav").c_str());
+  next_level_sound = Mix_LoadWAV(audio_path("next-level.wav").c_str());
+  collected_sound = Mix_LoadWAV(audio_path("collected.wav").c_str());
 
 	if (background_music == nullptr || player_death_sound == nullptr || student_disappear_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr || zombie_kill_sound == nullptr)
 	{
@@ -162,10 +165,13 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
 	if (registry.zombies.entities.size() < 1 && (num_collectibles > 0 && collectibles_collected >= num_collectibles) && this->game_over == false) {
+  // if (collectibles_collected > 0 && this->game_over == false) {
 		// createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
 		this->game_over = true;
 		createDoor(renderer, door_win_pos, { 40, 60 }, TEXTURE_ASSET_ID::WIN_DOOR);
 		debugging.in_full_view_mode = true;
+    Mix_HaltMusic();
+    Mix_PlayChannel(-1, level_success_sound, 0);
 		printf("You win!\n");
 
 		// press a key to transition to next level?
@@ -649,7 +655,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - door.fading_timer)).count() / 1000;
 
 			if (door.fading_factor < 1) {
-				door.fading_factor += 0.02;
+				door.fading_factor = 1 * elapsed_ms / 2000;
 			}
 		}
 
@@ -1368,6 +1374,7 @@ void WorldSystem::handle_collisions()
 			}
 			else if (registry.doors.has(entity_other))
 			{
+        Mix_PlayChannel(-1, next_level_sound, 0);
 				curr_level++;
 				if (curr_level > max_level) {
 					curr_level = 0;
@@ -1437,6 +1444,7 @@ void WorldSystem::handle_collisions()
 		// Player - Collectible collision
 
 		else if (registry.collectible.has(entity) && registry.players.has(entity_other)) {
+      Mix_PlayChannel(-1, collected_sound, 0);
 			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID)registry.collectible.get(entity).collectible_id;
 			Entity collectible = createCollectible(renderer, collectibles_collected_pos, 50, id, { 60, 60 }, true);
 
@@ -1491,10 +1499,10 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			player.keyPresses[3] = true;
 		}
 
-		if (key == GLFW_KEY_SPACE && !motion.offGround)
+		if (key == GLFW_KEY_SPACE && !motion.offGround && !motion.climbing)
 		{
 			motion.offGround = true;
-			motion.velocity[1] -= 600;
+			motion.velocity[1] = -600;
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 

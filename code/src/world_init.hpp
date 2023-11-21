@@ -195,7 +195,7 @@ const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
 
 // ---------------------SOUNDS-------------------------
 const std::vector<std::string> BACKGROUND_MUSIC = {
-	"soundtrack.wav",
+	"tutorial.wav",
 	"soundtrack.wav",
 	"beach.wav",
 	"library.wav"

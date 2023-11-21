@@ -221,3 +221,11 @@ Overlay rendering for food/lives feedback:
 - 1 new heart sprite for player lives
 - (created) spike mesh object file
 - (created) arrow sprite for projectile direction
+
+# Project References
+
+Level ending sound effect - pixabay.com
+Collected item sound effect - pixabay.com
+Tutorial background music - pixabay.com
+Wreck Beach level background music - "Tahitian Remix Despacito" by Tulei 
+

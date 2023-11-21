@@ -113,6 +113,9 @@ private:
 	Mix_Chunk* player_land_sound;
 	Mix_Chunk* collect_book_sound;
 	Mix_Chunk* zombie_kill_sound;
+  Mix_Chunk* level_success_sound;
+  Mix_Chunk* next_level_sound;
+  Mix_Chunk* collected_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;
