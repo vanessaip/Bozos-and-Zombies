@@ -324,17 +324,17 @@ void PhysicsSystem::step(float elapsed_ms)
 					resolve_bounce_collision(entity_i, entity_j);
 				}
 			}
-			else if ((registry.wheels.has(entity_i) && registry.spikes.has(entity_j)) || (registry.wheels.has(entity_j) && registry.spikes.has(entity_i)))
-			{
+			// else if ((registry.wheels.has(entity_i) && registry.spikes.has(entity_j)) || (registry.wheels.has(entity_j) && registry.spikes.has(entity_i)))
+			// {
 
-				std::vector<glm::vec2> transformedVertices1 = getTransformedVertices(mesh_i, motion_i);
-				std::vector<glm::vec2> transformedVertices2 = getTransformedVertices(mesh_j, motion_j);
+			// 	std::vector<glm::vec2> transformedVertices1 = getTransformedVertices(mesh_i, motion_i);
+			// 	std::vector<glm::vec2> transformedVertices2 = getTransformedVertices(mesh_j, motion_j);
 
-				if (checkSATIntersection(transformedVertices1, transformedVertices2) || checkSATIntersection(transformedVertices2, transformedVertices1))
-				{
-					resolve_bounce_collision(entity_i, entity_j);
-				}
-			}
+			// 	if (checkSATIntersection(transformedVertices1, transformedVertices2) || checkSATIntersection(transformedVertices2, transformedVertices1))
+			// 	{
+			// 		resolve_bounce_collision(entity_i, entity_j);
+			// 	}
+			// }
 			else
 			{
 				if (collides(motion_i, motion_j))

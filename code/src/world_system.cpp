@@ -505,34 +505,33 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 						registry.remove_all_components_of(motion_container.entities[i]);
 				}
 			}
-		}
 
-		// Add book behaviour
-		if (registry.books.has(motion_container.entities[i]))
-		{
-			Book& book = registry.books.get(motion_container.entities[i]);
-			Motion motion_player = registry.motions.get(player_bozo);
-			// If book is in hand, we consider it as on ground and always go with player
-			if (book.offHand == false)
+			// Add book behaviour
+			if (registry.books.has(motion_container.entities[i]))
 			{
-				motion.offGround = false;
-				motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
-				motion.position.y = motion_player.position.y;
+				Book& book = registry.books.get(motion_container.entities[i]);
+				Motion motion_player = registry.motions.get(player_bozo);
+				// If book is in hand, we consider it as on ground and always go with player
+				if (book.offHand == false)
+				{
+					motion.offGround = false;
+					motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
+					motion.position.y = motion_player.position.y;
+				}
+				// If book is on ground, it's velocity should always be 0
+				if (motion.offGround == false)
+				{
+					motion.velocity = { 0.f, 0.f };
+				}
 			}
-			// If book is on ground, it's velocity should always be 0
-			if (motion.offGround == false)
+
+			// If entity if a player effect, for example bozo_pointer, move it along with the player
+			if (registry.playerEffects.has(motion_container.entities[i]))
 			{
-				motion.velocity = { 0.f, 0.f };
+				motion.position.x = bozo_motion.position.x;
+				motion.position.y = bozo_motion.position.y;
 			}
 		}
-
-		// If entity if a player effect, for example bozo_pointer, move it along with the player
-		if (registry.playerEffects.has(motion_container.entities[i]))
-		{
-			motion.position.x = bozo_motion.position.x;
-			motion.position.y = bozo_motion.position.y;
-		}
-
 
 		// Processing the player state
 		assert(registry.screenStates.components.size() <= 1);
