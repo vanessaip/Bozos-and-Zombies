@@ -1056,7 +1056,11 @@ void WorldSystem::updateWheelRotation(float elapsed_ms_since_last_update)
 // Reset the world state to its initial state
 void WorldSystem::restart_level()
 {
-	debugging.in_full_view_mode = false;
+  if (curr_level == TBC) {
+    debugging.in_full_view_mode = true;
+  } else {
+    debugging.in_full_view_mode = false;
+  }
 	this->game_over = false;
 	// Debugging for memory/component leaks
 	registry.list_all_components();
@@ -1251,19 +1255,21 @@ void WorldSystem::restart_level()
 		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, { 230, 155 }, { 80, 60 });
 	}
 	// Lives can probably stay hardcoded?
-	float heart_pos_x = 1385;
-	float heart_starting_pos_y = 40;
+  if (curr_level != TBC) {
+    float heart_pos_x = 1385;
+    float heart_starting_pos_y = 40;
 
-	Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
-	Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
-	Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
-	Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
-	Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
+    Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
+    Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
+    Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
+    Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
+    Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
 
-	player_hearts = { heart0, heart1, heart2, heart3, heart4 };
+    player_hearts = { heart0, heart1, heart2, heart3, heart4 };
 
-	// Create label
-	Entity label = createLabel(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]]);
+    // Create label
+    Entity label = createLabel(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]]);
+  }
 
 	setup_keyframes(renderer);
 
