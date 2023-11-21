@@ -94,6 +94,7 @@ private:
 	std::vector<vec2> npc_spawn_pos;
 	std::vector<float> floor_positions;
 	std::vector<std::vector<float>> ladder_positions;
+	std::vector<std::vector<float>> jump_positions;
 	float PLATFORM_WIDTH;
 	float PLATFORM_HEIGHT;
   vec2 door_win_pos;
@@ -103,6 +104,8 @@ private:
 	float zombie_spawn_threshold;
 	float student_spawn_threshold;
 	uint num_collectibles;
+
+	float PLAYER_SPEED = 230;
 
 	// music references
 	Mix_Music* background_music;

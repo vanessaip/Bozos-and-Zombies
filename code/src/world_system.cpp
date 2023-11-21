@@ -421,7 +421,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 						else {
 							motion.velocity.x = 0;
 
-							if (isZombie && !motion.offGround)
+							if (curr_level == NEST && isZombie && !motion.offGround)
 							{
 								motion.offGround = true;
 								motion.velocity[1] -= 200;
@@ -819,20 +819,6 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 			float speed = ZOMBIE_SPEED;
 			motion.velocity.x = direction * speed;
 
-			/*
-			// If the zombie hasn't gotten to the player yet, set the appropriate direction the zombie is facing
-			if (abs(motion.position.x - bozo_motion.position.x) > 5)
-			{
-				if (motion.velocity.x > 0)
-				{
-					motion.reflect[0] = true;
-				}
-				else
-				{
-					motion.reflect[0] = false;
-				}
-			}
-			*/
 		}
 	}
 	else if (zombie_level == bozo_level)
@@ -845,6 +831,16 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 		float speed = ZOMBIE_SPEED;
 		motion.velocity.x = direction * speed;
+
+		if (!motion.offGround) {
+			for (float pos : jump_positions[zombie_level]) {
+				if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
+				{
+					motion.velocity.y = -500;
+					motion.offGround = true;
+				}
+			}
+		}
 
 	}
 	else if (zombie_level < bozo_level)
@@ -902,11 +898,11 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 
 		// When at the ladder, start descending
-		if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f))
+		if ((target_ladder - 15.f < motion.position.x && motion.position.x < target_ladder + 15.f))
 		{
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
-      motion.position.y += 15;
+			motion.position.y += 20;
 			motion.velocity.y = 2 *ZOMBIE_SPEED;
 			motion.climbing = true;
 		}
@@ -1153,6 +1149,15 @@ void WorldSystem::restart_level()
 			level_climb_points.push_back(point.asFloat());
 		}
 		ladder_positions.push_back(level_climb_points);
+	}
+
+	jump_positions.clear();
+	for (const auto levelPoints : jsonData["zombie_jump_points"]) {
+		std::vector<float> level_jump_points;
+		for (const auto point : levelPoints) {
+			level_jump_points.push_back(point.asFloat());
+		}
+		jump_positions.push_back(level_jump_points);
 	}
 
 	// Create spikes
@@ -1489,7 +1494,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		if (key == GLFW_KEY_SPACE && !motion.offGround)
 		{
 			motion.offGround = true;
-			motion.velocity[1] -= 400;
+			motion.velocity[1] -= 500;
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 
