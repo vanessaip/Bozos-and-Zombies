@@ -486,7 +486,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 					updateZombieMovement(motion, bozo_motion, motion_container.entities[i], offAll);
 				}
 
-			if (isNPC || isWheel)
+			if (isNPC)
 			{
 				if (motion.velocity.x < 0)
 				{
@@ -1038,14 +1038,32 @@ void WorldSystem::updateWheelRotation()
 {
 	for (Entity wheel : registry.wheels.entities)
 	{
-		Motion& wheelMotion = registry.motions.get(wheel);
-		const float rotationSpeed = 0.0001f;
-		if (wheelMotion.velocity.x >= 0)
-			wheelMotion.angle += rotationSpeed * wheelMotion.velocity.x;
-		else if (wheelMotion.velocity.x < 0)
-			wheelMotion.angle += rotationSpeed * wheelMotion.velocity.x;
+		Motion &wheelMotion = registry.motions.get(wheel);
+		float circumference = 2 * M_PI * 10.f;			 // M_PI is a constant for π
+		float distanceTraveled = wheelMotion.velocity.x; // If velocity is per second, multiply by deltaTime
+		float rotationRadians = distanceTraveled / circumference * 2 * M_PI;
+		float rotationDegrees = rotationRadians * 180 / M_PI;
+
+		wheelMotion.angle += rotationDegrees;
+
+		if (wheelMotion.angle >= 360.0f)
+		{
+			wheelMotion.angle -= 360.0f;
+		}
+		else if (wheelMotion.angle < 0.0f)
+		{
+			wheelMotion.angle += 360.0f;
+		}
+
+		// 	const float rotationSpeed = 0.0001f;
+		// 	if (wheelMotion.velocity.x >= 0)
+		// 		wheelMotion.angle += rotationSpeed * wheelMotion.velocity.x;
+		// 	else if (wheelMotion.velocity.x < 0)
+		// 		wheelMotion.angle += rotationSpeed * wheelMotion.velocity.x;
+		// }
 	}
 }
+
 
 // Reset the world state to its initial state
 void WorldSystem::restart_level()

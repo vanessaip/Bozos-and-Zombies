@@ -121,8 +121,16 @@ void resolve_bounce_collision(Entity entity1, Entity entity2)
 
 	float impact = -(1 + 0.5) * normalVelocity / (1 / mass1 + 1 / mass2); // 0.5 because I wanted a realistic collision
 	vec2 impulse = impact * collisionNormal;
-	motion1.velocity -= impulse / mass1;
-	motion2.velocity += impulse / mass2;
+	if (registry.wheels.has(entity1))
+	{
+		motion1.velocity.x -= impulse.x / mass1;
+		motion1.position.x -= 20.f;
+	}
+	else
+	{
+		motion2.velocity.x += impulse.x / mass2;
+		motion2.position.x += 20.f;
+	}
 }
 
 // This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
@@ -165,22 +173,37 @@ bool checkCollision(const Motion &player, const Mesh *spikeMesh, const Motion &s
 
 	// Calculate the player's bounding box edges
 	vec2 bb_half = get_bounding_box(player) / 2.f;
-	float left = player.position.x - bb_half.x;
-	float right = player.position.x + bb_half.x;
-	float top = player.position.y - bb_half.y;
-	float bottom = player.position.y + bb_half.y;
+	float leftP = player.position.x - bb_half.x;
+	float rightP = player.position.x + bb_half.x;
+	float topP = player.position.y - bb_half.y;
+	float bottomP = player.position.y + bb_half.y;
+
+	float leftS = std::numeric_limits<float>::max();
+	float rightS = std::numeric_limits<float>::lowest();
+	float topS = std::numeric_limits<float>::max();
+	float bottomS = std::numeric_limits<float>::lowest();
 
 	// Check each vertex of the spike mesh
 	for (const ColoredVertex &v : spikeMesh->vertices)
 	{
 		// Assume vertex position is in local space, transform to world space
 		vec2 worldPos = spike.position + vec2(v.position.x, v.position.y) * spikeMesh->original_size * 25.f;
+		leftS = std::min(leftS, worldPos.x);
+		rightS = std::max(rightS, worldPos.x);
+		topS = std::min(topS, worldPos.y);
+		bottomS = std::max(bottomS, worldPos.y);
 
 		// If any vertex is inside the player's bounding box, there's a collision
-		if (worldPos.x >= left && worldPos.x <= right && worldPos.y >= top && worldPos.y <= bottom)
+		if (worldPos.x >= leftP && worldPos.x <= rightP && worldPos.y >= topP && worldPos.y <= bottomP)
 		{
 			return true;
 		}
+	}
+
+	// Check if the player's bounding box is entirely within the spike's mesh
+	if (leftP >= leftS && rightP <= rightS && topP >= topS && bottomP <= bottomS)
+	{
+		return true;
 	}
 
 	return false; // No collision if no vertices are inside the bounding box
@@ -212,47 +235,55 @@ void PhysicsSystem::step(float elapsed_ms)
 			motion.velocity[1] += PhysicsSystem::GRAVITY;
 		}
 
-    // Step the spikeballs as per Bezier curves
-    // Bezier curve equations from https://en.wikipedia.org/wiki/B%C3%A9zier_curve
-    if (registry.dangerous.has(entity)) {
+		// Step the spikeballs as per Bezier curves
+		// Bezier curve equations from https://en.wikipedia.org/wiki/B%C3%A9zier_curve
+		if (registry.dangerous.has(entity))
+		{
 
-      Dangerous& dangerous = registry.dangerous.get(entity);
+			Dangerous &dangerous = registry.dangerous.get(entity);
 
-      vec2 p0 = dangerous.p0;
-      vec2 p1 = dangerous.p1;
-      vec2 p2 = dangerous.p2;
-      vec2 p3 = dangerous.p3;
+			vec2 p0 = dangerous.p0;
+			vec2 p1 = dangerous.p1;
+			vec2 p2 = dangerous.p2;
+			vec2 p3 = dangerous.p3;
 
-      if (dangerous.bezier_time < 2000) {
+			if (dangerous.bezier_time < 2000)
+			{
 
-        float t = dangerous.bezier_time / 1000;
+				float t = dangerous.bezier_time / 1000;
 
-        vec2 L0 = (1 - t) * p0 + t * p1;
-        vec2 L1 = (1 - t) * p1 + t * p2;
+				vec2 L0 = (1 - t) * p0 + t * p1;
+				vec2 L1 = (1 - t) * p1 + t * p2;
 
-        vec2 Q0 = (1 - t) * L0 + t * L1; 
-        
-        if (!dangerous.cubic) {
-          motion.position = Q0;
-          dangerous.bezier_time += 10;
-        } else {
-          vec2 L2 = (1 - t) * p2 + t * p3;
+				vec2 Q0 = (1 - t) * L0 + t * L1;
 
-          vec2 Q1 = (1 - t) * L1 + t * L2;
+				if (!dangerous.cubic)
+				{
+					motion.position = Q0;
+					dangerous.bezier_time += 10;
+				}
+				else
+				{
+					vec2 L2 = (1 - t) * p2 + t * p3;
 
-          vec2 C0 = (1 - t) * Q0 + t * Q1;
+					vec2 Q1 = (1 - t) * L1 + t * L2;
 
-          motion.position = C0;
-          dangerous.bezier_time += 4;
-        }
+					vec2 C0 = (1 - t) * Q0 + t * Q1;
 
-      } else if (dangerous.bezier_time > 4000) {
-        dangerous.bezier_time = 0;
-        motion.position = p0;
-      } else {
-        dangerous.bezier_time += 10;
-      }
-    }
+					motion.position = C0;
+					dangerous.bezier_time += 4;
+				}
+			}
+			else if (dangerous.bezier_time > 4000)
+			{
+				dangerous.bezier_time = 0;
+				motion.position = p0;
+			}
+			else
+			{
+				dangerous.bezier_time += 10;
+			}
+		}
 
 		motion.position[0] += motion.velocity[0] * step_seconds;
 		motion.position[1] += motion.velocity[1] * step_seconds;
@@ -304,7 +335,8 @@ void PhysicsSystem::step(float elapsed_ms)
 					resolve_bounce_collision(entity_i, entity_j);
 				}
 			}
-			else {
+			else
+			{
 				if (collides(motion_i, motion_j))
 				{
 					// Create a collisions event
