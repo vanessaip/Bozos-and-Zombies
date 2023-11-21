@@ -110,7 +110,8 @@ void resolve_bounce_collision(Entity entity1, Entity entity2)
 {
 	Motion &motion1 = registry.motions.get(entity1);
 	Motion &motion2 = registry.motions.get(entity2);
-	float mass = 50.0f;
+	float &mass1 = registry.bounce.get(entity1).mass;
+	float &mass2 = registry.bounce.get(entity2).mass;
 
 	vec2 collisionNormal = normalize(motion2.position - motion1.position);
 	vec2 relVelocity = motion2.velocity - motion1.velocity;
@@ -118,10 +119,10 @@ void resolve_bounce_collision(Entity entity1, Entity entity2)
 	if (normalVelocity > 0)
 		return;
 
-	float impact = -(2) * normalVelocity / (2 / mass); // 0.5 because I wanted a realistic collision
-	vec2 impulse = impact * collisionNormal / mass;
-	motion1.velocity -= impulse;
-	motion2.velocity += impulse;
+	float impact = -(1 + 0.5) * normalVelocity / (1 / mass1 + 1 / mass2); // 0.5 because I wanted a realistic collision
+	vec2 impulse = impact * collisionNormal;
+	motion1.velocity -= impulse / mass1;
+	motion2.velocity += impulse / mass2;
 }
 
 // This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
@@ -287,14 +288,23 @@ void PhysicsSystem::step(float elapsed_ms)
 				std::vector<glm::vec2> transformedVertices1 = getTransformedVertices(mesh_i, motion_i);
 				std::vector<glm::vec2> transformedVertices2 = getTransformedVertices(mesh_j, motion_j);
 
-				if (checkSATIntersection(transformedVertices1, transformedVertices2))
+				if (checkSATIntersection(transformedVertices1, transformedVertices2) || checkSATIntersection(transformedVertices2, transformedVertices1))
 				{
 					resolve_bounce_collision(entity_i, entity_j);
 				}
 			}
-			else
+			else if ((registry.wheels.has(entity_i) && registry.spikes.has(entity_j)) || (registry.wheels.has(entity_j) && registry.spikes.has(entity_i)))
 			{
 
+				std::vector<glm::vec2> transformedVertices1 = getTransformedVertices(mesh_i, motion_i);
+				std::vector<glm::vec2> transformedVertices2 = getTransformedVertices(mesh_j, motion_j);
+
+				if (checkSATIntersection(transformedVertices1, transformedVertices2) || checkSATIntersection(transformedVertices2, transformedVertices1))
+				{
+					resolve_bounce_collision(entity_i, entity_j);
+				}
+			}
+			else {
 				if (collides(motion_i, motion_j))
 				{
 					// Create a collisions event

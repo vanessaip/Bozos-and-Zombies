@@ -59,7 +59,7 @@ private:
 	// Sets up keyframe interpolation for given entity
 	void setup_keyframes(RenderSystem* rendered);
 
-	void updateWheelRotation(float elapsed_ms_since_last_update);
+	void updateWheelRotation();
 
 	// restart level
 	void restart_level();

@@ -63,6 +63,11 @@ struct Door
 	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
 };
 
+struct Bounce
+{
+	float mass;
+};
+
 // All data relevant to the shape and motion of entities
 struct Motion
 {

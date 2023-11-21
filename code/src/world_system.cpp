@@ -283,7 +283,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		bool isBook = registry.books.has(motion_container.entities[i]);
 		bool isWheel = registry.wheels.has(motion_container.entities[i]);
 
-		updateWheelRotation(elapsed_ms_since_last_update);
+		updateWheelRotation();
 
 		if (isPlayer && !registry.deathTimers.has(motion_container.entities[i]))
 		{
@@ -328,7 +328,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 			vec4 entityBB = { entityRightSide, entityLeftSide, entityBottom, entityTop };
 
-			if (!isWheel) {
 				// Bounding entities to window
 				if (motion.position.x < BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0 || motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f && motion.velocity.x > 0)
 				{
@@ -407,7 +406,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 					if (entityLeftSide < xBlockRightBound &&
 						entityLeftSide > xBlockRightBound - 10.f &&
 						entityTop < yBlockBottom &&
-						entityBottom > yBlockTop && (player.keyPresses[0] || isZombie || isNPC))
+						entityBottom > yBlockTop && (player.keyPresses[0] || isZombie || isNPC || isWheel))
 					{
 						if (isNPC || isWheel) {
 							if (registry.platforms.has(blocks[i])) {
@@ -433,7 +432,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 					if (entityRightSide > xBlockLeftBound &&
 						entityRightSide < xBlockLeftBound + 10.f &&
 						entityTop < yBlockBottom &&
-						entityBottom > yBlockTop && (player.keyPresses[1] || isZombie || isNPC))
+						entityBottom > yBlockTop && (player.keyPresses[1] || isZombie || isNPC || isWheel))
 					{
 						if (isNPC || isWheel) {
 							if (registry.platforms.has(blocks[i])) {
@@ -486,7 +485,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				{
 					updateZombieMovement(motion, bozo_motion, motion_container.entities[i], offAll);
 				}
-			}
 
 			if (isNPC || isWheel)
 			{
@@ -1036,16 +1034,16 @@ bool WorldSystem::isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& mot
 	return true;
 }
 
-void WorldSystem::updateWheelRotation(float elapsed_ms_since_last_update)
+void WorldSystem::updateWheelRotation()
 {
 	for (Entity wheel : registry.wheels.entities)
 	{
 		Motion& wheelMotion = registry.motions.get(wheel);
-		const float rotationSpeed = 0.001f;
-		if (wheelMotion.velocity.x > 0)
-			wheelMotion.angle += rotationSpeed * abs(elapsed_ms_since_last_update);
+		const float rotationSpeed = 0.0001f;
+		if (wheelMotion.velocity.x >= 0)
+			wheelMotion.angle += rotationSpeed * wheelMotion.velocity.x;
 		else if (wheelMotion.velocity.x < 0)
-			wheelMotion.angle -= rotationSpeed * abs(elapsed_ms_since_last_update);
+			wheelMotion.angle += rotationSpeed * wheelMotion.velocity.x;
 	}
 }
 
