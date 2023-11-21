@@ -105,8 +105,6 @@ private:
 	float student_spawn_threshold;
 	uint num_collectibles;
 
-	float PLAYER_SPEED = 230;
-
 	// music references
 	Mix_Music* background_music;
 	Mix_Chunk* player_death_sound;

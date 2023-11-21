@@ -18,7 +18,8 @@ const float WALL_WIDTH = 20.f;
 
 const vec2 CLIMBABLE_DIM = { 30.f, 32.f };
 
-const float ZOMBIE_SPEED = 100.f;
+const float ZOMBIE_SPEED = 150.f;
+const float PLAYER_SPEED = 230;
 
 // the player
 Entity createBozo(RenderSystem* renderer, vec2 pos);
@@ -70,15 +71,24 @@ void removeEntity(Entity e);
 
 enum level {
 	TUTORIAL = 0,
-	NEST = 1,
+	NEST = 3,
 	BEACH = 2,
-	LIBRARY = 3
+	LIBRARY = 1
 };
+
+// For swapping levels around
+const std::vector<int> asset_mapping = {
+  0, 
+  3, 
+  2, 
+  1
+};
+
 const std::vector<std::string> LEVEL_DESCRIPTORS = {
   level_path("0_tutorial.json"),
-  level_path("1_nest.json"),
+  level_path("3_library.json"),
   level_path("2_beach.json"),
-  level_path("3_library.json")
+  level_path("1_nest.json")
 };
 
 // ---------------------BACKGROUNDS-------------------------

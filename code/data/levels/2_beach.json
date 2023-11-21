@@ -53,9 +53,9 @@
       "visible": true
     },
     {
-      "x": 1190.0,
+      "x": 1150.0,
       "y": 405.0,
-      "num_tiles": 6,
+      "num_tiles": 7,
       "visible": true
     }
   ],
@@ -87,10 +87,12 @@
   "zombie_climb_points": [
     [ 400 ],
     [ 200, 940 ],
-    [ 940 ]
+    [ 940 ],
+    [ 1400 ]
   ],
   "zombie_jump_points": [
     [ 0 ],
+    [ 450, 1030 ],
     [ 0 ],
     [ 0 ]
   ],

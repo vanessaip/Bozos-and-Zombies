@@ -310,11 +310,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 			if (player.keyPresses[0])
 			{
-				motion.velocity[0] -= 200;
+				motion.velocity[0] -= PLAYER_SPEED;
 			}
 			if (player.keyPresses[1])
 			{
-				motion.velocity[0] += 200;
+				motion.velocity[0] += PLAYER_SPEED;
 			}
 
 		}
@@ -447,7 +447,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 						else {
 							motion.velocity.x = 0;
 
-							if (isZombie && !motion.offGround)
+							if (curr_level == NEST && isZombie && !motion.offGround)
 							{
 								motion.offGround = true;
 								motion.velocity[1] -= 200;
@@ -836,7 +836,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 			for (float pos : jump_positions[zombie_level]) {
 				if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
 				{
-					motion.velocity.y = -500;
+					motion.velocity.y = -600;
 					motion.offGround = true;
 				}
 			}
@@ -1093,7 +1093,7 @@ void WorldSystem::restart_level()
 
 	// Create background first (painter's algorithm for rendering)
 
-	for (std::tuple<TEXTURE_ASSET_ID, float> background : BACKGROUND_ASSET[curr_level]) {
+	for (std::tuple<TEXTURE_ASSET_ID, float> background : BACKGROUND_ASSET[asset_mapping[curr_level]]) {
 		createBackground(renderer, std::get<0>(background), std::get<1>(background));
 	}
 
@@ -1116,7 +1116,7 @@ void WorldSystem::restart_level()
 	}
 
 	for (const auto& platform_data : jsonData["platforms"]) {
-		createPlatforms(renderer, platform_data["x"].asFloat(), platform_data["y"].asFloat(), platform_data["num_tiles"].asInt(), PLATFORM_ASSET[curr_level], platform_data["visible"].asBool(), { PLATFORM_WIDTH, PLATFORM_HEIGHT });
+		createPlatforms(renderer, platform_data["x"].asFloat(), platform_data["y"].asFloat(), platform_data["num_tiles"].asInt(), PLATFORM_ASSET[asset_mapping[curr_level]], platform_data["visible"].asBool(), { PLATFORM_WIDTH, PLATFORM_HEIGHT });
 	}
 
 	// Create stairs
@@ -1131,7 +1131,7 @@ void WorldSystem::restart_level()
 
 	// Create climbables
 	for (const auto& data : jsonData["climbables"]) {
-		createClimbable(renderer, data["x"].asFloat(), data["y"].asFloat(), data["sections"].asInt(), CLIMBABLE_ASSET[curr_level]);
+		createClimbable(renderer, data["x"].asFloat(), data["y"].asFloat(), data["sections"].asInt(), CLIMBABLE_ASSET[asset_mapping[curr_level]]);
 	}
 
 	door_win_pos = { jsonData["door_win_pos"]["x"].asFloat(), jsonData["door_win_pos"]["y"].asFloat() };
@@ -1212,7 +1212,7 @@ void WorldSystem::restart_level()
 		vec2 pos = { student_pos["x"].asFloat(), student_pos["y"].asFloat() };
 		npc_spawn_pos.push_back(pos);
 		if (s < num_starting_students) {
-			Entity student = createStudent(renderer, pos, NPC_ASSET[curr_level]);
+			Entity student = createStudent(renderer, pos, NPC_ASSET[asset_mapping[curr_level]]);
 			// coded back+forth motion
 			Motion& student_motion = registry.motions.get(student);
 			student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
@@ -1232,7 +1232,7 @@ void WorldSystem::restart_level()
 	const Json::Value& collectiblesPositions = jsonData["collectibles"]["positions"];
 	num_collectibles = collectiblesPositions.size(); // set number of collectibles
 	vec2 collectible_scale = { jsonData["collectibles"]["scale"]["x"].asFloat(), jsonData["collectibles"]["scale"]["y"].asFloat() };
-	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[curr_level];
+	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[asset_mapping[curr_level]];
 	assert(num_collectibles == collectible_assets.size());
 	for (uint i = 0; i < num_collectibles; i++) {
 		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false);
@@ -1257,7 +1257,7 @@ void WorldSystem::restart_level()
 	player_hearts = { heart0, heart1, heart2, heart3, heart4 };
 
 	// Create label
-	Entity label = createLabel(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[curr_level]);
+	Entity label = createLabel(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]]);
 
 	setup_keyframes(renderer);
 
@@ -1342,7 +1342,7 @@ void WorldSystem::handle_collisions()
 					if (spawn_book)
 					{
 						Motion& m = registry.motions.get(entity_other);
-						Entity book = createBook(renderer, m.position, WEAPON_ASSETS[curr_level]);
+						Entity book = createBook(renderer, m.position, WEAPON_ASSETS[asset_mapping[curr_level]]);
 						Book& b = registry.books.get(book);
 						b.offHand = false;
 						++points;
@@ -1494,7 +1494,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		if (key == GLFW_KEY_SPACE && !motion.offGround)
 		{
 			motion.offGround = true;
-			motion.velocity[1] -= 500;
+			motion.velocity[1] -= 600;
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 
