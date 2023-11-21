@@ -57,7 +57,7 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 	gl_has_errors();
 
 	initScreenTexture();
-    initializeGlTextures();
+	initializeGlTextures();
 	initializeGlEffects();
 	initializeGlGeometryBuffers();
 
@@ -66,10 +66,10 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 
 void RenderSystem::initializeGlTextures()
 {
-    glGenTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());
+	glGenTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());
 
-    for(uint i = 0; i < texture_paths.size(); i++)
-    {
+	for (uint i = 0; i < texture_paths.size(); i++)
+	{
 		const std::string& path = texture_paths[i];
 		ivec2& dimensions = texture_dimensions[i];
 
@@ -89,13 +89,13 @@ void RenderSystem::initializeGlTextures()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		gl_has_errors();
 		stbi_image_free(data);
-    }
+	}
 	gl_has_errors();
 }
 
 void RenderSystem::initializeGlEffects()
 {
-	for(uint i = 0; i < effect_paths.size(); i++)
+	for (uint i = 0; i < effect_paths.size(); i++)
 	{
 		const std::string vertex_shader_name = effect_paths[i] + ".vs.glsl";
 		const std::string fragment_shader_name = effect_paths[i] + ".fs.glsl";
@@ -127,13 +127,13 @@ void RenderSystem::initializeGlMeshes()
 		// Initialize meshes
 		GEOMETRY_BUFFER_ID geom_index = mesh_paths[i].first;
 		std::string name = mesh_paths[i].second;
-		Mesh::loadFromOBJFile(name, 
+		Mesh::loadFromOBJFile(name,
 			meshes[(int)geom_index].vertices,
 			meshes[(int)geom_index].vertex_indices,
 			meshes[(int)geom_index].original_size);
 
 		bindVBOandIBO(geom_index,
-			meshes[(int)geom_index].vertices, 
+			meshes[(int)geom_index].vertices,
 			meshes[(int)geom_index].vertex_indices);
 	}
 }
@@ -152,10 +152,10 @@ void RenderSystem::initializeGlGeometryBuffers()
 	// Initialize sprite
 	// The position corresponds to the center of the texture.
 	std::vector<TexturedVertex> textured_vertices(4);
-	textured_vertices[0].position = { -1.f/2, +1.f/2, 0.f };
-	textured_vertices[1].position = { +1.f/2, +1.f/2, 0.f };
-	textured_vertices[2].position = { +1.f/2, -1.f/2, 0.f };
-	textured_vertices[3].position = { -1.f/2, -1.f/2, 0.f };
+	textured_vertices[0].position = { -1.f / 2, +1.f / 2, 0.f };
+	textured_vertices[1].position = { +1.f / 2, +1.f / 2, 0.f };
+	textured_vertices[2].position = { +1.f / 2, -1.f / 2, 0.f };
+	textured_vertices[3].position = { -1.f / 2, -1.f / 2, 0.f };
 	textured_vertices[0].texcoord = { 0.f, 1.f };
 	textured_vertices[1].texcoord = { 1.f, 1.f };
 	textured_vertices[2].texcoord = { 1.f, 0.f };
@@ -188,7 +188,7 @@ RenderSystem::~RenderSystem()
 	glDeleteRenderbuffers(1, &off_screen_render_buffer_depth);
 	gl_has_errors();
 
-	for(uint i = 0; i < effect_count; i++) {
+	for (uint i = 0; i < effect_count; i++) {
 		glDeleteProgram(effects[i]);
 	}
 	// delete allocated resources
@@ -197,7 +197,7 @@ RenderSystem::~RenderSystem()
 
 	// remove all entities created by the render system
 	while (registry.renderRequests.entities.size() > 0)
-	    registry.remove_all_components_of(registry.renderRequests.entities.back());
+		registry.remove_all_components_of(registry.renderRequests.entities.back());
 }
 
 // Initialize the screen texture from a standard sprite
@@ -289,7 +289,7 @@ bool loadEffectFromFile(
 	}
 	if (!gl_compile_shader(fragment))
 	{
-		fprintf(stderr, "Vertex compilation failed");
+		fprintf(stderr, "Fragment compilation failed");
 		assert(false);
 		return false;
 	}
@@ -330,7 +330,7 @@ bool loadEffectFromFile(
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{	
+{
 	// glfwMakeContextCurrent(window);
 	// float h = ((float)width)*aspect_ratio;
 	// glViewport(0, 0, width, h);

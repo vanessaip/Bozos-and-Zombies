@@ -1,6 +1,8 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
 
+using Clock = std::chrono::high_resolution_clock;
+
 Entity createBozo(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
@@ -110,7 +112,7 @@ Entity createZombie(RenderSystem* renderer, vec2 position)
 	// Initialize the motion
 	auto& motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
-	motion.velocity = { 0.f, 0.f };
+	motion.velocity = { 100.f, 0.f };
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way
@@ -178,31 +180,31 @@ std::vector<Entity> createPlatforms(RenderSystem* renderer, float left_position_
 }
 
 // TODO(vanessa): maybe make new component for steps, step blocks must be >0
-std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, uint num_steps, uint step_blocks, bool left)
+std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, vec2 step_scale, uint num_steps, uint step_blocks, bool left)
 {
 	std::vector<Entity> steps;
 	vec2 curr_pos = left_pos;
 	for (uint i = 0; i < num_steps; i++) {
 		if (left) {
-			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, true, { STEP_WIDTH, STEP_HEIGHT });
+			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, true, step_scale);
 			Motion& m = registry.motions.get(s0);
 			m.reflect.x = true; // TODO(vanessa): shouldn't it be reflect y?
 			steps.push_back(s0);
-			curr_pos.x += STEP_WIDTH;
+			curr_pos.x += step_scale.x;
 		}
 		for (uint j = 0; j < step_blocks - 1; j++) {
-			Entity s = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP1, true, { STEP_WIDTH, STEP_HEIGHT });
+			Entity s = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP1, true, step_scale);
 			steps.push_back(s);
-			curr_pos.x += STEP_WIDTH;
+			curr_pos.x += step_scale.x;
 		}
 		if (!left) {
-			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, true, { STEP_WIDTH, STEP_HEIGHT });
+			Entity s0 = createPlatform(renderer, curr_pos, TEXTURE_ASSET_ID::STEP0, true, step_scale);
 			steps.push_back(s0);
-			curr_pos.y += STEP_HEIGHT;
+			curr_pos.y += step_scale.y;
 		}
 		else {
-			curr_pos.x -= STEP_WIDTH;
-			curr_pos.y -= STEP_HEIGHT;
+			curr_pos.x -= step_scale.x;
+			curr_pos.y -= step_scale.y;
 		}
 	}
 	return steps;
@@ -270,7 +272,7 @@ std::vector<Entity> createClimbable(RenderSystem* renderer, float top_position_x
 	return sections;
 }
 
-Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, vec2 position, vec2 scale)
+Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, float depth, vec2 position, vec2 scale)
 {
 	auto entity = Entity();
 
@@ -288,7 +290,9 @@ Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, vec2 p
 	motion.scale = scale;
 
 	// Create a Background component
-	registry.backgrounds.emplace(entity);
+	Background& background = registry.backgrounds.emplace(entity);
+	background.depth = depth;
+
 	registry.renderRequests.insert(
 		entity,
 		{ texture,
@@ -340,6 +344,32 @@ Entity createSpike(RenderSystem* renderer, vec2 pos)
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
 			EFFECT_ASSET_ID::SPIKE,
 			GEOMETRY_BUFFER_ID::SPIKE });
+
+	return entity;
+}
+
+Entity createWheel(RenderSystem* renderer, vec2 pos)
+{
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::WHEEL);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 100.f, 0.f };
+	motion.scale = mesh.original_size * 25.f;
+	motion.offGround = true;
+
+	registry.wheels.emplace(entity);
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
+			EFFECT_ASSET_ID::WHEEL,
+			GEOMETRY_BUFFER_ID::WHEEL });
 
 	return entity;
 }
@@ -455,7 +485,7 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale) {
 	return entity;
 }
 
-Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale) {
+Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic) {
 	// Reserve en entity
 	auto entity = Entity();
 
@@ -468,11 +498,17 @@ Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale) {
 	motion.position = position;
 	motion.scale = scale;
 
-	registry.dangerous.emplace(entity);
+	Dangerous& dangerous = registry.dangerous.emplace(entity);
+
+  dangerous.p0 = p0;
+  dangerous.p1 = p1;
+  dangerous.p2 = p2;
+  dangerous.p3 = p3;
+  dangerous.cubic = cubic;
 
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::SPIKE_BALL,
+		{ assetID,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
@@ -491,7 +527,7 @@ Entity createLoadingScreen(RenderSystem* renderer, vec2 position, vec2 scale) {
 	auto& motion = registry.motions.emplace(entity);
 	motion.position = position;
 	motion.scale = scale;
-
+	
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::LOADING_SCREEN,
@@ -499,4 +535,70 @@ Entity createLoadingScreen(RenderSystem* renderer, vec2 position, vec2 scale) {
 			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
+
+}
+Entity createLabel(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID) {
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	registry.labels.emplace(entity);
+	Label& label = registry.labels.get(entity);
+	label.fading_timer = Clock::now();
+
+	registry.overlay.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ assetID,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+	return entity;
+}
+
+Entity createDoor(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID) {
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	registry.doors.emplace(entity);
+	Door& door = registry.doors.get(entity);
+	door.fading_timer = Clock::now();
+
+	registry.overlay.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ assetID,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+	return entity;
+}
+
+// Wrapper method for removing entities
+// Removes all entity components and resets buffer id for sprite sheet components
+void removeEntity(Entity e) {
+	if (registry.spriteSheets.has(e))
+	{
+		SpriteSheet& spriteSheet = registry.spriteSheets.get(e);
+		RenderSystem::deleteBufferId(static_cast<int>(spriteSheet.bufferId));
+	}
+
+	registry.remove_all_components_of(e);
 }

@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <cassert>
 #include "../ext/stb_image/stb_image.h"
+#include <chrono>
 
 // Player component
 struct Player
@@ -27,10 +28,6 @@ struct Human
 {
 };
 
-struct Background
-{
-};
-
 struct Platform
 {
 };
@@ -44,6 +41,11 @@ struct Spike
 
 };
 
+struct Wheel
+{
+
+};
+
 // Ladders and maybe stairs?
 struct Climbable
 {
@@ -53,6 +55,12 @@ struct Climbable
 struct Book
 {
 	bool offHand = true;
+};
+
+struct Door
+{
+	float fading_factor = 0.f;
+	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
 };
 
 // All data relevant to the shape and motion of entities
@@ -98,7 +106,6 @@ struct Collision
 struct Debug
 {
 	bool in_full_view_mode = 0;
-	bool in_freeze_mode = 0;
 };
 extern Debug debugging;
 
@@ -200,6 +207,12 @@ struct Camera
 	}
 };
 
+struct Background
+{
+	float depth = 0.f;
+	Camera parallaxCam = Camera(0.f, 0.f, 0.f, 0.f);
+};
+
 struct TextBox
 {
 	std::string text = "";
@@ -217,7 +230,18 @@ struct Overlay
 
 struct Dangerous
 {
+	vec2 p0;
+	vec2 p1;
+	vec2 p2;
+	vec2 p3;
+	bool cubic;
+	float bezier_time = 0;
+};
 
+struct Label
+{
+	float fading_factor = 1.f;
+	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
 };
 
 /**
@@ -252,8 +276,7 @@ enum class TEXTURE_ASSET_ID
 	ZOMBIE = STUDENT + 1,
 	BOZO = ZOMBIE + 1,
 	BOZO_POINTER = BOZO + 1,
-	BACKGROUND = BOZO_POINTER + 1,
-	PLATFORM = BACKGROUND + 1,
+	PLATFORM = BOZO_POINTER + 1,
 	STEP0 = PLATFORM + 1,
 	STEP1 = STEP0 + 1,
 	WALL = STEP1 + 1,
@@ -273,7 +296,15 @@ enum class TEXTURE_ASSET_ID
 	HEART = SODA + 1,
 	WIN_SCREEN = HEART + 1,
 	BASEMENT = WIN_SCREEN + 1,
-	BEACH_PLAT = BASEMENT + 1,
+	PARALLAX_FOREGROUND_4 = BASEMENT + 1,
+	PARALLAX_FOREGROUND_3 = PARALLAX_FOREGROUND_4 + 1,
+	PARALLAX_FOREGROUND_1 = PARALLAX_FOREGROUND_3 + 1,
+	PARALLAX_FOREGROUND_0 = PARALLAX_FOREGROUND_1 + 1,
+	PARALLAX_BACKGROUND_3 = PARALLAX_FOREGROUND_0 + 1,
+	PARALLAX_BACKGROUND_2 = PARALLAX_BACKGROUND_3 + 1,
+	PARALLAX_BACKGROUND_1 = PARALLAX_BACKGROUND_2 + 1,
+	PARALLAX_BACKGROUND_0 = PARALLAX_BACKGROUND_1 + 1,
+	BEACH_PLAT = PARALLAX_BACKGROUND_0 + 1,
 	BEACH_LADDER = BEACH_PLAT + 1,
 	SPIKE_BALL = BEACH_LADDER + 1,
 	CANNON = SPIKE_BALL + 1,
@@ -281,7 +312,6 @@ enum class TEXTURE_ASSET_ID
 	BEACH_SEA = BEACH_SKY + 1,
 	BEACH_LAND = BEACH_SEA + 1,
 	BEACH_CLOUD = BEACH_LAND + 1,
-	// tutorial assets
 	TUTORIAL_PLAT = BEACH_CLOUD + 1,
 	TUTORIAL_BACKGROUND0 = TUTORIAL_PLAT + 1,
 	TUTORIAL_BACKGROUND1 = TUTORIAL_BACKGROUND0 + 1,
@@ -303,7 +333,24 @@ enum class TEXTURE_ASSET_ID
 	LIBRARY_FILL = LIBRARY_OBJECTS + 1,
 	LIBRARY_PLAT = LIBRARY_FILL + 1,
 	LIBRARY_LAD = LIBRARY_PLAT + 1,
-	TEXTURE_COUNT = LIBRARY_LAD + 1
+	LABEL_NEST = LIBRARY_LAD + 1,
+	LABEL_BEACH = LABEL_NEST + 1,
+	LABEL_LIB = LABEL_BEACH + 1,
+	LABEL_TUTORIAL = LABEL_LIB + 1,
+	BEACH_APPLE = LABEL_TUTORIAL + 1,
+	BEACH_CHEST = BEACH_APPLE + 1,
+	BEACH_CHEST2 = BEACH_CHEST + 1,
+	BEACH_DIAMOND = BEACH_CHEST2 + 1,
+	BEACH_STAR = BEACH_DIAMOND + 1,
+	BEACH_COIN = BEACH_STAR + 1,
+	WIN_DOOR = BEACH_COIN + 1,
+	BEACH_BIRD = WIN_DOOR + 1,
+	LIB_COLL1 = BEACH_BIRD + 1,
+	LIB_COLL2 = LIB_COLL1 + 1,
+	LIB_COLL3 = LIB_COLL2 + 1,
+	LIB_COLL4 = LIB_COLL3 + 1,
+	LIB_COLL5 = LIB_COLL4 + 1,
+	TEXTURE_COUNT = LIB_COLL5 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -311,7 +358,8 @@ enum class EFFECT_ASSET_ID
 {
 	COLOURED = 0,
 	SPIKE = COLOURED + 1, // can reuse if we end up having meshes
-	TEXTURED = SPIKE + 1,
+	WHEEL = SPIKE + 1,
+	TEXTURED = WHEEL + 1,
 	WATER = TEXTURED + 1,
 	EFFECT_COUNT = WATER + 1
 };
@@ -319,7 +367,8 @@ const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
 	SPIKE = 0,
-	SPRITE = SPIKE + 1,
+	WHEEL = SPIKE + 1,
+	SPRITE = WHEEL + 1,
 	DEBUG_LINE = SPRITE + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
 	SPRITE_SHEET = SCREEN_TRIANGLE + 1,

@@ -3,6 +3,8 @@
 #include "world_init.hpp"
 #include <iostream>
 #include <vector>
+#include <glm/glm.hpp>
+
 // float GRAVITY = 10;
 
 // Returns the local bounding coordinates scaled by the current size of the entity
@@ -10,6 +12,116 @@ vec2 get_bounding_box(const Motion &motion)
 {
 	// abs is to avoid negative scale due to the facing direction.
 	return {abs(motion.scale.x), abs(motion.scale.y)};
+}
+
+glm::vec2 calculateNormalizedProjectionAxis(const glm::vec2 &current, const glm::vec2 &next)
+{
+	glm::vec2 edge = next - current;
+	glm::vec2 normal = glm::vec2(-edge.y, edge.x);
+	return glm::normalize(normal);
+}
+
+void computeProjections(const std::vector<glm::vec2> &vertices, const glm::vec2 &axis, std::vector<double> &projections)
+{
+	projections.clear();
+	for (const auto &vertex : vertices)
+	{
+		projections.push_back(glm::dot(axis, vertex));
+	}
+}
+
+bool isOverlapping(const std::vector<double> &projections1, const std::vector<double> &projections2)
+{
+	auto minProj1 = *std::min_element(projections1.begin(), projections1.end());
+	auto maxProj1 = *std::max_element(projections1.begin(), projections1.end());
+
+	auto minProj2 = *std::min_element(projections2.begin(), projections2.end());
+	auto maxProj2 = *std::max_element(projections2.begin(), projections2.end());
+
+	return !(maxProj1 < minProj2 || maxProj2 < minProj1);
+}
+
+bool checkSATIntersection(const std::vector<glm::vec2> &vertices1, const std::vector<glm::vec2> &vertices2)
+{
+	std::vector<double> projections1, projections2;
+
+	for (size_t i = 0; i < vertices1.size(); ++i)
+	{
+		glm::vec2 axis = calculateNormalizedProjectionAxis(vertices1[i], vertices1[(i + 1) % vertices1.size()]);
+		computeProjections(vertices1, axis, projections1);
+		computeProjections(vertices2, axis, projections2);
+
+		if (!isOverlapping(projections1, projections2))
+		{
+			return false;
+		}
+	}
+
+	for (size_t i = 0; i < vertices2.size(); ++i)
+	{
+		glm::vec2 axis = calculateNormalizedProjectionAxis(vertices2[i], vertices2[(i + 1) % vertices2.size()]);
+		computeProjections(vertices1, axis, projections1);
+		computeProjections(vertices2, axis, projections2);
+
+		if (!isOverlapping(projections1, projections2))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+std::vector<glm::vec2> getTransformedVertices(const Mesh *mesh, const Motion &motion)
+{
+	std::vector<glm::vec2> transformedVertices;
+
+	if (mesh == nullptr)
+	{
+		return transformedVertices;
+	}
+
+	for (const auto &vertex : mesh->vertices)
+	{
+		glm::vec3 pos = vertex.position;
+
+		// Apply scale and translation
+		glm::vec2 scaledPos = glm::vec2(pos.x * motion.scale.x, pos.y * motion.scale.y);
+		glm::vec2 worldPos = scaledPos + glm::vec2(motion.position.x, motion.position.y);
+
+		if (motion.angle != 0.0f)
+		{
+			float s = sin(motion.angle);
+			float c = cos(motion.angle);
+
+			// Rotate around the center of the entity
+			worldPos = glm::vec2(
+				worldPos.x * c - worldPos.y * s,
+				worldPos.x * s + worldPos.y * c);
+		}
+
+		transformedVertices.push_back(worldPos);
+	}
+
+	return transformedVertices;
+}
+
+void resolve_bounce_collision(Entity entity1, Entity entity2)
+{
+	Motion &motion1 = registry.motions.get(entity1);
+	Motion &motion2 = registry.motions.get(entity2);
+	float mass = 50.0f;
+
+	vec2 collisionNormal = normalize(motion2.position - motion1.position);
+	vec2 relVelocity = motion2.velocity - motion1.velocity;
+	float normalVelocity = dot(relVelocity, collisionNormal);
+	if (normalVelocity > 0)
+		return;
+
+	float impact = -(2) * normalVelocity / (2 / mass); // 0.5 because I wanted a realistic collision
+	vec2 impulse = impact * collisionNormal / mass;
+	motion1.velocity -= impulse;
+	motion2.velocity += impulse;
 }
 
 // This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
@@ -87,38 +199,57 @@ void PhysicsSystem::step(float elapsed_ms)
 		Entity entity = motion_container.entities[i];
 		float step_seconds = elapsed_ms / 1000.f;
 
-		if ((registry.players.has(entity))) {
+		if ((registry.players.has(entity)))
+		{
 			if (motion.velocity.x > 0)
 				motion.reflect.x = false;
 			else if (motion.velocity.x < 0)
 				motion.reflect.x = true;
 		}
-		if ((registry.humans.has(entity) || registry.zombies.has(entity) || registry.books.has(entity)) && motion.offGround) {
+		if ((registry.humans.has(entity) || registry.zombies.has(entity) || registry.books.has(entity) || registry.wheels.has(entity)) && motion.offGround)
+		{
 			motion.velocity[1] += PhysicsSystem::GRAVITY;
 		}
 
     // Step the spikeballs as per Bezier curves
+    // Bezier curve equations from https://en.wikipedia.org/wiki/B%C3%A9zier_curve
     if (registry.dangerous.has(entity)) {
-      vec2 p0 = {280, 130};
-      vec2 p1 = {500, 10};
-      vec2 p2 = {650, 250};
 
-      if (bezier_time < 2000) {
-        bezier_time += 10;
+      Dangerous& dangerous = registry.dangerous.get(entity);
 
-        float t = bezier_time / 1000;
+      vec2 p0 = dangerous.p0;
+      vec2 p1 = dangerous.p1;
+      vec2 p2 = dangerous.p2;
+      vec2 p3 = dangerous.p3;
+
+      if (dangerous.bezier_time < 2000) {
+
+        float t = dangerous.bezier_time / 1000;
 
         vec2 L0 = (1 - t) * p0 + t * p1;
         vec2 L1 = (1 - t) * p1 + t * p2;
 
         vec2 Q0 = (1 - t) * L0 + t * L1; 
+        
+        if (!dangerous.cubic) {
+          motion.position = Q0;
+          dangerous.bezier_time += 10;
+        } else {
+          vec2 L2 = (1 - t) * p2 + t * p3;
 
-        motion.position = Q0;
-      } else if (bezier_time > 4000) {
-        bezier_time = 0;
+          vec2 Q1 = (1 - t) * L1 + t * L2;
+
+          vec2 C0 = (1 - t) * Q0 + t * Q1;
+
+          motion.position = C0;
+          dangerous.bezier_time += 4;
+        }
+
+      } else if (dangerous.bezier_time > 4000) {
+        dangerous.bezier_time = 0;
         motion.position = p0;
       } else {
-        bezier_time += 10;
+        dangerous.bezier_time += 10;
       }
     }
 
@@ -148,6 +279,17 @@ void PhysicsSystem::step(float elapsed_ms)
 					// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
 					registry.collisions.emplace_with_duplicates(entity_i, entity_j);
 					registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+				}
+			}
+			else if (registry.wheels.has(entity_i) && (registry.wheels.has(entity_j)))
+			{
+
+				std::vector<glm::vec2> transformedVertices1 = getTransformedVertices(mesh_i, motion_i);
+				std::vector<glm::vec2> transformedVertices2 = getTransformedVertices(mesh_j, motion_j);
+
+				if (checkSATIntersection(transformedVertices1, transformedVertices2))
+				{
+					resolve_bounce_collision(entity_i, entity_j);
 				}
 			}
 			else

@@ -22,13 +22,14 @@ class RenderSystem {
 
 	vec2 lastRestingPlayerPos;
 	bool lastPlayerDirectionIsPos = true; // true = +x, false = -x
-	Camera camera = Camera(0.f, 0.f, screen_width_px, screen_height_px);
+	Camera playerCamera = Camera(0.f, 0.f, screen_width_px, screen_height_px);
 
 	// Make sure these paths remain in sync with the associated enumerators.
 	// Associated id with .obj path
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
-		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPIKE, mesh_path("spike.obj"))
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPIKE, mesh_path("spike.obj")),
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::WHEEL, mesh_path("wheel.obj"))
 		// specify meshes of other assets here
 	};
 
@@ -39,7 +40,6 @@ class RenderSystem {
 		textures_path("zombie_sprite_sheet.png"),
 		textures_path("bozo_sprite_sheet.png"),
 		textures_path("bozo_pointer.png"),
-		textures_path("business-background-night.png"),
 		textures_path("Tile_40.png"),	// platform
 		textures_path("Tile_04.png"),	// step left section
 		textures_path("Tile_02.png"),	// step middle section
@@ -60,14 +60,22 @@ class RenderSystem {
 		textures_path("heart.png"),
 		textures_path("win_screen.png"),
 		textures_path("basement.png"),
-		textures_path("beach-plat.png"),
-		textures_path("beach-ladder.png"),
-		textures_path("spikeball.png"),
-		textures_path("cannon_blue.png"),
-		textures_path("beach-sky.png"),
-		textures_path("beach-sea.png"),
-		textures_path("beach-land.png"),
-		textures_path("beach-cloud.png"),
+		textures_path("indoor_4.png"),
+		textures_path("indoor_3.png"),
+		textures_path("indoor_1.png"),
+		textures_path("indoor_0.png"),
+		textures_path("background_0.png"),
+		textures_path("background_1.png"),
+		textures_path("background_2.png"),
+		textures_path("background_3.png"),
+		textures_path("beach/beach-plat.png"),
+		textures_path("beach/beach-ladder.png"),
+		textures_path("beach/spikeball.png"),
+		textures_path("beach/cannon_blue.png"),
+		textures_path("beach/beach-sky.png"),
+		textures_path("beach/beach-sea.png"),
+		textures_path("beach/beach-land.png"),
+		textures_path("beach/beach-cloud.png"),
 		textures_path("level0/tutorial_plat.png"),
 		textures_path("level0/tutorial_foreground.png"),
 		textures_path("level0/tutorial_background1.png"),
@@ -89,6 +97,23 @@ class RenderSystem {
 		textures_path("library/fill.jpg"),
 		textures_path("library/plat.png"),
 		textures_path("library/ladder.png"),
+		textures_path("locations/label_nest.png"),
+		textures_path("locations/label_beach.png"),
+		textures_path("locations/label_library.png"),
+		textures_path("locations/label_tutorial.png"),
+    textures_path("beach/beach-apple.png"),
+    textures_path("beach/beach-chest.png"),
+    textures_path("beach/beach-chest2.png"),
+    textures_path("beach/beach-diamond.png"),
+    textures_path("beach/beach-star.png"),
+    textures_path("beach/beach-coin_01.png"),
+    textures_path("door.png"),
+    textures_path("beach/beach-bird.png"),
+	textures_path("library/coll1.png"),
+	textures_path("library/coll2.png"),
+	textures_path("library/coll3.png"),
+	textures_path("library/coll4.png"),
+	textures_path("library/coll5.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -96,6 +121,7 @@ class RenderSystem {
 	const std::array<std::string, effect_count> effect_paths = {
 		shader_path("coloured"),
 		shader_path("spike"),
+		shader_path("wheel"),
 		shader_path("textured"),
 		shader_path("water") };
 
@@ -145,7 +171,7 @@ public:
 
 	void initializeSpriteSheet(Entity& entity, ANIMATION_MODE defaultMode, std::vector<int> spriteCounts, float switchTime, vec2 trunc);
 
-	mat3 createProjectionMatrix(float elapsed_time_ms);
+	mat3 createProjectionMatrix(float left, float top, float right, float bottom);
 
 	mat3 RenderSystem::createBasicProjectionMatrix();
 
@@ -155,10 +181,15 @@ public:
 
 	void resetSpriteSheetTracker();
 
+	static void deleteBufferId(int index);
+
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
+	void updateCameraBounds(float elapsed_time_ms);
+	vec4 clampCam(float left, float top);
+	int findFirstAvailableBufferSlot();
 
 	// Window handle
 	GLFWwindow* window;
