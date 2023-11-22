@@ -1469,7 +1469,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	Motion& motion = registry.motions.get(player_bozo);
 	Player& player = registry.players.get(player_bozo);
 
-	if (action == GLFW_PRESS && !registry.deathTimers.has(player_bozo))
+	if (!pause && action == GLFW_PRESS && !registry.deathTimers.has(player_bozo))
 	{
 		if (key == GLFW_KEY_A)
 		{
@@ -1509,16 +1509,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 			restart_level();
 		}
-
-		if (key == GLFW_KEY_ENTER) {
-			pause = !pause;
-			if (pause) {
-				pause_start = Clock::now();
-			} else {
-				pause_end = Clock::now();
-				pause_duration = (float)(std::chrono::duration_cast<std::chrono::microseconds>(pause_end - pause_start)).count() / 1000;
-			}
-		}
 	}
 
 	// For camera (because I don't have a mouse) - Justin
@@ -1549,7 +1539,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	}
 	*/
 
-	if (action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo)))
+	if (!pause && action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo)))
 	{
 		if (key == GLFW_KEY_A)
 		{
@@ -1569,22 +1559,34 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 	}
 
-	// Resetting game
+	// Resetting game (can be done while paused)
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
 
+		pause = false;
 		restart_level();
 	}
 
-	// Debugging
+	// Debugging (can be done while paused)
 	if (key == GLFW_KEY_BACKSLASH)
 	{
 		if (action == GLFW_RELEASE)
 			debugging.in_full_view_mode = false;
 		else
 			debugging.in_full_view_mode = true;
+	}
+
+	// Pause
+	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+		pause = !pause;
+		if (pause) {
+			pause_start = Clock::now();
+		} else {
+			pause_end = Clock::now();
+			pause_duration = (float)(std::chrono::duration_cast<std::chrono::microseconds>(pause_end - pause_start)).count() / 1000;
+		}
 	}
 }
 
@@ -1596,7 +1598,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	if (!registry.deathTimers.has(player_bozo))
+	if (!pause && !registry.deathTimers.has(player_bozo))
 	{
 		Motion& motion = registry.motions.get(player_bozo_pointer);
 		vec2 pos = relativePos(mouse_position);
@@ -1625,10 +1627,8 @@ void WorldSystem::on_mouse_button(int button, int action, int mod)
 		return;
 	}
 
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+	if (!pause && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 	{
-
-
 		auto& booksRegistry = registry.books;
 		for (int i = 0; i < booksRegistry.size(); i++)
 		{
