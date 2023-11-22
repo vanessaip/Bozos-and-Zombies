@@ -243,7 +243,7 @@ struct Dangerous
 	float bezier_time = 0;
 };
 
-struct Label
+struct Fading
 {
 	float fading_factor = 1.f;
 	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
@@ -277,7 +277,8 @@ enum class TEXTURE_ASSET_ID
 {
 	// define parallax scrolling backgrounds at start
 	LOADING_SCREEN = 0,
-	STUDENT = LOADING_SCREEN + 1,
+	PAUSE = LOADING_SCREEN + 1,
+	STUDENT = PAUSE + 1,
 	ZOMBIE = STUDENT + 1,
 	BOZO = ZOMBIE + 1,
 	BOZO_POINTER = BOZO + 1,

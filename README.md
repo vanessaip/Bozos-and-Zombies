@@ -223,21 +223,25 @@ Overlay rendering for food/lives feedback:
 - (created) arrow sprite for projectile direction
 
 # Milestone 3 Proposal Alignment
-For milestone 3, our team added a tutorial level plus 2 new main levels.
+For milestone 3, our team added a tutorial level plus 2 new main levels. We integrated a variety of creative features to add depth and interactive elements to liven the gameplay. Level transitions, difficulty progressions, new enemies, and more varied level designs were introduced to balance the gameplay.
 
 # Milestone 3 Deliverables
 
 # Playability
 ## 5 minutes of non-repeptitive gameplay
 - Designed new tutorial level. Asset information stored in world_init.hpp (the first element in the asset vectors)
+- Designed new Wreck Beach level with asset information stored in world_init.hpp and rendering information stored in 2_beach.json.
 - Designed and implemented new library level. 
 
 # Robustness
 ## Proper memory management
+Extensive testing was done to ensure that no instantiated entities and their allocated memories were unfreed after they have been killed or otherwise left the world state.
 
 ## User input
+No known user inputs are able to crash the game.
 
 ## Real-time (no lag)
+The only runtime bottleneck we discovered was at the beginning of the game when all the textures were being loaded into the buffer in render_systems.init. This introduced a minor amount of lag at the beginning of the game, and we got around it by adding a loading screen at the start of the game at main.cpp:line 46
 
 
 # Stability
@@ -246,6 +250,7 @@ For milestone 3, our team added a tutorial level plus 2 new main levels.
 - Entry point world_system.cpp WorldSystem::step() line 238 - there are two for-loops, one for spawning new zombies, another for spawning new npcs
 
 ## M2 Bug Fix - mesh collision
+- Added use cases for some collision configurations. Now, a mesh and bounding box collision will be detected if no vertices of the mesh are inside the bounding box (for instance, if the box is fully inside the mesh).
 
 ## Minimal Lag
 
@@ -260,8 +265,17 @@ For milestone 3, our team added a tutorial level plus 2 new main levels.
 - Projections matrix adjusted for each scrolling background based on depth value (entry point: rendering_system.cpp RenderSystem::draw() line 305)
 
 ## [3] Complex geometry
+- Added a complex mesh for Spike Wheels with different parts having different colour (wheel.obj, wheel.fs.glsl, wheel.vs.glsl, render_system.cpp (line 136 - 165))
+- Initial Spike Meshes from M2 with gradient coloring (spike.obj, spike.fs.glsl, spike.vs.glsl, render_system.cpp (line 109 - 135))
 
 ## [9] Complex perscribed motion
+- In physics_system.cpp, Lines 240 to 286 calculate the Bezier motion for different entities
+- Quadratic Bezier defines the motion for the spikeball firing from the cannon on the beach level
+- Cubic Bezier defines the motion for the flying apple on the beach level
+
+## [10] Precise Collisions
+- Implemented precise mesh - mesh collision detection using Separating Axis Theorem (physics_system.cpp (line 17 - 109))
+- Implemented response elastic collision between Spikes and Wheels (physics_system.cpp (line 109 - 134))
 
 ## [19] Reloadability
 
@@ -284,3 +298,6 @@ Tutorial level assets - craftpix.net
 - https://pff_nox.artstation.com/projects/8e3wkQ
 
 
+Beach level assets - craftpix.net
+
+Separating Axis Theorem: github.com/winstxnhdw/2d-separating-axis-theorem
