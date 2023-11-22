@@ -230,7 +230,7 @@ For milestone 3, our team added a tutorial level plus 2 new main levels.
 # Playability
 ## 5 minutes of non-repeptitive gameplay
 - Designed new tutorial level. Asset information stored in world_init.hpp (the first element in the asset vectors)
-
+- Designed and implemented new library level. 
 
 # Robustness
 ## Proper memory management
@@ -253,7 +253,6 @@ For milestone 3, our team added a tutorial level plus 2 new main levels.
 
 ## No crashes, glitches, unpredictable behaviour
 - Fixed framrate dependent jump height by multiplying gravity factor by elapsed time in each step (physics_system.cpp line 235)
-
 # Creative
 
 ## [2] Parallax scrolling backgrounds
@@ -270,10 +269,18 @@ For milestone 3, our team added a tutorial level plus 2 new main levels.
 
 # Project References
 
-Level ending sound effect - pixabay.com
-Collected item sound effect - pixabay.com
-Tutorial background music - pixabay.com
-Wreck Beach level background music - "Tahitian Remix Despacito" by Tulei 
-To be Continue music - "Grim Grinning Ghosts (Electro Swing Mix)" by Glenn Gatsby and Ashley Slater
-Tutorial level assets - craftpix.net
+Level ending sound effect - pixabay.com  
+Collected item sound effect - pixabay.com  
+Tutorial background music - pixabay.com  
+Wreck Beach level background music - "Tahitian Remix Despacito" by Tulei  
+To be Continue music - "Grim Grinning Ghosts (Electro Swing Mix)" by Glenn Gatsby and Ashley Slater  
+Tutorial level assets - craftpix.net  
+
+**Library level assets:**
+- Background music - Harry Potter theme song  
+- craftpix.net - FREE MEDIEVAL TILESET PIXEL ART PACK
+- craftpix.net - MEDIEVAL PIXEL ART TILESET
+- craftpix.net - MAGIC WAND AND BOOK ICON PACK
+- https://pff_nox.artstation.com/projects/8e3wkQ
+
 
