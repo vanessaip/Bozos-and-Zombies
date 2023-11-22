@@ -229,6 +229,7 @@ For milestone 3, our team added a tutorial level plus 2 new main levels.
 
 # Playability
 ## 5 minutes of non-repeptitive gameplay
+- Designed new tutorial level. Asset information stored in world_init.hpp (the first element in the asset vectors)
 
 
 # Robustness
@@ -244,6 +245,8 @@ The only runtime bottleneck we discovered was at the beginning of the game when 
 
 # Stability
 ## M2 Bug Fix - game pauses randomly
+- Fixed infinite do-while loop. Replaced with for-loop. Changed logic to randomly pick a spawn position and try a set number of times to pick a position that is off screen. If there's no success within the max number of tries, no spawn occurs.
+- Entry point world_system.cpp WorldSystem::step() line 238 - there are two for-loops, one for spawning new zombies, another for spawning new npcs
 
 ## M2 Bug Fix - mesh collision
 
@@ -252,10 +255,13 @@ The only runtime bottleneck we discovered was at the beginning of the game when 
 ## Consistent game resolution
 
 ## No crashes, glitches, unpredictable behaviour
+- Fixed framrate dependent jump height by multiplying gravity factor by elapsed time in each step (physics_system.cpp line 235)
 
 # Creative
 
 ## [2] Parallax scrolling backgrounds
+- Background component stores depth value and camera object (entry point: components.hpp line 215)
+- Projections matrix adjusted for each scrolling background based on depth value (entry point: rendering_system.cpp RenderSystem::draw() line 305)
 
 ## [3] Complex geometry
 
@@ -272,4 +278,5 @@ Collected item sound effect - pixabay.com
 Tutorial background music - pixabay.com
 Wreck Beach level background music - "Tahitian Remix Despacito" by Tulei 
 To be Continue music - "Grim Grinning Ghosts (Electro Swing Mix)" by Glenn Gatsby and Ashley Slater
+Tutorial level assets - craftpix.net
 
