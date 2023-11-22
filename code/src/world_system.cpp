@@ -128,9 +128,9 @@ GLFWwindow* WorldSystem::create_window()
 	player_land_sound = Mix_LoadWAV(audio_path("player_land.wav").c_str());
 	collect_book_sound = Mix_LoadWAV(audio_path("Mario-coin-sound.wav").c_str());
 	zombie_kill_sound = Mix_LoadWAV(audio_path("splat.wav").c_str());
-  level_success_sound = Mix_LoadWAV(audio_path("level-success.wav").c_str());
-  next_level_sound = Mix_LoadWAV(audio_path("next-level.wav").c_str());
-  collected_sound = Mix_LoadWAV(audio_path("collected.wav").c_str());
+	level_success_sound = Mix_LoadWAV(audio_path("level-success.wav").c_str());
+	next_level_sound = Mix_LoadWAV(audio_path("next-level.wav").c_str());
+	collected_sound = Mix_LoadWAV(audio_path("collected.wav").c_str());
 
 	if (background_music == nullptr || player_death_sound == nullptr || student_disappear_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr || zombie_kill_sound == nullptr)
 	{
@@ -165,13 +165,13 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
 	if (registry.zombies.entities.size() < 1 && (num_collectibles > 0 && collectibles_collected >= num_collectibles) && this->game_over == false) {
-  // if (collectibles_collected > 0 && this->game_over == false) {
-		// createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
+		// if (collectibles_collected > 0 && this->game_over == false) {
+			  // createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
 		this->game_over = true;
 		createDoor(renderer, door_win_pos, { 40, 60 }, TEXTURE_ASSET_ID::WIN_DOOR);
 		debugging.in_full_view_mode = true;
-    Mix_HaltMusic();
-    Mix_PlayChannel(-1, level_success_sound, 0);
+		Mix_HaltMusic();
+		Mix_PlayChannel(-1, level_success_sound, 0);
 		printf("You win!\n");
 
 		// option to retry level? (display current and high scores?)
@@ -334,163 +334,163 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 			vec4 entityBB = { entityRightSide, entityLeftSide, entityBottom, entityTop };
 
-				// Bounding entities to window
-				if (motion.position.x < BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0 || motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f && motion.velocity.x > 0)
-				{
-					if (isPlayer) {
-						motion.velocity.x = 0;
-					}
-					else {
-						motion.velocity.x = -motion.velocity.x;
-					}
-					if (motion.position.y < 0.f + (BOZO_BB_HEIGHT) / 2.f)
-					{
-						motion.position.y = 0.f + BOZO_BB_HEIGHT / 2.f;
-					}
-					else if (motion.position.y > window_height_px - BOZO_BB_HEIGHT / 2.f)
-					{
-						motion.position.y = window_height_px - BOZO_BB_HEIGHT / 2.f;
-						motion.velocity.y = 0.f;
-						motion.offGround = false;
-					}
+			// Bounding entities to window
+			if (motion.position.x < BOZO_BB_WIDTH / 2.f && motion.velocity.x < 0 || motion.position.x > window_width_px - BOZO_BB_WIDTH / 2.f && motion.velocity.x > 0)
+			{
+				if (isPlayer) {
+					motion.velocity.x = 0;
 				}
-				bool offAll = true;
-
-				std::vector<Entity> blocks;
-				for (int i = 0; i < platforms.size(); i++)
-				{
-					blocks.push_back(platforms.entities[i]);
-				}
-				for (int i = 0; i < walls.size(); i++)
-				{
-					blocks.push_back(walls.entities[i]);
-				}
-
-				for (int i = 0; i < blocks.size(); i++)
-				{
-					Motion& blockMotion = motion_container.get(blocks[i]);
-
-					float xBlockLeftBound = blockMotion.position.x - blockMotion.scale[0] / 2.f;
-					float xBlockRightBound = blockMotion.position.x + blockMotion.scale[0] / 2.f;
-					float yBlockTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
-					float yBlockBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
-
-					// Add this check so that the player can pass through platforms when on a ladderd
-					if (!motion.climbing)
-					{
-						// Collision with Top of block
-						if (motion.velocity.y >= 0 && entityBottom >= yBlockTop && entityBottom < yBlockTop + 20.f &&
-							entityRightSide > xBlockLeftBound && entityLeftSide < xBlockRightBound)
-						{
-							// Move character with moving block
-							if (registry.keyframeAnimations.has(blocks[i]))
-							{
-								motion.position.x += blockMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
-								charactersOnMovingPlat.push_back(std::make_tuple(&motion, &blockMotion)); // track collision if platform is moving down
-							}
-
-							// if (motion.offGround)
-							// {
-							// 	Mix_PlayChannel(-1, player_land_sound, 0);
-							// }
-							motion.position.y = yBlockTop - motion.scale[1] / 2.f;
-							motion.velocity.y = 0.f;
-							motion.offGround = false;
-							offAll = offAll && false;
-						}
-
-						// Collision with Bottom of block
-						if (motion.velocity.y <= 0 && entityTop < yBlockBottom && entityTop > yBlockBottom - 20.f &&
-							entityRightSide > xBlockLeftBound && entityLeftSide < xBlockRightBound)
-						{
-							motion.position.y = yBlockBottom + motion.scale[1] / 2.f;
-							motion.velocity.y = 0.f;
-						}
-					}
-
-					// Collision with Right edge of block
-					if (entityLeftSide < xBlockRightBound &&
-						entityLeftSide > xBlockRightBound - 10.f &&
-						entityTop < yBlockBottom &&
-						entityBottom > yBlockTop && (player.keyPresses[0] || isZombie || isNPC || isWheel))
-					{
-						if (isNPC || isWheel) {
-							if (registry.platforms.has(blocks[i])) {
-								motion.offGround = true;
-								motion.velocity[1] -= 50;
-							}
-							else {
-								motion.velocity.x = -motion.velocity.x;
-							}
-						}
-						else {
-							motion.velocity.x = 0;
-
-							if (curr_level == NEST && isZombie && !motion.offGround)
-							{
-								motion.offGround = true;
-								motion.velocity[1] -= 200;
-							}
-						}
-					}
-
-					// Collision with Left edge of block
-					if (entityRightSide > xBlockLeftBound &&
-						entityRightSide < xBlockLeftBound + 10.f &&
-						entityTop < yBlockBottom &&
-						entityBottom > yBlockTop && (player.keyPresses[1] || isZombie || isNPC || isWheel))
-					{
-						if (isNPC || isWheel) {
-							if (registry.platforms.has(blocks[i])) {
-								motion.offGround = true;
-								motion.velocity[1] -= 50;
-							}
-							else {
-								motion.velocity.x = -motion.velocity.x;
-							}
-						}
-						else {
-							motion.velocity.x = 0;
-
-							if (curr_level == NEST && isZombie && !motion.offGround)
-							{
-								motion.offGround = true;
-								motion.velocity[1] -= 200;
-							}
-						}
-
-					}
-				}
-
-				if (motion.climbing)
-				{
-					motion.offGround = false;
-				}
-				else
-				{
-					motion.offGround = offAll;
-				}
-
-				if ((isWheel || isNPC) && offAll && !registry.infectTimers.has(motion_container.entities[i])) {
-					if (motion.velocity.x > 0) {
-						motion.position.x -= 10.f;
-					}
-					else {
-						motion.position.x += 10.f;
-					}
+				else {
 					motion.velocity.x = -motion.velocity.x;
 				}
-
-				if (isPlayer)
+				if (motion.position.y < 0.f + (BOZO_BB_HEIGHT) / 2.f)
 				{
-					updateClimbing(motion, entityBB, motion_container);
+					motion.position.y = 0.f + BOZO_BB_HEIGHT / 2.f;
+				}
+				else if (motion.position.y > window_height_px - BOZO_BB_HEIGHT / 2.f)
+				{
+					motion.position.y = window_height_px - BOZO_BB_HEIGHT / 2.f;
+					motion.velocity.y = 0.f;
+					motion.offGround = false;
+				}
+			}
+			bool offAll = true;
+
+			std::vector<Entity> blocks;
+			for (int i = 0; i < platforms.size(); i++)
+			{
+				blocks.push_back(platforms.entities[i]);
+			}
+			for (int i = 0; i < walls.size(); i++)
+			{
+				blocks.push_back(walls.entities[i]);
+			}
+
+			for (int i = 0; i < blocks.size(); i++)
+			{
+				Motion& blockMotion = motion_container.get(blocks[i]);
+
+				float xBlockLeftBound = blockMotion.position.x - blockMotion.scale[0] / 2.f;
+				float xBlockRightBound = blockMotion.position.x + blockMotion.scale[0] / 2.f;
+				float yBlockTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
+				float yBlockBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
+
+				// Add this check so that the player can pass through platforms when on a ladderd
+				if (!motion.climbing)
+				{
+					// Collision with Top of block
+					if (motion.velocity.y >= 0 && entityBottom >= yBlockTop && entityBottom < yBlockTop + 20.f &&
+						entityRightSide > xBlockLeftBound && entityLeftSide < xBlockRightBound)
+					{
+						// Move character with moving block
+						if (registry.keyframeAnimations.has(blocks[i]))
+						{
+							motion.position.x += blockMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
+							charactersOnMovingPlat.push_back(std::make_tuple(&motion, &blockMotion)); // track collision if platform is moving down
+						}
+
+						// if (motion.offGround)
+						// {
+						// 	Mix_PlayChannel(-1, player_land_sound, 0);
+						// }
+						motion.position.y = yBlockTop - motion.scale[1] / 2.f;
+						motion.velocity.y = 0.f;
+						motion.offGround = false;
+						offAll = offAll && false;
+					}
+
+					// Collision with Bottom of block
+					if (motion.velocity.y <= 0 && entityTop < yBlockBottom && entityTop > yBlockBottom - 20.f &&
+						entityRightSide > xBlockLeftBound && entityLeftSide < xBlockRightBound)
+					{
+						motion.position.y = yBlockBottom + motion.scale[1] / 2.f;
+						motion.velocity.y = 0.f;
+					}
 				}
 
-				// If entity is a zombie, update its direction to always move towards Bozo
-				if (registry.zombies.has(motion_container.entities[i]))
+				// Collision with Right edge of block
+				if (entityLeftSide < xBlockRightBound &&
+					entityLeftSide > xBlockRightBound - 10.f &&
+					entityTop < yBlockBottom &&
+					entityBottom > yBlockTop && (player.keyPresses[0] || isZombie || isNPC || isWheel))
 				{
-					updateZombieMovement(motion, bozo_motion, motion_container.entities[i], offAll);
+					if (isNPC || isWheel) {
+						if (registry.platforms.has(blocks[i])) {
+							motion.offGround = true;
+							motion.velocity[1] -= 50;
+						}
+						else {
+							motion.velocity.x = -motion.velocity.x;
+						}
+					}
+					else {
+						motion.velocity.x = 0;
+
+						if (curr_level == NEST && isZombie && !motion.offGround)
+						{
+							motion.offGround = true;
+							motion.velocity[1] -= 200;
+						}
+					}
 				}
+
+				// Collision with Left edge of block
+				if (entityRightSide > xBlockLeftBound &&
+					entityRightSide < xBlockLeftBound + 10.f &&
+					entityTop < yBlockBottom &&
+					entityBottom > yBlockTop && (player.keyPresses[1] || isZombie || isNPC || isWheel))
+				{
+					if (isNPC || isWheel) {
+						if (registry.platforms.has(blocks[i])) {
+							motion.offGround = true;
+							motion.velocity[1] -= 50;
+						}
+						else {
+							motion.velocity.x = -motion.velocity.x;
+						}
+					}
+					else {
+						motion.velocity.x = 0;
+
+						if (curr_level == NEST && isZombie && !motion.offGround)
+						{
+							motion.offGround = true;
+							motion.velocity[1] -= 200;
+						}
+					}
+
+				}
+			}
+
+			if (motion.climbing)
+			{
+				motion.offGround = false;
+			}
+			else
+			{
+				motion.offGround = offAll;
+			}
+
+			if ((isWheel || isNPC) && offAll && !registry.infectTimers.has(motion_container.entities[i])) {
+				if (motion.velocity.x > 0) {
+					motion.position.x -= 10.f;
+				}
+				else {
+					motion.position.x += 10.f;
+				}
+				motion.velocity.x = -motion.velocity.x;
+			}
+
+			if (isPlayer)
+			{
+				updateClimbing(motion, entityBB, motion_container);
+			}
+
+			// If entity is a zombie, update its direction to always move towards Bozo
+			if (registry.zombies.has(motion_container.entities[i]))
+			{
+				updateZombieMovement(motion, bozo_motion, motion_container.entities[i], offAll);
+			}
 
 			if (isNPC)
 			{
@@ -512,33 +512,34 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				}
 			}
 
-			// Add book behaviour
-			if (registry.books.has(motion_container.entities[i]))
-			{
-				Book& book = registry.books.get(motion_container.entities[i]);
-				Motion motion_player = registry.motions.get(player_bozo);
-				// If book is in hand, we consider it as on ground and always go with player
-				if (book.offHand == false)
-				{
-					motion.offGround = false;
-					motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
-					motion.position.y = motion_player.position.y;
-				}
-				// If book is on ground, it's velocity should always be 0
-				if (motion.offGround == false)
-				{
-					motion.velocity = { 0.f, 0.f };
-				}
-			}
 
-			// If entity if a player effect, for example bozo_pointer, move it along with the player
-			if (registry.playerEffects.has(motion_container.entities[i]))
+		}
+
+		// Add book behaviour
+		if (registry.books.has(motion_container.entities[i]))
+		{
+			Book& book = registry.books.get(motion_container.entities[i]);
+			Motion motion_player = registry.motions.get(player_bozo);
+			// If book is in hand, we consider it as on ground and always go with player
+			if (book.offHand == false)
 			{
-				motion.position.x = bozo_motion.position.x;
-				motion.position.y = bozo_motion.position.y;
+				motion.offGround = false;
+				motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
+				motion.position.y = motion_player.position.y;
+			}
+			// If book is on ground, it's velocity should always be 0
+			if (motion.offGround == false)
+			{
+				motion.velocity = { 0.f, 0.f };
 			}
 		}
 
+		// If entity if a player effect, for example bozo_pointer, move it along with the player
+		if (registry.playerEffects.has(motion_container.entities[i]))
+		{
+			motion.position.x = bozo_motion.position.x;
+			motion.position.y = bozo_motion.position.y;
+		}
 		// Processing the player state
 		assert(registry.screenStates.components.size() <= 1);
 		ScreenState& screen = registry.screenStates.components[0];
@@ -906,7 +907,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
 			motion.position.y += 20;
-			motion.velocity.y = 2 *ZOMBIE_SPEED;
+			motion.velocity.y = 2 * ZOMBIE_SPEED;
 			motion.climbing = true;
 		}
 		else
@@ -1041,7 +1042,7 @@ void WorldSystem::updateWheelRotation()
 {
 	for (Entity wheel : registry.wheels.entities)
 	{
-		Motion &wheelMotion = registry.motions.get(wheel);
+		Motion& wheelMotion = registry.motions.get(wheel);
 		float circumference = 2 * M_PI * 10.f;			 // M_PI is a constant for π
 		float distanceTraveled = wheelMotion.velocity.x; // If velocity is per second, multiply by deltaTime
 		float rotationRadians = distanceTraveled / circumference * 2 * M_PI;
@@ -1071,11 +1072,12 @@ void WorldSystem::updateWheelRotation()
 // Reset the world state to its initial state
 void WorldSystem::restart_level()
 {
-  if (curr_level == TBC) {
-    debugging.in_full_view_mode = true;
-  } else {
-    debugging.in_full_view_mode = false;
-  }
+	if (curr_level == TBC) {
+		debugging.in_full_view_mode = true;
+	}
+	else {
+		debugging.in_full_view_mode = false;
+	}
 	this->game_over = false;
 	// Debugging for memory/component leaks
 	registry.list_all_components();
@@ -1270,21 +1272,21 @@ void WorldSystem::restart_level()
 		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, { 230, 155 }, { 80, 60 });
 	}
 	// Lives can probably stay hardcoded?
-  if (curr_level != TBC) {
-    float heart_pos_x = 1385;
-    float heart_starting_pos_y = 40;
+	if (curr_level != TBC) {
+		float heart_pos_x = 1385;
+		float heart_starting_pos_y = 40;
 
-    Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
-    Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
-    Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
-    Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
-    Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
+		Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
+		Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
+		Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
+		Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
+		Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
 
-    player_hearts = { heart0, heart1, heart2, heart3, heart4 };
+		player_hearts = { heart0, heart1, heart2, heart3, heart4 };
 
-    // Create label
-    Entity label = createLabel(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]]);
-  }
+		// Create label
+		Entity label = createLabel(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]]);
+	}
 
 	setup_keyframes(renderer);
 
@@ -1396,7 +1398,7 @@ void WorldSystem::handle_collisions()
 			}
 			else if (registry.doors.has(entity_other))
 			{
-        Mix_PlayChannel(-1, next_level_sound, 0);
+				Mix_PlayChannel(-1, next_level_sound, 0);
 				curr_level++;
 				if (curr_level > max_level) {
 					curr_level = 0;
@@ -1466,7 +1468,7 @@ void WorldSystem::handle_collisions()
 		// Player - Collectible collision
 
 		else if (registry.collectible.has(entity) && registry.players.has(entity_other)) {
-      Mix_PlayChannel(-1, collected_sound, 0);
+			Mix_PlayChannel(-1, collected_sound, 0);
 			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID)registry.collectible.get(entity).collectible_id;
 			Entity collectible = createCollectible(renderer, collectibles_collected_pos, 50, id, { 60, 60 }, true);
 
@@ -1614,7 +1616,8 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		pause = !pause;
 		if (pause) {
 			pause_start = Clock::now();
-		} else {
+		}
+		else {
 			pause_end = Clock::now();
 			pause_duration = (float)(std::chrono::duration_cast<std::chrono::microseconds>(pause_end - pause_start)).count() / 1000;
 		}
@@ -1723,7 +1726,7 @@ void WorldSystem::writeJson(Json::Value& json, std::string file_name) {
 
 	std::ofstream outputFile(file_name);
 	if (outputFile.is_open()) {
-		outputFile << jsonString; 
+		outputFile << jsonString;
 		outputFile.close();
 		printf("data written to %s\n", file_name.c_str());
 	}
