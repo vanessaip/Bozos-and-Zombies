@@ -109,11 +109,12 @@ class RenderSystem {
     textures_path("beach/beach-coin_01.png"),
     textures_path("door.png"),
     textures_path("beach/beach-bird.png"),
-	textures_path("library/coll1.png"),
-	textures_path("library/coll2.png"),
-	textures_path("library/coll3.png"),
-	textures_path("library/coll4.png"),
-	textures_path("library/coll5.png"),
+    textures_path("library/coll1.png"),
+    textures_path("library/coll2.png"),
+    textures_path("library/coll3.png"),
+    textures_path("library/coll4.png"),
+    textures_path("library/coll5.png"),
+    textures_path("TBC.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

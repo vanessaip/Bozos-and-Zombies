@@ -18,7 +18,8 @@ const float WALL_WIDTH = 20.f;
 
 const vec2 CLIMBABLE_DIM = { 30.f, 32.f };
 
-const float ZOMBIE_SPEED = 100.f;
+const float ZOMBIE_SPEED = 150.f;
+const float PLAYER_SPEED = 230;
 
 // the player
 Entity createBozo(RenderSystem* renderer, vec2 pos);
@@ -72,16 +73,30 @@ Entity createLoadingScreen(RenderSystem* renderer, vec2 position, vec2 scale);
 
 enum level {
 	TUTORIAL = 0,
-	NEST = 1,
+	NEST = 3,
 	BEACH = 2,
-	LIBRARY = 3
+	LIBRARY = 1,
+  TBC = 4
 };
+
+// For swapping levels around
+const std::vector<int> asset_mapping = {
+  0, 
+  3, 
+  2, 
+  1,
+  4
+};
+
 const std::vector<std::string> LEVEL_DESCRIPTORS = {
   level_path("0_tutorial.json"),
-  level_path("1_nest.json"),
+  level_path("3_library.json"),
   level_path("2_beach.json"),
-  level_path("3_library.json")
+  level_path("1_nest.json"),
+  level_path("to_be_continued.json"),
 };
+
+const std::string SAVE_STATE_FILE = level_path("save_state.json");
 
 // ---------------------BACKGROUNDS-------------------------
 const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_ASSET = {
@@ -115,6 +130,9 @@ const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_A
 		{ TEXTURE_ASSET_ID::LIBRARY_FILL, 4.f },
 		{ TEXTURE_ASSET_ID::LIBRARY_OBJECTS, 2.f },
 		{ TEXTURE_ASSET_ID::LIBRARY_FRAME, 0.f }
+	},
+  {
+		{ TEXTURE_ASSET_ID::TBC, 0.f }
 	}
 };
 
@@ -175,7 +193,8 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::LIB_COLL5,
 		TEXTURE_ASSET_ID::LIB_COLL3,
 		TEXTURE_ASSET_ID::LIB_COLL4,
-		TEXTURE_ASSET_ID::LIB_COLL2}
+		TEXTURE_ASSET_ID::LIB_COLL2},
+  {}
 };
 
 const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
@@ -187,7 +206,7 @@ const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
 
 // ---------------------SOUNDS-------------------------
 const std::vector<std::string> BACKGROUND_MUSIC = {
-	"soundtrack.wav",
+	"tutorial.wav",
 	"soundtrack.wav",
 	"beach.wav",
 	"library.wav"
@@ -198,4 +217,5 @@ const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
 	TEXTURE_ASSET_ID::LABEL_NEST,
 	TEXTURE_ASSET_ID::LABEL_BEACH,
 	TEXTURE_ASSET_ID::LABEL_LIB,
+  TEXTURE_ASSET_ID::LABEL_LIB,
 };

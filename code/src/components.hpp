@@ -63,6 +63,11 @@ struct Door
 	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
 };
 
+struct Bounce
+{
+	float mass;
+};
+
 // All data relevant to the shape and motion of entities
 struct Motion
 {
@@ -350,7 +355,8 @@ enum class TEXTURE_ASSET_ID
 	LIB_COLL3 = LIB_COLL2 + 1,
 	LIB_COLL4 = LIB_COLL3 + 1,
 	LIB_COLL5 = LIB_COLL4 + 1,
-	TEXTURE_COUNT = LIB_COLL5 + 1
+  TBC = LIB_COLL5 + 1,
+	TEXTURE_COUNT = TBC + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

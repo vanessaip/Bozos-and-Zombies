@@ -140,8 +140,8 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		gl_has_errors();
 
 		// Define colors for the wheel and spikes
-		vec3 wheelColor = vec3(1.0, 0.0, 0.0); // Red color for the wheel
-		vec3 spikeColor = vec3(1.0, 1.0, 0.0); // Yellow color for the spikes
+		vec3 wheelColor = vec3(0.5f, 0.35f, 0.05); // Brown color for the wheel
+		vec3 spikeColor = vec3(0.628,0.095,0.990); // Purple color for the spikes
 
 		// Set the uniform values for the colors
 		glUniform3fv(wheelColor_uloc, 1, (float*)&wheelColor);
