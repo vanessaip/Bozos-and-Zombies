@@ -192,12 +192,14 @@
     {
       "position": [ 100, 600 ],
       "colour": [ 1.0, 0, 0 ],
-      "velocity": [ 50, 0 ]
+      "velocity": [ 50, 0 ],
+      "size": 30
     },
     {
       "position": [ 1340, 600 ],
       "colour": [ 1.0, 0, 0 ],
-      "velocity": [ -50, 0 ]
+      "velocity": [ -50, 0 ],
+      "size": 20
     }
   ],
   "player": {
