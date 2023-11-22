@@ -492,7 +492,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 					updateZombieMovement(motion, bozo_motion, motion_container.entities[i], offAll);
 				}
 
-			if (isNPC || isWheel)
+			if (isNPC)
 			{
 				if (motion.velocity.x < 0)
 				{
@@ -511,34 +511,33 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 						registry.remove_all_components_of(motion_container.entities[i]);
 				}
 			}
-		}
 
-		// Add book behaviour
-		if (registry.books.has(motion_container.entities[i]))
-		{
-			Book& book = registry.books.get(motion_container.entities[i]);
-			Motion motion_player = registry.motions.get(player_bozo);
-			// If book is in hand, we consider it as on ground and always go with player
-			if (book.offHand == false)
+			// Add book behaviour
+			if (registry.books.has(motion_container.entities[i]))
 			{
-				motion.offGround = false;
-				motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
-				motion.position.y = motion_player.position.y;
+				Book& book = registry.books.get(motion_container.entities[i]);
+				Motion motion_player = registry.motions.get(player_bozo);
+				// If book is in hand, we consider it as on ground and always go with player
+				if (book.offHand == false)
+				{
+					motion.offGround = false;
+					motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
+					motion.position.y = motion_player.position.y;
+				}
+				// If book is on ground, it's velocity should always be 0
+				if (motion.offGround == false)
+				{
+					motion.velocity = { 0.f, 0.f };
+				}
 			}
-			// If book is on ground, it's velocity should always be 0
-			if (motion.offGround == false)
+
+			// If entity if a player effect, for example bozo_pointer, move it along with the player
+			if (registry.playerEffects.has(motion_container.entities[i]))
 			{
-				motion.velocity = { 0.f, 0.f };
+				motion.position.x = bozo_motion.position.x;
+				motion.position.y = bozo_motion.position.y;
 			}
 		}
-
-		// If entity if a player effect, for example bozo_pointer, move it along with the player
-		if (registry.playerEffects.has(motion_container.entities[i]))
-		{
-			motion.position.x = bozo_motion.position.x;
-			motion.position.y = bozo_motion.position.y;
-		}
-
 
 		// Processing the player state
 		assert(registry.screenStates.components.size() <= 1);
@@ -1042,14 +1041,32 @@ void WorldSystem::updateWheelRotation()
 {
 	for (Entity wheel : registry.wheels.entities)
 	{
-		Motion& wheelMotion = registry.motions.get(wheel);
-		const float rotationSpeed = 0.0001f;
-		if (wheelMotion.velocity.x >= 0)
-			wheelMotion.angle += rotationSpeed * wheelMotion.velocity.x;
-		else if (wheelMotion.velocity.x < 0)
-			wheelMotion.angle += rotationSpeed * wheelMotion.velocity.x;
+		Motion &wheelMotion = registry.motions.get(wheel);
+		float circumference = 2 * M_PI * 10.f;			 // M_PI is a constant for π
+		float distanceTraveled = wheelMotion.velocity.x; // If velocity is per second, multiply by deltaTime
+		float rotationRadians = distanceTraveled / circumference * 2 * M_PI;
+		float rotationDegrees = rotationRadians * 180 / M_PI;
+
+		wheelMotion.angle += rotationDegrees;
+
+		if (wheelMotion.angle >= 360.0f)
+		{
+			wheelMotion.angle -= 360.0f;
+		}
+		else if (wheelMotion.angle < 0.0f)
+		{
+			wheelMotion.angle += 360.0f;
+		}
+
+		// 	const float rotationSpeed = 0.0001f;
+		// 	if (wheelMotion.velocity.x >= 0)
+		// 		wheelMotion.angle += rotationSpeed * wheelMotion.velocity.x;
+		// 	else if (wheelMotion.velocity.x < 0)
+		// 		wheelMotion.angle += rotationSpeed * wheelMotion.velocity.x;
+		// }
 	}
 }
+
 
 // Reset the world state to its initial state
 void WorldSystem::restart_level()
