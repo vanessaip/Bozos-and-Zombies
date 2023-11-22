@@ -10,6 +10,8 @@
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
+#include "world_init.hpp"
+#include "components.hpp"
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -40,8 +42,11 @@ int main()
 	render_system.init(window);
 	world_system.init(&render_system);
 
+	debugging.in_full_view_mode = true;
+	Entity loadingScreen = createLoadingScreen(&render_system, { window_width_px / 2, window_height_px / 2 }, { 2 * window_width_px, 3 * window_height_px });
 	// variable timestep loop
 	auto t = Clock::now();
+	float total_elapsed = 0.f;
 	while (!world_system.is_over()) {
 		while (world_system.pause) {
 			glfwPollEvents();
@@ -54,14 +59,22 @@ int main()
 		auto now = Clock::now();
 		float elapsed_ms =
 			((float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000) - world_system.pause_duration;
+		total_elapsed += elapsed_ms;
 		t = now;
 		// printf("pause duration: %f ", world_system.pause_duration);
 		world_system.pause_duration = 0.f;
 		// printf("elapsed time: %f\n", elapsed_ms);
 
-		world_system.step(elapsed_ms);
-		physics_system.step(elapsed_ms);
-		render_system.step(elapsed_ms);
+		printf("total elapsed time: %f\n", total_elapsed);
+		if (total_elapsed > 4000.f) {
+			if(registry.labels.has(loadingScreen)) {
+				debugging.in_full_view_mode = false;
+				registry.remove_all_components_of(loadingScreen);
+			}
+			world_system.step(elapsed_ms);
+			physics_system.step(elapsed_ms);
+			render_system.step(elapsed_ms);
+		}
 
 		world_system.handle_collisions();
 
