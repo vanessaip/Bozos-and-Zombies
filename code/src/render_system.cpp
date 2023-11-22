@@ -91,9 +91,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		// Fading
 		GLuint fade_timer_uloc = glGetUniformLocation(program, "fading_factor");
-		if (registry.labels.has(entity)) {
-			Label& label = registry.labels.get(entity);
-			glUniform1f(fade_timer_uloc, label.fading_factor);
+		if (registry.fading.has(entity)) {
+			Fading& fade = registry.fading.get(entity);
+			glUniform1f(fade_timer_uloc, fade.fading_factor);
 		}
     else if (registry.doors.has(entity)) {
 			Door& door = registry.doors.get(entity);
