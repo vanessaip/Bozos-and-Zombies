@@ -18,7 +18,7 @@ const float WALL_WIDTH = 20.f;
 
 const vec2 CLIMBABLE_DIM = { 30.f, 32.f };
 
-const float ZOMBIE_SPEED = 150.f;
+const float ZOMBIE_SPEED = 120.f;
 const float PLAYER_SPEED = 230;
 
 // the player
