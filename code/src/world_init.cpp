@@ -337,6 +337,8 @@ Entity createSpike(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 25.f;
 	motion.scale.y *= -1.25;
+	Bounce &bounce = registry.bounce.emplace(entity);
+	bounce.mass = std::numeric_limits<int>::max();
 
 	registry.spikes.emplace(entity);
 	registry.renderRequests.insert(
@@ -360,11 +362,13 @@ Entity createWheel(RenderSystem* renderer, vec2 pos)
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
 	motion.angle = 0.f;
-	motion.velocity = { 100.f, 0.f };
-	motion.scale = mesh.original_size * 25.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = mesh.original_size * 15.f;
 	motion.offGround = true;
 
 	registry.wheels.emplace(entity);
+	Bounce &bounce = registry.bounce.emplace(entity);
+	bounce.mass = 100.0f;
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
