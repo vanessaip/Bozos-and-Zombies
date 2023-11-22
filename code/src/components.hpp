@@ -276,7 +276,8 @@ struct Label
 enum class TEXTURE_ASSET_ID
 {
 	// define parallax scrolling backgrounds at start
-	STUDENT = 0,
+	LOADING_SCREEN = 0,
+	STUDENT = LOADING_SCREEN + 1,
 	ZOMBIE = STUDENT + 1,
 	BOZO = ZOMBIE + 1,
 	BOZO_POINTER = BOZO + 1,

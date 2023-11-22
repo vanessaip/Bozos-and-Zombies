@@ -87,6 +87,9 @@ private:
 	int max_level = 4;
 	float collectibles_collected_pos = 50;
 	int collectibles_collected = 0;
+	Entity loadingScreen;
+	bool loading = false;
+	float gameTimer = 0.f;
 	vec2 platformDimensions{ 0.f, 0.f }; // unused
 	std::chrono::time_point<std::chrono::steady_clock> level_start_time;
 	Json::Value save_state;
