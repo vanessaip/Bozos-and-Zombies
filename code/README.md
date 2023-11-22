@@ -222,6 +222,46 @@ Overlay rendering for food/lives feedback:
 - (created) spike mesh object file
 - (created) arrow sprite for projectile direction
 
+# Milestone 3 Proposal Alignment
+For milestone 3, our team added a tutorial level plus 2 new main levels.
+
+# Milestone 3 Deliverables
+
+# Playability
+## 5 minutes of non-repeptitive gameplay
+
+
+# Robustness
+## Proper memory management
+
+## User input
+
+## Real-time (no lag)
+
+
+# Stability
+## M2 Bug Fix - game pauses randomly
+
+## M2 Bug Fix - mesh collision
+
+## Minimal Lag
+
+## Consistent game resolution
+
+## No crashes, glitches, unpredictable behaviour
+
+# Creative
+
+## [2] Parallax scrolling backgrounds
+
+## [3] Complex geometry
+
+## [9] Complex perscribed motion
+
+## [19] Reloadability
+
+## [Custom] Pause functionality
+
 # Project References
 
 Level ending sound effect - pixabay.com
