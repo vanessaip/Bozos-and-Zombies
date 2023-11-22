@@ -223,13 +223,14 @@ Overlay rendering for food/lives feedback:
 - (created) arrow sprite for projectile direction
 
 # Milestone 3 Proposal Alignment
-For milestone 3, our team added a tutorial level plus 2 new main levels.
+For milestone 3, our team added a tutorial level plus 2 new main levels. We integrated a variety of creative features to add depth and interactive elements to liven the gameplay. Level transitions, difficulty progressions, new enemies, and more varied level designs were introduced to balance the gameplay.
 
 # Milestone 3 Deliverables
 
 # Playability
 ## 5 minutes of non-repeptitive gameplay
 - Designed new tutorial level. Asset information stored in world_init.hpp (the first element in the asset vectors)
+- Designed new Wreck Beach level with asset information stored in world_init.hpp and rendering information stored in 2_beach.json.
 
 
 # Robustness
@@ -263,6 +264,9 @@ For milestone 3, our team added a tutorial level plus 2 new main levels.
 ## [3] Complex geometry
 
 ## [9] Complex perscribed motion
+- In physics_system.cpp, Lines 240 to 286 calculate the Bezier motion for different entities
+- Quadratic Bezier defines the motion for the spikeball firing from the cannon on the beach level
+- Cubic Bezier defines the motion for the flying apple on the beach level
 
 ## [19] Reloadability
 
