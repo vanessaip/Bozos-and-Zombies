@@ -60,10 +60,9 @@
     }
   ],
   "floor_positions": [
-    600,
-    500,
-    350,
-    250
+    765,
+    650,
+    495
   ],
   "stairs": [],
   "walls": [
@@ -82,6 +81,11 @@
   ],
   "climbables": [
     {
+      "x": 500,
+      "y": 657,
+      "sections": 4
+    },
+    {
       "x": 300,
       "y": 335,
       "sections": 7
@@ -98,9 +102,14 @@
     }
   ],
   "zombie_climb_points": [
-    [ 300, 335 ],
-    [ 600, 500 ],
-    [ 1100, 200 ]
+    [ 500 ],
+    [ 0, 600 ],
+    [ 600 ]
+  ],
+  "zombie_jump_points": [
+    [ 0 ],
+    [ 400 ],
+    [ 0 ]
   ],
   "spikes": [],
   "wheels": [
@@ -122,19 +131,11 @@
     }
   },
   "zombies": {
-    "num_starting": 0,
+    "num_starting": 1,
     "positions": [
       {
         "x": 1200,
         "y": 600
-      },
-      {
-        "x": 300,
-        "y": 440
-      },
-      {
-        "x": 200,
-        "y": 440
       }
     ],
     "spawn_timer": null
@@ -183,7 +184,7 @@
   },
   "bgm": "library.wav",
   "door_win_pos": {
-    "x": 100,
-    "y": 754
+    "x": 1300,
+    "y": 730
   }
 }

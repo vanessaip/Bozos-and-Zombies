@@ -128,6 +128,9 @@ GLFWwindow* WorldSystem::create_window()
 	player_land_sound = Mix_LoadWAV(audio_path("player_land.wav").c_str());
 	collect_book_sound = Mix_LoadWAV(audio_path("Mario-coin-sound.wav").c_str());
 	zombie_kill_sound = Mix_LoadWAV(audio_path("splat.wav").c_str());
+  level_success_sound = Mix_LoadWAV(audio_path("level-success.wav").c_str());
+  next_level_sound = Mix_LoadWAV(audio_path("next-level.wav").c_str());
+  collected_sound = Mix_LoadWAV(audio_path("collected.wav").c_str());
 
 	if (background_music == nullptr || player_death_sound == nullptr || student_disappear_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr || zombie_kill_sound == nullptr)
 	{
@@ -150,10 +153,10 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 {
 	this->renderer = renderer_arg;
 
-	Json::Value save_state;
-	std::ifstream file(level_path("save_state.json"));
-	file >> save_state;
+	// get level left off on
+	save_state = readJson(SAVE_STATE_FILE);
 	curr_level = save_state["current_level"].asInt();
+
 	// Set all states to default for current level
 	restart_level();
 }
@@ -162,35 +165,38 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
 	if (registry.zombies.entities.size() < 1 && (num_collectibles > 0 && collectibles_collected >= num_collectibles) && this->game_over == false) {
+  // if (collectibles_collected > 0 && this->game_over == false) {
 		// createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
 		this->game_over = true;
 		createDoor(renderer, door_win_pos, { 40, 60 }, TEXTURE_ASSET_ID::WIN_DOOR);
 		debugging.in_full_view_mode = true;
+    Mix_HaltMusic();
+    Mix_PlayChannel(-1, level_success_sound, 0);
 		printf("You win!\n");
 
-		// press a key to transition to next level?
 		// option to retry level? (display current and high scores?)
 
-		// save level                                                                                                                                                                                                                     
-		Json::Value save;
-		save["current_level"] = curr_level + 1 > max_level ? 0 : curr_level + 1;
-		Json::StreamWriterBuilder writer;
-		std::string jsonString = Json::writeString(writer, save);
+		// calculate score
+		auto level_complete_time = Clock::now();
+		float time_to_completion = (float)(std::chrono::duration_cast<std::chrono::microseconds>(level_complete_time - level_start_time)).count() / 1000;
 
-		std::ofstream outputFile(level_path("save_state.json"));
-		if (outputFile.is_open()) {
-			outputFile << jsonString;
-			outputFile.close();
-			printf("data written to save_state.json\n");
+		// save level and high score                                                                                                                                                                             
+		save_state["current_level"] = curr_level + 1 > max_level ? 0 : curr_level + 1;
+		float prev_high_score = save_state["high_scores"][curr_level].isNull() ? FLT_MAX : save_state["high_scores"][curr_level].asFloat();
+		if (time_to_completion < prev_high_score) {
+			save_state["high_scores"][curr_level] = time_to_completion;
+			printf("new high score: %f", time_to_completion);
 		}
-		else {
-			printf("ERROR: unable to open save_state.json for writing\n");
-		}
+		writeJson(save_state, SAVE_STATE_FILE);
 	}
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Books: " << points;
+	title_ss << "Books: " << points << " ";
+	float curr_high_score = save_state["high_scores"][curr_level].asFloat() / 1000;
+	if (curr_high_score > 0) { // will be 0 if null
+		title_ss << "High Score: " << curr_high_score << " s";
+	}
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
 	// Remove debug info from the last step
@@ -310,11 +316,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 			if (player.keyPresses[0])
 			{
-				motion.velocity[0] -= 200;
+				motion.velocity[0] -= PLAYER_SPEED;
 			}
 			if (player.keyPresses[1])
 			{
-				motion.velocity[0] += 200;
+				motion.velocity[0] += PLAYER_SPEED;
 			}
 
 		}
@@ -421,7 +427,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 						else {
 							motion.velocity.x = 0;
 
-							if (isZombie && !motion.offGround)
+							if (curr_level == NEST && isZombie && !motion.offGround)
 							{
 								motion.offGround = true;
 								motion.velocity[1] -= 200;
@@ -447,7 +453,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 						else {
 							motion.velocity.x = 0;
 
-							if (isZombie && !motion.offGround)
+							if (curr_level == NEST && isZombie && !motion.offGround)
 							{
 								motion.offGround = true;
 								motion.velocity[1] -= 200;
@@ -507,33 +513,34 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 						registry.remove_all_components_of(motion_container.entities[i]);
 				}
 			}
+		}
 
-			// Add book behaviour
-			if (registry.books.has(motion_container.entities[i]))
+		// Add book behaviour
+		if (registry.books.has(motion_container.entities[i]))
+		{
+			Book& book = registry.books.get(motion_container.entities[i]);
+			Motion motion_player = registry.motions.get(player_bozo);
+			// If book is in hand, we consider it as on ground and always go with player
+			if (book.offHand == false)
 			{
-				Book& book = registry.books.get(motion_container.entities[i]);
-				Motion motion_player = registry.motions.get(player_bozo);
-				// If book is in hand, we consider it as on ground and always go with player
-				if (book.offHand == false)
-				{
-					motion.offGround = false;
-					motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
-					motion.position.y = motion_player.position.y;
-				}
-				// If book is on ground, it's velocity should always be 0
-				if (motion.offGround == false)
-				{
-					motion.velocity = { 0.f, 0.f };
-				}
+				motion.offGround = false;
+				motion.position.x = motion_player.position.x + BOZO_BB_WIDTH / 2;
+				motion.position.y = motion_player.position.y;
 			}
-
-			// If entity if a player effect, for example bozo_pointer, move it along with the player
-			if (registry.playerEffects.has(motion_container.entities[i]))
+			// If book is on ground, it's velocity should always be 0
+			if (motion.offGround == false)
 			{
-				motion.position.x = bozo_motion.position.x;
-				motion.position.y = bozo_motion.position.y;
+				motion.velocity = { 0.f, 0.f };
 			}
 		}
+
+		// If entity if a player effect, for example bozo_pointer, move it along with the player
+		if (registry.playerEffects.has(motion_container.entities[i]))
+		{
+			motion.position.x = bozo_motion.position.x;
+			motion.position.y = bozo_motion.position.y;
+		}
+
 
 		// Processing the player state
 		assert(registry.screenStates.components.size() <= 1);
@@ -648,7 +655,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - door.fading_timer)).count() / 1000;
 
 			if (door.fading_factor < 1) {
-				door.fading_factor += 0.02;
+				door.fading_factor = 1 * elapsed_ms / 2000;
 			}
 		}
 
@@ -818,20 +825,6 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 			float speed = ZOMBIE_SPEED;
 			motion.velocity.x = direction * speed;
 
-			/*
-			// If the zombie hasn't gotten to the player yet, set the appropriate direction the zombie is facing
-			if (abs(motion.position.x - bozo_motion.position.x) > 5)
-			{
-				if (motion.velocity.x > 0)
-				{
-					motion.reflect[0] = true;
-				}
-				else
-				{
-					motion.reflect[0] = false;
-				}
-			}
-			*/
 		}
 	}
 	else if (zombie_level == bozo_level)
@@ -844,6 +837,16 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 		float speed = ZOMBIE_SPEED;
 		motion.velocity.x = direction * speed;
+
+		if (!motion.offGround) {
+			for (float pos : jump_positions[zombie_level]) {
+				if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
+				{
+					motion.velocity.y = -600;
+					motion.offGround = true;
+				}
+			}
+		}
 
 	}
 	else if (zombie_level < bozo_level)
@@ -875,7 +878,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		{
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
-			motion.velocity.y = -2 * ZOMBIE_SPEED;
+			motion.velocity.y = -1.2 * ZOMBIE_SPEED;
 			motion.climbing = true;
 		}
 		else
@@ -901,11 +904,12 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 
 		// When at the ladder, start descending
-		if ((target_ladder - 10.f < motion.position.x && motion.position.x < target_ladder + 10.f))
+		if ((target_ladder - 15.f < motion.position.x && motion.position.x < target_ladder + 15.f))
 		{
 			motion.position.x = target_ladder;
 			motion.velocity.x = 0;
-			motion.velocity.y = 3 * ZOMBIE_SPEED;
+			motion.position.y += 20;
+			motion.velocity.y = 2 *ZOMBIE_SPEED;
 			motion.climbing = true;
 		}
 		else
@@ -1052,7 +1056,11 @@ void WorldSystem::updateWheelRotation(float elapsed_ms_since_last_update)
 // Reset the world state to its initial state
 void WorldSystem::restart_level()
 {
-	debugging.in_full_view_mode = false;
+  if (curr_level == TBC) {
+    debugging.in_full_view_mode = true;
+  } else {
+    debugging.in_full_view_mode = false;
+  }
 	this->game_over = false;
 	// Debugging for memory/component leaks
 	registry.list_all_components();
@@ -1095,7 +1103,7 @@ void WorldSystem::restart_level()
 
 	// Create background first (painter's algorithm for rendering)
 
-	for (std::tuple<TEXTURE_ASSET_ID, float> background : BACKGROUND_ASSET[curr_level]) {
+	for (std::tuple<TEXTURE_ASSET_ID, float> background : BACKGROUND_ASSET[asset_mapping[curr_level]]) {
 		createBackground(renderer, std::get<0>(background), std::get<1>(background));
 	}
 
@@ -1118,7 +1126,7 @@ void WorldSystem::restart_level()
 	}
 
 	for (const auto& platform_data : jsonData["platforms"]) {
-		createPlatforms(renderer, platform_data["x"].asFloat(), platform_data["y"].asFloat(), platform_data["num_tiles"].asInt(), PLATFORM_ASSET[curr_level], platform_data["visible"].asBool(), { PLATFORM_WIDTH, PLATFORM_HEIGHT });
+		createPlatforms(renderer, platform_data["x"].asFloat(), platform_data["y"].asFloat(), platform_data["num_tiles"].asInt(), PLATFORM_ASSET[asset_mapping[curr_level]], platform_data["visible"].asBool(), { PLATFORM_WIDTH, PLATFORM_HEIGHT });
 	}
 
 	// Create stairs
@@ -1133,7 +1141,7 @@ void WorldSystem::restart_level()
 
 	// Create climbables
 	for (const auto& data : jsonData["climbables"]) {
-		createClimbable(renderer, data["x"].asFloat(), data["y"].asFloat(), data["sections"].asInt(), CLIMBABLE_ASSET[curr_level]);
+		createClimbable(renderer, data["x"].asFloat(), data["y"].asFloat(), data["sections"].asInt(), CLIMBABLE_ASSET[asset_mapping[curr_level]]);
 	}
 
 	door_win_pos = { jsonData["door_win_pos"]["x"].asFloat(), jsonData["door_win_pos"]["y"].asFloat() };
@@ -1151,6 +1159,15 @@ void WorldSystem::restart_level()
 			level_climb_points.push_back(point.asFloat());
 		}
 		ladder_positions.push_back(level_climb_points);
+	}
+
+	jump_positions.clear();
+	for (const auto levelPoints : jsonData["zombie_jump_points"]) {
+		std::vector<float> level_jump_points;
+		for (const auto point : levelPoints) {
+			level_jump_points.push_back(point.asFloat());
+		}
+		jump_positions.push_back(level_jump_points);
 	}
 
 	// Create spikes
@@ -1205,7 +1222,7 @@ void WorldSystem::restart_level()
 		vec2 pos = { student_pos["x"].asFloat(), student_pos["y"].asFloat() };
 		npc_spawn_pos.push_back(pos);
 		if (s < num_starting_students) {
-			Entity student = createStudent(renderer, pos, NPC_ASSET[curr_level]);
+			Entity student = createStudent(renderer, pos, NPC_ASSET[asset_mapping[curr_level]]);
 			// coded back+forth motion
 			Motion& student_motion = registry.motions.get(student);
 			student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
@@ -1225,7 +1242,7 @@ void WorldSystem::restart_level()
 	const Json::Value& collectiblesPositions = jsonData["collectibles"]["positions"];
 	num_collectibles = collectiblesPositions.size(); // set number of collectibles
 	vec2 collectible_scale = { jsonData["collectibles"]["scale"]["x"].asFloat(), jsonData["collectibles"]["scale"]["y"].asFloat() };
-	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[curr_level];
+	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[asset_mapping[curr_level]];
 	assert(num_collectibles == collectible_assets.size());
 	for (uint i = 0; i < num_collectibles; i++) {
 		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false);
@@ -1238,23 +1255,26 @@ void WorldSystem::restart_level()
 		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, { 230, 155 }, { 80, 60 });
 	}
 	// Lives can probably stay hardcoded?
-	float heart_pos_x = 1385;
-	float heart_starting_pos_y = 40;
+  if (curr_level != TBC) {
+    float heart_pos_x = 1385;
+    float heart_starting_pos_y = 40;
 
-	Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
-	Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
-	Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
-	Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
-	Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
+    Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
+    Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
+    Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
+    Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
+    Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
 
-	player_hearts = { heart0, heart1, heart2, heart3, heart4 };
+    player_hearts = { heart0, heart1, heart2, heart3, heart4 };
 
-	// Create label
-	Entity label = createLabel(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[curr_level]);
+    // Create label
+    Entity label = createLabel(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]]);
+  }
 
 	setup_keyframes(renderer);
 
 	points = 0;
+	level_start_time = Clock::now();
 }
 
 // Compute collisions between entities
@@ -1335,7 +1355,7 @@ void WorldSystem::handle_collisions()
 					if (spawn_book)
 					{
 						Motion& m = registry.motions.get(entity_other);
-						Entity book = createBook(renderer, m.position, WEAPON_ASSETS[curr_level]);
+						Entity book = createBook(renderer, m.position, WEAPON_ASSETS[asset_mapping[curr_level]]);
 						Book& b = registry.books.get(book);
 						b.offHand = false;
 						++points;
@@ -1361,6 +1381,7 @@ void WorldSystem::handle_collisions()
 			}
 			else if (registry.doors.has(entity_other))
 			{
+        Mix_PlayChannel(-1, next_level_sound, 0);
 				curr_level++;
 				if (curr_level > max_level) {
 					curr_level = 0;
@@ -1430,6 +1451,7 @@ void WorldSystem::handle_collisions()
 		// Player - Collectible collision
 
 		else if (registry.collectible.has(entity) && registry.players.has(entity_other)) {
+      Mix_PlayChannel(-1, collected_sound, 0);
 			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID)registry.collectible.get(entity).collectible_id;
 			Entity collectible = createCollectible(renderer, collectibles_collected_pos, 50, id, { 60, 60 }, true);
 
@@ -1463,7 +1485,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	Motion& motion = registry.motions.get(player_bozo);
 	Player& player = registry.players.get(player_bozo);
 
-	if (action == GLFW_PRESS && !registry.deathTimers.has(player_bozo))
+	if (!pause && action == GLFW_PRESS && !registry.deathTimers.has(player_bozo))
 	{
 		if (key == GLFW_KEY_A)
 		{
@@ -1484,10 +1506,10 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			player.keyPresses[3] = true;
 		}
 
-		if (key == GLFW_KEY_SPACE && !motion.offGround)
+		if (key == GLFW_KEY_SPACE && !motion.offGround && !motion.climbing)
 		{
 			motion.offGround = true;
-			motion.velocity[1] -= 400;
+			motion.velocity[1] = -600;
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 
@@ -1533,7 +1555,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	}
 	*/
 
-	if (action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo)))
+	if (!pause && action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo)))
 	{
 		if (key == GLFW_KEY_A)
 		{
@@ -1553,22 +1575,34 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 	}
 
-	// Resetting game
+	// Resetting game (can be done while paused)
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
 
+		pause = false;
 		restart_level();
 	}
 
-	// Debugging
+	// Debugging (can be done while paused)
 	if (key == GLFW_KEY_BACKSLASH)
 	{
 		if (action == GLFW_RELEASE)
 			debugging.in_full_view_mode = false;
 		else
 			debugging.in_full_view_mode = true;
+	}
+
+	// Pause
+	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+		pause = !pause;
+		if (pause) {
+			pause_start = Clock::now();
+		} else {
+			pause_end = Clock::now();
+			pause_duration = (float)(std::chrono::duration_cast<std::chrono::microseconds>(pause_end - pause_start)).count() / 1000;
+		}
 	}
 }
 
@@ -1580,7 +1614,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	if (!registry.deathTimers.has(player_bozo))
+	if (!pause && !registry.deathTimers.has(player_bozo))
 	{
 		Motion& motion = registry.motions.get(player_bozo_pointer);
 		vec2 pos = relativePos(mouse_position);
@@ -1609,10 +1643,8 @@ void WorldSystem::on_mouse_button(int button, int action, int mod)
 		return;
 	}
 
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+	if (!pause && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 	{
-
-
 		auto& booksRegistry = registry.books;
 		for (int i = 0; i < booksRegistry.size(); i++)
 		{
@@ -1661,4 +1693,26 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 	for (uint i = 0; i < moving_plat2.size(); i++) {
 		registry.keyframeAnimations.emplace(moving_plat2[i], KeyframeAnimation((int)frames2.size(), 2000.f, true, frames2));
 	}*/
+}
+
+Json::Value WorldSystem::readJson(std::string file_name) {
+	Json::Value json;
+	std::ifstream file(file_name);
+	file >> json;
+	return json;
+}
+
+void WorldSystem::writeJson(Json::Value& json, std::string file_name) {
+	Json::StreamWriterBuilder writer;
+	std::string jsonString = Json::writeString(writer, json);
+
+	std::ofstream outputFile(file_name);
+	if (outputFile.is_open()) {
+		outputFile << jsonString; 
+		outputFile.close();
+		printf("data written to %s\n", file_name.c_str());
+	}
+	else {
+		printf("ERROR: unable to open %s for writing\n", file_name.c_str());
+	}
 }

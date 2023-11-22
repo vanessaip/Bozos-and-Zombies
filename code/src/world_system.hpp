@@ -21,6 +21,11 @@
 class WorldSystem
 {
 public:
+	bool pause = false; // TODO(vanessa): enum for playing, pause, game over?
+	std::chrono::time_point<std::chrono::steady_clock> pause_start;
+	std::chrono::time_point<std::chrono::steady_clock> pause_end;
+	float pause_duration = 0.f;
+
 	WorldSystem();
 
 	// Creates a window
@@ -61,6 +66,9 @@ private:
 
 	void updateWheelRotation(float elapsed_ms_since_last_update);
 
+	Json::Value WorldSystem::readJson(std::string file_name);
+	void WorldSystem::writeJson(Json::Value& json, std::string file_name);
+
 	// restart level
 	void restart_level();
 
@@ -76,10 +84,12 @@ private:
 	Entity player_bozo_pointer;
 	float enemySpawnTimer = 0.f;
 	float npcSpawnTimer = 0.f;
-	int max_level = 3;
+	int max_level = 4;
 	float collectibles_collected_pos = 50;
 	int collectibles_collected = 0;
 	vec2 platformDimensions{ 0.f, 0.f }; // unused
+	std::chrono::time_point<std::chrono::steady_clock> level_start_time;
+	Json::Value save_state;
 
 	// This is actually 5 lives but 0 indexed.
 	int player_lives = 4;
@@ -94,6 +104,7 @@ private:
 	std::vector<vec2> npc_spawn_pos;
 	std::vector<float> floor_positions;
 	std::vector<std::vector<float>> ladder_positions;
+	std::vector<std::vector<float>> jump_positions;
 	float PLATFORM_WIDTH;
 	float PLATFORM_HEIGHT;
   vec2 door_win_pos;
@@ -112,6 +123,9 @@ private:
 	Mix_Chunk* player_land_sound;
 	Mix_Chunk* collect_book_sound;
 	Mix_Chunk* zombie_kill_sound;
+  Mix_Chunk* level_success_sound;
+  Mix_Chunk* next_level_sound;
+  Mix_Chunk* collected_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;
