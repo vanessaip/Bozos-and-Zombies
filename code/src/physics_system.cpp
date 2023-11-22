@@ -232,7 +232,10 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 		if ((registry.humans.has(entity) || registry.zombies.has(entity) || registry.books.has(entity) || registry.wheels.has(entity)) && motion.offGround)
 		{
-			motion.velocity[1] += PhysicsSystem::GRAVITY;
+      // terminal velocity cap
+      if (motion.velocity[1] < 800) {
+        motion.velocity[1] += PhysicsSystem::GRAVITY;
+      }
 		}
 
 		// Step the spikeballs as per Bezier curves
