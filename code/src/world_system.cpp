@@ -1530,18 +1530,18 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 
-		if (key == GLFW_KEY_P) {
-			debugging.in_full_view_mode = !debugging.in_full_view_mode;
-		}
+		// if (key == GLFW_KEY_P) {
+		// 	debugging.in_full_view_mode = !debugging.in_full_view_mode;
+		// }
 
-		if (key == GLFW_KEY_L) {
-			curr_level++;
-			if (curr_level > max_level) {
-				curr_level = 0;
-			}
+		// if (key == GLFW_KEY_L) {
+		// 	curr_level++;
+		// 	if (curr_level > max_level) {
+		// 		curr_level = 0;
+		// 	}
 
-			restart_level();
-		}
+		// 	restart_level();
+		// }
 	}
 
 	// For camera (because I don't have a mouse) - Justin
