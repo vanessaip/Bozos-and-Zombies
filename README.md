@@ -231,7 +231,7 @@ For milestone 3, our team added a tutorial level plus 2 new main levels. We inte
 ## 5 minutes of non-repeptitive gameplay
 - Designed new tutorial level. Asset information stored in world_init.hpp (the first element in the asset vectors)
 - Designed new Wreck Beach level with asset information stored in world_init.hpp and rendering information stored in 2_beach.json.
-
+- Designed and implemented new library level. 
 
 # Robustness
 ## Proper memory management
@@ -258,7 +258,6 @@ The only runtime bottleneck we discovered was at the beginning of the game when 
 
 ## No crashes, glitches, unpredictable behaviour
 - Fixed framrate dependent jump height by multiplying gravity factor by elapsed time in each step (physics_system.cpp line 235)
-
 # Creative
 
 ## [2] Parallax scrolling backgrounds
@@ -284,17 +283,20 @@ The only runtime bottleneck we discovered was at the beginning of the game when 
 
 # Project References
 
-Level ending sound effect - pixabay.com
+Level ending sound effect - pixabay.com  
+Collected item sound effect - pixabay.com  
+Tutorial background music - pixabay.com  
+Wreck Beach level background music - "Tahitian Remix Despacito" by Tulei  
+To be Continue music - "Grim Grinning Ghosts (Electro Swing Mix)" by Glenn Gatsby and Ashley Slater  
+Tutorial level assets - craftpix.net  
 
-Collected item sound effect - pixabay.com
+**Library level assets:**
+- Background music - Harry Potter theme song  
+- craftpix.net - FREE MEDIEVAL TILESET PIXEL ART PACK
+- craftpix.net - MEDIEVAL PIXEL ART TILESET
+- craftpix.net - MAGIC WAND AND BOOK ICON PACK
+- https://pff_nox.artstation.com/projects/8e3wkQ
 
-Tutorial background music - pixabay.com
-
-Wreck Beach level background music - "Tahitian Remix Despacito" by Tulei 
-
-To be Continue music - "Grim Grinning Ghosts (Electro Swing Mix)" by Glenn Gatsby and Ashley Slater
-
-Tutorial level assets - craftpix.net
 
 Beach level assets - craftpix.net
 
