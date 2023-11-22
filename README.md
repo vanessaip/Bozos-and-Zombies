@@ -235,10 +235,13 @@ For milestone 3, our team added a tutorial level plus 2 new main levels. We inte
 
 # Robustness
 ## Proper memory management
+Extensive testing was done to ensure that no instantiated entities and their allocated memories were unfreed after they have been killed or otherwise left the world state.
 
 ## User input
+No known user inputs are able to crash the game.
 
 ## Real-time (no lag)
+The only runtime bottleneck we discovered was at the beginning of the game when all the textures were being loaded into the buffer in render_systems.init. This introduced a minor amount of lag at the beginning of the game, and we got around it by adding a loading screen at the start of the game at main.cpp:line 46
 
 
 # Stability
