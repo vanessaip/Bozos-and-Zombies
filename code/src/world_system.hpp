@@ -64,7 +64,7 @@ private:
 	// Sets up keyframe interpolation for given entity
 	void setup_keyframes(RenderSystem* rendered);
 
-	void updateWheelRotation(float elapsed_ms_since_last_update);
+	void updateWheelRotation();
 
 	Json::Value WorldSystem::readJson(std::string file_name);
 	void WorldSystem::writeJson(Json::Value& json, std::string file_name);
