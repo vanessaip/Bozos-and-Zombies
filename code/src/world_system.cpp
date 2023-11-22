@@ -1509,6 +1509,16 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 			restart_level();
 		}
+
+		if (key == GLFW_KEY_ENTER) {
+			pause = !pause;
+			if (pause) {
+				pause_start = Clock::now();
+			} else {
+				pause_end = Clock::now();
+				pause_duration = (float)(std::chrono::duration_cast<std::chrono::microseconds>(pause_end - pause_start)).count() / 1000;
+			}
+		}
 	}
 
 	// For camera (because I don't have a mouse) - Justin

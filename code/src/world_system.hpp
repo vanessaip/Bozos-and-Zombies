@@ -21,6 +21,11 @@
 class WorldSystem
 {
 public:
+	bool pause = false; // TODO(vanessa): enum for playing, pause, game over?
+	std::chrono::time_point<std::chrono::steady_clock> pause_start;
+	std::chrono::time_point<std::chrono::steady_clock> pause_end;
+	float pause_duration = 0.f;
+
 	WorldSystem();
 
 	// Creates a window
