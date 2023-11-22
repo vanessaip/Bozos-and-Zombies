@@ -59,8 +59,8 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
 
 Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic);
 
-//label
-Entity createLabel(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId);
+// label
+Entity createOverlay(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId, bool is_fading);
 
 Entity createDoor(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId);
 

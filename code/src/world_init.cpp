@@ -541,7 +541,7 @@ Entity createLoadingScreen(RenderSystem* renderer, vec2 position, vec2 scale) {
 	return entity;
 
 }
-Entity createLabel(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID) {
+Entity createOverlay(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, bool is_fading) {
 	// Reserve en entity
 	auto entity = Entity();
 
@@ -554,9 +554,11 @@ Entity createLabel(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_AS
 	motion.position = position;
 	motion.scale = scale;
 
-	registry.labels.emplace(entity);
-	Label& label = registry.labels.get(entity);
-	label.fading_timer = Clock::now();
+	if(is_fading) {
+		registry.fading.emplace(entity);
+		Fading& fading = registry.fading.get(entity);
+		fading.fading_timer = Clock::now();
+	}
 
 	registry.overlay.emplace(entity);
 
