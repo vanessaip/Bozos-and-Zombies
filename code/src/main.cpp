@@ -67,7 +67,7 @@ int main()
 
 		printf("total elapsed time: %f\n", total_elapsed);
 		if (total_elapsed > 4000.f) {
-			if(registry.labels.has(loadingScreen)) {
+			if(registry.motions.has(loadingScreen)) {
 				debugging.in_full_view_mode = false;
 				registry.remove_all_components_of(loadingScreen);
 			}
