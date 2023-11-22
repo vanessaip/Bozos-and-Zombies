@@ -275,9 +275,16 @@ For milestone 3, our team added a tutorial level plus 2 new main levels. We inte
 # Project References
 
 Level ending sound effect - pixabay.com
+
 Collected item sound effect - pixabay.com
+
 Tutorial background music - pixabay.com
+
 Wreck Beach level background music - "Tahitian Remix Despacito" by Tulei 
+
 To be Continue music - "Grim Grinning Ghosts (Electro Swing Mix)" by Glenn Gatsby and Ashley Slater
+
 Tutorial level assets - craftpix.net
+
+Beach level assets - craftpix.net
 
