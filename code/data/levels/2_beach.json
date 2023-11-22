@@ -99,13 +99,13 @@
   "spikes": [],
   "wheels": [
     {
-      "position": [ 100, 600 ],
+      "position": [ 100, 710 ],
       "colour": [ 1.0, 0, 0 ],
       "velocity": [ 50, 0 ],
       "size": 25
     },
     {
-      "position": [ 1340, 600 ],
+      "position": [ 1340, 710 ],
       "colour": [ 1.0, 0, 0 ],
       "velocity": [ -50, 0 ],
       "size": 30
