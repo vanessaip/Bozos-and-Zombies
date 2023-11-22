@@ -94,6 +94,8 @@ const std::vector<std::string> LEVEL_DESCRIPTORS = {
   level_path("to_be_continued.json"),
 };
 
+const std::string SAVE_STATE_FILE = level_path("save_state.json");
+
 // ---------------------BACKGROUNDS-------------------------
 const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_ASSET = {
 	{

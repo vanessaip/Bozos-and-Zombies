@@ -153,10 +153,10 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 {
 	this->renderer = renderer_arg;
 
-	Json::Value save_state;
-	std::ifstream file(level_path("save_state.json"));
-	file >> save_state;
+	// get level left off on
+	save_state = readJson(SAVE_STATE_FILE);
 	curr_level = save_state["current_level"].asInt();
+
 	// Set all states to default for current level
 	restart_level();
 }
@@ -174,29 +174,29 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
     Mix_PlayChannel(-1, level_success_sound, 0);
 		printf("You win!\n");
 
-		// press a key to transition to next level?
 		// option to retry level? (display current and high scores?)
 
-		// save level                                                                                                                                                                                                                     
-		Json::Value save;
-		save["current_level"] = curr_level + 1 > max_level ? 0 : curr_level + 1;
-		Json::StreamWriterBuilder writer;
-		std::string jsonString = Json::writeString(writer, save);
+		// calculate score
+		auto level_complete_time = Clock::now();
+		float time_to_completion = (float)(std::chrono::duration_cast<std::chrono::microseconds>(level_complete_time - level_start_time)).count() / 1000;
 
-		std::ofstream outputFile(level_path("save_state.json"));
-		if (outputFile.is_open()) {
-			outputFile << jsonString;
-			outputFile.close();
-			printf("data written to save_state.json\n");
+		// save level and high score                                                                                                                                                                             
+		save_state["current_level"] = curr_level + 1 > max_level ? 0 : curr_level + 1;
+		float prev_high_score = save_state["high_scores"][curr_level].isNull() ? FLT_MAX : save_state["high_scores"][curr_level].asFloat();
+		if (time_to_completion < prev_high_score) {
+			save_state["high_scores"][curr_level] = time_to_completion;
+			printf("new high score: %f", time_to_completion);
 		}
-		else {
-			printf("ERROR: unable to open save_state.json for writing\n");
-		}
+		writeJson(save_state, SAVE_STATE_FILE);
 	}
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Books: " << points;
+	title_ss << "Books: " << points << " ";
+	float curr_high_score = save_state["high_scores"][curr_level].asFloat() / 1000;
+	if (curr_high_score > 0) { // will be 0 if null
+		title_ss << "High Score: " << curr_high_score << " s";
+	}
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
 	// Remove debug info from the last step
@@ -1274,6 +1274,7 @@ void WorldSystem::restart_level()
 	setup_keyframes(renderer);
 
 	points = 0;
+	level_start_time = Clock::now();
 }
 
 // Compute collisions between entities
@@ -1484,7 +1485,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	Motion& motion = registry.motions.get(player_bozo);
 	Player& player = registry.players.get(player_bozo);
 
-	if (action == GLFW_PRESS && !registry.deathTimers.has(player_bozo))
+	if (!pause && action == GLFW_PRESS && !registry.deathTimers.has(player_bozo))
 	{
 		if (key == GLFW_KEY_A)
 		{
@@ -1554,7 +1555,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	}
 	*/
 
-	if (action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo)))
+	if (!pause && action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo)))
 	{
 		if (key == GLFW_KEY_A)
 		{
@@ -1574,22 +1575,34 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 	}
 
-	// Resetting game
+	// Resetting game (can be done while paused)
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
 
+		pause = false;
 		restart_level();
 	}
 
-	// Debugging
+	// Debugging (can be done while paused)
 	if (key == GLFW_KEY_BACKSLASH)
 	{
 		if (action == GLFW_RELEASE)
 			debugging.in_full_view_mode = false;
 		else
 			debugging.in_full_view_mode = true;
+	}
+
+	// Pause
+	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+		pause = !pause;
+		if (pause) {
+			pause_start = Clock::now();
+		} else {
+			pause_end = Clock::now();
+			pause_duration = (float)(std::chrono::duration_cast<std::chrono::microseconds>(pause_end - pause_start)).count() / 1000;
+		}
 	}
 }
 
@@ -1601,7 +1614,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	if (!registry.deathTimers.has(player_bozo))
+	if (!pause && !registry.deathTimers.has(player_bozo))
 	{
 		Motion& motion = registry.motions.get(player_bozo_pointer);
 		vec2 pos = relativePos(mouse_position);
@@ -1630,10 +1643,8 @@ void WorldSystem::on_mouse_button(int button, int action, int mod)
 		return;
 	}
 
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+	if (!pause && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 	{
-
-
 		auto& booksRegistry = registry.books;
 		for (int i = 0; i < booksRegistry.size(); i++)
 		{
@@ -1682,4 +1693,26 @@ void WorldSystem::setup_keyframes(RenderSystem* rendered)
 	for (uint i = 0; i < moving_plat2.size(); i++) {
 		registry.keyframeAnimations.emplace(moving_plat2[i], KeyframeAnimation((int)frames2.size(), 2000.f, true, frames2));
 	}*/
+}
+
+Json::Value WorldSystem::readJson(std::string file_name) {
+	Json::Value json;
+	std::ifstream file(file_name);
+	file >> json;
+	return json;
+}
+
+void WorldSystem::writeJson(Json::Value& json, std::string file_name) {
+	Json::StreamWriterBuilder writer;
+	std::string jsonString = Json::writeString(writer, json);
+
+	std::ofstream outputFile(file_name);
+	if (outputFile.is_open()) {
+		outputFile << jsonString; 
+		outputFile.close();
+		printf("data written to %s\n", file_name.c_str());
+	}
+	else {
+		printf("ERROR: unable to open %s for writing\n", file_name.c_str());
+	}
 }

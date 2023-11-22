@@ -43,14 +43,21 @@ int main()
 	// variable timestep loop
 	auto t = Clock::now();
 	while (!world_system.is_over()) {
+		while (world_system.pause) {
+			glfwPollEvents();
+			printf("PAUSING \n");
+		}
 		// Processes system messages, if this wasn't present the window would become unresponsive
 		glfwPollEvents();
 
 		// Calculating elapsed times in milliseconds from the previous iteration
 		auto now = Clock::now();
 		float elapsed_ms =
-			(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000;
+			((float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000) - world_system.pause_duration;
 		t = now;
+		// printf("pause duration: %f ", world_system.pause_duration);
+		world_system.pause_duration = 0.f;
+		// printf("elapsed time: %f\n", elapsed_ms);
 
 		world_system.step(elapsed_ms);
 		physics_system.step(elapsed_ms);

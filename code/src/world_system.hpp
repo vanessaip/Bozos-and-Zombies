@@ -21,6 +21,11 @@
 class WorldSystem
 {
 public:
+	bool pause = false; // TODO(vanessa): enum for playing, pause, game over?
+	std::chrono::time_point<std::chrono::steady_clock> pause_start;
+	std::chrono::time_point<std::chrono::steady_clock> pause_end;
+	float pause_duration = 0.f;
+
 	WorldSystem();
 
 	// Creates a window
@@ -61,6 +66,9 @@ private:
 
 	void updateWheelRotation(float elapsed_ms_since_last_update);
 
+	Json::Value WorldSystem::readJson(std::string file_name);
+	void WorldSystem::writeJson(Json::Value& json, std::string file_name);
+
 	// restart level
 	void restart_level();
 
@@ -80,6 +88,8 @@ private:
 	float collectibles_collected_pos = 50;
 	int collectibles_collected = 0;
 	vec2 platformDimensions{ 0.f, 0.f }; // unused
+	std::chrono::time_point<std::chrono::steady_clock> level_start_time;
+	Json::Value save_state;
 
 	// This is actually 5 lives but 0 indexed.
 	int player_lives = 4;
