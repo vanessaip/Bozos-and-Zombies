@@ -65,7 +65,7 @@ int main()
 		world_system.pause_duration = 0.f;
 		// printf("elapsed time: %f\n", elapsed_ms);
 
-		printf("total elapsed time: %f\n", total_elapsed);
+		// printf("total elapsed time: %f\n", total_elapsed);
 		if (total_elapsed > 4000.f) {
 			if(registry.motions.has(loadingScreen)) {
 				debugging.in_full_view_mode = false;
