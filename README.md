@@ -250,6 +250,7 @@ The only runtime bottleneck we discovered was at the beginning of the game when 
 - Entry point world_system.cpp WorldSystem::step() line 238 - there are two for-loops, one for spawning new zombies, another for spawning new npcs
 
 ## M2 Bug Fix - mesh collision
+- Added use cases for some collision configurations. Now, a mesh and bounding box collision will be detected if no vertices of the mesh are inside the bounding box (for instance, if the box is fully inside the mesh).
 
 ## Minimal Lag
 
@@ -265,11 +266,17 @@ The only runtime bottleneck we discovered was at the beginning of the game when 
 - Projections matrix adjusted for each scrolling background based on depth value (entry point: rendering_system.cpp RenderSystem::draw() line 305)
 
 ## [3] Complex geometry
+- Added a complex mesh for Spike Wheels with different parts having different colour (wheel.obj, wheel.fs.glsl, wheel.vs.glsl, render_system.cpp (line 136 - 165))
+- Initial Spike Meshes from M2 with gradient coloring (spike.obj, spike.fs.glsl, spike.vs.glsl, render_system.cpp (line 109 - 135))
 
 ## [9] Complex perscribed motion
 - In physics_system.cpp, Lines 240 to 286 calculate the Bezier motion for different entities
 - Quadratic Bezier defines the motion for the spikeball firing from the cannon on the beach level
 - Cubic Bezier defines the motion for the flying apple on the beach level
+
+## [10] Precise Collisions
+- Implemented precise mesh - mesh collision detection using Separating Axis Theorem (physics_system.cpp (line 17 - 109))
+- Implemented response elastic collision between Spikes and Wheels (physics_system.cpp (line 109 - 134))
 
 ## [19] Reloadability
 
@@ -291,3 +298,4 @@ Tutorial level assets - craftpix.net
 
 Beach level assets - craftpix.net
 
+Separating Axis Theorem: github.com/winstxnhdw/2d-separating-axis-theorem
