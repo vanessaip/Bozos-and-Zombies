@@ -1555,14 +1555,14 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		// 	debugging.in_full_view_mode = !debugging.in_full_view_mode;
 		// }
 
-		// if (key == GLFW_KEY_L) {
-		// 	curr_level++;
-		// 	if (curr_level > max_level) {
-		// 		curr_level = 0;
-		// 	}
+		if (curr_level == TBC && key == GLFW_KEY_L) {
+			curr_level++;
+			if (curr_level > max_level) {
+				curr_level = 0;
+			}
 
-		// 	restart_level();
-		// }
+			restart_level();
+		}
 	}
 
 	// For camera (because I don't have a mouse) - Justin
