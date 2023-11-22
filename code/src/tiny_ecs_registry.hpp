@@ -39,7 +39,7 @@ public:
 	ComponentContainer<Collectible> collectible;
 	ComponentContainer<Overlay> overlay;
 	ComponentContainer<Dangerous> dangerous;
-	ComponentContainer<Label> labels;
+	ComponentContainer<Fading> fading;
   	ComponentContainer<Door> doors;
 	ComponentContainer<Bounce> bounce;
 
@@ -75,7 +75,7 @@ public:
 		registry_list.push_back(&overlay);
 		registry_list.push_back(&lostLifeTimer);
 		registry_list.push_back(&dangerous);
-		registry_list.push_back(&labels);
+		registry_list.push_back(&fading);
     	registry_list.push_back(&doors);
 		registry_list.push_back(&bounce);
 	}

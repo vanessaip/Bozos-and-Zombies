@@ -206,23 +206,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// Removing out of screen entities
 	auto& motion_container = registry.motions;
 
-	// if(!loading && gameTimer < 5 * 1000) {
-	// 	debugging.in_full_view_mode = true;
-	// 	loadingScreen = createLoadingScreen(this->renderer, { window_width_px / 2, window_height_px / 2 }, { 2 * window_width_px, 3 * window_height_px });
-	// 	loading = true;
-	// 	printf("Loading...\n");
-	// } else if (loading && gameTimer >= 5 * 1000 && !registry.labels.has(loadingScreen)) {
-	// 	registry.labels.emplace(loadingScreen);
-	// 	Label& label = registry.labels.get(loadingScreen);
-	// 	label.fading_timer = Clock::now();
-	// }
-	// else if (loading && gameTimer >= 7 * 1000 && registry.labels.has(loadingScreen)) {
-	// 	debugging.in_full_view_mode = false;
-	// 	registry.remove_all_components_of(loadingScreen);
-	// 	loading = false;
-	// 	printf("Done loading!\n");
-
-	// }
 
 
 	gameTimer += elapsed_ms_since_last_update;
@@ -645,11 +628,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 
 
-		for (Entity entity : registry.labels.entities)
+		for (Entity entity : registry.fading.entities)
 		{
 			// progress timer, make the rotation happening based on time
 			// Set fading factor 
-			Label& label = registry.labels.get(entity);
+			Fading& label = registry.fading.get(entity);
 			auto now = Clock::now();
 
 			float elapsed_ms =
@@ -1309,7 +1292,7 @@ void WorldSystem::restart_level()
 		player_hearts = { heart0, heart1, heart2, heart3, heart4 };
 
 		// Create label
-		Entity label = createLabel(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]]);
+		Entity label = createOverlay(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]], true);
 	}
 
 	setup_keyframes(renderer);
@@ -1558,14 +1541,14 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		// 	debugging.in_full_view_mode = !debugging.in_full_view_mode;
 		// }
 
-		// if (key == GLFW_KEY_L) {
-		// 	curr_level++;
-		// 	if (curr_level > max_level) {
-		// 		curr_level = 0;
-		// 	}
+		if (curr_level == TBC && key == GLFW_KEY_L) {
+			curr_level++;
+			if (curr_level > max_level) {
+				curr_level = 0;
+			}
 
-		// 	restart_level();
-		// }
+			restart_level();
+		}
 	}
 
 	// For camera (because I don't have a mouse) - Justin
@@ -1639,9 +1622,13 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
 		pause = !pause;
 		if (pause) {
+			pause_ui = createOverlay(renderer, { window_width_px / 2, window_height_px / 2}, { 400.f, 300.f }, TEXTURE_ASSET_ID::PAUSE, false);
 			pause_start = Clock::now();
 		}
 		else {
+			if (registry.overlay.has(pause_ui)) {
+				registry.remove_all_components_of(pause_ui);
+			}
 			pause_end = Clock::now();
 			pause_duration = (float)(std::chrono::duration_cast<std::chrono::microseconds>(pause_end - pause_start)).count() / 1000;
 		}

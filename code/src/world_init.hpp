@@ -18,7 +18,7 @@ const float WALL_WIDTH = 20.f;
 
 const vec2 CLIMBABLE_DIM = { 30.f, 32.f };
 
-const float ZOMBIE_SPEED = 150.f;
+const float ZOMBIE_SPEED = 120.f;
 const float PLAYER_SPEED = 230;
 
 // the player
@@ -59,8 +59,8 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
 
 Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic);
 
-//label
-Entity createLabel(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId);
+// label
+Entity createOverlay(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId, bool is_fading);
 
 Entity createDoor(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId);
 

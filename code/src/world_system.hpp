@@ -93,6 +93,7 @@ private:
 	vec2 platformDimensions{ 0.f, 0.f }; // unused
 	std::chrono::time_point<std::chrono::steady_clock> level_start_time;
 	Json::Value save_state;
+	Entity pause_ui;
 
 	// This is actually 5 lives but 0 indexed.
 	int player_lives = 4;
