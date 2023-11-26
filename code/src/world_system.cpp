@@ -1123,13 +1123,12 @@ void WorldSystem::restart_level()
 	renderer->resetSpriteSheetTracker();
 
 	// Create background first (painter's algorithm for rendering)
-
 	for (std::tuple<TEXTURE_ASSET_ID, float> background : BACKGROUND_ASSET[asset_mapping[curr_level]]) {
 		createBackground(renderer, std::get<0>(background), std::get<1>(background));
 	}
 
 	if (curr_level == NEST)
-		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, 0.f, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f }); // egg
+		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, 0.f, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, false, { 250.f, 250.f }); // egg
 
 	// Tutorial sign only for the first level
 	if (curr_level == TUTORIAL) {
@@ -1273,7 +1272,7 @@ void WorldSystem::restart_level()
 	if (curr_level == BEACH) {
 		createDangerous(renderer, { 280, 130 }, { 30, 30 }, TEXTURE_ASSET_ID::SPIKE_BALL, { 280, 130 }, { 500, 10 }, { 650, 250 }, { 0, 0 }, false);
 		createDangerous(renderer, { 280, 130 }, { 30, 30 }, TEXTURE_ASSET_ID::BEACH_BIRD, { 0, 400 }, { 500, 50 }, { 1000, 750 }, { 1450, 400 }, true);
-		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, { 230, 155 }, { 80, 60 });
+		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, { 230, 155 }, false, { 80, 60 });
 	}
 	// Lives can probably stay hardcoded?
 	if (curr_level != TBC) {
@@ -1293,6 +1292,8 @@ void WorldSystem::restart_level()
 	}
 
 	setup_keyframes(renderer);
+
+	//createBackground(renderer, TEXTURE_ASSET_ID::LIGHTING_MAP, 0.f, { window_width_px / 2, window_height_px / 2 }, true);
 
 	points = 0;
 	level_start_time = Clock::now();
@@ -1538,7 +1539,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		// 	debugging.in_full_view_mode = !debugging.in_full_view_mode;
 		// }
 
-		if (curr_level == TBC && key == GLFW_KEY_L) {
+		if (key == GLFW_KEY_L) {
 			curr_level++;
 			if (curr_level > max_level) {
 				curr_level = 0;

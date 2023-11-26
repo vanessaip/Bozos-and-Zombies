@@ -13,6 +13,9 @@ int bufferIds[50];
 float previousLeft = 0.f;
 float currentLeft = 0.f;
 
+glm::vec3 lights[2] = { { 250, 175, 1.2f }, { 1300 , 700, 1.3f } };
+bool printLights = true;
+
 void RenderSystem::drawTexturedMesh(Entity entity,
 	const mat3& projection)
 {
@@ -25,6 +28,11 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	transform.rotate(motion.angle);
 	transform.scale(motion.scale);
 	transform.reflect(motion.reflect);
+
+	//std::cout << transform.mat[0][0] << " " << transform.mat[0][1] << " " << transform.mat[0][2] << "\n";
+	//std::cout << transform.mat[1][0] << " " << transform.mat[1][1] << " " << transform.mat[1][2] << "\n";
+	//std::cout << transform.mat[2][0] << " " << transform.mat[2][1] << " " << transform.mat[2][2] << "\n";
+
 
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest& render_request = registry.renderRequests.get(entity);
@@ -95,7 +103,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			Fading& fade = registry.fading.get(entity);
 			glUniform1f(fade_timer_uloc, fade.fading_factor);
 		}
-    else if (registry.doors.has(entity)) {
+		else if (registry.doors.has(entity)) {
 			Door& door = registry.doors.get(entity);
 			glUniform1f(fade_timer_uloc, door.fading_factor);
 		}
@@ -103,6 +111,41 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			glUniform1f(fade_timer_uloc, 0.f);
 		}
 
+		// Lighting
+		GLuint lights_loc = glGetUniformLocation(program, "lights");
+		glUniform3fv(lights_loc, sizeof(lights) / sizeof(glm::vec3), reinterpret_cast<GLfloat*>(&lights[0]));
+	}
+
+	else if (render_request.used_effect == EFFECT_ASSET_ID::BLENDED) 
+	{
+		GLint in_position_loc = glGetAttribLocation(program, "in_position");
+		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+		gl_has_errors();
+		assert(in_texcoord_loc >= 0);
+
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(TexturedVertex), (void*)0);
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_texcoord_loc);
+		glVertexAttribPointer(
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			(void*)sizeof(
+				vec3)); // note the stride to skip the preceeding vertex position
+
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
+		gl_has_errors();
+
+		assert(registry.renderRequests.has(entity));
+		GLuint texture_id = texture_gl_handles[(GLuint)render_request.used_texture];
+
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		gl_has_errors();
+
+		//glEnable(GL_BLEND);
+		//glBlendFunc(GL_ONE, GL_ONE);
 	}
 
 	// FUTURE: won't need for now, could reuse if we end up having meshes
@@ -294,6 +337,7 @@ void RenderSystem::draw(float elapsed_time_ms)
 	mat3 projection_2D = createProjectionMatrix(playerCamera.left, playerCamera.top, playerCamera.right, playerCamera.bottom);
 	mat3 projectionBasic = createBasicProjectionMatrix();
 	mat3 projectionParallax;
+
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{

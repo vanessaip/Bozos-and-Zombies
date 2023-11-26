@@ -46,7 +46,7 @@ Entity createSpike(RenderSystem* renderer, vec2 pos);
 // wheels
 Entity createWheel(RenderSystem* renderer, vec2 pos);
 // background
-Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_0, float depth = 0.f, vec2 position = { window_width_px / 2, window_height_px / 2 }, vec2 scale = { window_width_px, window_height_px });
+Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_0, float depth = 0.f, vec2 position = { window_width_px / 2, window_height_px / 2 }, bool blended = false, vec2 scale = { window_width_px, window_height_px });
 // book
 Entity createBook(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId);
 // text box
@@ -101,11 +101,13 @@ const std::string SAVE_STATE_FILE = level_path("save_state.json");
 // ---------------------BACKGROUNDS-------------------------
 const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_ASSET = {
 	{
-	  { TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND1, 16.f },
-	  { TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND2, 8.f },
-	  { TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND3, 4.f },
-	  { TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND4, 2.f },
-	  { TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND0, 0.f }
+	  //{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND1, 16.f },
+	  //{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND2, 8.f },
+	  //{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND3, 4.f },
+	  //{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND4, 2.f },
+	  //{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND0, 0.f }
+		{ TEXTURE_ASSET_ID::DARK_BACKGROUND1, 0.f },
+		{ TEXTURE_ASSET_ID::DARK_BACKGROUND0, 0.f }
 	},
 	{
 		// texture id, depth (set depth to 0 if not scrolling)

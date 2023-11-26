@@ -272,7 +272,7 @@ std::vector<Entity> createClimbable(RenderSystem* renderer, float top_position_x
 	return sections;
 }
 
-Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, float depth, vec2 position, vec2 scale)
+Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, float depth, vec2 position, bool blended, vec2 scale)
 {
 	auto entity = Entity();
 
@@ -296,7 +296,7 @@ Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, float 
 	registry.renderRequests.insert(
 		entity,
 		{ texture,
-		 EFFECT_ASSET_ID::TEXTURED,
+		 blended ? EFFECT_ASSET_ID::BLENDED : EFFECT_ASSET_ID::TEXTURED,
 		 GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;

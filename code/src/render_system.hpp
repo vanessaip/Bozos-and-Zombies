@@ -102,20 +102,23 @@ class RenderSystem {
 		textures_path("locations/label_beach.png"),
 		textures_path("locations/label_library.png"),
 		textures_path("locations/label_tutorial.png"),
-    textures_path("beach/beach-apple.png"),
-    textures_path("beach/beach-chest.png"),
-    textures_path("beach/beach-chest2.png"),
-    textures_path("beach/beach-diamond.png"),
-    textures_path("beach/beach-star.png"),
-    textures_path("beach/beach-coin_01.png"),
-    textures_path("door.png"),
-    textures_path("beach/beach-bird.png"),
-    textures_path("library/coll1.png"),
-    textures_path("library/coll2.png"),
-    textures_path("library/coll3.png"),
-    textures_path("library/coll4.png"),
-    textures_path("library/coll5.png"),
-    textures_path("TBC.png")
+		textures_path("beach/beach-apple.png"),
+		textures_path("beach/beach-chest.png"),
+		textures_path("beach/beach-chest2.png"),
+		textures_path("beach/beach-diamond.png"),
+		textures_path("beach/beach-star.png"),
+		textures_path("beach/beach-coin_01.png"),
+		textures_path("door.png"),
+		textures_path("beach/beach-bird.png"),
+		textures_path("library/coll1.png"),
+		textures_path("library/coll2.png"),
+		textures_path("library/coll3.png"),
+		textures_path("library/coll4.png"),
+		textures_path("library/coll5.png"),
+		textures_path("TBC.png"),
+		textures_path("lighting_map.png"),
+		textures_path("darkLevel/dark_background0.png"),
+		textures_path("darkLevel/dark_background1.jpg")
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -125,6 +128,7 @@ class RenderSystem {
 		shader_path("spike"),
 		shader_path("wheel"),
 		shader_path("textured"),
+		shader_path("blended"),
 		shader_path("water") };
 
 	// TODO (Justin): update size of array if we exceed 50 sprite sheet entities 
