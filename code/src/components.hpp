@@ -249,6 +249,14 @@ struct Fading
 	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
 };
 
+struct Boss
+{
+  float health = 100.f;
+
+  // num hearts that the boss damages
+  float damage = 1.f;
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -357,7 +365,10 @@ enum class TEXTURE_ASSET_ID
 	LIB_COLL4 = LIB_COLL3 + 1,
 	LIB_COLL5 = LIB_COLL4 + 1,
   TBC = LIB_COLL5 + 1,
-	TEXTURE_COUNT = TBC + 1
+  MM_BACKGROUND = TBC + 1,
+  MM_PLAT = MM_BACKGROUND + 1,
+  MM_BOSS = MM_PLAT + 1,
+	TEXTURE_COUNT = MM_BOSS + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

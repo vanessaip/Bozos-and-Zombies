@@ -291,6 +291,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		bool isHuman = isNPC || isPlayer;
 		bool isZombie = registry.zombies.has(motion_container.entities[i]);
 		bool isBook = registry.books.has(motion_container.entities[i]);
+    bool isBoss = registry.bosses.has(motion_container.entities[i]);
 		bool isWheel = registry.wheels.has(motion_container.entities[i]);
 
 		updateWheelRotation();
@@ -329,7 +330,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 		}
 		// Bounding entities to window
-		if (isHuman || isZombie || isBook || isWheel)
+		if (isHuman || isZombie || isBook || isWheel || isBoss)
 		{
 			float entityRightSide = motion.position.x + abs(motion.scale[0]) / 2.f;
 			float entityLeftSide = motion.position.x - abs(motion.scale[0]) / 2.f;
@@ -1076,12 +1077,7 @@ void WorldSystem::updateWheelRotation()
 // Reset the world state to its initial state
 void WorldSystem::restart_level()
 {
-	if (curr_level == TBC) {
-		debugging.in_full_view_mode = true;
-	}
-	else {
-		debugging.in_full_view_mode = false;
-	}
+	debugging.in_full_view_mode = false;
 	this->game_over = false;
 	// Debugging for memory/component leaks
 	registry.list_all_components();
@@ -1259,6 +1255,16 @@ void WorldSystem::restart_level()
 		student_spawn_on = false;
 	}
 
+  // Create boss
+  const Json::Value& bossData = jsonData["boss"];
+  uint num_starting_bosses = bossData["num_starting"].asInt();
+	assert(num_starting_bosses <= bossData["positions"].size());
+  for (const auto& boss_pos : bossData["positions"]) {
+    vec2 boss_start_pos = { boss_pos["x"].asFloat(), boss_pos["y"].asFloat() };
+    vec2 boss_scale = { bossData["scale"]["x"].asFloat(), bossData["scale"]["y"].asFloat() };
+    createBoss(renderer, boss_start_pos, boss_scale, bossData["health"].asFloat(), bossData["damage"].asFloat(), BOSS_ASSET[asset_mapping[curr_level]]);
+  }
+
 	// Place collectibles
 	const Json::Value& collectiblesPositions = jsonData["collectibles"]["positions"];
 	num_collectibles = collectiblesPositions.size(); // set number of collectibles
@@ -1276,21 +1282,19 @@ void WorldSystem::restart_level()
 		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, { 230, 155 }, { 80, 60 });
 	}
 	// Lives can probably stay hardcoded?
-	if (curr_level != TBC) {
-		float heart_pos_x = 1385;
-		float heart_starting_pos_y = 40;
+  float heart_pos_x = 1385;
+  float heart_starting_pos_y = 40;
 
-		Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
-		Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
-		Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
-		Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
-		Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
+  Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
+  Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
+  Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
+  Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
+  Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
 
-		player_hearts = { heart0, heart1, heart2, heart3, heart4 };
+  player_hearts = { heart0, heart1, heart2, heart3, heart4 };
 
-		// Create label
-		Entity label = createOverlay(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]], true);
-	}
+  // Create label
+  Entity label = createOverlay(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]], true);
 
 	setup_keyframes(renderer);
 
@@ -1534,11 +1538,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 
-		// if (key == GLFW_KEY_P) {
-		// 	debugging.in_full_view_mode = !debugging.in_full_view_mode;
-		// }
+		if (key == GLFW_KEY_P) {
+			debugging.in_full_view_mode = !debugging.in_full_view_mode;
+		}
 
-		if (curr_level == TBC && key == GLFW_KEY_L) {
+		if (key == GLFW_KEY_L) {
 			curr_level++;
 			if (curr_level > max_level) {
 				curr_level = 0;

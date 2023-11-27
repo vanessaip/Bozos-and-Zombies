@@ -597,6 +597,36 @@ Entity createDoor(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASS
 	return entity;
 }
 
+Entity createBoss(RenderSystem* renderer, vec2 position, vec2 scale, float health, float damage, TEXTURE_ASSET_ID assetID) {
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	Boss& boss = registry.bosses.emplace(entity);
+
+  boss.health = health;
+  boss.damage = damage;
+
+  std::vector<int> spriteCounts = { 3, 6, 7 };
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.01f, 0.01f));
+
+	registry.renderRequests.insert(
+		entity,
+		{ assetID,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE_SHEET });
+
+	return entity;
+}
+
 // Wrapper method for removing entities
 // Removes all entity components and resets buffer id for sprite sheet components
 void removeEntity(Entity e) {

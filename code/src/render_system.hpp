@@ -115,7 +115,10 @@ class RenderSystem {
     textures_path("library/coll3.png"),
     textures_path("library/coll4.png"),
     textures_path("library/coll5.png"),
-    textures_path("TBC.png")
+    textures_path("TBC.png"),
+    textures_path("mm/mm-background.png"),
+    textures_path("mm/mm-plat.png"),
+    textures_path("mm/mm-boss.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

@@ -1,43 +1,61 @@
 {
   "platform_scale": {
+    "x": 50,
+    "y": 30
   },
   "platforms": [
+    {
+      "x": 0.0,
+      "y": 798.0,
+      "num_tiles": 30,
+      "visible": true
+    }
   ],
   "floor_positions": [
+    798
   ],
   "stairs": [],
-  "walls": [
-  ],
+  "walls": [],
   "climbables": [
   ],
   "zombie_climb_points": [
-  
   ],
   "zombie_jump_points": [
-   
   ],
   "spikes": [],
-  "wheels": [
-  ],
+  "wheels": [],
   "player": {
     "position": {
-      "x": -10,
-      "y": 900
+      "x": 720,
+      "y": 760
     }
   },
   "zombies": {
     "num_starting": 0,
     "positions": [
-
     ],
     "spawn_timer": null
   },
   "students": {
     "num_starting": 0,
     "positions": [
-
     ],
-    "spawn_timer": 10
+    "spawn_timer": null
+  },
+  "boss": {
+    "num_starting": 1,
+    "scale": {
+      "x": 150,
+      "y": 150
+    },
+    "positions": [
+      {
+        "x": 720,
+        "y": 500
+      }
+    ],
+    "health": 100,
+    "damage": 1
   },
   "collectibles": {
     "scale": {
@@ -45,12 +63,12 @@
       "y": 30
     },
     "positions": [
-      
+    
     ]
   },
   "bgm": "tbc-music.wav",
   "door_win_pos": {
-    "x": 1300,
-    "y": 730
+    "x": 100,
+    "y": 754
   }
 }
