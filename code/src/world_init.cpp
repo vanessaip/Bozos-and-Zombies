@@ -483,7 +483,7 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale) {
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::HEART,
-			EFFECT_ASSET_ID::TEXTURED,
+			EFFECT_ASSET_ID::OVERLAY_TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
@@ -535,7 +535,7 @@ Entity createLoadingScreen(RenderSystem* renderer, vec2 position, vec2 scale) {
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::LOADING_SCREEN,
-			EFFECT_ASSET_ID::TEXTURED,
+			EFFECT_ASSET_ID::OVERLAY_TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
@@ -565,7 +565,7 @@ Entity createOverlay(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_
 	registry.renderRequests.insert(
 		entity,
 		{ assetID,
-			EFFECT_ASSET_ID::TEXTURED,
+			EFFECT_ASSET_ID::OVERLAY_TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 	return entity;
 }
@@ -594,6 +594,16 @@ Entity createDoor(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASS
 		{ assetID,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
+	return entity;
+}
+
+Entity createLight(RenderSystem* renderer, vec2 position, float intensity_dropoff_factor) 
+{
+	auto entity = Entity();
+	Light& light = registry.lights.emplace(entity);
+	light.position = position;
+	light.intensity_dropoff_factor = intensity_dropoff_factor;
+
 	return entity;
 }
 

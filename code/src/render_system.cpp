@@ -13,8 +13,7 @@ int bufferIds[50];
 float previousLeft = 0.f;
 float currentLeft = 0.f;
 
-glm::vec3 lights[2] = { { 250, 175, 1.2f }, { 1300 , 700, 1.3f } };
-bool printLights = true;
+//glm::vec3 lights[2] = { { 250, 175, 1.1f }, { 1300 , 700, 1.5f } };
 
 void RenderSystem::drawTexturedMesh(Entity entity,
 	const mat3& projection)
@@ -28,11 +27,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	transform.rotate(motion.angle);
 	transform.scale(motion.scale);
 	transform.reflect(motion.reflect);
-
-	//std::cout << transform.mat[0][0] << " " << transform.mat[0][1] << " " << transform.mat[0][2] << "\n";
-	//std::cout << transform.mat[1][0] << " " << transform.mat[1][1] << " " << transform.mat[1][2] << "\n";
-	//std::cout << transform.mat[2][0] << " " << transform.mat[2][1] << " " << transform.mat[2][2] << "\n";
-
 
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest& render_request = registry.renderRequests.get(entity);
@@ -97,23 +91,20 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 
-		// Fading
-		GLuint fade_timer_uloc = glGetUniformLocation(program, "fading_factor");
-		if (registry.fading.has(entity)) {
-			Fading& fade = registry.fading.get(entity);
-			glUniform1f(fade_timer_uloc, fade.fading_factor);
-		}
-		else if (registry.doors.has(entity)) {
-			Door& door = registry.doors.get(entity);
-			glUniform1f(fade_timer_uloc, door.fading_factor);
-		}
-		else {
-			glUniform1f(fade_timer_uloc, 0.f);
-		}
-
 		// Lighting
+		GLuint hasLights_loc = glGetUniformLocation(program, "hasLights");
 		GLuint lights_loc = glGetUniformLocation(program, "lights");
-		glUniform3fv(lights_loc, sizeof(lights) / sizeof(glm::vec3), reinterpret_cast<GLfloat*>(&lights[0]));
+		if (registry.lights.size() > 0) 
+		{
+			glUniform1f(hasLights_loc, true);
+			glUniform3fv(lights_loc, registry.lights.components.size(), reinterpret_cast<GLfloat*>(&registry.lights.components[0]));
+		}
+		else 
+		{
+			glUniform1f(hasLights_loc, false);
+			vec3 lights[2] = { {0,0,0}, {0,0,0} };
+			glUniform3fv(lights_loc, sizeof(lights) / sizeof(glm::vec3), reinterpret_cast<GLfloat*>(&lights[0]));
+		}
 	}
 
 	else if (render_request.used_effect == EFFECT_ASSET_ID::BLENDED) 
@@ -146,6 +137,48 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		//glEnable(GL_BLEND);
 		//glBlendFunc(GL_ONE, GL_ONE);
+	}
+	else if (render_request.used_effect == EFFECT_ASSET_ID::OVERLAY_TEXTURED) 
+	{
+		GLint in_position_loc = glGetAttribLocation(program, "in_position");
+		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+		gl_has_errors();
+		assert(in_texcoord_loc >= 0);
+
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(TexturedVertex), (void*)0);
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_texcoord_loc);
+		glVertexAttribPointer(
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			(void*)sizeof(
+				vec3)); // note the stride to skip the preceeding vertex position
+
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
+		gl_has_errors();
+
+		assert(registry.renderRequests.has(entity));
+		GLuint texture_id = texture_gl_handles[(GLuint)render_request.used_texture];
+
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		gl_has_errors();
+
+		// Fading
+		GLuint fade_timer_uloc = glGetUniformLocation(program, "fading_factor");
+		if (registry.fading.has(entity)) {
+			Fading& fade = registry.fading.get(entity);
+			glUniform1f(fade_timer_uloc, fade.fading_factor);
+		}
+		else if (registry.doors.has(entity)) {
+			Door& door = registry.doors.get(entity);
+			glUniform1f(fade_timer_uloc, door.fading_factor);
+		}
+		else {
+			glUniform1f(fade_timer_uloc, 0.f);
+		}
 	}
 
 	// FUTURE: won't need for now, could reuse if we end up having meshes

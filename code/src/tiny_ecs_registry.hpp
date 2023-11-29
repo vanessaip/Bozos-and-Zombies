@@ -42,6 +42,7 @@ public:
 	ComponentContainer<Fading> fading;
   	ComponentContainer<Door> doors;
 	ComponentContainer<Bounce> bounce;
+	ComponentContainer<Light> lights;
 
 
 	// constructor that adds all containers for looping over them
@@ -78,6 +79,7 @@ public:
 		registry_list.push_back(&fading);
     	registry_list.push_back(&doors);
 		registry_list.push_back(&bounce);
+		registry_list.push_back(&lights);
 	}
 
 	void clear_all_components() {

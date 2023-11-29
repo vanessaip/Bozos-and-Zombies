@@ -128,6 +128,7 @@ class RenderSystem {
 		shader_path("spike"),
 		shader_path("wheel"),
 		shader_path("textured"),
+		shader_path("overlay"),
 		shader_path("blended"),
 		shader_path("water") };
 

@@ -53,20 +53,20 @@ Entity createBook(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textur
 Entity createStaticTexture(RenderSystem* renderer, TEXTURE_ASSET_ID textureID, vec2 position, std::string text, vec2 scale = { 1.f, 1.f });
 // collectible
 Entity createCollectible(RenderSystem* renderer, float position_x, float position_y, TEXTURE_ASSET_ID collectible, vec2 scale, bool overlay);
-
 // hearts
 Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
-
+// dangerous object
 Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic);
-
 // label
 Entity createOverlay(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId, bool is_fading);
-
+// door
 Entity createDoor(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId);
+// loading screen
+Entity createLoadingScreen(RenderSystem* renderer, vec2 position, vec2 scale);
+// lights
+Entity createLight(RenderSystem* renderer, vec2 position, float intensity_dropoff_factor);
 
 void removeEntity(Entity e);
-
-Entity createLoadingScreen(RenderSystem* renderer, vec2 position, vec2 scale);
 
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
@@ -107,6 +107,7 @@ const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_A
 	  //{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND4, 2.f },
 	  //{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND0, 0.f }
 		{ TEXTURE_ASSET_ID::DARK_BACKGROUND1, 0.f },
+		//{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND0, 0.f }
 		{ TEXTURE_ASSET_ID::DARK_BACKGROUND0, 0.f }
 	},
 	{

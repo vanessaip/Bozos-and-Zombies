@@ -1099,6 +1099,9 @@ void WorldSystem::restart_level()
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
 
+	while (registry.lights.entities.size() > 0)
+		registry.remove_all_components_of(registry.lights.entities.back());
+
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
@@ -1137,6 +1140,10 @@ void WorldSystem::restart_level()
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_NPCS, { window_width_px - 800.f, window_height_px - 350.f }, "", { 150.f, 60.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_WEAPONS, { window_width_px - 900.f, window_height_px - 220.f }, "", { 200.f, 70.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_GOAL, { 130.f, window_height_px - 200.f }, "", { 180.f, 100.f });
+
+		glm::vec3 lights[2] = { { 250, 175, 1.1f }, { 1300 , 700, 1.5f } };
+		for (vec3 light : lights)
+			createLight(renderer, { light.x, light.y }, light.z);
 	}
 
 	// Create platforms

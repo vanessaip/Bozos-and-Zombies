@@ -249,6 +249,12 @@ struct Fading
 	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
 };
 
+struct Light 
+{
+	vec2 position;
+	float intensity_dropoff_factor;
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -370,7 +376,8 @@ enum class EFFECT_ASSET_ID
 	SPIKE = COLOURED + 1, // can reuse if we end up having meshes
 	WHEEL = SPIKE + 1,
 	TEXTURED = WHEEL + 1,
-	BLENDED = TEXTURED + 1,
+	OVERLAY_TEXTURED = TEXTURED + 1,
+	BLENDED = OVERLAY_TEXTURED + 1,
 	WATER = BLENDED + 1,
 	EFFECT_COUNT = WATER + 1
 };
