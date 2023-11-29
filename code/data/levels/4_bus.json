@@ -1,0 +1,58 @@
+{
+  "platform_scale": {
+    "x": 50,
+    "y": 30
+  },
+  "platforms": [
+    {
+      "x": 0.0,
+      "y": 830.0,
+      "num_tiles": 30,
+      "visible": true
+    }
+  ],
+  "floor_positions": [
+  ],
+  "stairs": [],
+  "walls": [],
+  "climbables": [
+  ],
+  "zombie_climb_points": [
+  ],
+  "zombie_jump_points": [
+  ],
+  "spikes": [],
+  "wheels": [
+  ],
+  "player": {
+    "position": {
+      "x": 100,
+      "y": 500
+    }
+  },
+  "zombies": {
+    "num_starting": 0,
+    "positions": [
+    ],
+    "spawn_timer": null
+  },
+  "students": {
+    "num_starting": 0,
+    "positions": [
+    ],
+    "spawn_timer": null
+  },
+  "collectibles": {
+    "scale": {
+      "x": 30,
+      "y": 30
+    },
+    "positions": [
+    ]
+  },
+  "bgm": "soundtrack.wav",
+  "door_win_pos": {
+    "x": 100,
+    "y": 754
+  }
+}

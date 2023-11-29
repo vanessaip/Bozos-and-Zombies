@@ -115,7 +115,11 @@ class RenderSystem {
 	textures_path("library/coll3.png"),
 	textures_path("library/coll4.png"),
 	textures_path("library/coll5.png"),
-	textures_path("TBC.png")
+	textures_path("TBC.png"),
+	textures_path("tutorial/bus_bg.png"),
+	textures_path("tutorial/bus_windows.png"),
+	textures_path("tutorial/bus_dec.png"),
+	textures_path("locations/label_bus.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

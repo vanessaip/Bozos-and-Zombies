@@ -1615,6 +1615,12 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			debugging.in_full_view_mode = true;
 	}
 
+	// Get location
+	if (action == GLFW_RELEASE && key == GLFW_KEY_M) {
+		Motion motion = registry.motions.get(player_bozo);
+		printf("%f, %f\n", motion.position.x, motion.position.y);
+	}
+
 	// Pause
 	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
 		pause = !pause;
