@@ -76,14 +76,14 @@ enum level {
 	NEST = 3,
 	BEACH = 2,
 	LIBRARY = 1,
-  TBC = 4
+	TBC = 4
 };
 
 // For swapping levels around
 const std::vector<int> asset_mapping = {
-  0, 
-  3, 
-  2, 
+  0,
+  3,
+  2,
   1,
   4
 };
@@ -213,9 +213,9 @@ const std::vector<std::string> BACKGROUND_MUSIC = {
 };
 
 const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
-	TEXTURE_ASSET_ID::LABEL_TUTORIAL,
+	TEXTURE_ASSET_ID::LABEL_STREET,
 	TEXTURE_ASSET_ID::LABEL_NEST,
 	TEXTURE_ASSET_ID::LABEL_BEACH,
 	TEXTURE_ASSET_ID::LABEL_LIB,
-  TEXTURE_ASSET_ID::LABEL_LIB,
+	TEXTURE_ASSET_ID::LABEL_LIB,
 };

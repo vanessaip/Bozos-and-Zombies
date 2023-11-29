@@ -1534,11 +1534,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 
-		// if (key == GLFW_KEY_P) {
-		// 	debugging.in_full_view_mode = !debugging.in_full_view_mode;
-		// }
+		if (key == GLFW_KEY_P) {
+			debugging.in_full_view_mode = !debugging.in_full_view_mode;
+		}
 
-		if (curr_level == TBC && key == GLFW_KEY_L) {
+		if (key == GLFW_KEY_L) {
 			curr_level++;
 			if (curr_level > max_level) {
 				curr_level = 0;
@@ -1619,7 +1619,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
 		pause = !pause;
 		if (pause) {
-			pause_ui = createOverlay(renderer, { window_width_px / 2, window_height_px / 2}, { 400.f, 300.f }, TEXTURE_ASSET_ID::PAUSE, false);
+			pause_ui = createOverlay(renderer, { window_width_px / 2, window_height_px / 2 }, { 400.f, 300.f }, TEXTURE_ASSET_ID::PAUSE, false);
 			pause_start = Clock::now();
 		}
 		else {
