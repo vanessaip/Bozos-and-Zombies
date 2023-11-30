@@ -165,13 +165,13 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
 	if (registry.zombies.entities.size() < 1 && (num_collectibles > 0 && collectibles_collected >= num_collectibles) && this->game_over == false) {
-		// if (collectibles_collected > 0 && this->game_over == false) {
-			  // createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
 		this->game_over = true;
-		createDoor(renderer, door_win_pos, { 40, 60 }, TEXTURE_ASSET_ID::WIN_DOOR);
 		debugging.in_full_view_mode = true;
 		Mix_HaltMusic();
 		Mix_PlayChannel(-1, level_success_sound, 0);
+		// animate door open
+		SpriteSheet& door_sheet = registry.spriteSheets.get(door);
+		door_sheet.updateAnimation(ANIMATION_MODE::RUN);
 		printf("You win!\n");
 
 		// option to retry level? (display current and high scores?)
@@ -646,22 +646,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			label.fading_factor = cos(0.0005 * elapsed_ms);
 		}
 
-		for (Entity entity : registry.doors.entities)
-		{
-			// progress timer, make the rotation happening based on time
-			// Set fading factor 
-			Door& door = registry.doors.get(entity);
-			auto now = Clock::now();
-
-			float elapsed_ms =
-				(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - door.fading_timer)).count() / 1000;
-
-			if (door.fading_factor < 1) {
-				door.fading_factor = 1 * elapsed_ms / 2000;
-			}
-		}
-
-
 		// update keyframe animated entity motions
 		for (Entity entity : registry.keyframeAnimations.entities)
 		{
@@ -742,6 +726,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 			spriteSheet.truncation.y = 0.08f;
 			bozo_motion.scale.y = BOZO_BB_HEIGHT;
+		}
+		
+		// handle animation of door when game is over
+		SpriteSheet& door_sheet = registry.spriteSheets.get(door);
+		if (game_over && door_sheet.mode != ANIMATION_MODE::ATTACK) { 
+			Door& door_component = registry.doors.get(door);
+			doorOpenTimer += elapsed_ms_since_last_update;
+			if (doorOpenTimer > door_component.door_open_timer) {
+				doorOpenTimer = 0.f;
+				door_sheet.updateAnimation(ANIMATION_MODE::ATTACK);
+			}
 		}
 	}
 	return true;
@@ -1160,18 +1155,15 @@ void WorldSystem::restart_level()
 		createWall(renderer, wall_data["x"].asFloat(), wall_data["y"].asFloat(), wall_data["height"].asFloat(), wall_data["visible"].asBool());
 	}
 
+	door_win_pos = { jsonData["door_win_pos"]["x"].asFloat(), jsonData["door_win_pos"]["y"].asFloat() };
+	door = createDoor(renderer, door_win_pos, { 40, 60 }, TEXTURE_ASSET_ID::WIN_DOOR);
+
 	// Create climbables
 	for (const auto& data : jsonData["climbables"]) {
 		createClimbable(renderer, data["x"].asFloat(), data["y"].asFloat(), data["sections"].asInt(), CLIMBABLE_ASSET[asset_mapping[curr_level]]);
 	}
 
-	door_win_pos = { jsonData["door_win_pos"]["x"].asFloat(), jsonData["door_win_pos"]["y"].asFloat() };
-
 	total_collectables = jsonData["total_collectables"].asInt();
-
-	// for (const auto& pos : jsonData["door_win_pos"]) {
-	  // 	 door_win_pos = pos;
-	  // }
 
 	ladder_positions.clear();
 	for (const auto levelPoints : jsonData["zombie_climb_points"]) {
@@ -1400,7 +1392,7 @@ void WorldSystem::handle_collisions()
 					++points;
 				}
 			}
-			else if (registry.doors.has(entity_other))
+			else if (game_over && registry.doors.has(entity_other)) // door transition to next level
 			{
 				Mix_PlayChannel(-1, next_level_sound, 0);
 				curr_level++;
@@ -1534,11 +1526,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 
-		// if (key == GLFW_KEY_P) {
-		// 	debugging.in_full_view_mode = !debugging.in_full_view_mode;
-		// }
+		if (key == GLFW_KEY_P) {
+			debugging.in_full_view_mode = !debugging.in_full_view_mode;
+		}
 
-		if (curr_level == TBC && key == GLFW_KEY_L) {
+		if (key == GLFW_KEY_L) {
 			curr_level++;
 			if (curr_level > max_level) {
 				curr_level = 0;

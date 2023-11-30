@@ -583,17 +583,16 @@ Entity createDoor(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASS
 	motion.position = position;
 	motion.scale = scale;
 
-	registry.doors.emplace(entity);
-	Door& door = registry.doors.get(entity);
-	door.fading_timer = Clock::now();
+	auto& door = registry.doors.emplace(entity);
 
-	registry.overlay.emplace(entity);
+	std::vector<int> spriteCounts = { 1,6,1 }; // one frame closed, 6 frames animate open, 1 frame closed
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, door.animation_switch_time, vec2(0.f, 0.0f)); //switch time is max to stay on door closed frame
 
 	registry.renderRequests.insert(
 		entity,
 		{ assetID,
 			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			GEOMETRY_BUFFER_ID::SPRITE_SHEET });
 	return entity;
 }
 

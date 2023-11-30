@@ -108,7 +108,7 @@ class RenderSystem {
     textures_path("beach/beach-diamond.png"),
     textures_path("beach/beach-star.png"),
     textures_path("beach/beach-coin_01.png"),
-    textures_path("door.png"),
+    textures_path("door_sprite_sheet.png"),
     textures_path("beach/beach-bird.png"),
     textures_path("library/coll1.png"),
     textures_path("library/coll2.png"),

@@ -59,8 +59,9 @@ struct Book
 
 struct Door
 {
-	float fading_factor = 0.f;
-	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
+	float animation_switch_time = 200.f; // milliseconds
+	int door_open_frames = 6; // maybe can be specified in level
+	float door_open_timer = door_open_frames * animation_switch_time;
 };
 
 struct Bounce
