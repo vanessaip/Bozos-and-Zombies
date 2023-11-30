@@ -267,7 +267,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			{
 				Entity student = createStudent(renderer, npcSpawnPos, NPC_ASSET[curr_level]);
 				Motion& student_motion = registry.motions.get(student);
-				student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+				if (curr_level == BUS) {
+					student_motion.velocity = { 0.f,0.f };
+				}
+				else {
+					student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+				}
+
 				npcSpawnTimer = 0.f;
 				break;
 			}
@@ -753,6 +759,10 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	int bozo_level = checkLevel(bozo_motion);
 	int zombie_level = checkLevel(motion);
 
+	if (curr_level == BUS) {
+		motion.velocity = { 0.f,0.f };
+		return;
+	}
 	if (curr_level == TUTORIAL) {
 
 	}
@@ -1246,7 +1256,12 @@ void WorldSystem::restart_level()
 			Entity student = createStudent(renderer, pos, NPC_ASSET[asset_mapping[curr_level]]);
 			// coded back+forth motion
 			Motion& student_motion = registry.motions.get(student);
-			student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+			if (curr_level == BUS) {
+				student_motion.velocity = { 0.f,0.f };
+			}
+			else {
+				student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+			}
 		}
 		s++;
 	}

@@ -6,41 +6,81 @@
   "platforms": [
     {
       "x": 0.0,
-      "y": 830.0,
+      "y": 820.0,
       "num_tiles": 30,
       "visible": true
+    },
+    {
+      "x": 250.0,
+      "y": 696.0,
+      "num_tiles": 2,
+      "visible": true
+    },
+    {
+
+      "x": 1311.0,
+      "y": 696.0,
+      "num_tiles": 2,
+      "visible": true
+
     }
   ],
   "floor_positions": [
+    0
   ],
   "stairs": [],
   "walls": [],
   "climbables": [
+    {
+      "x": 275.0,
+      "y": 696.0,
+      "sections": 4
+    },
+    {
+      "x": 1311.0,
+      "y": 696.0,
+      "sections": 4
+    }
   ],
   "zombie_climb_points": [
+    [ 0 ]
   ],
   "zombie_jump_points": [
+    [ 0 ]
   ],
   "spikes": [],
   "wheels": [
+    {
+      "position": [ 1090, 780 ],
+      "colour": [ 1.0, 0, 0 ],
+      "velocity": [ 0, 0 ]
+    }
   ],
   "player": {
     "position": {
       "x": 100,
-      "y": 500
+      "y": 700
     }
   },
   "zombies": {
-    "num_starting": 0,
+    "num_starting": 1,
     "positions": [
+      {
+        "x": 710,
+        "y": 780
+      }
     ],
     "spawn_timer": null
   },
   "students": {
-    "num_starting": 0,
+    "num_starting": 1,
     "positions": [
+      {
+        "x": 480,
+        "y": 780
+      }
     ],
-    "spawn_timer": null
+    "spawn_timer": 1
   },
   "collectibles": {
     "scale": {
@@ -48,11 +88,15 @@
       "y": 30
     },
     "positions": [
+      {
+        "x": 1360,
+        "y": 670
+      }
     ]
   },
   "bgm": "soundtrack.wav",
   "door_win_pos": {
-    "x": 100,
-    "y": 754
+    "x": 1370,
+    "y": 760
   }
 }
