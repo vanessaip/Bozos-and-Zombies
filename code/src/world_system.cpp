@@ -1134,17 +1134,35 @@ void WorldSystem::restart_level()
 		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, 0.f, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, false, { 250.f, 250.f }); // egg
 
 	// Tutorial sign only for the first level
-	if (curr_level == TUTORIAL) {
+	else if (curr_level == TUTORIAL) {
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_MOVEMENT, { window_width_px - 120.f, window_height_px - 80.f }, "", { 150.f, 70.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_CLIMB, { window_width_px - 480.f, window_height_px - 90.f }, "", { 115.f, 40.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_NPCS, { window_width_px - 800.f, window_height_px - 350.f }, "", { 150.f, 60.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_WEAPONS, { window_width_px - 900.f, window_height_px - 220.f }, "", { 200.f, 70.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_GOAL, { 130.f, window_height_px - 200.f }, "", { 180.f, 100.f });
-
-		glm::vec3 lights[2] = { { 250, 175, 1.1f }, { 1300 , 700, 1.5f } };
-		for (vec3 light : lights)
-			createLight(renderer, { light.x, light.y }, light.z);
 	}
+	
+	
+	else if (curr_level == SEWERS) 
+	{
+		glm::vec3 lights[8] = 
+		{ 
+			{ 15, 700, 1.5f },
+			//{ 235, 100, 1.5f }, 
+			{ 1340, 550, 1.5f },
+			{ 927, 670, 1.7f },
+			{ 850, 450, 1.7f },
+			{ 1300, 150, 1.7f },
+			{ 500, 790, 1.7f },
+			{ 430, 400, 1.6f },
+			{ 630, 30, 1.5f },
+		};
+		for (vec3 light : lights) 
+		{
+			createLight(renderer, { light.x, light.y }, light.z);
+		}
+	}
+	
 
 	// Create platforms
 	floor_positions.clear();
@@ -1542,9 +1560,9 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 
-		// if (key == GLFW_KEY_P) {
-		// 	debugging.in_full_view_mode = !debugging.in_full_view_mode;
-		// }
+		if (key == GLFW_KEY_P) {
+		 	debugging.in_full_view_mode = !debugging.in_full_view_mode;
+		}
 
 		if (key == GLFW_KEY_L) {
 			curr_level++;

@@ -118,7 +118,8 @@ class RenderSystem {
 		textures_path("TBC.png"),
 		textures_path("lighting_map.png"),
 		textures_path("darkLevel/dark_background0.png"),
-		textures_path("darkLevel/dark_background1.jpg")
+		textures_path("darkLevel/dark_background1.jpg"),
+		textures_path("darkLevel/light.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

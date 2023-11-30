@@ -60,7 +60,7 @@ Entity createBozoPointer(RenderSystem* renderer, vec2 pos)
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::BOZO_POINTER,
-			EFFECT_ASSET_ID::TEXTURED,
+			EFFECT_ASSET_ID::OVERLAY_TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
@@ -600,9 +600,23 @@ Entity createDoor(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASS
 Entity createLight(RenderSystem* renderer, vec2 position, float intensity_dropoff_factor) 
 {
 	auto entity = Entity();
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
 	Light& light = registry.lights.emplace(entity);
 	light.position = position;
 	light.intensity_dropoff_factor = intensity_dropoff_factor;
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = vec2(100.f);
+
+	registry.renderRequests.insert(
+		entity,
+		{	TEXTURE_ASSET_ID::LIGHT,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }

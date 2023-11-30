@@ -1,218 +1,221 @@
 {
   "platform_scale": {
     "x": 32,
-    "y": 30
+    "y": 8
   },
   "platforms": [
     {
-      "x": 15.0,
-      "y": 790.0,
-      "num_tiles": 45,
-      "visible": true
-    },
-
-    {
-      "x": 15.0,
-      "y": 495,
-      "num_tiles": 10,
+      "x": 527,
+      "y": 64, // ladder
+      "num_tiles": 6,
       "visible": true
     },
     {
-      "x": 79.0,
-      "y": 670.0,
-      "num_tiles": 3,
+      "x": 1263,
+      "y": 96,
+      "num_tiles": 6,
       "visible": true
     },
     {
-      "x": 240.0,
-      "y": 610.0,
-      "num_tiles": 3,
-      "visible": true
-    },
-
-    {
-      "x": 368.0,
-      "y": 235.0,
-      "num_tiles": 3,
+      "x": 79,
+      "y": 160,
+      "num_tiles": 12,
       "visible": true
     },
     {
-      "x": 463.0,
-      "y": 145.0,
+      "x": 1231,
+      "y": 230,
       "num_tiles": 2,
       "visible": true
     },
     {
-      "x": 527.5,
-      "y": 300.0,
+      "x": 815,
+      "y": 325,
+      "num_tiles": 11,
+      "visible": true
+    },
+    {
+      "x": 687,
+      "y": 421, // ladder
+      "num_tiles": 7,
+      "visible": true
+    },
+    {
+      "x": 1231,
+      "y": 487,
       "num_tiles": 1,
       "visible": true
     },
     {
-      "x": 560.0,
-      "y": 405.0,
-      "num_tiles": 8,
+      "x": 1327,
+      "y": 487,
+      "num_tiles": 2,
       "visible": true
     },
     {
-      "x": 432.0,
-      "y": 527.0,
+      "x": 1231,
+      "y": 683,
+      "num_tiles": 7,
+      "visible": true
+    },
+    {
+      "x": 15,    // ladder
+      "y": 494,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 911,
+      "y": 750,
+      "num_tiles": 6,
+      "visible": true
+    },
+    {
+      "x": 431,
+      "y": 750,
       "num_tiles": 4,
       "visible": true
     },
     {
-      "x": 432.0,
-      "y": 663.0,
-      "num_tiles": 9,
+      "x": 15,
+      "y": 782,
+      "num_tiles": 1,
       "visible": true
     },
 
     {
-      "x": 1390.0,
-      "y": 530.0,
+      "x": 431,
+      "y": 256, // ladder
       "num_tiles": 1,
       "visible": true
     },
     {
-      "x": 1360.0,
-      "y": 435.0,
+      "x": 463,
+      "y": 548,
       "num_tiles": 1,
       "visible": true
     },
     {
-      "x": 1330.0,
-      "y": 500.0,
+      "x": 463,
+      "y": 682,
       "num_tiles": 1,
       "visible": true
     },
     {
-      "x": 1298.0,
-      "y": 595.0,
+      "x": 399,
+      "y": 715,
       "num_tiles": 1,
-      "visible": true
-    },
-    {
-      "x": 1266.0,
-      "y": 690.0,
-      "num_tiles": 1,
-      "visible": true
-    },
-    {
-      "x": 1200.0,
-      "y": 660.0,
-      "num_tiles": 2,
-      "visible": true
-    },
-    {
-      "x": 1036.0,
-      "y": 500.0,
-      "num_tiles": 5,
-      "visible": true
-    },
-    {
-      "x": 944.0,
-      "y": 403.0,
-      "num_tiles": 3,
-      "visible": true
-    },
-    {
-      "x": 944.0,
-      "y": 660.0,
-      "num_tiles": 2,
-      "visible": true
-    },
-    {
-      "x": 880.0,
-      "y": 500.0,
-      "num_tiles": 2,
       "visible": true
     }
+
   ],
   "floor_positions": [
-    790,
-    500,
-    495,
-
-    405,
-    527,
-    663
+    64,
   ],
   "stairs": [],
   "walls": [],
   "climbables": [
     {
-      "x": 20.0,
-      "y": 495,
-      "sections": 9
-    },
-    {
-      "x": 431.0,
-      "y": 235.0,
-      "sections": 9
-    },
-    {
-      "x": 431.0,
-      "y": 660.0,
-      "sections": 4
-    },
-    {
-      "x": 783.0,
-      "y": 404.0,
-      "sections": 12
-    },
-    {
-      "x": 879.0,
-      "y": 500.0,
-      "sections": 9
-    },
-    {
-      "x": 1167.0,
-      "y": 500.0,
+      "x": 783,
+      "y": 426,
       "sections": 5
+    },
+    {
+      "x": 431,
+      "y": 261,
+      "sections": 3
+    },
+    {
+      "x": 15,
+      "y": 500,
+      "sections": 9
+    }
+
+  ],
+  "zombie_climb_points": [],
+  "zombie_jump_points": [],
+  "spikes": [
+    {
+      "x": 0.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 120.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 240.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 360.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 480.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 600.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 720.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 840.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 960.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 1080.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 1200.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 1320.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 1440.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
     }
   ],
-  "zombie_climb_points": [
-    [ 20 ],
-    [ 431.0 ],
-    [ 431.0 ],
-    [ 783.0 ],
-    [ 879.0 ],
-    [ 1167.0 ]
-  ],
-  "zombie_jump_points": [
-    [ 0 ],
-    [ 0 ],
-    [ 0 ],
-    [ 0 ],
-    [ 0 ],
-    [ 0 ]
-  ],
-  "spikes": [],
   "wheels": [],
   "player": {
     "position": {
-      "x": 1240,
-      "y": 760
+      "x": 1400,
+      "y": 655
     }
   },
   "zombies": {
-    "num_starting": 1,
-    "positions": [
-      {
-        "x": 50,
-        "y": 740
-      }
-    ],
+    "num_starting": 0,
+    "positions": [],
     "spawn_timer": null
   },
   "students": {
-    "num_starting": 1,
-    "positions": [
-      {
-        "x": 570,
-        "y": 384
-      }
-    ],
+    "num_starting": 0,
+    "positions": [],
     "spawn_timer": null
   },
   "collectibles": {
@@ -220,22 +223,9 @@
       "x": 20,
       "y": 20
     },
-    "positions": [
-      {
-        "x": 1360,
-        "y": 412
-      },
-      {
-        "x": 480,
-        "y": 121
-      },
-      {
-        "x": 50,
-        "y": 472
-      }
-    ]
+    "positions": []
   },
-  "bgm": "tutorial.wav",
+  "bgm": "Ghost_Story.wav",
   "door_win_pos": {
     "x": 710,
     "y": 747

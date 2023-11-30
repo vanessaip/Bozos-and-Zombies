@@ -1,14 +1,16 @@
 #version 330
+#define NUM_OF_LIGHTS 8
 
 // From vertex shader
 in vec2 texcoord;
 in vec4 worldPos;
 
+
 // Application data
 uniform sampler2D sampler0;
 uniform vec3 fcolor;
 uniform bool hasLights;
-uniform vec3 lights[2]; // xy - position, z - intensity
+uniform vec3 lights[NUM_OF_LIGHTS]; // xy - position, z - intensity
 
 // Output color
 layout(location = 0) out  vec4 color;
@@ -29,7 +31,7 @@ void main()
 	{
 		bool isLit = false;
 		vec3 baseColor = vec3(0.01, 0.01, 0.0);
-		for (int i = 0; i < 2; i++) 
+		for (int i = 0; i < NUM_OF_LIGHTS; i++) 
 		{
 			vec3 light = lights[i];
 			float dist = distance(worldPos.xy, light.xy);
@@ -45,16 +47,17 @@ void main()
 		}
 		color.xyz = vec3(min(baseColor.x, 1), min(baseColor.y, 1), min(baseColor.z, 1));
 
-		/*
+		
 		if (isLit) 
 		{
-			color.xyz = vec3(min(baseColor.x, 1), min(baseColor.y, 1), min(baseColor.z, 1));
+			color.z /= 1.3;
+			//color.xyz = vec3(min(baseColor.x, 1), min(baseColor.y, 1), min(baseColor.z, 1));
 		}
 		else 
 		{
-			vec3 bColor = vec3(0.0);
-			color.xyz = bColor.xyz;
+			//vec3 bColor = vec3(0.0);
+			//color.xyz = bColor.xyz;
 		}
-		*/
+		
 	}
 }
