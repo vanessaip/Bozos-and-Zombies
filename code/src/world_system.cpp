@@ -313,7 +313,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 					registry.lostLifeTimer.remove(player_bozo);
 				}
 			}
-			else {
+			if (!registry.lostLifeTimer.has(player_bozo)) {
 				vec3& color = registry.colors.get(player_bozo);
 				color = { 1.f, 1.f, 1.f };
 			}
@@ -745,7 +745,60 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			bozo_motion.scale.y = BOZO_BB_HEIGHT;
 		}
 	}
+
+  // If it is a boss level
+  if (curr_level == 2) {
+    updateBossMotion(bozo_motion, elapsed_ms_since_last_update);
+    updateHPBar(bossHealth / registry.bosses.get(boss).health * 100);
+  }
+
 	return true;
+}
+
+void WorldSystem::updateHPBar(float percent_full) {
+  Motion& bossMotion = registry.motions.get(boss);
+  Motion& hpBarMotion = registry.motions.get(hp_bar);
+  Motion& hpMotion = registry.motions.get(hp);
+
+  hpBarMotion.position[0] = bossMotion.position[0];
+  hpBarMotion.position[1] = bossMotion.position[1] - 50;
+  hpMotion.position = hpBarMotion.position;
+
+  hpMotion.scale[0] = percent_full / 100 * 80;
+  hpMotion.position[0] = hpBarMotion.position[0] - (100 - percent_full) / 100 * 80 / 2;
+}
+
+void WorldSystem::updateBossMotion(Motion& bozo_motion, float elapsed_ms_since_last_update) {
+  Motion& bossMotion = registry.motions.get(boss);
+  float direction = -1;
+  if ((bozo_motion.position.x - bossMotion.position.x) > 0)
+  {
+    direction = 1;
+  }
+  float speed = 50;
+  bossMotion.velocity.x = direction * speed;
+  if (direction == 1) {
+    bossMotion.reflect[0] = false;
+  } else {
+    bossMotion.reflect[0] = true;
+  }
+
+  if (registry.lostLifeTimer.has(boss)) {
+        LostLife& timer = registry.lostLifeTimer.get(boss);
+				timer.timer_ms -= elapsed_ms_since_last_update;
+
+				// Make a bit red to show damaged
+				vec3& color = registry.colors.get(boss);
+				color = { 1.0f, 0.5f, 0.5f };
+
+				if (timer.timer_ms <= 0) {
+					registry.lostLifeTimer.remove(boss);
+				}
+  }
+  if (!registry.lostLifeTimer.has(boss)) {
+    vec3& color = registry.colors.get(boss);
+    color = { 1.f, 1.f, 1.f };
+  }
 }
 
 void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Entity& zombie, bool offAll)
@@ -1201,6 +1254,24 @@ void WorldSystem::restart_level()
 		motion1.velocity = { data["velocity"][0].asFloat(), data["velocity"][1].asFloat() };
 	}
 
+  // Create boss
+  const Json::Value& bossData = jsonData["boss"];
+  uint num_starting_bosses = bossData["num_starting"].asInt();
+  if (num_starting_bosses > 0) {
+    const auto& boss_pos = bossData["position"];
+    vec2 boss_start_pos = { boss_pos["x"].asFloat(), boss_pos["y"].asFloat() };
+    vec2 boss_scale = { bossData["scale"]["x"].asFloat(), bossData["scale"]["y"].asFloat() };
+    vec2 boss_trunc = { bossData["trunc"]["x"].asFloat(), bossData["trunc"]["y"].asFloat()};
+    std::vector<int> spriteCounts;
+    for (const auto& count : bossData["sprite_counts"]) {
+      spriteCounts.push_back(count.asInt());
+    }
+    boss = createBoss(renderer, boss_start_pos, boss_scale, bossData["health"].asFloat(), bossData["damage"].asFloat(), BOSS_ASSET[asset_mapping[curr_level]], boss_trunc, spriteCounts);
+    hp = createHP(renderer, registry.motions.get(boss).position);
+    hp_bar = createHPBar(renderer, registry.motions.get(boss).position);
+    bossHealth = registry.bosses.get(boss).health;
+  }
+
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, bozo_start_pos);
 	registry.colors.insert(player_bozo, { 1, 0.8f, 0.8f });
@@ -1254,16 +1325,6 @@ void WorldSystem::restart_level()
 	else {
 		student_spawn_on = false;
 	}
-
-  // Create boss
-  const Json::Value& bossData = jsonData["boss"];
-  uint num_starting_bosses = bossData["num_starting"].asInt();
-	assert(num_starting_bosses <= bossData["positions"].size());
-  for (const auto& boss_pos : bossData["positions"]) {
-    vec2 boss_start_pos = { boss_pos["x"].asFloat(), boss_pos["y"].asFloat() };
-    vec2 boss_scale = { bossData["scale"]["x"].asFloat(), bossData["scale"]["y"].asFloat() };
-    createBoss(renderer, boss_start_pos, boss_scale, bossData["health"].asFloat(), bossData["damage"].asFloat(), BOSS_ASSET[asset_mapping[curr_level]]);
-  }
 
 	// Place collectibles
 	const Json::Value& collectiblesPositions = jsonData["collectibles"]["positions"];
@@ -1319,7 +1380,12 @@ void WorldSystem::handle_collisions()
 			// Player& player = registry.players.get(entity);
 
 			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
-			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)) || registry.dangerous.has(entity_other) || registry.wheels.has(entity_other))
+      bool isZombie = registry.zombies.has(entity_other);
+      bool isSpikes = registry.spikes.has(entity_other);
+      bool isDangerous = registry.dangerous.has(entity_other);
+      bool isWheel = registry.wheels.has(entity_other);
+      bool isBoss = registry.bosses.has(entity_other);
+			if (isZombie || isSpikes || isDangerous || isWheel || isBoss)
 			{
 				// Reduce hearts if player has lives left
 				if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives > 0) {
@@ -1467,6 +1533,22 @@ void WorldSystem::handle_collisions()
 				removeEntity(entity_other);
 			}
 		}
+
+    // Book - Boss collision
+    else if (!registry.lostLifeTimer.has(boss) && registry.books.has(entity) && registry.bosses.has(entity_other))
+    {
+      Mix_PlayChannel(-1, zombie_kill_sound, 0);
+      Motion& motion_book = registry.motions.get(entity);
+      if (motion_book.offGround == true)
+			{
+				bossHealth -= 20;
+			}
+
+      // Make boss invincible for a bit between hits
+      if (!registry.lostLifeTimer.has(boss)) {
+				registry.lostLifeTimer.emplace(boss);
+			}
+    }
 
 		// Check Spike - Zombie collision
 		else if (registry.zombies.has(entity) && registry.spikes.has(entity_other)) {

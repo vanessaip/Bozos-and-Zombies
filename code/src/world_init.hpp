@@ -68,7 +68,11 @@ void removeEntity(Entity e);
 
 Entity createLoadingScreen(RenderSystem* renderer, vec2 position, vec2 scale);
 
-Entity createBoss(RenderSystem* renderer, vec2 position, vec2 scale, float health, float damage, TEXTURE_ASSET_ID assetID);
+Entity createBoss(RenderSystem* renderer, vec2 position, vec2 scale, float health, float damage, TEXTURE_ASSET_ID assetID, vec2 trunc, std::vector<int> counts);
+
+Entity createHPBar(RenderSystem* renderer, vec2 position);
+
+Entity createHP(RenderSystem* renderer, vec2 position);
 
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.

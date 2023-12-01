@@ -119,6 +119,8 @@ class RenderSystem {
     textures_path("mm/mm-background.png"),
     textures_path("mm/mm-plat.png"),
     textures_path("mm/mm-boss.png"),
+    textures_path("mm/mm-hp-bar.png"),
+    textures_path("mm/mm-hp.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;
