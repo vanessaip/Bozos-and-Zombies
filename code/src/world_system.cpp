@@ -188,6 +188,23 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			printf("new high score: %f", time_to_completion);
 		}
 		writeJson(save_state, SAVE_STATE_FILE);
+
+		// remove zombies, NPC's, wheels, and books on level completion
+		while (registry.zombies.entities.size() > 0) {
+			registry.remove_all_components_of(registry.zombies.entities.back());
+		}
+		while (registry.humans.entities.size() > 1) { // for the player
+			Entity human = registry.humans.entities.back();
+			if (human != player_bozo) {
+				registry.remove_all_components_of(human);
+			}
+		}
+		while (registry.books.entities.size() > 0) {
+			registry.remove_all_components_of(registry.books.entities.back());
+		}
+		while (registry.wheels.entities.size() > 0) {
+			registry.remove_all_components_of(registry.wheels.entities.back());
+		}
 	}
 
 	// Updating window title with points
@@ -218,7 +235,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
 
-	if (zombie_spawn_on && enemySpawnTimer / 1000.f > zombie_spawn_threshold && spawn_on) {
+	if (!game_over && zombie_spawn_on && enemySpawnTimer / 1000.f > zombie_spawn_threshold && spawn_on) {
 		vec2 enemySpawnPos;
 		for (int i = 0; i < zombie_spawn_pos.size(); i++)  // try a few times
 		{
@@ -245,7 +262,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 
-	if (student_spawn_on && npcSpawnTimer / 1000.f > student_spawn_threshold && spawn_on) {
+	if (!game_over && student_spawn_on && npcSpawnTimer / 1000.f > student_spawn_threshold && spawn_on) {
 		vec2 npcSpawnPos;
 		for (int i = 0; i < npc_spawn_pos.size(); i++)  // try a few times
 		{
@@ -1307,7 +1324,7 @@ void WorldSystem::handle_collisions()
 			// Player& player = registry.players.get(entity);
 
 			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
-			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)) || registry.dangerous.has(entity_other) || registry.wheels.has(entity_other))
+			if (!game_over && (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)) || registry.dangerous.has(entity_other) || registry.wheels.has(entity_other)))
 			{
 				// Reduce hearts if player has lives left
 				if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives > 0) {
@@ -1358,7 +1375,7 @@ void WorldSystem::handle_collisions()
 				}
 			}
 			// Checking Player - Human collisions
-			else if (registry.humans.has(entity_other))
+			else if (!game_over && registry.humans.has(entity_other))
 			{
 				if (!registry.deathTimers.has(entity))
 				{
@@ -1382,7 +1399,7 @@ void WorldSystem::handle_collisions()
 				}
 			}
 			// Check Player - Book collisions
-			else if (registry.books.has(entity_other))
+			else if (!game_over && registry.books.has(entity_other))
 			{
 				bool& offHand = registry.books.get(entity_other).offHand;
 				Motion& motion_book = registry.motions.get(entity_other);
@@ -1403,7 +1420,7 @@ void WorldSystem::handle_collisions()
 			}
 		}
 		// Check NPC - Zombie Collision
-		else if (registry.humans.has(entity) && registry.zombies.has(entity_other))
+		else if (!game_over && registry.humans.has(entity) && registry.zombies.has(entity_other))
 		{
 			// TODO: students don't always turn into zombies
 			int turnIntoZombie = rng() % 2; // 0 or 1
@@ -1444,7 +1461,7 @@ void WorldSystem::handle_collisions()
 			}
 		}
 		// Check Book - Zombie collision
-		else if (registry.books.has(entity) && registry.zombies.has(entity_other))
+		else if (!game_over && registry.books.has(entity) && registry.zombies.has(entity_other))
 		{
 			Motion& motion_book = registry.motions.get(entity);
 			// Only collide when book is in air
@@ -1457,13 +1474,13 @@ void WorldSystem::handle_collisions()
 		}
 
 		// Check Spike - Zombie collision
-		else if (registry.zombies.has(entity) && registry.spikes.has(entity_other)) {
+		else if (!game_over && registry.zombies.has(entity) && registry.spikes.has(entity_other)) {
 			removeEntity(entity);
 		}
 
 		// Player - Collectible collision
 
-		else if (registry.collectible.has(entity) && registry.players.has(entity_other)) {
+		else if (!game_over && registry.collectible.has(entity) && registry.players.has(entity_other)) {
 			Mix_PlayChannel(-1, collected_sound, 0);
 			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID)registry.collectible.get(entity).collectible_id;
 			Entity collectible = createCollectible(renderer, collectibles_collected_pos, 50, id, { 60, 60 }, true);
