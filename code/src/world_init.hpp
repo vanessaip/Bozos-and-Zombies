@@ -59,6 +59,8 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
 
 Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic);
 
+Entity createBus(RenderSystem* renderer, vec2 position, vec2 scale);
+
 // label
 Entity createOverlay(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId, bool is_fading);
 
@@ -139,11 +141,7 @@ const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_A
 	},
 	// BUSLOOP TEMP
 	{
-		{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND1, 16.f },
-		{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND2, 8.f },
-		{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND3, 4.f },
-		{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND4, 2.f },
-		{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND0, 0.f }
+		{ TEXTURE_ASSET_ID::BUSLOOP_BACKGROUND, 0.f }
 	},
   {
 		{ TEXTURE_ASSET_ID::TBC, 0.f }
@@ -165,7 +163,7 @@ const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
   TEXTURE_ASSET_ID::BEACH_PLAT,
   TEXTURE_ASSET_ID::LIBRARY_PLAT,
   // BUSLOOP TEMP
-  TEXTURE_ASSET_ID::BEACH_PLAT,
+  TEXTURE_ASSET_ID::STEP1,
 };
 // uses asset_mapping
 const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {

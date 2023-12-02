@@ -1105,6 +1105,7 @@ void WorldSystem::restart_level()
 	enemySpawnTimer = 0.f;
 	npcSpawnTimer = 0.f;
 	doorOpenTimer = 0.f;
+	busTimer = 0.f;
 	collectibles_collected_pos = 50.f;
 	player_lives = 4;
 	collectibles_collected = 0;
@@ -1282,6 +1283,10 @@ void WorldSystem::restart_level()
 	assert(num_collectibles == collectible_assets.size());
 	for (uint i = 0; i < num_collectibles; i++) {
 		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false);
+	}
+
+	if (curr_level == BUSLOOP) {
+		createBus(renderer, { 200, 200 }, { 100.f, 100.f });
 	}
 
 	// This is specific to the beach level
@@ -1664,7 +1669,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 		// printf("Radians: %f\n", radians);
 		motion.angle = radians;
 		// print mouse position
-		// printf("Mouse position: %f, %f\n", pos.x, pos.y); 
+		printf("Mouse position: %f, %f\n", pos.x, pos.y); 
 	}
 }
 
