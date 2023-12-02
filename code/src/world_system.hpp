@@ -46,6 +46,10 @@ public:
 	// Should the game be over ?
 	bool is_over()const;
 
+  void updateHPBar(float percent_full);
+
+  void updateBossMotion(Motion& bozo_motion, float elapsed_ms_since_last_update);
+
 	void updateZombieMovement(Motion& motion, Motion& bozo_motion, Entity& zombie, bool offAll);
 
 	void updateClimbing(Motion& motion, vec4 entityBB, ComponentContainer<Motion>& motion_container);
@@ -56,6 +60,18 @@ public:
 
 	bool isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& motion_container);
 private:
+	void handleGameOver();
+	void updateWindowTitle();
+	void handleRespawn(float elapsed_ms_since_last_update);
+	bool handleTimers(Motion& motion, float elapsed_ms_since_last_update);
+	void handleWeaponBehaviour(Motion& motion, Motion& bozo_motion, Entity entity);
+	void handleFadingEntities();
+	void handleKeyframeAnimation(float elapsed_ms_since_last_update);
+	void updateSpriteSheetAnimation(Motion& bozo_motion, float elapsed_ms_since_last_update);
+	void handleWorldCollisions(Motion& motion, Entity motionEntity, Motion& bozo_motion, ComponentContainer<Motion>& motion_container, float elapsed_ms_since_last_update);
+	void boundEntitiesToWindow(Motion& motion, bool isPlayer);
+	void handlePlatformCollision(Motion& blockMotion, vec4 entityBB);
+	
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
@@ -98,6 +114,10 @@ private:
 	std::chrono::time_point<std::chrono::steady_clock> level_start_time;
 	Json::Value save_state;
 	Entity pause_ui;
+  Entity boss;
+  Entity hp_bar;
+  Entity hp;
+  float bossHealth;
 
 	// This is actually 5 lives but 0 indexed.
 	int player_lives = 4;
