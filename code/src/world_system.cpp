@@ -164,6 +164,8 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
+
+	// Game over
 	if (registry.zombies.entities.size() < 1 && (num_collectibles > 0 && collectibles_collected >= num_collectibles) && this->game_over == false) {
 		// if (collectibles_collected > 0 && this->game_over == false) {
 			  // createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
@@ -1264,6 +1266,10 @@ void WorldSystem::restart_level()
 	num_collectibles = collectiblesPositions.size(); // set number of collectibles
 	vec2 collectible_scale = { jsonData["collectibles"]["scale"]["x"].asFloat(), jsonData["collectibles"]["scale"]["y"].asFloat() };
 	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[asset_mapping[curr_level]];
+	//print asset_mapping[curr_level]
+	printf("asset_mapping[curr_level]: %d\n", asset_mapping[curr_level]);
+	printf("curr_level: %d\n", curr_level);	
+	printf("num_collectibles: %d, collectible_assets.size(): %d\n", num_collectibles, collectible_assets.size());
 	assert(num_collectibles == collectible_assets.size());
 	for (uint i = 0; i < num_collectibles; i++) {
 		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false);
@@ -1538,7 +1544,8 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		// 	debugging.in_full_view_mode = !debugging.in_full_view_mode;
 		// }
 
-		if (curr_level == TBC && key == GLFW_KEY_L) {
+		// if (curr_level == TBC && key == GLFW_KEY_L) {
+		if (key == GLFW_KEY_L) {
 			curr_level++;
 			if (curr_level > max_level) {
 				curr_level = 0;
@@ -1647,6 +1654,8 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 		float radians = atan2(pos.y - motion.position.y, pos.x - motion.position.x);
 		// printf("Radians: %f\n", radians);
 		motion.angle = radians;
+		// print mouse position
+		// printf("Mouse position: %f, %f\n", pos.x, pos.y); 
 	}
 }
 
