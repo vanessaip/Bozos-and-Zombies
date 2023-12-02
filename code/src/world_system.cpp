@@ -569,7 +569,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 	bool isHuman = isNPC || isPlayer;
 	bool isZombie = registry.zombies.has(motionEntity);
 	bool isBook = registry.books.has(motionEntity);
-	bool isBoss = registry.bosses.has(motion_container.entities[i]);
+	bool isBoss = registry.bosses.has(motionEntity);
 	bool isWheel = registry.wheels.has(motionEntity);
 
 	updateWheelRotation();
