@@ -59,8 +59,9 @@ struct Book
 
 struct Door
 {
-	float fading_factor = 0.f;
-	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
+	float animation_switch_time = 200.f; // milliseconds
+	int door_open_frames = 6; // maybe can be specified in level
+	float door_open_timer = door_open_frames * animation_switch_time * 160.f; // multiply 200: for some reason the elapsed time is counted much slower for render step() than in world system???
 };
 
 struct Bounce
@@ -349,15 +350,18 @@ enum class TEXTURE_ASSET_ID
 	BEACH_DIAMOND = BEACH_CHEST2 + 1,
 	BEACH_STAR = BEACH_DIAMOND + 1,
 	BEACH_COIN = BEACH_STAR + 1,
-	WIN_DOOR = BEACH_COIN + 1,
-	BEACH_BIRD = WIN_DOOR + 1,
+	LIBRARY_DOOR = BEACH_COIN + 1,
+	BEACH_BIRD = LIBRARY_DOOR + 1,
 	LIB_COLL1 = BEACH_BIRD + 1,
 	LIB_COLL2 = LIB_COLL1 + 1,
 	LIB_COLL3 = LIB_COLL2 + 1,
 	LIB_COLL4 = LIB_COLL3 + 1,
 	LIB_COLL5 = LIB_COLL4 + 1,
-  TBC = LIB_COLL5 + 1,
-	TEXTURE_COUNT = TBC + 1
+  	TBC = LIB_COLL5 + 1,
+	GHETTO_DOOR = TBC + 1,
+	BEACH_DOOR = GHETTO_DOOR + 1,
+	NEST_DOOR = BEACH_DOOR + 1,
+	TEXTURE_COUNT = NEST_DOOR + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
