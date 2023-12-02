@@ -94,15 +94,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		if (registry.fading.has(entity)) {
 			Fading& fade = registry.fading.get(entity);
 			glUniform1f(fade_timer_uloc, fade.fading_factor);
-		}
-    else if (registry.doors.has(entity)) {
-			Door& door = registry.doors.get(entity);
-			glUniform1f(fade_timer_uloc, door.fading_factor);
-		}
-		else {
+		} else {
 			glUniform1f(fade_timer_uloc, 0.f);
 		}
-
 	}
 
 	// FUTURE: won't need for now, could reuse if we end up having meshes

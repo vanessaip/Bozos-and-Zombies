@@ -86,8 +86,10 @@ private:
 	RenderSystem* renderer;
 	Entity player_bozo;
 	Entity player_bozo_pointer;
+	Entity door;
 	float enemySpawnTimer = 0.f;
 	float npcSpawnTimer = 0.f;
+	float doorOpenTimer = 0.f;
 	int max_level = 4;
 	float collectibles_collected_pos = 50;
 	int collectibles_collected = 0;
