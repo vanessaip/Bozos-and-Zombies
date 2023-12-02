@@ -360,6 +360,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			}
 			bool offAll = true;
 
+			// TODO: can we do this in level_restart?
 			std::vector<Entity> blocks;
 			for (int i = 0; i < platforms.size(); i++)
 			{
@@ -756,6 +757,9 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	if (curr_level == TUTORIAL) {
 
 	}
+	else if (curr_level == SEWERS) {
+
+	}
 	else if (curr_level == NEST && (zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1)))
 	{
 		// Zombie is on the same level as bozo
@@ -1143,6 +1147,7 @@ void WorldSystem::restart_level()
 	}
 	
 	
+	/*
 	else if (curr_level == SEWERS) 
 	{
 		glm::vec3 lights[8] = 
@@ -1161,7 +1166,8 @@ void WorldSystem::restart_level()
 		{
 			createLight(renderer, { light.x, light.y }, light.z);
 		}
-	}
+	
+	}*/
 	
 
 	// Create platforms

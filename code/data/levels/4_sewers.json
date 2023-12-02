@@ -209,8 +209,26 @@
     }
   },
   "zombies": {
-    "num_starting": 0,
-    "positions": [],
+    "num_starting": 4,
+    "positions": [
+      {
+        "x": 1060,
+        "y": 712
+      },
+      {
+        "x": 800,
+        "y": 400
+      },
+      {
+        "x": 1400,
+        "y": 50
+      },
+      {
+        "x": 100,
+        "y": 100
+      }
+
+    ],
     "spawn_timer": null
   },
   "students": {
