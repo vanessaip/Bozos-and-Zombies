@@ -1176,7 +1176,7 @@ void WorldSystem::restart_level()
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_GOAL, { 130.f, window_height_px - 200.f }, "", { 180.f, 100.f });
 	}
 	
-	/*
+	
 	else if (curr_level == SEWERS) 
 	{
 		glm::vec3 lights[8] = 
@@ -1197,9 +1197,7 @@ void WorldSystem::restart_level()
 		}
 	
 	}
-	*/
 	
-
 	// Create platforms
 	floor_positions.clear();
 	for (const auto pos : jsonData["floor_positions"]) {

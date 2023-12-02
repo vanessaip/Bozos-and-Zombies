@@ -6,124 +6,124 @@
   "platforms": [
     {
       "x": 15.0,
-      "y": 790.0,
+      "y": 780.0,
       "num_tiles": 45,
       "visible": true
     },
 
     {
       "x": 15.0,
-      "y": 495,
+      "y": 485,
       "num_tiles": 10,
       "visible": true
     },
     {
       "x": 79.0,
-      "y": 670.0,
+      "y": 660.0,
       "num_tiles": 3,
       "visible": true
     },
     {
       "x": 240.0,
-      "y": 610.0,
+      "y": 600.0,
       "num_tiles": 3,
       "visible": true
     },
 
     {
       "x": 368.0,
-      "y": 235.0,
+      "y": 225.0,
       "num_tiles": 3,
       "visible": true
     },
     {
       "x": 463.0,
-      "y": 145.0,
+      "y": 130.0,
       "num_tiles": 2,
       "visible": true
     },
     {
       "x": 527.5,
-      "y": 300.0,
+      "y": 290.0,
       "num_tiles": 1,
       "visible": true
     },
     {
       "x": 560.0,
-      "y": 405.0,
+      "y": 395.0,
       "num_tiles": 8,
       "visible": true
     },
     {
       "x": 432.0,
-      "y": 527.0,
+      "y": 517.0,
       "num_tiles": 4,
       "visible": true
     },
     {
       "x": 432.0,
-      "y": 663.0,
+      "y": 653.0,
       "num_tiles": 9,
       "visible": true
     },
 
     {
       "x": 1390.0,
-      "y": 530.0,
+      "y": 520.0,
       "num_tiles": 1,
       "visible": true
     },
     {
       "x": 1360.0,
-      "y": 435.0,
+      "y": 425.0,
       "num_tiles": 1,
       "visible": true
     },
     {
       "x": 1330.0,
-      "y": 500.0,
+      "y": 490.0,
       "num_tiles": 1,
       "visible": true
     },
     {
       "x": 1298.0,
-      "y": 595.0,
+      "y": 585.0,
       "num_tiles": 1,
       "visible": true
     },
     {
       "x": 1266.0,
-      "y": 690.0,
+      "y": 680.0,
       "num_tiles": 1,
       "visible": true
     },
     {
       "x": 1200.0,
-      "y": 660.0,
+      "y": 650.0,
       "num_tiles": 2,
       "visible": true
     },
     {
       "x": 1036.0,
-      "y": 500.0,
+      "y": 490.0,
       "num_tiles": 5,
       "visible": true
     },
     {
       "x": 944.0,
-      "y": 403.0,
+      "y": 393.0,
       "num_tiles": 3,
       "visible": true
     },
     {
       "x": 944.0,
-      "y": 660.0,
+      "y": 650.0,
       "num_tiles": 2,
       "visible": true
     },
     {
       "x": 880.0,
-      "y": 500.0,
+      "y": 490.0,
       "num_tiles": 2,
       "visible": true
     }
@@ -200,7 +200,7 @@
     "positions": [
       {
         "x": 50,
-        "y": 740
+        "y": 730
       }
     ],
     "spawn_timer": null
@@ -227,7 +227,7 @@
       },
       {
         "x": 480,
-        "y": 121
+        "y": 117
       },
       {
         "x": 50,

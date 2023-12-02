@@ -105,6 +105,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			vec3 lights[2] = { {0,0,0}, {0,0,0} };
 			glUniform3fv(lights_loc, sizeof(lights) / sizeof(glm::vec3), reinterpret_cast<GLfloat*>(&lights[0]));
 		}
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	}
 
 	else if (render_request.used_effect == EFFECT_ASSET_ID::BLENDED) 
