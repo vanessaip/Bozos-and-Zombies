@@ -167,13 +167,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// Game over
 	if (registry.zombies.entities.size() < 1 && (num_collectibles > 0 && collectibles_collected >= num_collectibles) && this->game_over == false) {
-		// if (collectibles_collected > 0 && this->game_over == false) {
-			  // createStaticTexture(this->renderer, TEXTURE_ASSET_ID::WIN_SCREEN, { window_width_px / 2, window_height_px / 2 }, "You Win!", { 600.f, 400.f });
 		this->game_over = true;
-		createDoor(renderer, door_win_pos, { 40, 60 }, TEXTURE_ASSET_ID::WIN_DOOR);
 		debugging.in_full_view_mode = true;
 		Mix_HaltMusic();
 		Mix_PlayChannel(-1, level_success_sound, 0);
+		// animate door open
+		SpriteSheet& door_sheet = registry.spriteSheets.get(door);
+		door_sheet.updateAnimation(ANIMATION_MODE::RUN);
 		printf("You win!\n");
 
 		// option to retry level? (display current and high scores?)
@@ -190,6 +190,23 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			printf("new high score: %f", time_to_completion);
 		}
 		writeJson(save_state, SAVE_STATE_FILE);
+
+		// remove zombies, NPC's, wheels, and books on level completion
+		while (registry.zombies.entities.size() > 0) {
+			registry.remove_all_components_of(registry.zombies.entities.back());
+		}
+		while (registry.humans.entities.size() > 1) { // for the player
+			Entity human = registry.humans.entities.back();
+			if (human != player_bozo) {
+				registry.remove_all_components_of(human);
+			}
+		}
+		while (registry.books.entities.size() > 0) {
+			registry.remove_all_components_of(registry.books.entities.back());
+		}
+		while (registry.wheels.entities.size() > 0) {
+			registry.remove_all_components_of(registry.wheels.entities.back());
+		}
 	}
 
 	// Updating window title with points
@@ -220,7 +237,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
 
-	if (zombie_spawn_on && enemySpawnTimer / 1000.f > zombie_spawn_threshold && spawn_on) {
+	if (!game_over && zombie_spawn_on && enemySpawnTimer / 1000.f > zombie_spawn_threshold && spawn_on) {
 		vec2 enemySpawnPos;
 		for (int i = 0; i < zombie_spawn_pos.size(); i++)  // try a few times
 		{
@@ -247,7 +264,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 
-	if (student_spawn_on && npcSpawnTimer / 1000.f > student_spawn_threshold && spawn_on) {
+	if (!game_over && student_spawn_on && npcSpawnTimer / 1000.f > student_spawn_threshold && spawn_on) {
 		vec2 npcSpawnPos;
 		for (int i = 0; i < npc_spawn_pos.size(); i++)  // try a few times
 		{
@@ -648,22 +665,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			label.fading_factor = cos(0.0005 * elapsed_ms);
 		}
 
-		for (Entity entity : registry.doors.entities)
-		{
-			// progress timer, make the rotation happening based on time
-			// Set fading factor 
-			Door& door = registry.doors.get(entity);
-			auto now = Clock::now();
-
-			float elapsed_ms =
-				(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - door.fading_timer)).count() / 1000;
-
-			if (door.fading_factor < 1) {
-				door.fading_factor = 1 * elapsed_ms / 2000;
-			}
-		}
-
-
 		// update keyframe animated entity motions
 		for (Entity entity : registry.keyframeAnimations.entities)
 		{
@@ -744,6 +745,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 			spriteSheet.truncation.y = 0.08f;
 			bozo_motion.scale.y = BOZO_BB_HEIGHT;
+		}
+		
+		// handle animation of door when game is over
+		SpriteSheet& door_sheet = registry.spriteSheets.get(door);
+		if (game_over && door_sheet.mode != ANIMATION_MODE::ATTACK) {
+			Door& door_component = registry.doors.get(door);
+			doorOpenTimer += elapsed_ms_since_last_update;
+			if (doorOpenTimer > door_component.door_open_timer) {
+				doorOpenTimer = 0.f;
+				door_sheet.updateAnimation(ANIMATION_MODE::ATTACK);
+			}
 		}
 	}
 	return true;
@@ -1092,6 +1104,7 @@ void WorldSystem::restart_level()
 	// Reset the game state variables
 	enemySpawnTimer = 0.f;
 	npcSpawnTimer = 0.f;
+	doorOpenTimer = 0.f;
 	collectibles_collected_pos = 50.f;
 	player_lives = 4;
 	collectibles_collected = 0;
@@ -1162,18 +1175,14 @@ void WorldSystem::restart_level()
 		createWall(renderer, wall_data["x"].asFloat(), wall_data["y"].asFloat(), wall_data["height"].asFloat(), wall_data["visible"].asBool());
 	}
 
+	door = createDoor(renderer, {jsonData["door"]["position"][0].asFloat(), jsonData["door"]["position"][1].asFloat()}, { jsonData["door"]["scale"][0].asFloat(), jsonData["door"]["scale"][1].asFloat() }, DOOR_ASSET[curr_level]);
+
 	// Create climbables
 	for (const auto& data : jsonData["climbables"]) {
 		createClimbable(renderer, data["x"].asFloat(), data["y"].asFloat(), data["sections"].asInt(), CLIMBABLE_ASSET[asset_mapping[curr_level]]);
 	}
 
-	door_win_pos = { jsonData["door_win_pos"]["x"].asFloat(), jsonData["door_win_pos"]["y"].asFloat() };
-
 	total_collectables = jsonData["total_collectables"].asInt();
-
-	// for (const auto& pos : jsonData["door_win_pos"]) {
-	  // 	 door_win_pos = pos;
-	  // }
 
 	ladder_positions.clear();
 	for (const auto levelPoints : jsonData["zombie_climb_points"]) {
@@ -1321,7 +1330,7 @@ void WorldSystem::handle_collisions()
 			// Player& player = registry.players.get(entity);
 
 			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
-			if (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)) || registry.dangerous.has(entity_other) || registry.wheels.has(entity_other))
+			if (!game_over && (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)) || registry.dangerous.has(entity_other) || registry.wheels.has(entity_other)))
 			{
 				// Reduce hearts if player has lives left
 				if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives > 0) {
@@ -1372,7 +1381,7 @@ void WorldSystem::handle_collisions()
 				}
 			}
 			// Checking Player - Human collisions
-			else if (registry.humans.has(entity_other))
+			else if (!game_over && registry.humans.has(entity_other))
 			{
 				if (!registry.deathTimers.has(entity))
 				{
@@ -1396,7 +1405,7 @@ void WorldSystem::handle_collisions()
 				}
 			}
 			// Check Player - Book collisions
-			else if (registry.books.has(entity_other))
+			else if (!game_over && registry.books.has(entity_other))
 			{
 				bool& offHand = registry.books.get(entity_other).offHand;
 				Motion& motion_book = registry.motions.get(entity_other);
@@ -1406,7 +1415,7 @@ void WorldSystem::handle_collisions()
 					++points;
 				}
 			}
-			else if (registry.doors.has(entity_other))
+			else if (game_over && registry.doors.has(entity_other)) // door transition to next level
 			{
 				Mix_PlayChannel(-1, next_level_sound, 0);
 				curr_level++;
@@ -1417,7 +1426,7 @@ void WorldSystem::handle_collisions()
 			}
 		}
 		// Check NPC - Zombie Collision
-		else if (registry.humans.has(entity) && registry.zombies.has(entity_other))
+		else if (!game_over && registry.humans.has(entity) && registry.zombies.has(entity_other))
 		{
 			// TODO: students don't always turn into zombies
 			int turnIntoZombie = rng() % 2; // 0 or 1
@@ -1458,7 +1467,7 @@ void WorldSystem::handle_collisions()
 			}
 		}
 		// Check Book - Zombie collision
-		else if (registry.books.has(entity) && registry.zombies.has(entity_other))
+		else if (!game_over && registry.books.has(entity) && registry.zombies.has(entity_other))
 		{
 			Motion& motion_book = registry.motions.get(entity);
 			// Only collide when book is in air
@@ -1471,13 +1480,13 @@ void WorldSystem::handle_collisions()
 		}
 
 		// Check Spike - Zombie collision
-		else if (registry.zombies.has(entity) && registry.spikes.has(entity_other)) {
+		else if (!game_over && registry.zombies.has(entity) && registry.spikes.has(entity_other)) {
 			removeEntity(entity);
 		}
 
 		// Player - Collectible collision
 
-		else if (registry.collectible.has(entity) && registry.players.has(entity_other)) {
+		else if (!game_over && registry.collectible.has(entity) && registry.players.has(entity_other)) {
 			Mix_PlayChannel(-1, collected_sound, 0);
 			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID)registry.collectible.get(entity).collectible_id;
 			Entity collectible = createCollectible(renderer, collectibles_collected_pos, 50, id, { 60, 60 }, true);
@@ -1540,9 +1549,9 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			Mix_PlayChannel(-1, player_jump_sound, 0);
 		}
 
-		// if (key == GLFW_KEY_P) {
-		// 	debugging.in_full_view_mode = !debugging.in_full_view_mode;
-		// }
+		if (key == GLFW_KEY_P) {
+			debugging.in_full_view_mode = !debugging.in_full_view_mode;
+		}
 
 		// if (curr_level == TBC && key == GLFW_KEY_L) {
 		if (key == GLFW_KEY_L) {
