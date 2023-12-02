@@ -116,7 +116,6 @@ class RenderSystem {
 		textures_path("library/coll3.png"),
 		textures_path("library/coll4.png"),
 		textures_path("library/coll5.png"),
-		textures_path("busloop/bus.png"),
 		textures_path("TBC.png"),
 		textures_path("level0/door_sprite_sheet.png"),
 		textures_path("beach/door_sprite_sheet.png"),
