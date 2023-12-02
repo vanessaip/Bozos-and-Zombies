@@ -221,6 +221,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		*/
 		// !!! TODO: update timers for dying **zombies** and remove if time drops below zero, similar to the death time
 	}
+
+	// If it is a boss level
+  	if (curr_level == 2) {
+	    updateBossMotion(bozo_motion, elapsed_ms_since_last_update);
+		updateHPBar(bossHealth / registry.bosses.get(boss).health * 100);
+  	}
 	return true;
 }
 
@@ -563,6 +569,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 	bool isHuman = isNPC || isPlayer;
 	bool isZombie = registry.zombies.has(motionEntity);
 	bool isBook = registry.books.has(motionEntity);
+	bool isBoss = registry.bosses.has(motion_container.entities[i]);
 	bool isWheel = registry.wheels.has(motionEntity);
 
 	updateWheelRotation();
@@ -601,7 +608,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 
 	}
 	// Bounding entities to window
-	if (isHuman || isZombie || isBook || isWheel)
+	if (isHuman || isZombie || isBook || isWheel || isBoss)
 	{
 		float entityRightSide = motion.position.x + abs(motion.scale[0]) / 2.f;
 		float entityLeftSide = motion.position.x - abs(motion.scale[0]) / 2.f;
@@ -793,6 +800,52 @@ void WorldSystem::boundEntitiesToWindow(Motion& motion, bool isPlayer) {
 			motion.offGround = false;
 		}
 	}
+}
+
+void WorldSystem::updateHPBar(float percent_full) {
+  Motion& bossMotion = registry.motions.get(boss);
+  Motion& hpBarMotion = registry.motions.get(hp_bar);
+  Motion& hpMotion = registry.motions.get(hp);
+
+  hpBarMotion.position[0] = bossMotion.position[0];
+  hpBarMotion.position[1] = bossMotion.position[1] - 50;
+  hpMotion.position = hpBarMotion.position;
+
+  hpMotion.scale[0] = percent_full / 100 * 80;
+  hpMotion.position[0] = hpBarMotion.position[0] - (100 - percent_full) / 100 * 80 / 2;
+}
+
+void WorldSystem::updateBossMotion(Motion& bozo_motion, float elapsed_ms_since_last_update) {
+  Motion& bossMotion = registry.motions.get(boss);
+  float direction = -1;
+  if ((bozo_motion.position.x - bossMotion.position.x) > 0)
+  {
+    direction = 1;
+  }
+  float speed = 50;
+  bossMotion.velocity.x = direction * speed;
+  if (direction == 1) {
+    bossMotion.reflect[0] = false;
+  } else {
+    bossMotion.reflect[0] = true;
+  }
+
+  if (registry.lostLifeTimer.has(boss)) {
+        LostLife& timer = registry.lostLifeTimer.get(boss);
+				timer.timer_ms -= elapsed_ms_since_last_update;
+
+				// Make a bit red to show damaged
+				vec3& color = registry.colors.get(boss);
+				color = { 1.0f, 0.5f, 0.5f };
+
+				if (timer.timer_ms <= 0) {
+					registry.lostLifeTimer.remove(boss);
+				}
+  }
+  if (!registry.lostLifeTimer.has(boss)) {
+    vec3& color = registry.colors.get(boss);
+    color = { 1.f, 1.f, 1.f };
+  }
 }
 
 void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Entity& zombie, bool offAll)
@@ -1123,12 +1176,7 @@ void WorldSystem::updateWheelRotation()
 // Reset the world state to its initial state
 void WorldSystem::restart_level()
 {
-	if (curr_level == TBC) {
-		debugging.in_full_view_mode = true;
-	}
-	else {
-		debugging.in_full_view_mode = false;
-	}
+	debugging.in_full_view_mode = false;
 	this->game_over = false;
 	// Debugging for memory/component leaks
 	registry.list_all_components();
@@ -1249,6 +1297,24 @@ void WorldSystem::restart_level()
 		motion1.velocity = { data["velocity"][0].asFloat(), data["velocity"][1].asFloat() };
 	}
 
+  // Create boss
+  const Json::Value& bossData = jsonData["boss"];
+  uint num_starting_bosses = bossData["num_starting"].asInt();
+  if (num_starting_bosses > 0) {
+    const auto& boss_pos = bossData["position"];
+    vec2 boss_start_pos = { boss_pos["x"].asFloat(), boss_pos["y"].asFloat() };
+    vec2 boss_scale = { bossData["scale"]["x"].asFloat(), bossData["scale"]["y"].asFloat() };
+    vec2 boss_trunc = { bossData["trunc"]["x"].asFloat(), bossData["trunc"]["y"].asFloat()};
+    std::vector<int> spriteCounts;
+    for (const auto& count : bossData["sprite_counts"]) {
+      spriteCounts.push_back(count.asInt());
+    }
+    boss = createBoss(renderer, boss_start_pos, boss_scale, bossData["health"].asFloat(), bossData["damage"].asFloat(), BOSS_ASSET[asset_mapping[curr_level]], boss_trunc, spriteCounts);
+    hp = createHP(renderer, registry.motions.get(boss).position);
+    hp_bar = createHPBar(renderer, registry.motions.get(boss).position);
+    bossHealth = registry.bosses.get(boss).health;
+  }
+
 	// Create a new Bozo player
 	player_bozo = createBozo(renderer, bozo_start_pos);
 	registry.colors.insert(player_bozo, { 1, 0.8f, 0.8f });
@@ -1320,21 +1386,19 @@ void WorldSystem::restart_level()
 		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, { 230, 155 }, { 80, 60 });
 	}
 	// Lives can probably stay hardcoded?
-	if (curr_level != TBC) {
-		float heart_pos_x = 1385;
-		float heart_starting_pos_y = 40;
+  float heart_pos_x = 1385;
+  float heart_starting_pos_y = 40;
 
-		Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
-		Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
-		Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
-		Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
-		Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
+  Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
+  Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
+  Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
+  Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
+  Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
 
-		player_hearts = { heart0, heart1, heart2, heart3, heart4 };
+  player_hearts = { heart0, heart1, heart2, heart3, heart4 };
 
-		// Create label
-		Entity label = createOverlay(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]], true);
-	}
+  // Create label
+  Entity label = createOverlay(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]], true);
 
 	setup_keyframes(renderer);
 
@@ -1359,7 +1423,12 @@ void WorldSystem::handle_collisions()
 			// Player& player = registry.players.get(entity);
 
 			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
-			if (!game_over && (registry.zombies.has(entity_other) || (registry.spikes.has(entity_other)) || registry.dangerous.has(entity_other) || registry.wheels.has(entity_other)))
+      bool isZombie = registry.zombies.has(entity_other);
+      bool isSpikes = registry.spikes.has(entity_other);
+      bool isDangerous = registry.dangerous.has(entity_other);
+      bool isWheel = registry.wheels.has(entity_other);
+      bool isBoss = registry.bosses.has(entity_other);
+			if (!game_over && isZombie || isSpikes || isDangerous || isWheel || isBoss)
 			{
 				// Reduce hearts if player has lives left
 				if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives > 0) {
@@ -1507,6 +1576,22 @@ void WorldSystem::handle_collisions()
 				removeEntity(entity_other);
 			}
 		}
+
+    // Book - Boss collision
+    else if (!registry.lostLifeTimer.has(boss) && registry.books.has(entity) && registry.bosses.has(entity_other))
+    {
+      Mix_PlayChannel(-1, zombie_kill_sound, 0);
+      Motion& motion_book = registry.motions.get(entity);
+      if (motion_book.offGround == true)
+			{
+				bossHealth -= 20;
+			}
+
+      // Make boss invincible for a bit between hits
+      if (!registry.lostLifeTimer.has(boss)) {
+				registry.lostLifeTimer.emplace(boss);
+			}
+    }
 
 		// Check Spike - Zombie collision
 		else if (!game_over && registry.zombies.has(entity) && registry.spikes.has(entity_other)) {
