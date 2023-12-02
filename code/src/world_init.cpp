@@ -586,7 +586,7 @@ Entity createDoor(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASS
 	auto& door = registry.doors.emplace(entity);
 
 	std::vector<int> spriteCounts = { 1,6,1 }; // one frame closed, 6 frames animate open, 1 frame closed
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, door.animation_switch_time, vec2(0.f, 0.0f)); //switch time is max to stay on door closed frame
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 400.f, vec2(0.f, 0.0f));
 
 	registry.renderRequests.insert(
 		entity,

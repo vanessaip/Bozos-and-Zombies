@@ -730,7 +730,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		
 		// handle animation of door when game is over
 		SpriteSheet& door_sheet = registry.spriteSheets.get(door);
-		if (game_over && door_sheet.mode != ANIMATION_MODE::ATTACK) { 
+		if (game_over && door_sheet.mode != ANIMATION_MODE::ATTACK) {
 			Door& door_component = registry.doors.get(door);
 			doorOpenTimer += elapsed_ms_since_last_update;
 			if (doorOpenTimer > door_component.door_open_timer) {
@@ -1085,6 +1085,7 @@ void WorldSystem::restart_level()
 	// Reset the game state variables
 	enemySpawnTimer = 0.f;
 	npcSpawnTimer = 0.f;
+	doorOpenTimer = 0.f;
 	collectibles_collected_pos = 50.f;
 	player_lives = 4;
 	collectibles_collected = 0;
@@ -1155,8 +1156,7 @@ void WorldSystem::restart_level()
 		createWall(renderer, wall_data["x"].asFloat(), wall_data["y"].asFloat(), wall_data["height"].asFloat(), wall_data["visible"].asBool());
 	}
 
-	door_win_pos = { jsonData["door_win_pos"]["x"].asFloat(), jsonData["door_win_pos"]["y"].asFloat() };
-	door = createDoor(renderer, door_win_pos, { 40, 60 }, TEXTURE_ASSET_ID::WIN_DOOR);
+	door = createDoor(renderer, {jsonData["door"]["position"][0].asFloat(), jsonData["door"]["position"][1].asFloat()}, { jsonData["door"]["scale"][0].asFloat(), jsonData["door"]["scale"][1].asFloat() }, DOOR_ASSET[curr_level]);
 
 	// Create climbables
 	for (const auto& data : jsonData["climbables"]) {
