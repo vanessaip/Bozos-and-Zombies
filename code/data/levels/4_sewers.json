@@ -106,6 +106,12 @@
       "y": 715,
       "num_tiles": 1,
       "visible": true
+    },
+    {
+      "x": 623,
+      "y": 750,
+      "num_tiles": 1,
+      "visible": true
     }
 
   ],
@@ -128,7 +134,7 @@
     {
       "x": 15,
       "y": 500,
-      "sections": 9
+      "sections": 6
     }
 
   ],
@@ -216,11 +222,11 @@
         "y": 712
       },
       {
-        "x": 800,
+        "x": 900,
         "y": 400
       },
       {
-        "x": 1400,
+        "x": 1300,
         "y": 50
       },
       {
@@ -232,20 +238,58 @@
     "spawn_timer": null
   },
   "students": {
-    "num_starting": 0,
-    "positions": [],
-    "spawn_timer": null
+    "num_starting": 4,
+    "positions": [
+      {
+        "x": 1320,
+        "y": 460
+      },
+      {
+        "x": 800,
+        "y": 305
+      },
+      {
+        "x": 520,
+        "y": 40
+      },
+      {
+        "x": 1220,
+        "y": 660
+      }
+    ],
+    "spawn_timer": 30
   },
   "collectibles": {
     "scale": {
-      "x": 20,
-      "y": 20
+      "x": 25,
+      "y": 15
     },
-    "positions": []
+    "positions": [
+      {
+        "x": 260,
+        "y": 400
+      },
+      {
+        "x": 432,
+        "y": 450
+      },
+      {
+        "x": 1430,
+        "y": 85
+      },
+      {
+        "x": 530,
+        "y": 740
+      },
+      {
+        "x": 1230,
+        "y": 476
+      }
+    ]
   },
   "bgm": "Ghost_Story.wav",
   "door_win_pos": {
-    "x": 710,
-    "y": 747
+    "x": 15,
+    "y": 750
   }
 }

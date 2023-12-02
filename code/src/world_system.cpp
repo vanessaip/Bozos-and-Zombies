@@ -123,7 +123,7 @@ GLFWwindow* WorldSystem::create_window()
 
 	background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[0]).c_str());
 	player_death_sound = Mix_LoadWAV(audio_path("player_death.wav").c_str());
-	student_disappear_sound = Mix_LoadWAV(audio_path("student_disappear.wav").c_str());
+	student_disappear_sound = Mix_LoadWAV(audio_path("student_disappear_quiet.wav").c_str());
 	player_jump_sound = Mix_LoadWAV(audio_path("player_jump.wav").c_str());
 	player_land_sound = Mix_LoadWAV(audio_path("player_land.wav").c_str());
 	collect_book_sound = Mix_LoadWAV(audio_path("Mario-coin-sound.wav").c_str());
@@ -138,7 +138,7 @@ GLFWwindow* WorldSystem::create_window()
 			audio_path("beach.wav").c_str(),
 			audio_path("soundtrack.wav").c_str(),
 			audio_path("player_death.wav").c_str(),
-			audio_path("student_disappear.wav").c_str(),
+			audio_path("student_disappear_quiet.wav").c_str(),
 			audio_path("player_jump.wav").c_str(),
 			audio_path("player_land.wav").c_str(),
 			audio_path("Mario-coin-sound.wav").c_str(),
@@ -758,7 +758,31 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 
 	}
 	else if (curr_level == SEWERS) {
+		float dist = distance(motion.position, bozo_motion.position);
+		if (dist < 150.0 && bozo_motion.position.y - 15.f <= motion.position.y) {
+			if ((motion.position.x - bozo_motion.position.x) < -10 ) {
+				motion.velocity.x = ZOMBIE_SPEED / 1.f;
+			}
+			else if ((motion.position.x - bozo_motion.position.x) > 10) {
+				motion.velocity.x = -ZOMBIE_SPEED / 1.5f;
+			}
+			else {
+				motion.velocity.x = 0.f;
+			}
+		}
+		else {
+			motion.velocity.x = 0.f;
+		}
 
+		if (offAll) {
+			if (motion.velocity.x > 0) {
+				motion.position.x -= 15.f;
+			}
+			else {
+				motion.position.x += 15.f;
+			}
+			motion.velocity.x = -motion.velocity.x;
+		}
 	}
 	else if (curr_level == NEST && (zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1)))
 	{
@@ -939,8 +963,14 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	float length = sqrt(abs(motion.position.x - bozo_motion.position.x) + abs(motion.position.y - bozo_motion.position.y));
 	if (length < 10.f)
 		zombieSheet.updateAnimation(ANIMATION_MODE::ATTACK);
-	else
-		zombieSheet.updateAnimation(ANIMATION_MODE::RUN);
+	else {
+		if (motion.velocity.x == 0.f) {
+			zombieSheet.updateAnimation(ANIMATION_MODE::IDLE);
+		}
+		else {
+			zombieSheet.updateAnimation(ANIMATION_MODE::RUN);
+		}
+	}
 }
 
 int WorldSystem::checkLevel(Motion& motion)
@@ -1146,7 +1176,6 @@ void WorldSystem::restart_level()
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_GOAL, { 130.f, window_height_px - 200.f }, "", { 180.f, 100.f });
 	}
 	
-	
 	/*
 	else if (curr_level == SEWERS) 
 	{
@@ -1155,9 +1184,9 @@ void WorldSystem::restart_level()
 			{ 15, 700, 1.5f },
 			//{ 235, 100, 1.5f }, 
 			{ 1340, 550, 1.5f },
-			{ 927, 670, 1.7f },
+			{ 927, 670, 1.5f },
 			{ 850, 450, 1.7f },
-			{ 1300, 150, 1.7f },
+			{ 1400, 150, 1.4f },
 			{ 500, 790, 1.7f },
 			{ 430, 400, 1.6f },
 			{ 630, 30, 1.5f },
@@ -1167,7 +1196,8 @@ void WorldSystem::restart_level()
 			createLight(renderer, { light.x, light.y }, light.z);
 		}
 	
-	}*/
+	}
+	*/
 	
 
 	// Create platforms
@@ -1506,7 +1536,7 @@ void WorldSystem::handle_collisions()
 		else if (registry.collectible.has(entity) && registry.players.has(entity_other)) {
 			Mix_PlayChannel(-1, collected_sound, 0);
 			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID)registry.collectible.get(entity).collectible_id;
-			Entity collectible = createCollectible(renderer, collectibles_collected_pos, 50, id, { 60, 60 }, true);
+			Entity collectible = createOverlay(renderer, { collectibles_collected_pos, 50 }, { 60, 60 }, id, false);
 
 			removeEntity(entity);
 

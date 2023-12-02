@@ -116,10 +116,15 @@ class RenderSystem {
 		textures_path("library/coll4.png"),
 		textures_path("library/coll5.png"),
 		textures_path("TBC.png"),
-		textures_path("lighting_map.png"),
 		textures_path("darkLevel/dark_background0.png"),
 		textures_path("darkLevel/dark_background1.jpg"),
-		textures_path("darkLevel/light.png")
+		textures_path("darkLevel/light.png"),
+		textures_path("darkLevel/collectible1.png"),
+		textures_path("darkLevel/collectible2.png"),
+		textures_path("darkLevel/collectible3.png"),
+		textures_path("darkLevel/collectible4.png"),
+		textures_path("darkLevel/collectible5.png"),
+		textures_path("darkLevel/collectible6.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;
