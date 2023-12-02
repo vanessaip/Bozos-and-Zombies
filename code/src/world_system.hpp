@@ -60,6 +60,18 @@ public:
 
 	bool isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& motion_container);
 private:
+	void handleGameOver();
+	void updateWindowTitle();
+	void handleRespawn(float elapsed_ms_since_last_update);
+	bool handleTimers(Motion& motion, float elapsed_ms_since_last_update);
+	void handleWeaponBehaviour(Motion& motion, Motion& bozo_motion, Entity entity);
+	void handleFadingEntities();
+	void handleKeyframeAnimation(float elapsed_ms_since_last_update);
+	void updateSpriteSheetAnimation(Motion& bozo_motion, float elapsed_ms_since_last_update);
+	void handleWorldCollisions(Motion& motion, Entity motionEntity, Motion& bozo_motion, ComponentContainer<Motion>& motion_container, float elapsed_ms_since_last_update);
+	void boundEntitiesToWindow(Motion& motion, bool isPlayer);
+	void handlePlatformCollision(Motion& blockMotion, vec4 entityBB);
+	
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
