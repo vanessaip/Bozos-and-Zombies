@@ -92,5 +92,8 @@
         ]
     },
     "bgm": "soundtrack.wav",
-    "door_win_pos": {"x": 700, "y": 754}
+    "door": {
+        "position": [700, 754],
+        "scale": [40, 60]
+    }
 }

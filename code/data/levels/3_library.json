@@ -185,8 +185,8 @@
     ]
   },
   "bgm": "library.wav",
-  "door_win_pos": {
-    "x": 1000,
-    "y": 730
+  "door": {
+    "position": [1000, 730],
+    "scale": [40, 60]
   }
 }
