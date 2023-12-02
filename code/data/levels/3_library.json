@@ -1,143 +1,130 @@
 {
   "platform_scale": {
-    "x": 48.0,
-    "y": 17.0
+    "x": 50,
+    "y": 30
   },
   "platforms": [
     {
-      "x": 45.0,
-      "y": 765.0,
+      "x": 0.0,
+      "y": 798.0,
       "num_tiles": 30,
-      "visible": false
+      "visible": true
     },
     {
-      "x": 400.0,
-      "y": 650.0,
+      "x": 1140.0,
+      "y": 690.0,
+      "num_tiles": 10,
+      "visible": true
+    },
+    {
+      "x": 0.0,
+      "y": 610.0,
+      "num_tiles": 10,
+      "visible": true
+    },
+    {
+      "x": 0.0,
+      "y": 200.0,
       "num_tiles": 6,
       "visible": true
     },
     {
-      "x": 75.0,
-      "y": 545.0,
-      "num_tiles": 6,
+      "x": 520.0,
+      "y": 490.0,
+      "num_tiles": 10,
       "visible": true
     },
     {
-      "x": 250.0,
-      "y": 330.0,
+      "x": 200.0,
+      "y": 325.0,
+      "num_tiles": 11,
+      "visible": true
+    },
+    {
+      "x": 450.0,
+      "y": 110.0,
       "num_tiles": 2,
       "visible": true
     },
     {
-      "x": 600.0,
-      "y": 495.0,
-      "num_tiles": 3,
+      "x": 940.0,
+      "y": 110.0,
+      "num_tiles": 11,
       "visible": true
     },
     {
-      "x": 750.0,
-      "y": 400.0,
-      "num_tiles": 2,
+      "x": 1150.0,
+      "y": 405.0,
+      "num_tiles": 7,
       "visible": true
-    },
-    {
-      "x": 1100.0,
-      "y": 545.0,
-      "num_tiles": 1,
-      "visible": true
-    },
-    {
-      "x": 1100.0,
-      "y": 195.0,
-      "num_tiles": 3,
-      "visible": true
-    },
-    {
-      "x": 45.0,
-      "y": 45.0,
-      "num_tiles": 30,
-      "visible": false
     }
   ],
   "floor_positions": [
-    765,
-    650,
-    495
+    798,
+    610,
+    325,
+    110
   ],
   "stairs": [],
-  "walls": [
-    {
-      "x": 32.0,
-      "y": 405.0,
-      "height": 810,
-      "visible": false
-    },
-    {
-      "x": 1408.0,
-      "y": 405.0,
-      "height": 810,
-      "visible": false
-    }
-  ],
+  "walls": [],
   "climbables": [
     {
-      "x": 500,
-      "y": 657,
-      "sections": 4
+      "x": 200,
+      "y": 325,
+      "sections": 9
     },
     {
-      "x": 300,
-      "y": 335,
-      "sections": 7
+      "x": 400,
+      "y": 610,
+      "sections": 6
     },
     {
-      "x": 600,
-      "y": 500,
-      "sections": 5
-    },
-    {
-      "x": 1100,
-      "y": 200,
-      "sections": 11
+      "x": 940,
+      "y": 110,
+      "sections": 12
     }
   ],
   "zombie_climb_points": [
-    [ 500 ],
-    [ 0, 600 ],
-    [ 600 ]
+    [ 400 ],
+    [ 200, 940, 1400 ],
+    [ 940 ],
+    [ 1400 ]
   ],
   "zombie_jump_points": [
     [ 0 ],
-    [ 400 ],
+    [ 450, 1030 ],
+    [ 0 ],
     [ 0 ]
   ],
-  "spikes": [
-    {"x": 1320.0, "y": 750.0, "colour": [0.5, 0.5, 0.5]}
-  ],
+  "spikes": [],
   "wheels": [
     {
-      "position": [ 500, 710 ],
+      "position": [ 100, 600 ],
       "colour": [ 1.0, 0, 0 ],
-      "velocity": [ 100, 0 ]
+      "velocity": [ 50, 0 ]
     },
     {
-      "position": [ 1300, 710 ],
+      "position": [ 1340, 600 ],
       "colour": [ 1.0, 0, 0 ],
-      "velocity": [ -100, 0 ]
+      "velocity": [ -50, 0 ]
     }
   ],
   "player": {
     "position": {
-      "x": 100,
-      "y": 710
+      "x": 720,
+      "y": 760
     }
   },
   "zombies": {
-    "num_starting": 1,
+    "num_starting": 2,
     "positions": [
       {
         "x": 1200,
         "y": 600
+      },
+      {
+        "x": 1200,
+        "y": 50
       }
     ],
     "spawn_timer": null
@@ -146,15 +133,15 @@
     "num_starting": 2,
     "positions": [
       {
-        "x": 300,
-        "y": 300
+        "x": 550,
+        "y": 290
       },
       {
-        "x": 1100,
-        "y": 500
+        "x": 1300,
+        "y": 350
       }
     ],
-    "spawn_timer": 10
+    "spawn_timer": null
   },
   "collectibles": {
     "scale": {
@@ -163,30 +150,34 @@
     },
     "positions": [
       {
-        "x": 75,
-        "y": 525
+        "x": 1380,
+        "y": 377
       },
       {
-        "x": 245,
-        "y": 310
+        "x": 20,
+        "y": 172
       },
       {
-        "x": 700,
-        "y": 475
+        "x": 475,
+        "y": 82
       },
       {
-        "x": 1150,
-        "y": 750
+        "x": 620,
+        "y": 459
       },
       {
-        "x": 1210,
-        "y": 170
+        "x": 1200,
+        "y": 82
+      },
+      {
+        "x": 20,
+        "y": 770
       }
     ]
   },
-  "bgm": "library.wav",
+  "bgm": "beach.wav",
   "door": {
-    "position": [1000, 730],
-    "scale": [40, 60]
+    "position": [100, 754],
+    "scale": [60, 60]
   }
 }

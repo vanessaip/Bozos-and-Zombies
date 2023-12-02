@@ -73,21 +73,23 @@ Entity createLoadingScreen(RenderSystem* renderer, vec2 position, vec2 scale);
 
 enum level {
 	TUTORIAL = 0,
-	BUSLOOP = 4,
-	NEST = 3,
-	BEACH = 2,
-	LIBRARY = 1,
+	BUSLOOP = 1,
+	LIBRARY = 2,
+	BEACH = 3,
+	NEST = 4,
   TBC = 5
 };
 
 // For swapping levels around
+// current asset_mapping order:
+// tutorial, nest, beach, library, busloop
 const std::vector<int> asset_mapping = {
-  0, 
-  4,
-  3, 
-  2, 
-  1,
-  5
+  0, //tutorial 0 -> 0
+  4, //busloop  1 -> 4
+  3, //library  2 -> 3
+  2, //beach    3 -> 2
+  1, //nest     4 -> 1
+  5  //tbc      5 -> 5
 };
 
 const std::vector<std::string> LEVEL_DESCRIPTORS = {
@@ -102,6 +104,7 @@ const std::vector<std::string> LEVEL_DESCRIPTORS = {
 const std::string SAVE_STATE_FILE = level_path("save_state.json");
 
 // ---------------------BACKGROUNDS-------------------------
+// uses asset_mapping
 const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_ASSET = {
 	{
 		{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND1, 16.f },
@@ -109,9 +112,6 @@ const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_A
 		{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND3, 4.f },
 		{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND4, 2.f },
 		{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND0, 0.f }
-	},
-	{
-		{ TEXTURE_ASSET_ID::BACKGROUND_INDOOR, 0.f },
 	},
 	{
 		// texture id, depth (set depth to 0 if not scrolling)
@@ -137,6 +137,13 @@ const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_A
 		{ TEXTURE_ASSET_ID::LIBRARY_OBJECTS, 2.f },
 		{ TEXTURE_ASSET_ID::LIBRARY_FRAME, 0.f }
 	},
+	// BUSLOOP TEMP
+	{
+		{ TEXTURE_ASSET_ID::BEACH_SKY, 16.0f},
+		{ TEXTURE_ASSET_ID::BEACH_SEA, 8.0f},
+		{ TEXTURE_ASSET_ID::BEACH_LAND, 2.0f},
+		{ TEXTURE_ASSET_ID::BEACH_CLOUD, 4.0f}
+	},
   {
 		{ TEXTURE_ASSET_ID::TBC, 0.f }
 	}
@@ -150,39 +157,46 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> BACKGROUND_ASSET = {
 	{ TEXTURE_ASSET_ID::LIBRARY_FILL, TEXTURE_ASSET_ID::LIBRARY_OBJECTS, TEXTURE_ASSET_ID::LIBRARY_FRAME}
 };
 */
-
+// uses asset_mapping
 const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
   TEXTURE_ASSET_ID::TUTORIAL_PLAT,
   TEXTURE_ASSET_ID::STEP1,
-  TEXTURE_ASSET_ID::STEP1,
   TEXTURE_ASSET_ID::BEACH_PLAT,
   TEXTURE_ASSET_ID::LIBRARY_PLAT,
+  // BUSLOOP TEMP
+  TEXTURE_ASSET_ID::BEACH_PLAT,
 };
-
+// uses asset_mapping
 const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
-  TEXTURE_ASSET_ID::LADDER2,
   TEXTURE_ASSET_ID::LADDER2,
   TEXTURE_ASSET_ID::LADDER2,
   TEXTURE_ASSET_ID::BEACH_LADDER,
   TEXTURE_ASSET_ID::LIBRARY_LAD,
+  // BUSLOOP TEMP
+  TEXTURE_ASSET_ID::BEACH_LADDER,
 };
-
+// does NOT use asset_mapping
 const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
 	TEXTURE_ASSET_ID::GHETTO_DOOR,
+	// BUS LOOP TEMP
+	TEXTURE_ASSET_ID::BEACH_DOOR,
+
 	TEXTURE_ASSET_ID::LIBRARY_DOOR,
 	TEXTURE_ASSET_ID::BEACH_DOOR,
 	TEXTURE_ASSET_ID::NEST_DOOR,
-	TEXTURE_ASSET_ID::LIBRARY_DOOR,
+	
 };
-
+// does NOT use asset_mapping
 const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
   TEXTURE_ASSET_ID::TUTORIAL_NPC,
+  TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT
 };
 
+// uses asset_mapping
 const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 	{
 		TEXTURE_ASSET_ID::TUTORIAL_COLLECTIBLE1,
@@ -212,6 +226,7 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::LIB_COLL4,
 		TEXTURE_ASSET_ID::LIB_COLL2,
 	},
+	// BUSLOOP TEMP
 	{
 		TEXTURE_ASSET_ID::BEACH_APPLE,
 		TEXTURE_ASSET_ID::BEACH_CHEST,
@@ -222,9 +237,10 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
   	},
   {}
 };
-
+// uses asset_mapping
 const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
 	TEXTURE_ASSET_ID::TUTORIAL_WEAPON,
+	TEXTURE_ASSET_ID::BOOK,
 	TEXTURE_ASSET_ID::BOOK,
 	TEXTURE_ASSET_ID::BOOK,
 	TEXTURE_ASSET_ID::BOOK,
@@ -239,12 +255,12 @@ const std::vector<std::string> BACKGROUND_MUSIC = {
 	"beach.wav",
 	"library.wav"
 };
-
+// uses asset_mapping
 const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
 	TEXTURE_ASSET_ID::LABEL_TUTORIAL,
-	TEXTURE_ASSET_ID::LABEL_BUSLOOP,
 	TEXTURE_ASSET_ID::LABEL_NEST,
 	TEXTURE_ASSET_ID::LABEL_BEACH,
 	TEXTURE_ASSET_ID::LABEL_LIB,
+	TEXTURE_ASSET_ID::LABEL_BUSLOOP,
   TEXTURE_ASSET_ID::LABEL_LIB,
 };

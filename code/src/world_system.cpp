@@ -1254,7 +1254,7 @@ void WorldSystem::restart_level()
 		vec2 pos = { student_pos["x"].asFloat(), student_pos["y"].asFloat() };
 		npc_spawn_pos.push_back(pos);
 		if (s < num_starting_students) {
-			Entity student = createStudent(renderer, pos, NPC_ASSET[asset_mapping[curr_level]]);
+			Entity student = createStudent(renderer, pos, NPC_ASSET[curr_level]);
 			// coded back+forth motion
 			Motion& student_motion = registry.motions.get(student);
 			student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
