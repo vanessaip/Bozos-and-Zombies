@@ -46,6 +46,10 @@ public:
 	// Should the game be over ?
 	bool is_over()const;
 
+  void updateHPBar(float percent_full);
+
+  void updateBossMotion(Motion& bozo_motion, float elapsed_ms_since_last_update);
+
 	void updateZombieMovement(Motion& motion, Motion& bozo_motion, Entity& zombie, bool offAll);
 
 	void updateClimbing(Motion& motion, vec4 entityBB, ComponentContainer<Motion>& motion_container);
@@ -96,6 +100,10 @@ private:
 	std::chrono::time_point<std::chrono::steady_clock> level_start_time;
 	Json::Value save_state;
 	Entity pause_ui;
+  Entity boss;
+  Entity hp_bar;
+  Entity hp;
+  float bossHealth;
 
 	// This is actually 5 lives but 0 indexed.
 	int player_lives = 4;
