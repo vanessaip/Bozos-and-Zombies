@@ -284,8 +284,8 @@
     ]
   },
   "bgm": "Ghost_Story.wav",
-  "door_win_pos": {
-    "x": 15,
-    "y": 750
+  "door": {
+    "position":  [17, 750],
+    "scale": [ 40, 60 ]
   }
 }

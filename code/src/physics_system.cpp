@@ -230,7 +230,7 @@ void PhysicsSystem::step(float elapsed_ms)
 			else if (motion.velocity.x < 0)
 				motion.reflect.x = true;
 		}
-		if ((registry.humans.has(entity) || registry.zombies.has(entity) || registry.books.has(entity) || registry.wheels.has(entity)) && motion.offGround)
+		if ((registry.humans.has(entity) || registry.zombies.has(entity) || registry.books.has(entity) || registry.wheels.has(entity) || registry.bosses.has(entity)) && motion.offGround)
 		{
 			motion.velocity[1] += PhysicsSystem::GRAVITY * elapsed_ms / 1000.f;
 		}

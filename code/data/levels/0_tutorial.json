@@ -236,8 +236,8 @@
     ]
   },
   "bgm": "tutorial.wav",
-  "door_win_pos": {
-    "x": 710,
-    "y": 747
+  "door": {
+    "position": [710, 747],
+    "scale": [40, 60]
   }
 }
