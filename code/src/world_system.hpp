@@ -63,7 +63,7 @@ private:
 	void handleGameOver();
 	void updateWindowTitle();
 	void handleRespawn(float elapsed_ms_since_last_update);
-	bool handleTimers(Motion& motion, float elapsed_ms_since_last_update);
+	bool WorldSystem::handleTimers(Motion& motion, Entity motionEntity, float elapsed_ms_since_last_update);
 	void handleWeaponBehaviour(Motion& motion, Motion& bozo_motion, Entity entity);
 	void handleFadingEntities();
 	void handleKeyframeAnimation(float elapsed_ms_since_last_update);

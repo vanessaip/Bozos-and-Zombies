@@ -198,14 +198,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			motion.position.y = bozo_motion.position.y;
 		}
 		
-		if (handleTimers(motion, elapsed_ms_since_last_update)) {
+		if (handleTimers(motion, motionEntity, elapsed_ms_since_last_update)) {
 			return true;
 		}
 
 		handleFadingEntities();
-		//handleKeyframeAnimation(elapsed_ms_since_last_update);
-		updateSpriteSheetAnimation(bozo_motion, elapsed_ms_since_last_update);
-		
+		//handleKeyframeAnimation(elapsed_ms_since_last_update);		
 
 		// For all objects that are standing on a platform that is moving down, re-update the character position
 		// TODO: uncomment if we re-introduce moving platforms
@@ -221,6 +219,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		*/
 		// !!! TODO: update timers for dying **zombies** and remove if time drops below zero, similar to the death time
 	}
+	// outside the loop since the logic inside updateSpriteSheetAnimation is just for bozo and the door
+	updateSpriteSheetAnimation(bozo_motion, elapsed_ms_since_last_update);
 
 	// If it is a boss level
   	if (curr_level == 2) {
@@ -349,7 +349,7 @@ void WorldSystem::handleRespawn(float elapsed_ms_since_last_update) {
 	}
 }
 
-bool WorldSystem::handleTimers(Motion& motion, float elapsed_ms_since_last_update) {
+bool WorldSystem::handleTimers(Motion& motion, Entity motionEntity, float elapsed_ms_since_last_update) {
 	// Processing the player state
 	assert(registry.screenStates.components.size() <= 1);
 	ScreenState& screen = registry.screenStates.components[0];
@@ -359,15 +359,14 @@ bool WorldSystem::handleTimers(Motion& motion, float elapsed_ms_since_last_updat
 	float min_angle = asin(-1);
 	float max_angle = asin(1);
 
-	for (Entity entity : registry.deathTimers.entities)
-	{
+	if (registry.deathTimers.has(motionEntity)) {
 		// progress timer, make the rotation happening based on time
-		DeathTimer& timer = registry.deathTimers.get(entity);
-		Motion& motion = registry.motions.get(entity);
+		DeathTimer& timer = registry.deathTimers.get(motionEntity);
 		timer.timer_ms -= elapsed_ms_since_last_update;
 		if (timer.timer_ms < min_timer_ms)
 		{
-			min_timer_ms = timer.timer_ms;
+			// reduce window brightness if player is dying
+			screen.screen_darken_factor = 1 - timer.timer_ms / min_timer_ms;
 			if (timer.direction == 0)
 			{
 				if (motion.angle > min_angle)
@@ -387,18 +386,15 @@ bool WorldSystem::handleTimers(Motion& motion, float elapsed_ms_since_last_updat
 		// restart the game once the death timer expired
 		if (timer.timer_ms < 0)
 		{
-			registry.deathTimers.remove(entity);
+			registry.deathTimers.remove(motionEntity);
 			screen.screen_darken_factor = 0;
 			restart_level();
 			return true;
 		}
-	}
-
-	for (Entity entity : registry.infectTimers.entities)
+	} else if (registry.infectTimers.has(motionEntity))
 	{
 		// progress timer, make the rotation happening based on time
-		InfectTimer& timer = registry.infectTimers.get(entity);
-		Motion& motion = registry.motions.get(entity);
+		InfectTimer& timer = registry.infectTimers.get(motionEntity);
 		timer.timer_ms -= elapsed_ms_since_last_update;
 		if (timer.timer_ms < infect_timer_ms)
 		{
@@ -422,15 +418,12 @@ bool WorldSystem::handleTimers(Motion& motion, float elapsed_ms_since_last_updat
 		// remove the NPC player once the timer expires and create a zombie
 		if (timer.timer_ms < 0)
 		{
-			registry.infectTimers.remove(entity);
-			Motion lastStudentLocation = registry.motions.get(entity);
-			removeEntity(entity);
+			registry.infectTimers.remove(motionEntity);
+			Motion lastStudentLocation = registry.motions.get(motionEntity);
+			removeEntity(motionEntity);
 			Entity new_zombie = createZombie(renderer, lastStudentLocation.position);
-			return true;
 		}
 	}
-	// reduce window brightness if any of the present salmons is dying
-	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
 
 	return false;
 }
@@ -1476,62 +1469,63 @@ void WorldSystem::handle_collisions()
 		// For now, we are only interested in collisions that involve the player
 		if (registry.players.has(entity))
 		{
-			// Player& player = registry.players.get(entity);
-
 			// Checking Player - Zombie collisions TODO: can generalize to Human - Zombie, and treat player as special case
-      bool isZombie = registry.zombies.has(entity_other);
-      bool isSpikes = registry.spikes.has(entity_other);
-      bool isDangerous = registry.dangerous.has(entity_other);
-      bool isWheel = registry.wheels.has(entity_other);
-      bool isBoss = registry.bosses.has(entity_other);
+			bool isZombie = registry.zombies.has(entity_other);
+			bool isSpikes = registry.spikes.has(entity_other);
+			bool isDangerous = registry.dangerous.has(entity_other);
+			bool isWheel = registry.wheels.has(entity_other);
+			bool isBoss = registry.bosses.has(entity_other);
 			if (!game_over && isZombie || isSpikes || isDangerous || isWheel || isBoss)
 			{
 				// Reduce hearts if player has lives left
-				if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives > 0) {
+				if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo)) {
 					// Remove a heart
 					registry.remove_all_components_of(player_hearts[player_lives]);
 
 					// Play death sound
-					Mix_PlayChannel(-1, zombie_kill_sound, 0);
+					if (isZombie) {
+						Mix_PlayChannel(-1, player_death_sound, 0);
+					} else {
+						Mix_PlayChannel(-1, zombie_kill_sound, 0);
+					}
 
 					// Decrement the player lives
 					player_lives--;
+					
+					// if player runs out of lives, use death timer
+					if (player_lives < 0 && !registry.deathTimers.has(entity)) {
+						// Scream, reset timer, and make the player [dying animation]
+						Motion& motion_player = registry.motions.get(entity);
+						Motion& motion_zombie = registry.motions.get(entity_other);
 
-					// Move player back to start
-					Motion& bozo_motion = registry.motions.get(player_bozo);
-					bozo_motion.position = bozo_start_pos;
+						// Add a little jump animation
+						motion_player.offGround = true;
+						motion_player.velocity[0] = 0.f;
+						motion_player.velocity[1] = -100.f;
 
-					// Add to lost life timer
-					if (!registry.lostLifeTimer.has(player_bozo)) {
-						registry.lostLifeTimer.emplace(player_bozo);
+						registry.deathTimers.emplace(entity);
+
+						// Set the direction of the death
+						DeathTimer& timer = registry.deathTimers.get(entity);
+						if (motion_zombie.velocity.x < 0)
+						{
+							timer.direction = 0;
+						}
+						else
+						{
+							timer.direction = 1;
+						}
+
+					} else {
+						// Move player back to start
+						Motion& bozo_motion = registry.motions.get(player_bozo);
+						bozo_motion.position = bozo_start_pos;
+
+						// Add to lost life timer
+						if (!registry.lostLifeTimer.has(player_bozo)) {
+							registry.lostLifeTimer.emplace(player_bozo);
+						}
 					}
-				}
-				else if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives == 0)
-				{
-					// Kill player if no lives left
-					// Scream, reset timer, and make the player [dying animation]
-					Motion& motion_player = registry.motions.get(entity);
-					Motion& motion_zombie = registry.motions.get(entity_other);
-
-					// Add a little jump animation
-					motion_player.offGround = true;
-					motion_player.velocity[0] = 0.f;
-					motion_player.velocity[1] = -100.f;
-
-					registry.deathTimers.emplace(entity);
-
-					// Set the direction of the death
-					DeathTimer& timer = registry.deathTimers.get(entity);
-					if (motion_zombie.velocity.x < 0)
-					{
-						timer.direction = 0;
-					}
-					else
-					{
-						timer.direction = 1;
-					}
-
-					Mix_PlayChannel(-1, player_death_sound, 0);
 				}
 			}
 			// Checking Player - Human collisions
@@ -1569,7 +1563,8 @@ void WorldSystem::handle_collisions()
 					++points;
 				}
 			}
-			else if (game_over && registry.doors.has(entity_other)) // door transition to next level
+			// Check Player - Door collision for transition to next level
+			else if (game_over && registry.doors.has(entity_other))
 			{
 				Mix_PlayChannel(-1, next_level_sound, 0);
 				curr_level++;
