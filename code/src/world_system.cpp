@@ -676,7 +676,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 
 			// Collision with Right edge of block
 			if (entityLeftSide < xBlockRightBound &&
-				entityLeftSide > xBlockRightBound - 10.f &&
+				entityLeftSide > xBlockRightBound - abs(motion.scale[0])/3.f &&
 				entityTop < yBlockBottom &&
 				entityBottom > yBlockTop && (player.keyPresses[0] || isZombie || isNPC || isWheel))
 			{
@@ -702,7 +702,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 
 			// Collision with Left edge of block
 			if (entityRightSide > xBlockLeftBound &&
-				entityRightSide < xBlockLeftBound + 10.f &&
+				entityRightSide < xBlockLeftBound + abs(motion.scale[0])/3.f &&
 				entityTop < yBlockBottom &&
 				entityBottom > yBlockTop && (player.keyPresses[1] || isZombie || isNPC || isWheel))
 			{
@@ -739,10 +739,10 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 
 		if ((isWheel || isNPC) && offAll && !registry.infectTimers.has(motionEntity)) {
 			if (motion.velocity.x > 0) {
-				motion.position.x -= 10.f;
+				motion.position.x -= abs(motion.scale[0]/3.0f);
 			}
 			else {
-				motion.position.x += 10.f;
+				motion.position.x += abs(motion.scale[0]/3.0f);
 			}
 			motion.velocity.x = -motion.velocity.x;
 		}
@@ -1105,7 +1105,7 @@ void WorldSystem::updateClimbing(Motion& motion, vec4 entityBB, ComponentContain
 				motion.climbing = true;
 				motion.velocity.y -= 200;
 			}
-			if (player.keyPresses[3] && !isBottomOfLadder({ motion.position.x, entityBottom + 5 }, motion_container))
+			if (player.keyPresses[3] && !isBottomOfLadder({ motion.position.x, entityBottom + motion.scale[1]/10.f }, motion_container))
 			{
 
 				motion.climbing = true;

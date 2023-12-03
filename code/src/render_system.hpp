@@ -126,6 +126,7 @@ class RenderSystem {
     textures_path("mm/mm-hp.png"),
 	textures_path("beach/beach_zombie.png"),
 	textures_path("beach/npc_sprite_sheet.png"),
+	textures_path("nest_student.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

@@ -6,11 +6,11 @@
 #include <string.h>
 
 // These are ahrd coded to the dimensions of the entity texture
-const float STUDENT_BB_WIDTH = 30.f;
+const float STUDENT_BB_WIDTH = 40.f;
 const float STUDENT_BB_HEIGHT = 50.f;
 const float ZOMBIE_BB_WIDTH = 50.f;
 const float ZOMBIE_BB_HEIGHT = STUDENT_BB_HEIGHT + 20.f;
-const float BOZO_BB_WIDTH = STUDENT_BB_WIDTH;
+const float BOZO_BB_WIDTH = 40.f;
 const float BOZO_BB_HEIGHT = STUDENT_BB_HEIGHT;
 const float BOZO_POINTER_BB_WIDTH = 170.f;
 const float BOZO_POINTER_BB_HEIGHT = 170.f;
@@ -168,9 +168,9 @@ const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
 
 const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
   TEXTURE_ASSET_ID::TUTORIAL_NPC,
-  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::NEST_NPC,
   TEXTURE_ASSET_ID::BEACH_NPC,
-  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::NEST_NPC,
   TEXTURE_ASSET_ID::STUDENT
 };
 
