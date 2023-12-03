@@ -1277,7 +1277,6 @@ void WorldSystem::restart_level()
 		glm::vec3 lights[8] = 
 		{ 
 			{ 15, 700, 1.5f },
-			//{ 235, 100, 1.5f }, 
 			{ 1340, 550, 1.5f },
 			{ 927, 670, 1.5f },
 			{ 850, 450, 1.7f },
@@ -1458,8 +1457,6 @@ void WorldSystem::restart_level()
   Entity label = createOverlay(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]], true);
 
 	setup_keyframes(renderer);
-
-	//createBackground(renderer, TEXTURE_ASSET_ID::LIGHTING_MAP, 0.f, { window_width_px / 2, window_height_px / 2 }, true);
 
 	points = 0;
 	level_start_time = Clock::now();
