@@ -105,7 +105,6 @@ const std::string SAVE_STATE_FILE = level_path("save_state.json");
 const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_ASSET = {
 	{
 		{TEXTURE_ASSET_ID::BUS_BG, 2.f},
-	{TEXTURE_ASSET_ID::BUS_DEC, 2.f },
 		{TEXTURE_ASSET_ID::BUS_WINDOW, 0.f},
 
 	},

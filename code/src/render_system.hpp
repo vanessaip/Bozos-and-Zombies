@@ -118,7 +118,6 @@ class RenderSystem {
 	textures_path("TBC.png"),
 	textures_path("tutorial/bus_bg.png"),
 	textures_path("tutorial/bus_windows.png"),
-	textures_path("tutorial/bus_dec.png"),
 	textures_path("locations/label_bus.png")
 	};
 

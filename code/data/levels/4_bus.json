@@ -11,18 +11,16 @@
       "visible": true
     },
     {
-      "x": 250.0,
-      "y": 696.0,
-      "num_tiles": 2,
-      "visible": true
+      "x": 0.0,
+      "y": 550.0,
+      "num_tiles": 30,
+      "visible": false
     },
     {
-
-      "x": 1311.0,
-      "y": 696.0,
-      "num_tiles": 2,
+      "x": 340.0,
+      "y": 665.0,
+      "num_tiles": 1,
       "visible": true
-
     }
   ],
   "floor_positions": [
@@ -32,14 +30,9 @@
   "walls": [],
   "climbables": [
     {
-      "x": 275.0,
-      "y": 696.0,
-      "sections": 4
-    },
-    {
-      "x": 1311.0,
-      "y": 696.0,
-      "sections": 4
+      "x": 340.0,
+      "y": 665.0,
+      "sections": 5
     }
   ],
   "zombie_climb_points": [
@@ -51,7 +44,7 @@
   "spikes": [],
   "wheels": [
     {
-      "position": [ 1090, 780 ],
+      "position": [ 1100, 780 ],
       "colour": [ 1.0, 0, 0 ],
       "velocity": [ 0, 0 ]
     }
@@ -66,7 +59,7 @@
     "num_starting": 1,
     "positions": [
       {
-        "x": 710,
+        "x": 750,
         "y": 780
       }
     ],
@@ -80,7 +73,7 @@
         "y": 780
       }
     ],
-    "spawn_timer": 1
+    "spawn_timer": 10
   },
   "collectibles": {
     "scale": {
@@ -89,14 +82,14 @@
     },
     "positions": [
       {
-        "x": 1360,
-        "y": 670
+        "x": 1320,
+        "y": 790
       }
     ]
   },
   "bgm": "soundtrack.wav",
   "door_win_pos": {
     "x": 1370,
-    "y": 760
+    "y": 780
   }
 }
