@@ -78,11 +78,11 @@ Entity createHP(RenderSystem* renderer, vec2 position);
 // Index 0 is level 1, index 1 is level 2 etc.
 
 enum level {
-	TUTORIAL = 0,
+  TUTORIAL = 0,
   LIBRARY = 1,
   MMBOSS = 2,
   NEST = 3,
-  BEACH = 4
+  BEACH = 4,
   FOREST = 5
 };
 
@@ -176,10 +176,12 @@ const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
 	TEXTURE_ASSET_ID::BEACH_DOOR,
 	TEXTURE_ASSET_ID::NEST_DOOR,
 	TEXTURE_ASSET_ID::LIBRARY_DOOR,
+	TEXTURE_ASSET_ID::LIBRARY_DOOR,
 };
 
 const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
   TEXTURE_ASSET_ID::TUTORIAL_NPC,
+  TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
@@ -215,15 +217,18 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::LIB_COLL4,
 		TEXTURE_ASSET_ID::LIB_COLL2
 },
+{
+
+},
  {
 		TEXTURE_ASSET_ID::FOREST_CHERRY,
 		TEXTURE_ASSET_ID::FOREST_MEAT,
 		TEXTURE_ASSET_ID::FOREST_RADISH,
 		TEXTURE_ASSET_ID::FOREST_SQUASH,
 		TEXTURE_ASSET_ID::FOREST_TOMATO,
-		TEXTURE_ASSET_ID::FOREST_STRAWBERRY},
-  {
-  }
+		TEXTURE_ASSET_ID::FOREST_STRAWBERRY
+	},
+
 };
 
 const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
@@ -232,7 +237,7 @@ const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
 	TEXTURE_ASSET_ID::BOOK,
 	TEXTURE_ASSET_ID::BOOK,
 	TEXTURE_ASSET_ID::BOOK,
-  TEXTURE_ASSET_ID::BOOK,
+	TEXTURE_ASSET_ID::BOOK,
 };
 
 // ---------------------SOUNDS-------------------------
@@ -241,8 +246,8 @@ const std::vector<std::string> BACKGROUND_MUSIC = {
 	"soundtrack.wav",
 	"beach.wav",
 	"library.wav",
-  "library.wav",
-  "forest.wav"
+  	"library.wav",
+  	"forest.wav"
 };
 
 const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
@@ -251,11 +256,14 @@ const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
 	TEXTURE_ASSET_ID::LABEL_BEACH,
 	TEXTURE_ASSET_ID::LABEL_LIB,
 	TEXTURE_ASSET_ID::LABEL_FOREST,
+	TEXTURE_ASSET_ID::LABEL_FOREST,
+
 };
 
 
 // ---------------------BOSSES-------------------------
 const std::vector<TEXTURE_ASSET_ID> BOSS_ASSET = {
+  TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
