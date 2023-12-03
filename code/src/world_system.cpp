@@ -1453,7 +1453,7 @@ void WorldSystem::restart_level()
 
 void WorldSystem::addAnimatedMMBossTextures(RenderSystem* renderer)
 {
-  createAnimatedBackgroundObject(renderer, {800, 720}, {130, 130}, TEXTURE_ASSET_ID::MM_FOUNTAIN, {4}, {0, 0.01});
+  createAnimatedBackgroundObject(renderer, {730, 720}, {130, 130}, TEXTURE_ASSET_ID::MM_FOUNTAIN, {4}, {0, 0.01});
 }
 
 // Compute collisions between entities

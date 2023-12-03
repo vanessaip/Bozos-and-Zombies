@@ -17,13 +17,37 @@
       "visible": true
     },
     {
-      "x": 50.0,
+      "x": 80.0,
       "y": 330.0,
       "num_tiles": 2,
       "visible": true
     },
     {
-      "x": 200.0,
+      "x": 220.0,
+      "y": 480.0,
+      "num_tiles": 2,
+      "visible": true
+    },
+    {
+      "x": 900.0,
+      "y": 610.0,
+      "num_tiles": 12,
+      "visible": true
+    },
+    {
+      "x": 1300.0,
+      "y": 330.0,
+      "num_tiles": 2,
+      "visible": true
+    },
+    {
+      "x": 1140.0,
+      "y": 480.0,
+      "num_tiles": 2,
+      "visible": true
+    },
+    {
+      "x": 700.0,
       "y": 480.0,
       "num_tiles": 2,
       "visible": true
@@ -31,7 +55,9 @@
   ],
   "floor_positions": [
     798,
-    610
+    610,
+    480,
+    330
   ],
   "stairs": [],
   "walls": [
