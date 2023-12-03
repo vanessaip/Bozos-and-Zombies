@@ -9,14 +9,40 @@
       "y": 798.0,
       "num_tiles": 30,
       "visible": true
+    },
+    {
+      "x": 0.0,
+      "y": 610.0,
+      "num_tiles": 12,
+      "visible": true
+    },
+    {
+      "x": 50.0,
+      "y": 330.0,
+      "num_tiles": 2,
+      "visible": true
+    },
+    {
+      "x": 200.0,
+      "y": 480.0,
+      "num_tiles": 2,
+      "visible": true
     }
   ],
   "floor_positions": [
-    798
+    798,
+    610
   ],
   "stairs": [],
-  "walls": [],
+  "walls": [
+
+  ],
   "climbables": [
+    {
+      "x": 150,
+      "y": 610,
+      "sections": 6
+    }
   ],
   "zombie_climb_points": [
   ],
@@ -59,7 +85,7 @@
       "x": 0.0,
       "y": 0.03
     },
-    "sprite_counts": [ 3, 6 ],
+    "sprite_counts": [ 5, 5, 5, 4, 4, 7, 7, 4, 3, 4 ],
     "health": 100,
     "damage": 1
   },

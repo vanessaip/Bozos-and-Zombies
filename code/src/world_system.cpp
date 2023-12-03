@@ -814,17 +814,8 @@ void WorldSystem::updateBossMotion(Motion& bozo_motion, float elapsed_ms_since_l
   // If boss is not damaged, follow the player
   if (!registry.lostLifeTimer.has(boss)) {
 
-    float direction = -1;
-    if ((bozo_motion.position.x - bossMotion.position.x) > 0)
-    {
-      direction = 1;
-    }
-    float speed = 150;
-    bossMotion.velocity.x = direction * speed;
-    if (direction == 1) {
-      bossMotion.reflect[0] = false;
-    } else {
-      bossMotion.reflect[0] = true;
+    if (curr_level == MMBOSS) {
+      updateMainMallBossMovement(bozo_motion, bossMotion);
     }
 
     vec3& color = registry.colors.get(boss);
@@ -850,6 +841,50 @@ void WorldSystem::updateBossMotion(Motion& bozo_motion, float elapsed_ms_since_l
       registry.lostLifeTimer.remove(boss);
     }
 
+  }
+}
+
+void WorldSystem::updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_motion)
+{
+  int bozo_level = checkLevel(bozo_motion);
+	int boss_level = checkLevel(boss_motion);
+
+  SpriteSheet& mmBossSheet = registry.spriteSheets.get(boss);
+
+  if (boss_level == bozo_level)
+  {
+    boss_motion.climbing = false;
+    float direction = -1;
+    if ((bozo_motion.position.x - boss_motion.position.x) > 0)
+    {
+      direction = 1;
+    }
+    boss_motion.velocity.x = direction * MMBOSS_SPEED;
+    if (direction == 1) {
+      boss_motion.reflect[0] = false;
+    } else {
+      boss_motion.reflect[0] = true;
+    }
+
+    // This is actually run
+    // TODO-Will fix the sprite sheet
+    mmBossSheet.updateAnimation(ANIMATION_MODE::ATTACK);
+
+  }
+  else if (boss_level < bozo_level)
+  {
+    // Boss floats to bozo's level
+
+    // Fly up to bozo
+    boss_motion.velocity.y = -MMBOSS_SPEED;
+    boss_motion.climbing = true;
+
+    // Update to flying animation
+    mmBossSheet.updateAnimation(ANIMATION_MODE::SEVENTH_INDEX);
+  }
+  else
+  {
+    
   }
 }
 
@@ -1418,7 +1453,7 @@ void WorldSystem::restart_level()
 
 void WorldSystem::addAnimatedMMBossTextures(RenderSystem* renderer)
 {
-  createAnimatedBackgroundObject(renderer, {800, 720}, {130, 130}, TEXTURE_ASSET_ID::MM_FOUNTAIN, {4}, {0, 0});
+  createAnimatedBackgroundObject(renderer, {800, 720}, {130, 130}, TEXTURE_ASSET_ID::MM_FOUNTAIN, {4}, {0, 0.01});
 }
 
 // Compute collisions between entities

@@ -72,6 +72,7 @@ private:
 	void boundEntitiesToWindow(Motion& motion, bool isPlayer);
 	void handlePlatformCollision(Motion& blockMotion, vec4 entityBB);
   void addAnimatedMMBossTextures(RenderSystem* renderer);
+  void updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_motion);
 	
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
