@@ -82,14 +82,14 @@
     },
     "positions": [
       {
-        "x": 1320,
+        "x": 1310,
         "y": 790
       }
     ]
   },
   "bgm": "soundtrack.wav",
-  "door_win_pos": {
-    "x": 1370,
-    "y": 780
+  "door": {
+    "position": [ 1370, 780 ],
+    "scale": [ 40, 60 ]
   }
 }
