@@ -505,17 +505,20 @@ Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTUR
 
 	Dangerous& dangerous = registry.dangerous.emplace(entity);
 
-  dangerous.p0 = p0;
-  dangerous.p1 = p1;
-  dangerous.p2 = p2;
-  dangerous.p3 = p3;
-  dangerous.cubic = cubic;
+	dangerous.p0 = p0;
+	dangerous.p1 = p1;
+	dangerous.p2 = p2;
+	dangerous.p3 = p3;
+	dangerous.cubic = cubic;
+
+	std::vector<int> spriteCounts = { 6 };
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.f, 0.f));
 
 	registry.renderRequests.insert(
 		entity,
 		{ assetID,
 			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			GEOMETRY_BUFFER_ID::SPRITE_SHEET });
 
 	return entity;
 }
