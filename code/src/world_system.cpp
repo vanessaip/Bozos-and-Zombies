@@ -257,19 +257,19 @@ void WorldSystem::handleGameOver() {
 
 	// remove zombies, NPC's, wheels, and books on level completion
 	while (registry.zombies.entities.size() > 0) {
-		registry.remove_all_components_of(registry.zombies.entities.back());
+		removeEntity(registry.zombies.entities.back());
 	}
 	while (registry.humans.entities.size() > 1) { // for the player
 		Entity human = registry.humans.entities.back();
 		if (human != player_bozo) {
-			registry.remove_all_components_of(human);
+			removeEntity(human);
 		}
 	}
 	while (registry.books.entities.size() > 0) {
-		registry.remove_all_components_of(registry.books.entities.back());
+		removeEntity(registry.books.entities.back());
 	}
 	while (registry.wheels.entities.size() > 0) {
-		registry.remove_all_components_of(registry.wheels.entities.back());
+		removeEntity(registry.wheels.entities.back());
 	}
 }
 
@@ -312,7 +312,7 @@ void WorldSystem::handleRespawn(float elapsed_ms_since_last_update) {
 
 			if (spawn)
 			{
-				createZombie(renderer, enemySpawnPos);
+				createZombie(renderer, enemySpawnPos, ZOMBIE_ASSET[asset_mapping[curr_level]]);
 				enemySpawnTimer = 0.f;
 				break;
 			}
@@ -339,7 +339,7 @@ void WorldSystem::handleRespawn(float elapsed_ms_since_last_update) {
 
 			if (spawn)
 			{
-				Entity student = createStudent(renderer, npcSpawnPos, NPC_ASSET[curr_level]);
+				Entity student = createStudent(renderer, npcSpawnPos, NPC_ASSET[asset_mapping[curr_level]]);
 				Motion& student_motion = registry.motions.get(student);
 				student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
 				npcSpawnTimer = 0.f;
@@ -387,7 +387,6 @@ bool WorldSystem::handleTimers(Motion& motion, Entity motionEntity, float elapse
 		if (timer.timer_ms < 0)
 		{
 			registry.deathTimers.remove(motionEntity);
-			screen.screen_darken_factor = 0;
 			restart_level();
 			return true;
 		}
@@ -421,7 +420,13 @@ bool WorldSystem::handleTimers(Motion& motion, Entity motionEntity, float elapse
 			registry.infectTimers.remove(motionEntity);
 			Motion lastStudentLocation = registry.motions.get(motionEntity);
 			removeEntity(motionEntity);
-			Entity new_zombie = createZombie(renderer, lastStudentLocation.position);
+			Entity new_zombie = createZombie(renderer, lastStudentLocation.position, ZOMBIE_ASSET[asset_mapping[curr_level]]);
+		}
+	} else if (registry.zombieDeathTimers.has(motionEntity)) {
+		ZombieDeathTimer& timer = registry.zombieDeathTimers.get(motionEntity);
+		timer.timer_ms -= elapsed_ms_since_last_update;
+		if (timer.timer_ms < 0) {
+			removeEntity(motionEntity); // remove zombie (also removes timer)
 		}
 	}
 
@@ -747,7 +752,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 			updateClimbing(motion, entityBB, motion_container);
 		}
 		// If entity is a zombie, update its direction to always move towards Bozo
-		else if (isZombie)
+		else if (isZombie && !registry.zombieDeathTimers.has(motionEntity))
 		{
 			updateZombieMovement(motion, bozo_motion, motionEntity, offAll);
 		}
@@ -1230,10 +1235,15 @@ void WorldSystem::restart_level()
 	player_lives = 4;
 	collectibles_collected = 0;
 
+	// reset screen brightness
+	assert(registry.screenStates.components.size() <= 1);
+	ScreenState& screen = registry.screenStates.components[0];
+	screen.screen_darken_factor = 0;
+
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
-		registry.remove_all_components_of(registry.motions.entities.back());
+		removeEntity(registry.motions.entities.back());
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();
@@ -1301,7 +1311,7 @@ void WorldSystem::restart_level()
 		createWall(renderer, wall_data["x"].asFloat(), wall_data["y"].asFloat(), wall_data["height"].asFloat(), wall_data["visible"].asBool());
 	}
 
-	door = createDoor(renderer, {jsonData["door"]["position"][0].asFloat(), jsonData["door"]["position"][1].asFloat()}, { jsonData["door"]["scale"][0].asFloat(), jsonData["door"]["scale"][1].asFloat() }, DOOR_ASSET[curr_level]);
+	door = createDoor(renderer, {jsonData["door"]["position"][0].asFloat(), jsonData["door"]["position"][1].asFloat()}, { jsonData["door"]["scale"][0].asFloat(), jsonData["door"]["scale"][1].asFloat() }, DOOR_ASSET[asset_mapping[curr_level]]);
 
 	// Create climbables
 	for (const auto& data : jsonData["climbables"]) {
@@ -1376,7 +1386,7 @@ void WorldSystem::restart_level()
 		vec2 pos = { zombie_pos["x"].asFloat(), zombie_pos["y"].asFloat() };
 		zombie_spawn_pos.push_back(pos);
 		if (z < num_starting_zombies) {
-			createZombie(renderer, pos);
+			createZombie(renderer, pos, ZOMBIE_ASSET[asset_mapping[curr_level]]);
 		}
 		z++;
 	}
@@ -1617,15 +1627,27 @@ void WorldSystem::handle_collisions()
 			}
 		}
 		// Check Book - Zombie collision
-		else if (!game_over && registry.books.has(entity) && registry.zombies.has(entity_other))
+		else if (!game_over && registry.books.has(entity) && registry.zombies.has(entity_other) && !registry.zombieDeathTimers.has(entity_other))
 		{
 			Motion& motion_book = registry.motions.get(entity);
 			// Only collide when book is in air
 			if (motion_book.offGround == true)
 			{
 				Mix_PlayChannel(-1, zombie_kill_sound, 0);
+				
+				Motion& motion_zombie = registry.motions.get(entity_other);
+				motion_zombie.velocity[0] = 0.f;
+				motion_zombie.velocity[1] = 0.f;
+
+				// Modify Student's color
+				vec3& color = registry.colors.get(entity_other);
+				color = { 1.0f, 0.f, 0.f };
+
+				SpriteSheet& zombie_spritesheet = registry.spriteSheets.get(entity_other);
+				zombie_spritesheet.switchTime_ms *= 2.0;
+				zombie_spritesheet.updateAnimation(ANIMATION_MODE::CLIMB); // climb is actually death for zombies
+				registry.zombieDeathTimers.emplace(entity_other);
 				removeEntity(entity);
-				removeEntity(entity_other);
 			}
 		}
 
