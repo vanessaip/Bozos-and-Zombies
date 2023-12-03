@@ -242,47 +242,51 @@ void PhysicsSystem::step(float elapsed_ms)
 
 			Dangerous &dangerous = registry.dangerous.get(entity);
 
-			vec2 p0 = dangerous.p0;
-			vec2 p1 = dangerous.p1;
-			vec2 p2 = dangerous.p2;
-			vec2 p3 = dangerous.p3;
+      if (dangerous.bezier) {
+        vec2 p0 = dangerous.p0;
+        vec2 p1 = dangerous.p1;
+        vec2 p2 = dangerous.p2;
+        vec2 p3 = dangerous.p3;
 
-			if (dangerous.bezier_time < 2000)
-			{
+        if (dangerous.bezier_time < 2000)
+        {
 
-				float t = dangerous.bezier_time / 1000;
+          float t = dangerous.bezier_time / 1000;
 
-				vec2 L0 = (1 - t) * p0 + t * p1;
-				vec2 L1 = (1 - t) * p1 + t * p2;
+          vec2 L0 = (1 - t) * p0 + t * p1;
+          vec2 L1 = (1 - t) * p1 + t * p2;
 
-				vec2 Q0 = (1 - t) * L0 + t * L1;
+          vec2 Q0 = (1 - t) * L0 + t * L1;
 
-				if (!dangerous.cubic)
-				{
-					motion.position = Q0;
-					dangerous.bezier_time += 10;
-				}
-				else
-				{
-					vec2 L2 = (1 - t) * p2 + t * p3;
+          if (!dangerous.cubic)
+          {
+            motion.position = Q0;
+            dangerous.bezier_time += 10;
+          }
+          else
+          {
+            vec2 L2 = (1 - t) * p2 + t * p3;
 
-					vec2 Q1 = (1 - t) * L1 + t * L2;
+            vec2 Q1 = (1 - t) * L1 + t * L2;
 
-					vec2 C0 = (1 - t) * Q0 + t * Q1;
+            vec2 C0 = (1 - t) * Q0 + t * Q1;
 
-					motion.position = C0;
-					dangerous.bezier_time += 4;
-				}
-			}
-			else if (dangerous.bezier_time > 4000)
-			{
-				dangerous.bezier_time = 0;
-				motion.position = p0;
-			}
-			else
-			{
-				dangerous.bezier_time += 10;
-			}
+            motion.position = C0;
+            dangerous.bezier_time += 4;
+          }
+        }
+        else if (dangerous.bezier_time > 4000)
+        {
+          dangerous.bezier_time = 0;
+          motion.position = p0;
+        }
+        else
+        {
+          dangerous.bezier_time += 10;
+        }
+      } else {
+        motion.position[1] += 300 * elapsed_ms / 1000.f;
+      }
 		}
 
 		motion.position[0] += motion.velocity[0] * step_seconds;

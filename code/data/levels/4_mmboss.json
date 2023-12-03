@@ -47,7 +47,7 @@
       "visible": true
     },
     {
-      "x": 700.0,
+      "x": 704.0,
       "y": 480.0,
       "num_tiles": 2,
       "visible": true
@@ -65,14 +65,25 @@
   ],
   "climbables": [
     {
-      "x": 150,
+      "x": 120,
+      "y": 610,
+      "sections": 6
+    },
+    {
+      "x": 1280,
       "y": 610,
       "sections": 6
     }
   ],
   "zombie_climb_points": [
+    [],
+    [],
+    []
   ],
   "zombie_jump_points": [
+    [],
+    [],
+    []
   ],
   "spikes": [],
   "wheels": [],
@@ -90,11 +101,13 @@
     "spawn_timer": null
   },
   "students": {
-    "num_starting": 1,
+    "num_starting": 3,
     "positions": [
-      {"x": 320, "y": 760}
+      {"x": 720, "y": 430},
+      {"x": 80, "y": 300},
+      {"x": 1300, "y": 300}
     ],
-    "spawn_timer": null
+    "spawn_timer": 10
   },
   "boss": {
     "num_starting": 1,
@@ -125,8 +138,8 @@
     ]
   },
   "bgm": "tbc-music.wav",
-  "door_win_pos": {
-    "x": 100,
-    "y": 754
+  "door": {
+    "position": [730, 423],
+    "scale": [70, 90]
   }
 }

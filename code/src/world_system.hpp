@@ -72,7 +72,7 @@ private:
 	void boundEntitiesToWindow(Motion& motion, bool isPlayer);
 	void handlePlatformCollision(Motion& blockMotion, vec4 entityBB);
   void addAnimatedMMBossTextures(RenderSystem* renderer);
-  void updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_motion);
+  void updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_motion, float elapsed_ms_since_last_update);
 	
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
@@ -142,6 +142,8 @@ private:
 	float zombie_spawn_threshold;
 	float student_spawn_threshold;
 	uint num_collectibles;
+  std::vector<Entity> mm_boss_rain;
+
 
 	// music references
 	Mix_Music* background_music;

@@ -490,7 +490,7 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale) {
 	return entity;
 }
 
-Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic) {
+Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic, bool bezier) {
 	// Reserve en entity
 	auto entity = Entity();
 
@@ -510,6 +510,7 @@ Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTUR
   dangerous.p2 = p2;
   dangerous.p3 = p3;
   dangerous.cubic = cubic;
+  dangerous.bezier = bezier;
 
 	registry.renderRequests.insert(
 		entity,
