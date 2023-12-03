@@ -1426,58 +1426,58 @@ void WorldSystem::handle_collisions()
 			bool isDangerous = registry.dangerous.has(entity_other);
 			bool isWheel = registry.wheels.has(entity_other);
 			bool isBoss = registry.bosses.has(entity_other);
-			if (!game_over && ((isZombie && !registry.zombieDeathTimers.has(entity_other)) || isSpikes || isDangerous || isWheel || isBoss))
+			if (!game_over &&
+				((isZombie && !registry.zombieDeathTimers.has(entity_other)) || isSpikes || isDangerous || isWheel || isBoss) &&
+				!registry.deathTimers.has(entity) &&
+				!registry.lostLifeTimer.has(player_bozo))
 			{
-				// Reduce hearts if player has lives left
-				if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo)) {
-					// Remove a heart
-					registry.remove_all_components_of(player_hearts[player_lives]);
+				// Remove a heart
+				registry.remove_all_components_of(player_hearts[player_lives]);
 
-					// Play death sound
-					if (isZombie) {
-						Mix_PlayChannel(-1, player_death_sound, 0);
-					} else {
-						Mix_PlayChannel(-1, zombie_kill_sound, 0);
+				// Play death sound
+				if (isZombie) {
+					Mix_PlayChannel(-1, player_death_sound, 0);
+				} else {
+					Mix_PlayChannel(-1, zombie_kill_sound, 0);
+				}
+
+				// Decrement the player lives
+				player_lives--;
+				
+				// if player runs out of lives, use death timer
+				if (player_lives < 0 && !registry.deathTimers.has(entity)) {
+					// Scream, reset timer, and make the player [dying animation]
+					Motion& motion_player = registry.motions.get(entity);
+					Motion& motion_zombie = registry.motions.get(entity_other);
+
+					// Add a little jump animation
+					motion_player.offGround = true;
+					motion_player.velocity[0] = 0.f;
+					motion_player.velocity[1] = -100.f;
+
+					registry.deathTimers.emplace(entity);
+
+					// Set the direction of the death
+					DeathTimer& timer = registry.deathTimers.get(entity);
+					if (motion_zombie.velocity.x < 0)
+					{
+						timer.direction = 0;
+					}
+					else
+					{
+						timer.direction = 1;
 					}
 
-					// Decrement the player lives
-					player_lives--;
-					
-					// if player runs out of lives, use death timer
-					if (player_lives < 0 && !registry.deathTimers.has(entity)) {
-						// Scream, reset timer, and make the player [dying animation]
-						Motion& motion_player = registry.motions.get(entity);
-						Motion& motion_zombie = registry.motions.get(entity_other);
+				} else {
+					// Move player back to start
+					Motion& bozo_motion = registry.motions.get(player_bozo);
+					bozo_motion.position = bozo_start_pos;
 
-						// Add a little jump animation
-						motion_player.offGround = true;
-						motion_player.velocity[0] = 0.f;
-						motion_player.velocity[1] = -100.f;
-
-						registry.deathTimers.emplace(entity);
-
-						// Set the direction of the death
-						DeathTimer& timer = registry.deathTimers.get(entity);
-						if (motion_zombie.velocity.x < 0)
-						{
-							timer.direction = 0;
-						}
-						else
-						{
-							timer.direction = 1;
-						}
-
-					} else {
-						// Move player back to start
-						Motion& bozo_motion = registry.motions.get(player_bozo);
-						bozo_motion.position = bozo_start_pos;
-
-						// Add to lost life timer, animate hurt
-						SpriteSheet& bozo_sheet = registry.spriteSheets.get(player_bozo);
-						bozo_sheet.updateAnimation(ANIMATION_MODE::HURT);
-						bozo_sheet.switchTime_ms *= 2.f; // make switch time slower
-						registry.lostLifeTimer.emplace(player_bozo);
-					}
+					// Add to lost life timer, animate hurt
+					SpriteSheet& bozo_sheet = registry.spriteSheets.get(player_bozo);
+					bozo_sheet.updateAnimation(ANIMATION_MODE::HURT);
+					bozo_sheet.switchTime_ms *= 2.f; // make switch time slower
+					registry.lostLifeTimer.emplace(player_bozo);
 				}
 			}
 			// Checking Player - Human collisions

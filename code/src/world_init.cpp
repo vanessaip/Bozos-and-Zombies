@@ -25,7 +25,7 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 	registry.humans.emplace(entity); // zombies will target all entities with human component
 
 	std::vector<int> spriteCounts = { 4, 6, 6, 2, 6 };
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.05f, 0.065f));
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.06f, 0.065f));
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::BOZO,
@@ -90,7 +90,7 @@ Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID tex
 	registry.colors.insert(entity, { 1, 0.8f, 0.8f });
 
 	std::vector<int> spriteCounts = { 4, 6 };
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.05f, 0.1f));
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.08f, 0.08f));
 
 	registry.renderRequests.insert(
 		entity,
