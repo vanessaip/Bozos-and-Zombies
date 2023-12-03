@@ -422,9 +422,9 @@ enum class ANIMATION_MODE
 	IDLE = 0,
 	RUN = IDLE + 1,
 	ATTACK = RUN + 1,
-	CLIMB = ATTACK + 1,
-	DEATH = CLIMB + 1,
-	MODE_COUNT = DEATH + 1
+	HURT = ATTACK + 1,
+	CLIMB = HURT + 1,
+	MODE_COUNT = CLIMB + 1
 };
 const int animation_mode_count = (int)ANIMATION_MODE::MODE_COUNT;
 
