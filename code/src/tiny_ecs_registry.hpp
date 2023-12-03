@@ -40,9 +40,10 @@ public:
 	ComponentContainer<Overlay> overlay;
 	ComponentContainer<Dangerous> dangerous;
 	ComponentContainer<Fading> fading;
-  	ComponentContainer<Door> doors;
+  ComponentContainer<Door> doors;
 	ComponentContainer<Bounce> bounce;
 	ComponentContainer<Poisonous> poisonous;
+  ComponentContainer<Boss> bosses;
 
 
 	// constructor that adds all containers for looping over them
@@ -77,9 +78,10 @@ public:
 		registry_list.push_back(&lostLifeTimer);
 		registry_list.push_back(&dangerous);
 		registry_list.push_back(&fading);
-    	registry_list.push_back(&doors);
+    registry_list.push_back(&doors);
 		registry_list.push_back(&bounce);
 		registry_list.push_back(&poisonous);
+    registry_list.push_back(&bosses);
 	}
 
 	void clear_all_components() {

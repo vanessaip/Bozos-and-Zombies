@@ -586,17 +586,92 @@ Entity createDoor(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASS
 	motion.position = position;
 	motion.scale = scale;
 
-	registry.doors.emplace(entity);
-	Door& door = registry.doors.get(entity);
-	door.fading_timer = Clock::now();
+	auto& door = registry.doors.emplace(entity);
 
-	registry.overlay.emplace(entity);
+	std::vector<int> spriteCounts = { 1,6,1 }; // one frame closed, 6 frames animate open, 1 frame closed
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 400.f, vec2(0.f, 0.0f));
 
 	registry.renderRequests.insert(
 		entity,
 		{ assetID,
 			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE_SHEET });
+	return entity;
+}
+
+Entity createBoss(RenderSystem* renderer, vec2 position, vec2 scale, float health, float damage, TEXTURE_ASSET_ID assetID, vec2 trunc, std::vector<int> counts) {
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	Boss& boss = registry.bosses.emplace(entity);
+
+  registry.colors.insert(entity, { 1, 1, 1 });
+
+  boss.health = health;
+  boss.damage = damage;
+
+  std::vector<int> spriteCounts = counts;
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, trunc);
+
+	registry.renderRequests.insert(
+		entity,
+		{ assetID,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE_SHEET });
+
+	return entity;
+}
+
+Entity createHPBar(RenderSystem* renderer, vec2 position) {
+  // Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = {80, 10};
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::HP_BAR,
+			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createHP(RenderSystem* renderer, vec2 position) {
+  // Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = {80, 10};
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::HP,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
 	return entity;
 }
 

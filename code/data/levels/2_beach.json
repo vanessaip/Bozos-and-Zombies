@@ -176,8 +176,8 @@
     ]
   },
   "bgm": "beach.wav",
-  "door_win_pos": {
-    "x": 100,
-    "y": 754
+  "door": {
+    "position": [100, 754],
+    "scale": [60, 60]
   }
 }
