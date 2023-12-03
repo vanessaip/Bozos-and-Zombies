@@ -52,7 +52,7 @@ Entity createBook(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textur
 // text box
 Entity createStaticTexture(RenderSystem* renderer, TEXTURE_ASSET_ID textureID, vec2 position, std::string text, vec2 scale = { 1.f, 1.f });
 // collectible
-Entity createCollectible(RenderSystem* renderer, float position_x, float position_y, TEXTURE_ASSET_ID collectible, vec2 scale, bool overlay);
+Entity createCollectible(RenderSystem* renderer, float position_x, float position_y, TEXTURE_ASSET_ID collectible, vec2 scale, bool overlay, bool isPoisonous);
 
 // hearts
 Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
@@ -76,7 +76,8 @@ enum level {
 	NEST = 3,
 	BEACH = 2,
 	LIBRARY = 1,
-  TBC = 4
+  	TBC = 5,
+	FOREST = 4
 };
 
 // For swapping levels around
@@ -85,7 +86,8 @@ const std::vector<int> asset_mapping = {
   3, 
   2, 
   1,
-  4
+  4,
+  5
 };
 
 const std::vector<std::string> LEVEL_DESCRIPTORS = {
@@ -93,6 +95,7 @@ const std::vector<std::string> LEVEL_DESCRIPTORS = {
   level_path("3_library.json"),
   level_path("2_beach.json"),
   level_path("1_nest.json"),
+  level_path("4_forest.json"),
   level_path("to_be_continued.json"),
 };
 
@@ -131,7 +134,14 @@ const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_A
 		{ TEXTURE_ASSET_ID::LIBRARY_OBJECTS, 2.f },
 		{ TEXTURE_ASSET_ID::LIBRARY_FRAME, 0.f }
 	},
-  {
+	{
+		{ TEXTURE_ASSET_ID::FOREST_BACKGROUND_1, 32.f },
+		{ TEXTURE_ASSET_ID::FOREST_BACKGROUND_2, 16.f },
+		{ TEXTURE_ASSET_ID::FOREST_BACKGROUND_3, 8.f },
+		{ TEXTURE_ASSET_ID::FOREST_BACKGROUND_4, 4.f },
+		{ TEXTURE_ASSET_ID::FOREST_BACKGROUND_5, 0.f }
+	},
+  	{
 		{ TEXTURE_ASSET_ID::TBC, 0.f }
 	}
 };
@@ -150,6 +160,7 @@ const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
   TEXTURE_ASSET_ID::STEP1,
   TEXTURE_ASSET_ID::BEACH_PLAT,
   TEXTURE_ASSET_ID::LIBRARY_PLAT,
+  TEXTURE_ASSET_ID::FOREST_PLATFORM,
 };
 
 const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
@@ -157,10 +168,12 @@ const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
   TEXTURE_ASSET_ID::LADDER2,
   TEXTURE_ASSET_ID::BEACH_LADDER,
   TEXTURE_ASSET_ID::LIBRARY_LAD,
+  TEXTURE_ASSET_ID::FOREST_LADDER,
 };
 
 const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
   TEXTURE_ASSET_ID::TUTORIAL_NPC,
+  TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT
@@ -181,7 +194,7 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::PIZZA
 	},
 	{
-	TEXTURE_ASSET_ID::BEACH_APPLE,
+		TEXTURE_ASSET_ID::BEACH_APPLE,
 		TEXTURE_ASSET_ID::BEACH_CHEST,
 		TEXTURE_ASSET_ID::BEACH_CHEST2,
 		TEXTURE_ASSET_ID::BEACH_DIAMOND,
@@ -193,12 +206,22 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::LIB_COLL5,
 		TEXTURE_ASSET_ID::LIB_COLL3,
 		TEXTURE_ASSET_ID::LIB_COLL4,
-		TEXTURE_ASSET_ID::LIB_COLL2},
-  {}
+		TEXTURE_ASSET_ID::LIB_COLL2
+},
+ {
+		TEXTURE_ASSET_ID::FOREST_CHERRY,
+		TEXTURE_ASSET_ID::FOREST_MEAT,
+		TEXTURE_ASSET_ID::FOREST_RADISH,
+		TEXTURE_ASSET_ID::FOREST_SQUASH,
+		TEXTURE_ASSET_ID::FOREST_TOMATO,
+		TEXTURE_ASSET_ID::FOREST_STRAWBERRY},
+  {
+  }
 };
 
 const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
 	TEXTURE_ASSET_ID::TUTORIAL_WEAPON,
+	TEXTURE_ASSET_ID::BOOK,
 	TEXTURE_ASSET_ID::BOOK,
 	TEXTURE_ASSET_ID::BOOK,
 	TEXTURE_ASSET_ID::BOOK,
@@ -210,6 +233,7 @@ const std::vector<std::string> BACKGROUND_MUSIC = {
 	"soundtrack.wav",
 	"beach.wav",
 	"library.wav"
+	"forest.wav",
 };
 
 const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
@@ -217,5 +241,5 @@ const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
 	TEXTURE_ASSET_ID::LABEL_NEST,
 	TEXTURE_ASSET_ID::LABEL_BEACH,
 	TEXTURE_ASSET_ID::LABEL_LIB,
-  TEXTURE_ASSET_ID::LABEL_LIB,
+	TEXTURE_ASSET_ID::LABEL_FOREST,
 };
