@@ -101,7 +101,7 @@ Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID tex
 	return entity;
 }
 
-Entity createZombie(RenderSystem* renderer, vec2 position)
+Entity createZombie(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId)
 {
 	auto entity = Entity();
 
@@ -128,7 +128,7 @@ Entity createZombie(RenderSystem* renderer, vec2 position)
 
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::ZOMBIE,
+		{ textureId,
 		 EFFECT_ASSET_ID::TEXTURED,
 		 GEOMETRY_BUFFER_ID::SPRITE_SHEET });
 

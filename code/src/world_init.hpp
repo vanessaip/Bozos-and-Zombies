@@ -28,7 +28,7 @@ Entity createBozoPointer(RenderSystem* renderer, vec2 pos);
 // the prey
 Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId);
 // the enemy
-Entity createZombie(RenderSystem* renderer, vec2 position);
+Entity createZombie(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId);
 // a red line for debugging purposes
 Entity createLine(vec2 position, vec2 size);
 // one platform
@@ -160,9 +160,9 @@ const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
 
 const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
 	TEXTURE_ASSET_ID::GHETTO_DOOR,
-	TEXTURE_ASSET_ID::LIBRARY_DOOR,
-	TEXTURE_ASSET_ID::BEACH_DOOR,
 	TEXTURE_ASSET_ID::NEST_DOOR,
+	TEXTURE_ASSET_ID::BEACH_DOOR,
+	TEXTURE_ASSET_ID::LIBRARY_DOOR,
 	TEXTURE_ASSET_ID::LIBRARY_DOOR,
 };
 
@@ -172,6 +172,14 @@ const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT
+};
+
+const std::vector<TEXTURE_ASSET_ID> ZOMBIE_ASSET = {
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::BEACH_ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE
 };
 
 const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {

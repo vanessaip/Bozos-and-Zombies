@@ -312,7 +312,7 @@ void WorldSystem::handleRespawn(float elapsed_ms_since_last_update) {
 
 			if (spawn)
 			{
-				createZombie(renderer, enemySpawnPos);
+				createZombie(renderer, enemySpawnPos, ZOMBIE_ASSET[asset_mapping[curr_level]]);
 				enemySpawnTimer = 0.f;
 				break;
 			}
@@ -339,7 +339,7 @@ void WorldSystem::handleRespawn(float elapsed_ms_since_last_update) {
 
 			if (spawn)
 			{
-				Entity student = createStudent(renderer, npcSpawnPos, NPC_ASSET[curr_level]);
+				Entity student = createStudent(renderer, npcSpawnPos, NPC_ASSET[asset_mapping[curr_level]]);
 				Motion& student_motion = registry.motions.get(student);
 				student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
 				npcSpawnTimer = 0.f;
@@ -421,7 +421,7 @@ bool WorldSystem::handleTimers(Motion& motion, Entity motionEntity, float elapse
 			registry.infectTimers.remove(motionEntity);
 			Motion lastStudentLocation = registry.motions.get(motionEntity);
 			removeEntity(motionEntity);
-			Entity new_zombie = createZombie(renderer, lastStudentLocation.position);
+			Entity new_zombie = createZombie(renderer, lastStudentLocation.position, ZOMBIE_ASSET[asset_mapping[curr_level]]);
 		}
 	} else if (registry.zombieDeathTimers.has(motionEntity)) {
 		ZombieDeathTimer& timer = registry.zombieDeathTimers.get(motionEntity);
@@ -1255,7 +1255,7 @@ void WorldSystem::restart_level()
 		createWall(renderer, wall_data["x"].asFloat(), wall_data["y"].asFloat(), wall_data["height"].asFloat(), wall_data["visible"].asBool());
 	}
 
-	door = createDoor(renderer, {jsonData["door"]["position"][0].asFloat(), jsonData["door"]["position"][1].asFloat()}, { jsonData["door"]["scale"][0].asFloat(), jsonData["door"]["scale"][1].asFloat() }, DOOR_ASSET[curr_level]);
+	door = createDoor(renderer, {jsonData["door"]["position"][0].asFloat(), jsonData["door"]["position"][1].asFloat()}, { jsonData["door"]["scale"][0].asFloat(), jsonData["door"]["scale"][1].asFloat() }, DOOR_ASSET[asset_mapping[curr_level]]);
 
 	// Create climbables
 	for (const auto& data : jsonData["climbables"]) {
@@ -1330,7 +1330,7 @@ void WorldSystem::restart_level()
 		vec2 pos = { zombie_pos["x"].asFloat(), zombie_pos["y"].asFloat() };
 		zombie_spawn_pos.push_back(pos);
 		if (z < num_starting_zombies) {
-			createZombie(renderer, pos);
+			createZombie(renderer, pos, ZOMBIE_ASSET[asset_mapping[curr_level]]);
 		}
 		z++;
 	}
