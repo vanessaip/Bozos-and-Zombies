@@ -148,6 +148,11 @@ struct LostLife
 	bool direction = 0;
 };
 
+struct ZombieDeathTimer
+{
+	float timer_ms = 600.f;
+};
+
 // Keyframe animation stores all keyframes and timing data for a given entity
 struct KeyframeAnimation
 {
@@ -413,7 +418,8 @@ enum class ANIMATION_MODE
 	RUN = IDLE + 1,
 	ATTACK = RUN + 1,
 	CLIMB = ATTACK + 1,
-	MODE_COUNT = CLIMB + 1
+	DEATH = CLIMB + 1,
+	MODE_COUNT = DEATH + 1
 };
 const int animation_mode_count = (int)ANIMATION_MODE::MODE_COUNT;
 

@@ -122,8 +122,9 @@ Entity createZombie(RenderSystem* renderer, vec2 position)
 
 	// Create and (empty) Zombie component to be able to refer to all zombies
 	registry.zombies.emplace(entity);
-	std::vector<int> spriteCounts = { 8, 6, 5 };
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 75.f, vec2(0.01f, 0.1f));
+	registry.colors.insert(entity, { 1, 1, 1 });
+	std::vector<int> spriteCounts = { 4, 6, 6, 6 };
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.0f, 0.0f));
 
 	registry.renderRequests.insert(
 		entity,
