@@ -58,7 +58,7 @@ Entity createCollectible(RenderSystem* renderer, float position_x, float positio
 // hearts
 Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
 
-Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic, bool bezier);
+Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic, bool bezier, int spriteCount);
 
 // label
 Entity createOverlay(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId, bool is_fading);
@@ -171,9 +171,9 @@ const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
 
 const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
   TEXTURE_ASSET_ID::TUTORIAL_NPC,
-  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::NEST_NPC,
   TEXTURE_ASSET_ID::BEACH_NPC,
-  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::NEST_NPC,
   TEXTURE_ASSET_ID::STUDENT
 };
 
@@ -218,8 +218,8 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 
 const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
 	TEXTURE_ASSET_ID::TUTORIAL_WEAPON,
-	TEXTURE_ASSET_ID::BOOK,
-	TEXTURE_ASSET_ID::BOOK,
+	TEXTURE_ASSET_ID::CLEAVER_WEAPON,
+	TEXTURE_ASSET_ID::BEACH_WEAPON,
 	TEXTURE_ASSET_ID::BOOK,
   TEXTURE_ASSET_ID::MM_PROJECTILE,
 };
