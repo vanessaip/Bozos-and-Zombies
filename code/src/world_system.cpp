@@ -387,7 +387,6 @@ bool WorldSystem::handleTimers(Motion& motion, Entity motionEntity, float elapse
 		if (timer.timer_ms < 0)
 		{
 			registry.deathTimers.remove(motionEntity);
-			screen.screen_darken_factor = 0;
 			restart_level();
 			return true;
 		}
@@ -1188,6 +1187,11 @@ void WorldSystem::restart_level()
 	collectibles_collected_pos = 50.f;
 	player_lives = 4;
 	collectibles_collected = 0;
+
+	// reset screen brightness
+	assert(registry.screenStates.components.size() <= 1);
+	ScreenState& screen = registry.screenStates.components[0];
+	screen.screen_darken_factor = 0;
 
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
