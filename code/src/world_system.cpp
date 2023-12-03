@@ -237,7 +237,7 @@ void WorldSystem::handleGameOver() {
 	Mix_PlayChannel(-1, level_success_sound, 0);
 	// animate door open
 	SpriteSheet& door_sheet = registry.spriteSheets.get(door);
-	door_sheet.updateAnimation(ANIMATION_MODE::RUN);
+	door_sheet.updateAnimation(ANIMATION_MODE::RUN); // "run" is the door opening animation
 	printf("You win!\n");
 
 	// option to retry level? (display current and high scores?)
@@ -526,24 +526,26 @@ void WorldSystem::handleKeyframeAnimation(float elapsed_ms_since_last_update) {
 }
 
 void WorldSystem::updateSpriteSheetAnimation(Motion& bozo_motion, float elapsed_ms_since_last_update) {
-	SpriteSheet& spriteSheet = registry.spriteSheets.get(player_bozo);
-	if (bozo_motion.climbing)
-	{
-		spriteSheet.updateAnimation(ANIMATION_MODE::CLIMB);
-		spriteSheet.truncation.y = 0.f;
-		bozo_motion.scale.y = BOZO_BB_HEIGHT + 17.f;
-	}
-	else
-	{
-		if (bozo_motion.velocity.x != 0.f && !bozo_motion.offGround)
-			spriteSheet.updateAnimation(ANIMATION_MODE::RUN);
-		else if (bozo_motion.velocity.x == 0 || bozo_motion.offGround)
-			spriteSheet.updateAnimation(ANIMATION_MODE::IDLE);
+	if (!registry.lostLifeTimer.has(player_bozo)) {
+		SpriteSheet& spriteSheet = registry.spriteSheets.get(player_bozo);
+		if (bozo_motion.climbing)
+		{
+			spriteSheet.updateAnimation(ANIMATION_MODE::CLIMB);
+			spriteSheet.truncation.y = 0.f;
+			bozo_motion.scale.y = BOZO_BB_HEIGHT + 17.f;
+		}
+		else
+		{
+			if (bozo_motion.velocity.x != 0.f && !bozo_motion.offGround)
+				spriteSheet.updateAnimation(ANIMATION_MODE::RUN);
+			else if (bozo_motion.velocity.x == 0 || bozo_motion.offGround)
+				spriteSheet.updateAnimation(ANIMATION_MODE::IDLE);
 
-		spriteSheet.truncation.y = 0.08f;
-		bozo_motion.scale.y = BOZO_BB_HEIGHT;
+			spriteSheet.truncation.y = 0.065f;
+			bozo_motion.scale.y = BOZO_BB_HEIGHT;
+		}
 	}
-
+	
 	// handle animation of door when game is over
 	SpriteSheet& door_sheet = registry.spriteSheets.get(door);
 	if (game_over && door_sheet.mode != ANIMATION_MODE::ATTACK) {
@@ -551,7 +553,7 @@ void WorldSystem::updateSpriteSheetAnimation(Motion& bozo_motion, float elapsed_
 		doorOpenTimer += elapsed_ms_since_last_update;
 		if (doorOpenTimer > door_component.door_open_timer) {
 			doorOpenTimer = 0.f;
-			door_sheet.updateAnimation(ANIMATION_MODE::ATTACK);
+			door_sheet.updateAnimation(ANIMATION_MODE::ATTACK); // "attack" the mode where the door is open
 		}
 	}
 }
@@ -581,17 +583,12 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 			LostLife& timer = registry.lostLifeTimer.get(player_bozo);
 			timer.timer_ms -= elapsed_ms_since_last_update;
 
-			// Fade a bit to show invincibility
-			vec3& color = registry.colors.get(player_bozo);
-			color = { 0.5f, 0.5f, 0.5f };
-
 			if (timer.timer_ms <= 0) {
 				registry.lostLifeTimer.remove(player_bozo);
+				SpriteSheet& bozo_sheet = registry.spriteSheets.get(player_bozo);
+				bozo_sheet.updateAnimation(ANIMATION_MODE::IDLE);
+				bozo_sheet.switchTime_ms /= 2.f; // reset switch time
 			}
-		}
-		else {
-			vec3& color = registry.colors.get(player_bozo);
-			color = { 1.f, 1.f, 1.f };
 		}
 
 
@@ -676,7 +673,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 
 			// Collision with Right edge of block
 			if (entityLeftSide < xBlockRightBound &&
-				entityLeftSide > xBlockRightBound - 10.f &&
+				entityLeftSide > xBlockRightBound - abs(motion.scale[0])/3.f &&
 				entityTop < yBlockBottom &&
 				entityBottom > yBlockTop && (player.keyPresses[0] || isZombie || isNPC || isWheel))
 			{
@@ -702,7 +699,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 
 			// Collision with Left edge of block
 			if (entityRightSide > xBlockLeftBound &&
-				entityRightSide < xBlockLeftBound + 10.f &&
+				entityRightSide < xBlockLeftBound + abs(motion.scale[0])/3.f &&
 				entityTop < yBlockBottom &&
 				entityBottom > yBlockTop && (player.keyPresses[1] || isZombie || isNPC || isWheel))
 			{
@@ -739,10 +736,10 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 
 		if ((isWheel || isNPC) && offAll && !registry.infectTimers.has(motionEntity)) {
 			if (motion.velocity.x > 0) {
-				motion.position.x -= 10.f;
+				motion.position.x -= abs(motion.scale[0]/3.0f);
 			}
 			else {
-				motion.position.x += 10.f;
+				motion.position.x += abs(motion.scale[0]/3.0f);
 			}
 			motion.velocity.x = -motion.velocity.x;
 		}
@@ -1105,7 +1102,7 @@ void WorldSystem::updateClimbing(Motion& motion, vec4 entityBB, ComponentContain
 				motion.climbing = true;
 				motion.velocity.y -= 200;
 			}
-			if (player.keyPresses[3] && !isBottomOfLadder({ motion.position.x, entityBottom + 5 }, motion_container))
+			if (player.keyPresses[3] && !isBottomOfLadder({ motion.position.x, entityBottom + motion.scale[1]/10.f }, motion_container))
 			{
 
 				motion.climbing = true;
@@ -1385,7 +1382,7 @@ void WorldSystem::restart_level()
 	// This is specific to the beach level
 	if (curr_level == BEACH) {
 		createDangerous(renderer, { 280, 130 }, { 30, 30 }, TEXTURE_ASSET_ID::SPIKE_BALL, { 280, 130 }, { 500, 10 }, { 650, 250 }, { 0, 0 }, false);
-		createDangerous(renderer, { 280, 130 }, { 30, 30 }, TEXTURE_ASSET_ID::BEACH_BIRD, { 0, 400 }, { 500, 50 }, { 1000, 750 }, { 1450, 400 }, true);
+		createDangerous(renderer, { 280, 130 }, { 50, 50 }, TEXTURE_ASSET_ID::BEACH_BIRD, { 0, 400 }, { 500, 50 }, { 1000, 750 }, { 1450, 400 }, true);
 		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, { 230, 155 }, { 80, 60 });
 	}
 	// Lives can probably stay hardcoded?
@@ -1429,57 +1426,58 @@ void WorldSystem::handle_collisions()
 			bool isDangerous = registry.dangerous.has(entity_other);
 			bool isWheel = registry.wheels.has(entity_other);
 			bool isBoss = registry.bosses.has(entity_other);
-			if (!game_over && isZombie || isSpikes || isDangerous || isWheel || isBoss)
+			if (!game_over &&
+				((isZombie && !registry.zombieDeathTimers.has(entity_other)) || isSpikes || isDangerous || isWheel || isBoss) &&
+				!registry.deathTimers.has(entity) &&
+				!registry.lostLifeTimer.has(player_bozo))
 			{
-				// Reduce hearts if player has lives left
-				if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo)) {
-					// Remove a heart
-					registry.remove_all_components_of(player_hearts[player_lives]);
+				// Remove a heart
+				registry.remove_all_components_of(player_hearts[player_lives]);
 
-					// Play death sound
-					if (isZombie) {
-						Mix_PlayChannel(-1, player_death_sound, 0);
-					} else {
-						Mix_PlayChannel(-1, zombie_kill_sound, 0);
+				// Play death sound
+				if (isZombie) {
+					Mix_PlayChannel(-1, player_death_sound, 0);
+				} else {
+					Mix_PlayChannel(-1, zombie_kill_sound, 0);
+				}
+
+				// Decrement the player lives
+				player_lives--;
+				
+				// if player runs out of lives, use death timer
+				if (player_lives < 0 && !registry.deathTimers.has(entity)) {
+					// Scream, reset timer, and make the player [dying animation]
+					Motion& motion_player = registry.motions.get(entity);
+					Motion& motion_zombie = registry.motions.get(entity_other);
+
+					// Add a little jump animation
+					motion_player.offGround = true;
+					motion_player.velocity[0] = 0.f;
+					motion_player.velocity[1] = -100.f;
+
+					registry.deathTimers.emplace(entity);
+
+					// Set the direction of the death
+					DeathTimer& timer = registry.deathTimers.get(entity);
+					if (motion_zombie.velocity.x < 0)
+					{
+						timer.direction = 0;
+					}
+					else
+					{
+						timer.direction = 1;
 					}
 
-					// Decrement the player lives
-					player_lives--;
-					
-					// if player runs out of lives, use death timer
-					if (player_lives < 0 && !registry.deathTimers.has(entity)) {
-						// Scream, reset timer, and make the player [dying animation]
-						Motion& motion_player = registry.motions.get(entity);
-						Motion& motion_zombie = registry.motions.get(entity_other);
+				} else {
+					// Move player back to start
+					Motion& bozo_motion = registry.motions.get(player_bozo);
+					bozo_motion.position = bozo_start_pos;
 
-						// Add a little jump animation
-						motion_player.offGround = true;
-						motion_player.velocity[0] = 0.f;
-						motion_player.velocity[1] = -100.f;
-
-						registry.deathTimers.emplace(entity);
-
-						// Set the direction of the death
-						DeathTimer& timer = registry.deathTimers.get(entity);
-						if (motion_zombie.velocity.x < 0)
-						{
-							timer.direction = 0;
-						}
-						else
-						{
-							timer.direction = 1;
-						}
-
-					} else {
-						// Move player back to start
-						Motion& bozo_motion = registry.motions.get(player_bozo);
-						bozo_motion.position = bozo_start_pos;
-
-						// Add to lost life timer
-						if (!registry.lostLifeTimer.has(player_bozo)) {
-							registry.lostLifeTimer.emplace(player_bozo);
-						}
-					}
+					// Add to lost life timer, animate hurt
+					SpriteSheet& bozo_sheet = registry.spriteSheets.get(player_bozo);
+					bozo_sheet.updateAnimation(ANIMATION_MODE::HURT);
+					bozo_sheet.switchTime_ms *= 2.f; // make switch time slower
+					registry.lostLifeTimer.emplace(player_bozo);
 				}
 			}
 			// Checking Player - Human collisions
@@ -1588,7 +1586,7 @@ void WorldSystem::handle_collisions()
 
 				SpriteSheet& zombie_spritesheet = registry.spriteSheets.get(entity_other);
 				zombie_spritesheet.switchTime_ms *= 2.0;
-				zombie_spritesheet.updateAnimation(ANIMATION_MODE::CLIMB); // climb is actually death for zombies
+				zombie_spritesheet.updateAnimation(ANIMATION_MODE::HURT);
 				registry.zombieDeathTimers.emplace(entity_other);
 				removeEntity(entity);
 			}
