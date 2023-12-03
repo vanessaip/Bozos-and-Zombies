@@ -71,6 +71,7 @@ private:
 	void handleWorldCollisions(Motion& motion, Entity motionEntity, Motion& bozo_motion, ComponentContainer<Motion>& motion_container, float elapsed_ms_since_last_update);
 	void boundEntitiesToWindow(Motion& motion, bool isPlayer);
 	void handlePlatformCollision(Motion& blockMotion, vec4 entityBB);
+  void addAnimatedMMBossTextures(RenderSystem* renderer);
 	
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);

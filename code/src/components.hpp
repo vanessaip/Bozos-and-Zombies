@@ -374,7 +374,8 @@ enum class TEXTURE_ASSET_ID
   MM_BOSS = MM_PLAT + 1,
   HP_BAR = MM_BOSS + 1,
   HP = HP_BAR + 1,
-	TEXTURE_COUNT = HP + 1
+  MM_FOUNTAIN = HP + 1,
+	TEXTURE_COUNT = MM_FOUNTAIN + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

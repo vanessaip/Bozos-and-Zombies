@@ -223,9 +223,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 
 	// If it is a boss level
-  	if (curr_level == 2) {
+  	if (curr_level == MMBOSS) {
 	    updateBossMotion(bozo_motion, elapsed_ms_since_last_update);
-		updateHPBar(bossHealth / registry.bosses.get(boss).health * 100);
+		  updateHPBar(bossHealth / registry.bosses.get(boss).health * 100);
   	}
 	return true;
 }
@@ -817,34 +817,46 @@ void WorldSystem::updateHPBar(float percent_full) {
 
 void WorldSystem::updateBossMotion(Motion& bozo_motion, float elapsed_ms_since_last_update) {
   Motion& bossMotion = registry.motions.get(boss);
-  float direction = -1;
-  if ((bozo_motion.position.x - bossMotion.position.x) > 0)
-  {
-    direction = 1;
-  }
-  float speed = 50;
-  bossMotion.velocity.x = direction * speed;
-  if (direction == 1) {
-    bossMotion.reflect[0] = false;
-  } else {
-    bossMotion.reflect[0] = true;
-  }
 
-  if (registry.lostLifeTimer.has(boss)) {
-        LostLife& timer = registry.lostLifeTimer.get(boss);
-				timer.timer_ms -= elapsed_ms_since_last_update;
-
-				// Make a bit red to show damaged
-				vec3& color = registry.colors.get(boss);
-				color = { 1.0f, 0.5f, 0.5f };
-
-				if (timer.timer_ms <= 0) {
-					registry.lostLifeTimer.remove(boss);
-				}
-  }
+  // If boss is not damaged, follow the player
   if (!registry.lostLifeTimer.has(boss)) {
+
+    float direction = -1;
+    if ((bozo_motion.position.x - bossMotion.position.x) > 0)
+    {
+      direction = 1;
+    }
+    float speed = 150;
+    bossMotion.velocity.x = direction * speed;
+    if (direction == 1) {
+      bossMotion.reflect[0] = false;
+    } else {
+      bossMotion.reflect[0] = true;
+    }
+
     vec3& color = registry.colors.get(boss);
     color = { 1.f, 1.f, 1.f };
+
+  } else {
+
+    // Fade the boss red, and adjust knockback
+    LostLife& timer = registry.lostLifeTimer.get(boss);
+    timer.timer_ms -= elapsed_ms_since_last_update;
+
+    if (bossMotion.velocity.x > 0) {
+      bossMotion.velocity.x -= 5;
+    } else {
+      bossMotion.velocity.x += 5;
+    }
+
+    // Make a bit red to show damaged
+    vec3& color = registry.colors.get(boss);
+    color = { 1.0f, 0.5f, 0.5f };
+
+    if (timer.timer_ms <= 0) {
+      registry.lostLifeTimer.remove(boss);
+    }
+
   }
 }
 
@@ -1236,6 +1248,11 @@ void WorldSystem::restart_level()
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_GOAL, { 130.f, window_height_px - 200.f }, "", { 180.f, 100.f });
 	}
 
+  // AnimateBackgrounds for Main Mall Boss level
+  if (curr_level == MMBOSS) {
+    addAnimatedMMBossTextures(renderer);
+  }
+
 	// Create platforms
 	floor_positions.clear();
 	for (const auto pos : jsonData["floor_positions"]) {
@@ -1404,6 +1421,11 @@ void WorldSystem::restart_level()
 
 	points = 0;
 	level_start_time = Clock::now();
+}
+
+void WorldSystem::addAnimatedMMBossTextures(RenderSystem* renderer)
+{
+  createAnimatedBackgroundObject(renderer, {800, 720}, {130, 130}, TEXTURE_ASSET_ID::MM_FOUNTAIN, {4}, {0, 0});
 }
 
 // Compute collisions between entities
@@ -1577,19 +1599,30 @@ void WorldSystem::handle_collisions()
 			}
 		}
 
-    // Book - Boss collision
+    // Book-Boss collision
     else if (!registry.lostLifeTimer.has(boss) && registry.books.has(entity) && registry.bosses.has(entity_other))
     {
-      Mix_PlayChannel(-1, zombie_kill_sound, 0);
       Motion& motion_book = registry.motions.get(entity);
+      Motion& boss_motion = registry.motions.get(entity_other);
       if (motion_book.offGround == true)
 			{
+        Mix_PlayChannel(-1, zombie_kill_sound, 0);
 				bossHealth -= 20;
-			}
+        // Make boss invincible for a bit between hits
+        if (!registry.lostLifeTimer.has(boss)) {
+          auto& timer = registry.lostLifeTimer.emplace(boss);
+          timer.timer_ms = 500.f;
+        }
 
-      // Make boss invincible for a bit between hits
-      if (!registry.lostLifeTimer.has(boss)) {
-				registry.lostLifeTimer.emplace(boss);
+        // Determine knockback direction
+        if (motion_book.velocity.x > 0) {
+          boss_motion.velocity.x = 500;
+        } else {
+          boss_motion.velocity.x = -500;
+        }
+
+        // Remove the book on collision
+        removeEntity(entity);
 			}
     }
 

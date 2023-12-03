@@ -74,6 +74,8 @@ Entity createHPBar(RenderSystem* renderer, vec2 position);
 
 Entity createHP(RenderSystem* renderer, vec2 position);
 
+Entity createAnimatedBackgroundObject(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, std::vector<int> spriteCounts, vec2 trunc);
+
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 
