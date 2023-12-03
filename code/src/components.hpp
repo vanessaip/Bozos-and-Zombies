@@ -148,6 +148,11 @@ struct LostLife
 	bool direction = 0;
 };
 
+struct ZombieDeathTimer
+{
+	float timer_ms = 600.f;
+};
+
 // Keyframe animation stores all keyframes and timing data for a given entity
 struct KeyframeAnimation
 {
@@ -365,16 +370,18 @@ enum class TEXTURE_ASSET_ID
 	LIB_COLL3 = LIB_COLL2 + 1,
 	LIB_COLL4 = LIB_COLL3 + 1,
 	LIB_COLL5 = LIB_COLL4 + 1,
-  TBC = LIB_COLL5 + 1,
+  	TBC = LIB_COLL5 + 1,
 	GHETTO_DOOR = TBC + 1,
 	BEACH_DOOR = GHETTO_DOOR + 1,
 	NEST_DOOR = BEACH_DOOR + 1,
-  MM_BACKGROUND = NEST_DOOR + 1,
-  MM_PLAT = MM_BACKGROUND + 1,
-  MM_BOSS = MM_PLAT + 1,
-  HP_BAR = MM_BOSS + 1,
-  HP = HP_BAR + 1,
-	TEXTURE_COUNT = HP + 1
+	MM_BACKGROUND = NEST_DOOR + 1,
+	MM_PLAT = MM_BACKGROUND + 1,
+	MM_BOSS = MM_PLAT + 1,
+	HP_BAR = MM_BOSS + 1,
+	HP = HP_BAR + 1,
+	BEACH_ZOMBIE = HP + 1,
+	BEACH_NPC = BEACH_ZOMBIE + 1,
+	TEXTURE_COUNT = BEACH_NPC + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -413,7 +420,8 @@ enum class ANIMATION_MODE
 	RUN = IDLE + 1,
 	ATTACK = RUN + 1,
 	CLIMB = ATTACK + 1,
-	MODE_COUNT = CLIMB + 1
+	DEATH = CLIMB + 1,
+	MODE_COUNT = DEATH + 1
 };
 const int animation_mode_count = (int)ANIMATION_MODE::MODE_COUNT;
 

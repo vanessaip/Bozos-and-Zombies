@@ -89,7 +89,7 @@ Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID tex
 	registry.humans.emplace(entity);
 	registry.colors.insert(entity, { 1, 0.8f, 0.8f });
 
-	std::vector<int> spriteCounts = { 4, 6, 6 };
+	std::vector<int> spriteCounts = { 4, 6 };
 	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.05f, 0.1f));
 
 	registry.renderRequests.insert(
@@ -101,7 +101,7 @@ Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID tex
 	return entity;
 }
 
-Entity createZombie(RenderSystem* renderer, vec2 position)
+Entity createZombie(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId)
 {
 	auto entity = Entity();
 
@@ -122,12 +122,13 @@ Entity createZombie(RenderSystem* renderer, vec2 position)
 
 	// Create and (empty) Zombie component to be able to refer to all zombies
 	registry.zombies.emplace(entity);
-	std::vector<int> spriteCounts = { 8, 6, 5 };
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 75.f, vec2(0.01f, 0.1f));
+	registry.colors.insert(entity, { 1, 1, 1 });
+	std::vector<int> spriteCounts = { 4, 6, 6, 6 };
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.0f, 0.0f));
 
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::ZOMBIE,
+		{ textureId,
 		 EFFECT_ASSET_ID::TEXTURED,
 		 GEOMETRY_BUFFER_ID::SPRITE_SHEET });
 

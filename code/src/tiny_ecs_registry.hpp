@@ -42,7 +42,8 @@ public:
 	ComponentContainer<Fading> fading;
   	ComponentContainer<Door> doors;
 	ComponentContainer<Bounce> bounce;
-  ComponentContainer<Boss> bosses;
+  	ComponentContainer<Boss> bosses;
+	ComponentContainer<ZombieDeathTimer> zombieDeathTimers;
 
 
 	// constructor that adds all containers for looping over them
@@ -79,7 +80,8 @@ public:
 		registry_list.push_back(&fading);
     	registry_list.push_back(&doors);
 		registry_list.push_back(&bounce);
-    registry_list.push_back(&bosses);
+    	registry_list.push_back(&bosses);
+		registry_list.push_back(&zombieDeathTimers);
 	}
 
 	void clear_all_components() {
