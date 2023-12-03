@@ -61,7 +61,7 @@ struct Door
 {
 	float animation_switch_time = 200.f; // milliseconds
 	int door_open_frames = 6; // maybe can be specified in level
-	float door_open_timer = door_open_frames * animation_switch_time * 160.f; // multiply 200: for some reason the elapsed time is counted much slower for render step() than in world system???
+	float door_open_timer = door_open_frames * animation_switch_time;
 };
 
 struct Bounce
