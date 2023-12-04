@@ -44,7 +44,7 @@
   "spikes": [],
   "wheels": [
     {
-      "position": [ 1100, 780 ],
+      "position": [ 1000, 710 ],
       "colour": [ 1.0, 0, 0 ],
       "velocity": [ 0, 0 ]
     }
