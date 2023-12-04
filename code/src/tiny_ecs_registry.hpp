@@ -40,11 +40,10 @@ public:
 	ComponentContainer<Overlay> overlay;
 	ComponentContainer<Dangerous> dangerous;
 	ComponentContainer<Fading> fading;
-  ComponentContainer<Door> doors;
+  	ComponentContainer<Door> doors;
 	ComponentContainer<Bounce> bounce;
 	ComponentContainer<Poisonous> poisonous;
-  ComponentContainer<Boss> bosses;
-  ComponentContainer<Boss> bosses;
+  	ComponentContainer<Boss> bosses;
 	ComponentContainer<ZombieDeathTimer> zombieDeathTimers;
 
 

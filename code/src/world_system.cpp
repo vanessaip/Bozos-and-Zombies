@@ -1325,6 +1325,9 @@ void WorldSystem::restart_level()
 	ScreenState& screen = registry.screenStates.components[0];
 	screen.screen_darken_factor = 0;
 
+	// set poisoned to be false
+	screen.is_poisoned = false;
+
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
@@ -1352,10 +1355,6 @@ void WorldSystem::restart_level()
 	// reset camera on restart
 	renderer->resetCamera(bozo_start_pos);
 	renderer->resetSpriteSheetTracker();
-
-	// set poisoned to be false
-	ScreenState& screen = registry.screenStates.components[0];
-	screen.is_poisoned = false;
 
 	// Create background first (painter's algorithm for rendering)
 
