@@ -102,7 +102,7 @@ const std::vector<std::string> LEVEL_DESCRIPTORS = {
   level_path("4_mmboss.json"),
   level_path("1_nest.json"),
   level_path("2_beach.json"),
-  level_path("4_forest.json")
+  level_path("5_forest.json")
 };
 
 const std::string SAVE_STATE_FILE = level_path("save_state.json");
