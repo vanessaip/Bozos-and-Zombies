@@ -156,6 +156,7 @@ private:
   Mix_Chunk* level_success_sound;
   Mix_Chunk* next_level_sound;
   Mix_Chunk* collected_sound;
+  Mix_Chunk* boss_summon_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;

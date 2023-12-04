@@ -42,6 +42,14 @@ WorldSystem::~WorldSystem()
 		Mix_FreeChunk(collect_book_sound);
 	if (zombie_kill_sound != nullptr)
 		Mix_FreeChunk(zombie_kill_sound);
+  if (level_success_sound != nullptr)
+		Mix_FreeChunk(level_success_sound);
+  if (next_level_sound != nullptr)
+		Mix_FreeChunk(next_level_sound);
+  if (collected_sound != nullptr)
+		Mix_FreeChunk(collected_sound);
+  if (boss_summon_sound != nullptr)
+		Mix_FreeChunk(boss_summon_sound);
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -131,6 +139,7 @@ GLFWwindow* WorldSystem::create_window()
 	level_success_sound = Mix_LoadWAV(audio_path("level-success.wav").c_str());
 	next_level_sound = Mix_LoadWAV(audio_path("next-level.wav").c_str());
 	collected_sound = Mix_LoadWAV(audio_path("collected.wav").c_str());
+  boss_summon_sound = Mix_LoadWAV(audio_path("boss-summon.wav").c_str());
 
 	if (background_music == nullptr || player_death_sound == nullptr || student_disappear_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr || zombie_kill_sound == nullptr)
 	{
@@ -875,6 +884,9 @@ void WorldSystem::updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_m
     boss_motion.climbing = false;
     boss_entity.summon_timer_ms = 13000;
 
+    // Play a summon sound
+    Mix_PlayChannel(-1, boss_summon_sound, 0);
+
     // Spawn some zombozos
     float direction = 1;
     if (boss_motion.velocity.x < 0) {
@@ -893,6 +905,7 @@ void WorldSystem::updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_m
       boss_entity.rain_active = true;
     }
     
+    // Summon a zombie if there are less than 2 on the level
     if (registry.zombies.entities.size() < 2) {
       createZombie(renderer, {boss_motion.position.x + direction * 20, boss_motion.position.y}, ZOMBIE_ASSET[asset_mapping[curr_level]]);
     }

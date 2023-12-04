@@ -132,7 +132,8 @@ class RenderSystem {
     textures_path("mm/mm-fountain.png"),
     textures_path("mm/mm-rain.png"),
     textures_path("mm/mm-door-sprite-sheet.png"),
-    textures_path("mm/mm-projectile.png")
+    textures_path("mm/mm-projectile.png"),
+    textures_path("locations/label_mm.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;
