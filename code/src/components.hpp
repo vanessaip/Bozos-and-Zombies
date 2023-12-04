@@ -247,6 +247,7 @@ struct Dangerous
 	vec2 p3;
 	bool cubic;
 	float bezier_time = 0;
+  bool bezier;
 };
 
 struct Fading
@@ -261,6 +262,9 @@ struct Boss
 
   // num hearts that the boss damages
   float damage = 1.f;
+
+  float summon_timer_ms = 10000.f;
+  bool rain_active = false;
 };
 
 /**
@@ -370,7 +374,7 @@ enum class TEXTURE_ASSET_ID
 	LIB_COLL3 = LIB_COLL2 + 1,
 	LIB_COLL4 = LIB_COLL3 + 1,
 	LIB_COLL5 = LIB_COLL4 + 1,
-  	TBC = LIB_COLL5 + 1,
+  TBC = LIB_COLL5 + 1,
 	GHETTO_DOOR = TBC + 1,
 	BEACH_DOOR = GHETTO_DOOR + 1,
 	NEST_DOOR = BEACH_DOOR + 1,
@@ -384,7 +388,12 @@ enum class TEXTURE_ASSET_ID
 	NEST_NPC = BEACH_NPC + 1,
 	CLEAVER_WEAPON = NEST_NPC + 1,
 	BEACH_WEAPON = CLEAVER_WEAPON + 1,
-	TEXTURE_COUNT = BEACH_WEAPON + 1
+  MM_FOUNTAIN = BEACH_WEAPON + 1,
+  MM_RAIN = MM_FOUNTAIN + 1,
+  MM_DOOR = MM_RAIN + 1,
+  MM_PROJECTILE = MM_DOOR + 1,
+  LABEL_MM = MM_PROJECTILE + 1,
+	TEXTURE_COUNT = LABEL_MM + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -424,7 +433,12 @@ enum class ANIMATION_MODE
 	ATTACK = RUN + 1,
 	HURT = ATTACK + 1,
 	CLIMB = HURT + 1,
-	MODE_COUNT = CLIMB + 1
+  FIFTH_INDEX = CLIMB + 1,
+  SIXTH_INDEX = FIFTH_INDEX + 1,
+  SEVENTH_INDEX = SIXTH_INDEX + 1,
+  EIGTH_INDEX = SEVENTH_INDEX + 1,
+  NINTH_INDEX = EIGTH_INDEX + 1,
+	MODE_COUNT = NINTH_INDEX + 1
 };
 const int animation_mode_count = (int)ANIMATION_MODE::MODE_COUNT;
 

@@ -42,6 +42,14 @@ WorldSystem::~WorldSystem()
 		Mix_FreeChunk(collect_book_sound);
 	if (zombie_kill_sound != nullptr)
 		Mix_FreeChunk(zombie_kill_sound);
+  if (level_success_sound != nullptr)
+		Mix_FreeChunk(level_success_sound);
+  if (next_level_sound != nullptr)
+		Mix_FreeChunk(next_level_sound);
+  if (collected_sound != nullptr)
+		Mix_FreeChunk(collected_sound);
+  if (boss_summon_sound != nullptr)
+		Mix_FreeChunk(boss_summon_sound);
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -131,6 +139,7 @@ GLFWwindow* WorldSystem::create_window()
 	level_success_sound = Mix_LoadWAV(audio_path("level-success.wav").c_str());
 	next_level_sound = Mix_LoadWAV(audio_path("next-level.wav").c_str());
 	collected_sound = Mix_LoadWAV(audio_path("collected.wav").c_str());
+  boss_summon_sound = Mix_LoadWAV(audio_path("boss-summon.wav").c_str());
 
 	if (background_music == nullptr || player_death_sound == nullptr || student_disappear_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr || zombie_kill_sound == nullptr)
 	{
@@ -166,7 +175,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
 	if (registry.zombies.entities.size() < 1 && (num_collectibles > 0 && collectibles_collected >= num_collectibles) && this->game_over == false) {
 		handleGameOver();
-	}
+	} else if (curr_level == MMBOSS && registry.bosses.entities.size() == 0 && this->game_over == false) {
+    handleGameOver();
+  }
 
 	// Updating window title with points
 	updateWindowTitle();
@@ -223,9 +234,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	updateSpriteSheetAnimation(bozo_motion, elapsed_ms_since_last_update);
 
 	// If it is a boss level
-  	if (curr_level == 2) {
-	    updateBossMotion(bozo_motion, elapsed_ms_since_last_update);
-		updateHPBar(bossHealth / registry.bosses.get(boss).health * 100);
+  	if (curr_level == MMBOSS && registry.bosses.has(boss)) {
+      if (!registry.zombieDeathTimers.has(hp) && registry.motions.has(hp)) {
+        updateHPBar(bossHealth / registry.bosses.get(boss).health * 100);
+      }
+      if (!registry.zombieDeathTimers.has(boss)) {
+        updateBossMotion(bozo_motion, elapsed_ms_since_last_update);
+      }
   	}
 	return true;
 }
@@ -812,34 +827,136 @@ void WorldSystem::updateHPBar(float percent_full) {
 
 void WorldSystem::updateBossMotion(Motion& bozo_motion, float elapsed_ms_since_last_update) {
   Motion& bossMotion = registry.motions.get(boss);
-  float direction = -1;
-  if ((bozo_motion.position.x - bossMotion.position.x) > 0)
-  {
-    direction = 1;
-  }
-  float speed = 50;
-  bossMotion.velocity.x = direction * speed;
-  if (direction == 1) {
-    bossMotion.reflect[0] = false;
+
+  if (bossHealth <= 0) {
+    // Kill the boss if health reaches 0
+    SpriteSheet& boss_spritesheet = registry.spriteSheets.get(boss);
+    boss_spritesheet.updateAnimation(ANIMATION_MODE::NINTH_INDEX); // climb is actually death for zombies
+    ZombieDeathTimer& timer = registry.zombieDeathTimers.emplace(boss);
+    registry.zombieDeathTimers.emplace(hp);
+    registry.zombieDeathTimers.emplace(hp_bar);
+    timer.timer_ms = 2000;
   } else {
-    bossMotion.reflect[0] = true;
+    // If boss is not damaged, follow the player
+    if (!registry.lostLifeTimer.has(boss)) {
+
+      if (curr_level == MMBOSS) {
+        updateMainMallBossMovement(bozo_motion, bossMotion, elapsed_ms_since_last_update);
+      }
+
+      vec3& color = registry.colors.get(boss);
+      color = { 1.f, 1.f, 1.f };
+
+    } else {
+
+      // Fade the boss red, and adjust knockback
+      LostLife& timer = registry.lostLifeTimer.get(boss);
+      timer.timer_ms -= elapsed_ms_since_last_update;
+
+      if (bossMotion.velocity.x > 0) {
+        bossMotion.velocity.x -= 5;
+      } else {
+        bossMotion.velocity.x += 5;
+      }
+
+      // Make a bit red to show damaged
+      vec3& color = registry.colors.get(boss);
+      color = { 1.0f, 0.5f, 0.5f };
+
+      if (timer.timer_ms <= 0) {
+        registry.lostLifeTimer.remove(boss);
+      }
+
+    }
   }
+}
 
-  if (registry.lostLifeTimer.has(boss)) {
-        LostLife& timer = registry.lostLifeTimer.get(boss);
-				timer.timer_ms -= elapsed_ms_since_last_update;
+void WorldSystem::updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_motion, float elapsed_ms_since_last_update)
+{
+  int bozo_level = checkLevel(bozo_motion);
+	int boss_level = checkLevel(boss_motion);
 
-				// Make a bit red to show damaged
-				vec3& color = registry.colors.get(boss);
-				color = { 1.0f, 0.5f, 0.5f };
+  Boss& boss_entity = registry.bosses.get(boss);
 
-				if (timer.timer_ms <= 0) {
-					registry.lostLifeTimer.remove(boss);
-				}
-  }
-  if (!registry.lostLifeTimer.has(boss)) {
-    vec3& color = registry.colors.get(boss);
-    color = { 1.f, 1.f, 1.f };
+  SpriteSheet& mmBossSheet = registry.spriteSheets.get(boss);
+
+  if (boss_entity.summon_timer_ms < 0) {
+    boss_motion.climbing = false;
+    boss_entity.summon_timer_ms = 13000;
+
+    // Play a summon sound
+    Mix_PlayChannel(-1, boss_summon_sound, 0);
+
+    // Spawn some zombozos
+    float direction = 1;
+    if (boss_motion.velocity.x < 0) {
+      float direction = -1;
+    }
+    boss_motion.velocity.x = 0;
+    boss_motion.velocity.y = 0;
+		mmBossSheet.updateAnimation(ANIMATION_MODE::FIFTH_INDEX);
+
+    // Make it rain
+    if (boss_entity.rain_active == false) {
+      for (const auto& rain : mm_boss_rain) {
+        Motion& rain_motion = registry.motions.get(rain);
+        rain_motion.position.y = 0;
+      }
+      boss_entity.rain_active = true;
+    }
+    
+    // Summon a zombie if there are less than 2 on the level
+    if (registry.zombies.entities.size() < 2) {
+      createZombie(renderer, {boss_motion.position.x + direction * 20, boss_motion.position.y}, ZOMBIE_ASSET[asset_mapping[curr_level]]);
+    }
+
+  } else if (boss_entity.summon_timer_ms <= 10000) {
+
+    boss_entity.rain_active = false;
+    boss_entity.summon_timer_ms -= elapsed_ms_since_last_update;
+
+    if (boss_level == bozo_level)
+    {
+      boss_motion.climbing = false;
+      float direction = -1;
+      if ((bozo_motion.position.x - boss_motion.position.x) > 0)
+      {
+        direction = 1;
+      }
+      boss_motion.velocity.x = direction * MMBOSS_SPEED;
+      if (direction == 1) {
+        boss_motion.reflect[0] = false;
+      } else {
+        boss_motion.reflect[0] = true;
+      }
+
+      // This is actually run
+      // TODO-Will fix the sprite sheet
+      mmBossSheet.updateAnimation(ANIMATION_MODE::ATTACK);
+
+    }
+    else if (boss_level < bozo_level)
+    {
+      // Boss floats to bozo's level
+
+      // Fly up to bozo
+      boss_motion.velocity.y = -MMBOSS_SPEED;
+      boss_motion.climbing = true;
+
+      // Update to flying animation
+      mmBossSheet.updateAnimation(ANIMATION_MODE::SEVENTH_INDEX);
+    }
+    else
+    {
+      boss_motion.position.y += 20;
+      boss_motion.velocity.y = MMBOSS_SPEED;
+      boss_motion.climbing = true;
+
+      // Update to flying animation
+      mmBossSheet.updateAnimation(ANIMATION_MODE::SEVENTH_INDEX); 
+    }
+  } else {
+    boss_entity.summon_timer_ms -= elapsed_ms_since_last_update;
   }
 }
 
@@ -848,8 +965,25 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	int bozo_level = checkLevel(bozo_motion);
 	int zombie_level = checkLevel(motion);
 
-	if (curr_level == TUTORIAL) {
+	if (curr_level == MMBOSS) {
+    motion.climbing = false;
+		float direction = -1;
+		if ((bozo_motion.position.x - motion.position.x) > 0)
+		{
+			direction = 1;
+		}
+		float speed = ZOMBIE_SPEED;
+		motion.velocity.x = direction * speed;
 
+		if (!motion.offGround) {
+			for (float pos : jump_positions[zombie_level]) {
+				if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
+				{
+					motion.velocity.y = -600;
+					motion.offGround = true;
+				}
+			}
+		}
 	}
 	else if (curr_level == NEST && (zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1)))
 	{
@@ -1236,6 +1370,11 @@ void WorldSystem::restart_level()
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_GOAL, { 130.f, window_height_px - 200.f }, "", { 180.f, 100.f });
 	}
 
+  // AnimateBackgrounds for Main Mall Boss level
+  if (curr_level == MMBOSS) {
+    addAnimatedMMBossTextures(renderer);
+  }
+
 	// Create platforms
 	floor_positions.clear();
 	for (const auto pos : jsonData["floor_positions"]) {
@@ -1381,10 +1520,18 @@ void WorldSystem::restart_level()
 
 	// This is specific to the beach level
 	if (curr_level == BEACH) {
-		createDangerous(renderer, { 280, 130 }, { 30, 30 }, TEXTURE_ASSET_ID::SPIKE_BALL, { 280, 130 }, { 500, 10 }, { 650, 250 }, { 0, 0 }, false);
-		createDangerous(renderer, { 280, 130 }, { 50, 50 }, TEXTURE_ASSET_ID::BEACH_BIRD, { 0, 400 }, { 500, 50 }, { 1000, 750 }, { 1450, 400 }, true);
+		createDangerous(renderer, { 280, 130 }, { 30, 30 }, TEXTURE_ASSET_ID::SPIKE_BALL, { 280, 130 }, { 500, 10 }, { 650, 250 }, { 0, 0 }, false, true, 6);
+		createDangerous(renderer, { 280, 130 }, { 50, 50 }, TEXTURE_ASSET_ID::BEACH_BIRD, { 0, 400 }, { 500, 50 }, { 1000, 750 }, { 1450, 400 }, true, true, 6);
 		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, { 230, 155 }, { 80, 60 });
 	}
+  
+  mm_boss_rain.clear();
+  if (curr_level == MMBOSS) {
+    for (float i = 200; i < 1400; i += 200) {
+      Entity dng = createDangerous(renderer, { i, 850 }, { 30, 30 }, TEXTURE_ASSET_ID::MM_RAIN, { 200, 0 }, { 200, 200 }, { 200, 400 }, { 0, 0 }, false, false, 1);
+      mm_boss_rain.push_back(dng);
+    }
+  }
 	// Lives can probably stay hardcoded?
   float heart_pos_x = 1385;
   float heart_starting_pos_y = 40;
@@ -1404,6 +1551,11 @@ void WorldSystem::restart_level()
 
 	points = 0;
 	level_start_time = Clock::now();
+}
+
+void WorldSystem::addAnimatedMMBossTextures(RenderSystem* renderer)
+{
+  createAnimatedBackgroundObject(renderer, {728, 720}, {130, 130}, TEXTURE_ASSET_ID::MM_FOUNTAIN, {4}, {0, 0.01});
 }
 
 // Compute collisions between entities
@@ -1592,19 +1744,35 @@ void WorldSystem::handle_collisions()
 			}
 		}
 
-    // Book - Boss collision
-    else if (!registry.lostLifeTimer.has(boss) && registry.books.has(entity) && registry.bosses.has(entity_other))
+    // Book-Boss collision
+    else if (!registry.lostLifeTimer.has(boss) && registry.books.has(entity) && registry.bosses.has(entity_other) && !registry.zombieDeathTimers.has(boss))
     {
-      Mix_PlayChannel(-1, zombie_kill_sound, 0);
       Motion& motion_book = registry.motions.get(entity);
+      Motion& boss_motion = registry.motions.get(entity_other);
       if (motion_book.offGround == true)
 			{
+        Mix_PlayChannel(-1, zombie_kill_sound, 0);
 				bossHealth -= 20;
-			}
 
-      // Make boss invincible for a bit between hits
-      if (!registry.lostLifeTimer.has(boss)) {
-				registry.lostLifeTimer.emplace(boss);
+        if (bossHealth > 0) {
+          // Make boss invincible for a bit between hits
+          if (!registry.lostLifeTimer.has(boss)) {
+            auto& timer = registry.lostLifeTimer.emplace(boss);
+            timer.timer_ms = 500.f;
+          }
+
+          // Determine knockback direction
+          if (motion_book.velocity.x > 0) {
+            boss_motion.velocity.x = 500;
+          } else {
+            boss_motion.velocity.x = -500;
+          }
+        } else {
+          boss_motion.velocity.x = 0;
+        }
+
+        // Remove the book on collision
+        removeEntity(entity);
 			}
     }
 

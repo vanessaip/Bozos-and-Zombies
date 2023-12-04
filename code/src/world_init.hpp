@@ -20,6 +20,7 @@ const vec2 CLIMBABLE_DIM = { 30.f, 32.f };
 
 const float ZOMBIE_SPEED = 120.f;
 const float PLAYER_SPEED = 230;
+const float MMBOSS_SPEED = 140.f;
 
 // the player
 Entity createBozo(RenderSystem* renderer, vec2 pos);
@@ -57,7 +58,7 @@ Entity createCollectible(RenderSystem* renderer, float position_x, float positio
 // hearts
 Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
 
-Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic);
+Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic, bool bezier, int spriteCount);
 
 // label
 Entity createOverlay(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId, bool is_fading);
@@ -73,6 +74,8 @@ Entity createBoss(RenderSystem* renderer, vec2 position, vec2 scale, float healt
 Entity createHPBar(RenderSystem* renderer, vec2 position);
 
 Entity createHP(RenderSystem* renderer, vec2 position);
+
+Entity createAnimatedBackgroundObject(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, std::vector<int> spriteCounts, vec2 trunc);
 
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
@@ -163,7 +166,7 @@ const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
 	TEXTURE_ASSET_ID::NEST_DOOR,
 	TEXTURE_ASSET_ID::BEACH_DOOR,
 	TEXTURE_ASSET_ID::LIBRARY_DOOR,
-	TEXTURE_ASSET_ID::LIBRARY_DOOR,
+	TEXTURE_ASSET_ID::MM_DOOR,
 };
 
 const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
@@ -218,7 +221,7 @@ const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
 	TEXTURE_ASSET_ID::CLEAVER_WEAPON,
 	TEXTURE_ASSET_ID::BEACH_WEAPON,
 	TEXTURE_ASSET_ID::BOOK,
-  TEXTURE_ASSET_ID::BOOK,
+  TEXTURE_ASSET_ID::MM_PROJECTILE,
 };
 
 // ---------------------SOUNDS-------------------------
@@ -235,7 +238,7 @@ const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
 	TEXTURE_ASSET_ID::LABEL_NEST,
 	TEXTURE_ASSET_ID::LABEL_BEACH,
 	TEXTURE_ASSET_ID::LABEL_LIB,
-  TEXTURE_ASSET_ID::LABEL_LIB,
+  TEXTURE_ASSET_ID::LABEL_MM,
 };
 
 

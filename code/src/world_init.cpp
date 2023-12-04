@@ -490,7 +490,7 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale) {
 	return entity;
 }
 
-Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic) {
+Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic, bool bezier, int spriteCount) {
 	// Reserve en entity
 	auto entity = Entity();
 
@@ -505,13 +505,14 @@ Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTUR
 
 	Dangerous& dangerous = registry.dangerous.emplace(entity);
 
-	dangerous.p0 = p0;
-	dangerous.p1 = p1;
-	dangerous.p2 = p2;
-	dangerous.p3 = p3;
-	dangerous.cubic = cubic;
+  dangerous.p0 = p0;
+  dangerous.p1 = p1;
+  dangerous.p2 = p2;
+  dangerous.p3 = p3;
+  dangerous.cubic = cubic;
+  dangerous.bezier = bezier;
 
-	std::vector<int> spriteCounts = { 6 };
+	std::vector<int> spriteCounts = { spriteCount };
 	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.f, 0.f));
 
 	registry.renderRequests.insert(
@@ -673,6 +674,29 @@ Entity createHP(RenderSystem* renderer, vec2 position) {
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
+	return entity;
+}
+
+Entity createAnimatedBackgroundObject(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, std::vector<int> spriteCounts, vec2 trunc) {
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, trunc);
+
+	registry.renderRequests.insert(
+		entity,
+		{ assetID,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE_SHEET });
 	return entity;
 }
 
