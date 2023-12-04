@@ -44,6 +44,8 @@ public:
 	ComponentContainer<Bounce> bounce;
 	ComponentContainer<Poisonous> poisonous;
   ComponentContainer<Boss> bosses;
+  ComponentContainer<Boss> bosses;
+	ComponentContainer<ZombieDeathTimer> zombieDeathTimers;
 
 
 	// constructor that adds all containers for looping over them
@@ -82,6 +84,8 @@ public:
 		registry_list.push_back(&bounce);
 		registry_list.push_back(&poisonous);
     registry_list.push_back(&bosses);
+    registry_list.push_back(&bosses);
+		registry_list.push_back(&zombieDeathTimers);
 	}
 
 	void clear_all_components() {

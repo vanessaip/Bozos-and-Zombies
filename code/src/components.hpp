@@ -153,6 +153,11 @@ struct LostLife
 	bool direction = 0;
 };
 
+struct ZombieDeathTimer
+{
+	float timer_ms = 600.f;
+};
+
 // Keyframe animation stores all keyframes and timing data for a given entity
 struct KeyframeAnimation
 {
@@ -247,6 +252,7 @@ struct Dangerous
 	vec2 p3;
 	bool cubic;
 	float bezier_time = 0;
+  bool bezier;
 };
 
 struct Fading
@@ -261,6 +267,9 @@ struct Boss
 
   // num hearts that the boss damages
   float damage = 1.f;
+
+  float summon_timer_ms = 10000.f;
+  bool rain_active = false;
 };
 
 /**
@@ -391,12 +400,22 @@ enum class TEXTURE_ASSET_ID
 	GHETTO_DOOR = FOREST_MUSHROOM + 1,
 	BEACH_DOOR = GHETTO_DOOR + 1,
 	NEST_DOOR = BEACH_DOOR + 1,
-  MM_BACKGROUND = NEST_DOOR + 1,
-  MM_PLAT = MM_BACKGROUND + 1,
-  MM_BOSS = MM_PLAT + 1,
-  HP_BAR = MM_BOSS + 1,
-  HP = HP_BAR + 1,
-	TEXTURE_COUNT = HP + 1
+	MM_BACKGROUND = NEST_DOOR + 1,
+	MM_PLAT = MM_BACKGROUND + 1,
+	MM_BOSS = MM_PLAT + 1,
+	HP_BAR = MM_BOSS + 1,
+	HP = HP_BAR + 1,
+	BEACH_ZOMBIE = HP + 1,
+	BEACH_NPC = BEACH_ZOMBIE + 1,
+	NEST_NPC = BEACH_NPC + 1,
+	CLEAVER_WEAPON = NEST_NPC + 1,
+	BEACH_WEAPON = CLEAVER_WEAPON + 1,
+  MM_FOUNTAIN = BEACH_WEAPON + 1,
+  MM_RAIN = MM_FOUNTAIN + 1,
+  MM_DOOR = MM_RAIN + 1,
+  MM_PROJECTILE = MM_DOOR + 1,
+  LABEL_MM = MM_PROJECTILE + 1,
+	TEXTURE_COUNT = LABEL_MM + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -434,8 +453,14 @@ enum class ANIMATION_MODE
 	IDLE = 0,
 	RUN = IDLE + 1,
 	ATTACK = RUN + 1,
-	CLIMB = ATTACK + 1,
-	MODE_COUNT = CLIMB + 1
+	HURT = ATTACK + 1,
+	CLIMB = HURT + 1,
+  FIFTH_INDEX = CLIMB + 1,
+  SIXTH_INDEX = FIFTH_INDEX + 1,
+  SEVENTH_INDEX = SIXTH_INDEX + 1,
+  EIGTH_INDEX = SEVENTH_INDEX + 1,
+  NINTH_INDEX = EIGTH_INDEX + 1,
+	MODE_COUNT = NINTH_INDEX + 1
 };
 const int animation_mode_count = (int)ANIMATION_MODE::MODE_COUNT;
 

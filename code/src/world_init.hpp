@@ -20,6 +20,7 @@ const vec2 CLIMBABLE_DIM = { 30.f, 32.f };
 
 const float ZOMBIE_SPEED = 120.f;
 const float PLAYER_SPEED = 230;
+const float MMBOSS_SPEED = 140.f;
 
 // the player
 Entity createBozo(RenderSystem* renderer, vec2 pos);
@@ -28,7 +29,7 @@ Entity createBozoPointer(RenderSystem* renderer, vec2 pos);
 // the prey
 Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId);
 // the enemy
-Entity createZombie(RenderSystem* renderer, vec2 position);
+Entity createZombie(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId);
 // a red line for debugging purposes
 Entity createLine(vec2 position, vec2 size);
 // one platform
@@ -57,7 +58,7 @@ Entity createCollectible(RenderSystem* renderer, float position_x, float positio
 // hearts
 Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
 
-Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic);
+Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic, bool bezier, int spriteCount);
 
 // label
 Entity createOverlay(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId, bool is_fading);
@@ -73,6 +74,8 @@ Entity createBoss(RenderSystem* renderer, vec2 position, vec2 scale, float healt
 Entity createHPBar(RenderSystem* renderer, vec2 position);
 
 Entity createHP(RenderSystem* renderer, vec2 position);
+
+Entity createAnimatedBackgroundObject(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, std::vector<int> spriteCounts, vec2 trunc);
 
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
@@ -172,20 +175,28 @@ const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
 
 const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
 	TEXTURE_ASSET_ID::GHETTO_DOOR,
-	TEXTURE_ASSET_ID::LIBRARY_DOOR,
-	TEXTURE_ASSET_ID::BEACH_DOOR,
 	TEXTURE_ASSET_ID::NEST_DOOR,
+	TEXTURE_ASSET_ID::BEACH_DOOR,
 	TEXTURE_ASSET_ID::LIBRARY_DOOR,
-	TEXTURE_ASSET_ID::LIBRARY_DOOR,
+	TEXTURE_ASSET_ID::MM_DOOR,
+	TEXTURE_ASSET_ID::LIBRARY_DOOR
 };
 
 const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
   TEXTURE_ASSET_ID::TUTORIAL_NPC,
-  TEXTURE_ASSET_ID::STUDENT,
-  TEXTURE_ASSET_ID::STUDENT,
-  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::NEST_NPC,
+  TEXTURE_ASSET_ID::BEACH_NPC,
+  TEXTURE_ASSET_ID::NEST_NPC,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT
+};
+
+const std::vector<TEXTURE_ASSET_ID> ZOMBIE_ASSET = {
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::BEACH_ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE
 };
 
 const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
@@ -228,16 +239,15 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::FOREST_TOMATO,
 		TEXTURE_ASSET_ID::FOREST_STRAWBERRY
 	},
-
 };
 
 const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
 	TEXTURE_ASSET_ID::TUTORIAL_WEAPON,
+	TEXTURE_ASSET_ID::CLEAVER_WEAPON,
+	TEXTURE_ASSET_ID::BEACH_WEAPON,
 	TEXTURE_ASSET_ID::BOOK,
-	TEXTURE_ASSET_ID::BOOK,
-	TEXTURE_ASSET_ID::BOOK,
-	TEXTURE_ASSET_ID::BOOK,
-	TEXTURE_ASSET_ID::BOOK,
+  TEXTURE_ASSET_ID::MM_PROJECTILE,
+  TEXTURE_ASSET_ID::BOOK
 };
 
 // ---------------------SOUNDS-------------------------
@@ -246,8 +256,8 @@ const std::vector<std::string> BACKGROUND_MUSIC = {
 	"soundtrack.wav",
 	"beach.wav",
 	"library.wav",
-  	"library.wav",
-  	"forest.wav"
+  "library.wav",
+  "forest.wav"
 };
 
 const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
@@ -255,9 +265,8 @@ const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
 	TEXTURE_ASSET_ID::LABEL_NEST,
 	TEXTURE_ASSET_ID::LABEL_BEACH,
 	TEXTURE_ASSET_ID::LABEL_LIB,
-	TEXTURE_ASSET_ID::LABEL_FOREST,
-	TEXTURE_ASSET_ID::LABEL_FOREST,
-
+  TEXTURE_ASSET_ID::LABEL_MM,
+  TEXTURE_ASSET_ID::LABEL_FOREST
 };
 
 
@@ -267,6 +276,6 @@ const std::vector<TEXTURE_ASSET_ID> BOSS_ASSET = {
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
-  TEXTURE_ASSET_ID::STUDENT,
-  TEXTURE_ASSET_ID::MM_BOSS
+  TEXTURE_ASSET_ID::MM_BOSS,
+  TEXTURE_ASSET_ID::STUDENT
 };
