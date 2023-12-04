@@ -21,6 +21,7 @@
         {"x": 580, "y": 648, "scale_x": 30, "scale_y": 30, "num_steps": 5, "step_blocks": 3, "left": false},
         {"x": 960, "y": 768, "scale_x": 30, "scale_y": 30, "num_steps": 5, "step_blocks": 2, "left": true}
     ],
+    "wall-width": 20,
     "walls": [
         {"x": 320.0, "y": 739, "height": 152, "visible": true},
         {"x": 1120.0, "y": 739, "height": 152, "visible": true},

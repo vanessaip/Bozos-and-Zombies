@@ -104,7 +104,7 @@ private:
 	float enemySpawnTimer = 0.f;
 	float npcSpawnTimer = 0.f;
 	float doorOpenTimer = 0.f;
-	int max_level = 4;
+	int max_level = 5;
 	float collectibles_collected_pos = 50;
 	int collectibles_collected = 0;
 	Entity loadingScreen;
@@ -135,6 +135,7 @@ private:
 	std::vector<std::vector<float>> jump_positions;
 	float PLATFORM_WIDTH;
 	float PLATFORM_HEIGHT;
+	float WALL_WIDTH;
   vec2 door_win_pos;
   int total_collectables;
 	bool zombie_spawn_on;

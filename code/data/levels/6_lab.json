@@ -1,0 +1,133 @@
+{
+    "platform_scale": {
+      "x": 32,
+      "y": 32
+    },
+    "platforms": [
+      {"x": 112, "y": 112, "num_tiles": 7, "visible": true},
+      {"x": 304, "y": 80, "num_tiles": 16, "visible": true},
+      {"x": 784, "y": 112, "num_tiles": 3, "visible": true},
+      {"x": 48, "y": 176, "num_tiles": 2, "visible": true},
+      {"x": 112, "y": 368, "num_tiles": 3, "visible": true},
+      {"x": 208, "y": 240, "num_tiles": 6, "visible": true},
+      {"x": 496, "y": 240, "num_tiles": 6, "visible": true},
+      {"x": 688, "y": 272, "num_tiles": 6, "visible": true},
+
+      {"x": 912, "y": 208, "num_tiles": 3, "visible": true},
+
+      {"x": 976, "y": 80, "num_tiles": 7, "visible": true},
+      {"x": 1168, "y": 176, "num_tiles": 4, "visible": true},
+      {"x": 1296, "y": 112, "num_tiles": 5, "visible": true},
+
+      {"x": 16, "y": 528, "num_tiles": 9, "visible": true},
+      {"x": 304, "y": 432, "num_tiles": 15, "visible": true},
+      {"x": 720, "y": 400, "num_tiles": 2, "visible": true},
+      {"x": 16, "y": 656, "num_tiles": 6, "visible": true},
+      {"x": 240, "y": 592, "num_tiles": 2, "visible": true},
+      {"x": 304, "y": 720, "num_tiles": 4, "visible": true},
+      {"x": 400, "y": 656, "num_tiles": 4, "visible": true},
+      {"x": 496, "y": 688, "num_tiles": 3, "visible": true},
+      {"x": 432, "y": 560, "num_tiles": 6, "visible": true},
+
+      {"x": 752, "y": 560, "num_tiles": 6, "visible": true},
+      {"x": 944, "y": 496, "num_tiles": 1, "visible": true},
+      {"x": 1008, "y": 592, "num_tiles": 8, "visible": true},
+      {"x": 1136, "y": 336, "num_tiles": 10, "visible": true},
+      {"x": 1264, "y": 432, "num_tiles": 4, "visible": true},
+      {"x": 752, "y": 656, "num_tiles": 8, "visible": true},
+
+      {"x": 16, "y": 816, "num_tiles": 34, "visible": true},
+
+      {"x": 1232, "y": 752, "num_tiles": 7, "visible": true},
+      {"x": 1328, "y": 624, "num_tiles": 4, "visible": true},
+      {"x": 1328, "y": 528, "num_tiles": 4, "visible": true}
+    ],
+    "floor_positions": [
+        794,
+        666,
+        538,
+        698,
+        538,
+        698
+    ],
+    "wall-width": 32,
+    "walls": [
+        {"x": 112, "y": 64, "height": 128, "visible": true},
+        {"x": 848, "y": 192, "height": 192, "visible": true},
+        {"x": 688, "y": 192, "height": 192, "visible": true},
+        {"x": 400, "y": 176, "height": 160, "visible": true},
+        {"x": 176, "y": 304, "height": 160, "visible": true},
+        {"x": 112, "y": 288, "height": 192, "visible": true},
+        {"x": 16, "y": 288, "height": 192, "visible": true},
+
+        {"x": 976, "y": 48, "height": 96, "visible": true},
+        {"x": 1168, "y": 128, "height": 128, "visible": true},
+        {"x": 1264, "y": 144, "height": 96, "visible": true},
+
+        {"x": 304, "y": 464, "height": 96, "visible": true},
+        {"x": 432, "y": 496, "height": 160, "visible": true},
+        {"x": 592, "y": 624, "height": 160, "visible": true},
+        {"x": 400, "y": 688, "height": 96, "visible": true},
+        {"x": 304, "y": 656, "height": 160, "visible": true},
+        {"x": 208, "y": 624, "height": 96, "visible": true},
+        {"x": 16, "y": 736, "height": 192, "visible": true},
+
+        {"x": 752, "y": 608, "height": 128, "visible": true},
+        {"x": 912, "y": 528, "height": 96, "visible": true},
+        {"x": 976, "y": 576, "height": 192, "visible": true},
+        {"x": 1136, "y": 464, "height": 288, "visible": true},
+        {"x": 1360, "y": 384, "height": 128, "visible": true},
+        {"x": 1232, "y": 512, "height": 192, "visible": true},
+
+        {"x": 1232, "y": 784, "height": 96, "visible": true},
+        {"x": 1424, "y": 688, "height": 160, "visible": true},
+        {"x": 1328, "y": 576, "height": 128, "visible": true}
+    ],
+    "climbables": [
+      {"x": 208.0, "y": 666, "sections": 4}
+    ],
+    "zombie_climb_points": [
+      [],
+      [],
+      []
+    ],
+    "zombie_jump_points": [
+      [],
+      [],
+      []
+    ],
+    "spikes": [],
+    "wheels": [],
+    "player": {
+      "position": {
+        "x": 80,
+        "y": 487
+      }
+    },
+    "zombies": {
+      "num_starting": 0,
+      "positions": [
+        
+      ],
+      "spawn_timer": null
+    },
+    "students": {
+      "num_starting": 0,
+      "positions": [],
+      "spawn_timer": null
+    },
+    "collectibles": {
+      "scale": {
+        "x": 30,
+        "y": 30
+      },
+      "positions": [
+      
+      ]
+    },
+    "bgm": "lab-music.wav",
+    "door": {
+      "position": [146, 770],
+      "scale": [40, 60]
+    }
+  }

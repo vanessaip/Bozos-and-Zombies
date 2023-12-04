@@ -212,7 +212,7 @@ std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, vec2 step
 }
 
 // Wall has variable height
-Entity createWall(RenderSystem* renderer, float position_x, float position_y, float height, bool visible)
+Entity createWall(RenderSystem* renderer, float position_x, float position_y, float width, float height, bool visible)
 {
 	auto entity = Entity();
 
@@ -227,7 +227,7 @@ Entity createWall(RenderSystem* renderer, float position_x, float position_y, fl
 	motion.position = { position_x, position_y };
 
 	// Setting initial values
-	motion.scale = vec2({ WALL_WIDTH, height });
+	motion.scale = vec2({ width, height });
 
 	// Create a Wall component
 	registry.walls.emplace(entity);

@@ -129,7 +129,7 @@ GLFWwindow* WorldSystem::create_window()
 		return nullptr;
 	}
 
-	background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[0]).c_str());
+	background_music = Mix_LoadMUS(audio_path("tutorial.wav").c_str());
 	player_death_sound = Mix_LoadWAV(audio_path("player_death.wav").c_str());
 	student_disappear_sound = Mix_LoadWAV(audio_path("student_disappear.wav").c_str());
 	player_jump_sound = Mix_LoadWAV(audio_path("player_jump.wav").c_str());
@@ -139,7 +139,7 @@ GLFWwindow* WorldSystem::create_window()
 	level_success_sound = Mix_LoadWAV(audio_path("level-success.wav").c_str());
 	next_level_sound = Mix_LoadWAV(audio_path("next-level.wav").c_str());
 	collected_sound = Mix_LoadWAV(audio_path("collected.wav").c_str());
-  boss_summon_sound = Mix_LoadWAV(audio_path("boss-summon.wav").c_str());
+  	boss_summon_sound = Mix_LoadWAV(audio_path("boss-summon.wav").c_str());
 
 	if (background_music == nullptr || player_death_sound == nullptr || student_disappear_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr || zombie_kill_sound == nullptr)
 	{
@@ -1344,6 +1344,7 @@ void WorldSystem::restart_level()
 	// set paltform dimensions
 	PLATFORM_WIDTH = jsonData["platform_scale"]["x"].asFloat();
 	PLATFORM_HEIGHT = jsonData["platform_scale"]["y"].asFloat();
+	WALL_WIDTH = jsonData["wall-width"].asFloat();
 
 	const Json::Value& playerData = jsonData["player"];
 	bozo_start_pos = { playerData["position"]["x"].asFloat(), playerData["position"]["y"].asFloat() };
@@ -1392,7 +1393,7 @@ void WorldSystem::restart_level()
 
 	// Create walls
 	for (const auto& wall_data : jsonData["walls"]) {
-		createWall(renderer, wall_data["x"].asFloat(), wall_data["y"].asFloat(), wall_data["height"].asFloat(), wall_data["visible"].asBool());
+		createWall(renderer, wall_data["x"].asFloat(), wall_data["y"].asFloat(), WALL_WIDTH, wall_data["height"].asFloat(), wall_data["visible"].asBool());
 	}
 
 	door = createDoor(renderer, {jsonData["door"]["position"][0].asFloat(), jsonData["door"]["position"][1].asFloat()}, { jsonData["door"]["scale"][0].asFloat(), jsonData["door"]["scale"][1].asFloat() }, DOOR_ASSET[asset_mapping[curr_level]]);

@@ -134,6 +134,19 @@ class RenderSystem {
     textures_path("mm/mm-door-sprite-sheet.png"),
     textures_path("mm/mm-projectile.png"),
     textures_path("locations/label_mm.png"),
+	textures_path("lab/map.png"),
+	textures_path("lab/background-0.png"),
+	textures_path("lab/2.png"),
+	textures_path("lab/3.png"),
+	textures_path("lab/4.png"),
+	textures_path("lab/5.png"),
+	textures_path("lab/6.png"),
+	textures_path("lab/purple-pipes.png"),
+	textures_path("lab/grey-pipes.png"),
+	textures_path("lab/lab-decor.png"),
+	textures_path("lab/lab-objects.png"),
+	textures_path("lab/colour-overlay.png"),
+	textures_path("lab/lab-ladder.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

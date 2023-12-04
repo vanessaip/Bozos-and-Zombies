@@ -14,7 +14,6 @@ const float BOZO_BB_WIDTH = STUDENT_BB_WIDTH;
 const float BOZO_BB_HEIGHT = STUDENT_BB_HEIGHT;
 const float BOZO_POINTER_BB_WIDTH = 170.f;
 const float BOZO_POINTER_BB_HEIGHT = 170.f;
-const float WALL_WIDTH = 20.f;
 
 const vec2 CLIMBABLE_DIM = { 30.f, 32.f };
 
@@ -39,7 +38,7 @@ std::vector<Entity> createPlatforms(RenderSystem* renderer, float left_position_
 // helper for steps
 std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, vec2 scale, uint num_steps, uint step_blocks, bool left);
 // walls
-Entity createWall(RenderSystem* renderer, float position_x, float position_y, float height, bool visible);
+Entity createWall(RenderSystem* renderer, float position_x, float position_y, float width, float height, bool visible);
 // ladders
 std::vector<Entity> createClimbable(RenderSystem* renderer, float top_position_x, float top_position_y, uint num_sections, TEXTURE_ASSET_ID texture);
 // spikes
@@ -94,7 +93,8 @@ const std::vector<int> asset_mapping = {
   3, 
   4,
   1, 
-  2
+  2,
+  5
 };
 
 const std::vector<std::string> LEVEL_DESCRIPTORS = {
@@ -103,6 +103,7 @@ const std::vector<std::string> LEVEL_DESCRIPTORS = {
   level_path("4_mmboss.json"),
   level_path("1_nest.json"),
   level_path("2_beach.json"),
+  level_path("6_lab.json"),
 };
 
 const std::string SAVE_STATE_FILE = level_path("save_state.json");
@@ -140,8 +141,22 @@ const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_A
 		{ TEXTURE_ASSET_ID::LIBRARY_OBJECTS, 2.f },
 		{ TEXTURE_ASSET_ID::LIBRARY_FRAME, 0.f }
 	},
-  {
+  	{
 		{ TEXTURE_ASSET_ID::MM_BACKGROUND, 0.f }
+	},
+	{
+		{ TEXTURE_ASSET_ID::LAB_BACKGROUND_0, 0.f},
+		// { TEXTURE_ASSET_ID::LAB_BACKGROUND_1, 16.f},
+		{ TEXTURE_ASSET_ID::LAB_BACKGROUND_2, 12.f},
+		{ TEXTURE_ASSET_ID::LAB_BACKGROUND_3, 10.f},
+		{ TEXTURE_ASSET_ID::LAB_BACKGROUND_4, 10.f},
+		{ TEXTURE_ASSET_ID::LAB_BACKGROUND_5, 6.f},
+		{ TEXTURE_ASSET_ID::LAB_BACKGROUND_6, 4.f},
+		{ TEXTURE_ASSET_ID::LAB_BACKGROUND_7, 2.f},
+		{ TEXTURE_ASSET_ID::LAB_DECOR_0, 0.f},
+		{ TEXTURE_ASSET_ID::LAB_DECOR_1, 0.f},
+		{ TEXTURE_ASSET_ID::LAB_OVERLAY, 0.f},
+		{ TEXTURE_ASSET_ID::LAB_MAP, 0.f},
 	}
 };
 
@@ -151,6 +166,7 @@ const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
   TEXTURE_ASSET_ID::BEACH_PLAT,
   TEXTURE_ASSET_ID::LIBRARY_PLAT,
   TEXTURE_ASSET_ID::MM_PLAT,
+  TEXTURE_ASSET_ID::STEP1,
 };
 
 const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
@@ -159,6 +175,7 @@ const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
   TEXTURE_ASSET_ID::BEACH_LADDER,
   TEXTURE_ASSET_ID::LIBRARY_LAD,
   TEXTURE_ASSET_ID::LIBRARY_LAD,
+  TEXTURE_ASSET_ID::LAB_LADDER,
 };
 
 const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
@@ -167,6 +184,7 @@ const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
 	TEXTURE_ASSET_ID::BEACH_DOOR,
 	TEXTURE_ASSET_ID::LIBRARY_DOOR,
 	TEXTURE_ASSET_ID::MM_DOOR,
+	TEXTURE_ASSET_ID::NEST_DOOR,
 };
 
 const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
@@ -174,6 +192,7 @@ const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
   TEXTURE_ASSET_ID::NEST_NPC,
   TEXTURE_ASSET_ID::BEACH_NPC,
   TEXTURE_ASSET_ID::NEST_NPC,
+  TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT
 };
 
@@ -181,6 +200,7 @@ const std::vector<TEXTURE_ASSET_ID> ZOMBIE_ASSET = {
 	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::BEACH_ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::ZOMBIE
 };
@@ -213,6 +233,7 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::LIB_COLL3,
 		TEXTURE_ASSET_ID::LIB_COLL4,
 		TEXTURE_ASSET_ID::LIB_COLL2},
+  {},
   {}
 };
 
@@ -221,24 +242,26 @@ const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
 	TEXTURE_ASSET_ID::CLEAVER_WEAPON,
 	TEXTURE_ASSET_ID::BEACH_WEAPON,
 	TEXTURE_ASSET_ID::BOOK,
-  TEXTURE_ASSET_ID::MM_PROJECTILE,
+  	TEXTURE_ASSET_ID::MM_PROJECTILE,
+	TEXTURE_ASSET_ID::BOOK,
 };
 
 // ---------------------SOUNDS-------------------------
-const std::vector<std::string> BACKGROUND_MUSIC = {
-	"tutorial.wav",
-	"soundtrack.wav",
-	"beach.wav",
-	"library.wav",
-  "library.wav"
-};
+// const std::vector<std::string> BACKGROUND_MUSIC = {
+// 	"tutorial.wav",
+// 	"soundtrack.wav",
+// 	"beach.wav",
+// 	"library.wav",
+//   	"library.wav"
+// };
 
 const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
 	TEXTURE_ASSET_ID::LABEL_TUTORIAL,
 	TEXTURE_ASSET_ID::LABEL_NEST,
 	TEXTURE_ASSET_ID::LABEL_BEACH,
 	TEXTURE_ASSET_ID::LABEL_LIB,
-  TEXTURE_ASSET_ID::LABEL_MM,
+  	TEXTURE_ASSET_ID::LABEL_MM,
+  	TEXTURE_ASSET_ID::LABEL_MM, // TODO(vanessa): update
 };
 
 
@@ -248,5 +271,6 @@ const std::vector<TEXTURE_ASSET_ID> BOSS_ASSET = {
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
-  TEXTURE_ASSET_ID::MM_BOSS
+  TEXTURE_ASSET_ID::MM_BOSS,
+  TEXTURE_ASSET_ID::MM_BOSS,
 };
