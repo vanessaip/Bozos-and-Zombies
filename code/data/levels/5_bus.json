@@ -41,14 +41,14 @@
   "zombie_jump_points": [
     [ 0 ]
   ],
-  "spikes": [],
-  "wheels": [
+  "spikes": [
     {
-      "position": [ 1000, 710 ],
-      "colour": [ 1.0, 0, 0 ],
-      "velocity": [ 0, 0 ]
+      "x": 1170.0,
+      "y": 795.0,
+      "colour": [ 1.0, 0.0, 0.0 ]
     }
   ],
+  "wheels": [],
   "player": {
     "position": {
       "x": 100,

@@ -274,7 +274,7 @@
   },
   "bgm": "soundtrack.wav",
   "door": {
-    "position": [ 700, 764 ],
+    "position": [ 700, 754 ],
     "scale": [ 40, 60 ]
   }
 }
