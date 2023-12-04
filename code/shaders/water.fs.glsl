@@ -17,8 +17,9 @@ vec2 distort(vec2 uv)
 if (!is_poisoned){
 	return uv;
 }
-	vec2 distortion = vec2((sin(time/10)+39)/40, (cos(time/10)+39)/40);
-	return distortion*uv;
+	float distortionStrength = 0.02; 
+    vec2 distortion = vec2(sin(time) * distortionStrength, cos(time) * distortionStrength);
+    return uv + distortion;
 }
 
 vec4 color_shift(vec4 in_color) 
@@ -29,8 +30,9 @@ vec4 color_shift(vec4 in_color)
 if (!is_poisoned){
 	return in_color;
 }
-	vec4 shift = vec4(0.8,0.8,1.2,0);
-	return shift*in_color;
+	vec4 purpleTint = vec4(0.5, 0.2, 0.5, 1.0);
+    float mixFactor = 0.5;
+    return mix(in_color, purpleTint, mixFactor);
 }
 
 vec4 fade_color(vec4 in_color) 

@@ -542,7 +542,7 @@ void WorldSystem::updateSpriteSheetAnimation(Motion& bozo_motion, float elapsed_
 
 	// handle animation of door when game is over
 	SpriteSheet& door_sheet = registry.spriteSheets.get(door);
-	if (game_over && door_sheet.mode != ANIMATION_MODE::ATTACK) {
+	if (!game_over && door_sheet.mode != ANIMATION_MODE::ATTACK) {
 		Door& door_component = registry.doors.get(door);
 		doorOpenTimer += elapsed_ms_since_last_update;
 		if (doorOpenTimer > door_component.door_open_timer) {
@@ -1374,12 +1374,12 @@ void WorldSystem::restart_level()
 	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[asset_mapping[curr_level]];
 	assert(num_collectibles == collectible_assets.size());
 	for (uint i = 0; i < num_collectibles; i++) {
-		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false, true);
+		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false, false);
 	}
 
 	// This is specific to the forest level
 	if (curr_level == FOREST){
-		createCollectible(renderer, 280, 740, TEXTURE_ASSET_ID::FOREST_MUSHROOM, {70, 70}, false, true);
+		createCollectible(renderer, 225, 625, TEXTURE_ASSET_ID::FOREST_MUSHROOM, {70, 70}, false, true);
 	}
 
 	// This is specific to the beach level
