@@ -101,7 +101,7 @@ class RenderSystem {
 		textures_path("locations/label_nest.png"),
 		textures_path("locations/label_beach.png"),
 		textures_path("locations/label_library.png"),
-		textures_path("locations/label_tutorial.png"),
+		textures_path("locations/label_street.png"),
 		textures_path("beach/beach-apple.png"),
 		textures_path("beach/beach-chest.png"),
 		textures_path("beach/beach-chest2.png"),

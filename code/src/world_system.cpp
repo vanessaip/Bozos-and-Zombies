@@ -1601,7 +1601,7 @@ void WorldSystem::restart_level()
 	if (curr_level == BEACH) {
 		createDangerous(renderer, { 280, 130 }, { 30, 30 }, TEXTURE_ASSET_ID::SPIKE_BALL, { 280, 130 }, { 500, 10 }, { 650, 250 }, { 0, 0 }, false, true, 6);
 		createDangerous(renderer, { 280, 130 }, { 50, 50 }, TEXTURE_ASSET_ID::BEACH_BIRD, { 0, 400 }, { 500, 50 }, { 1000, 750 }, { 1450, 400 }, true, true, 6);
-		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, { 230, 155 }, { 80, 60 });
+		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, { 230, 155 }, false, { 80, 60 });
 	}
 
 	mm_boss_rain.clear();

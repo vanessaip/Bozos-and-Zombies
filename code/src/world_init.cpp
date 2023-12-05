@@ -677,7 +677,7 @@ Entity createHP(RenderSystem* renderer, vec2 position) {
 	return entity;
 }
 
-Entity createLight(RenderSystem* renderer, vec2 position, float intensity_dropoff_factor) 
+Entity createLight(RenderSystem* renderer, vec2 position, float intensity_dropoff_factor)
 {
 	auto entity = Entity();
 
@@ -694,9 +694,12 @@ Entity createLight(RenderSystem* renderer, vec2 position, float intensity_dropof
 
 	registry.renderRequests.insert(
 		entity,
-		{	TEXTURE_ASSET_ID::LIGHT,
+		{ TEXTURE_ASSET_ID::LIGHT,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
 
 Entity createAnimatedBackgroundObject(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, std::vector<int> spriteCounts, vec2 trunc) {
 	// Reserve en entity
