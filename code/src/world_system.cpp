@@ -1392,7 +1392,6 @@ void WorldSystem::restart_level()
 
 	// Tutorial sign only for the first level
 	if (curr_level == TUTORIAL) {
-		createCutscene(renderer, { 720, 405 }, { 1440, 810 }, TEXTURE_ASSET_ID::CUTSCENE_1, { 10 }, 1000.f, vec2(0.0f, 0.0f));
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_MOVEMENT, { window_width_px - 120.f, window_height_px - 80.f }, "", { 150.f, 70.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_CLIMB, { window_width_px - 480.f, window_height_px - 90.f }, "", { 115.f, 40.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_NPCS, { window_width_px - 800.f, window_height_px - 350.f }, "", { 150.f, 60.f });
