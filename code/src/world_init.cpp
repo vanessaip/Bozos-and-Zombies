@@ -87,7 +87,7 @@ Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID tex
 
 	// Create an (empty) Student component to be able to refer to all students
 	registry.humans.emplace(entity);
-	registry.colors.insert(entity, { 1, 0.8f, 0.8f });
+	registry.colors.insert(entity, { 1, 1, 1 });
 
 	std::vector<int> spriteCounts = { 4, 6 };
 	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.08f, 0.08f));

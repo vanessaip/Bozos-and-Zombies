@@ -127,7 +127,7 @@ class RenderSystem {
     textures_path("beach/beach_zombie.png"),
     textures_path("beach/npc_sprite_sheet.png"),
     textures_path("nest_student.png"),
-    textures_path("cleaver_weapon.png"),
+    textures_path("wallet-weapon.png"),
     textures_path("beach/beach_weapon.png"),
     textures_path("mm/mm-fountain.png"),
     textures_path("mm/mm-rain.png"),
@@ -147,6 +147,14 @@ class RenderSystem {
 	textures_path("lab/lab-objects.png"),
 	textures_path("lab/colour-overlay.png"),
 	textures_path("lab/lab-ladder.png"),
+	textures_path("lab/lab-npc.png"),
+	textures_path("lab/lab-weapon.png"),
+	textures_path("lab/lab-collect0.png"),
+	textures_path("lab/lab-collect1.png"),
+	textures_path("lab/lab-collect2.png"),
+	textures_path("lab/lab-collect3.png"),
+	textures_path("lab/lab-collect4.png"),
+	textures_path("lab/lab-collect5.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

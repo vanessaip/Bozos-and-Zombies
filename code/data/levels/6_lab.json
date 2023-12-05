@@ -92,18 +92,18 @@
       [1328],
       [592, 1424],
       [238],
-      [],
-      []
+      [0],
+      [0]
     ],
     "zombie_jump_points": [
       [1072],
       [208, 816, 944, 1072],
-      [],
-      [],
+      [0],
+      [0],
       [224, 816, 944]
     ],
     "spikes": [
-      {"x": 1168, "y": 810, "colour": [100, 255, 0]}
+      {"x": 1152, "y": 810, "colour": [100, 255, 0]}
     ],
     "wheels": [],
     "player": {
@@ -120,9 +120,11 @@
       "spawn_timer": null
     },
     "students": {
-      "num_starting": 0,
-      "positions": [],
-      "spawn_timer": null
+      "num_starting": 1,
+      "positions": [
+        {"x": 1136, "y": 295}
+      ],
+      "spawn_timer": 20
     },
     "collectibles": {
       "scale": {
@@ -130,7 +132,12 @@
         "y": 30
       },
       "positions": [
-      
+        {"x": 64, "y": 352},
+        {"x": 224, "y": 75},
+        {"x": 1056, "y": 160},
+        {"x": 864, "y": 320},
+        {"x": 1120, "y": 656},
+        {"x": 448, "y": 710}
       ]
     },
     "bgm": "lab-music.wav",
