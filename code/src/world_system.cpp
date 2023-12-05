@@ -650,6 +650,11 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 			blocks.push_back(walls.entities[i]);
 		}
 
+        if (isZombie) {
+            registry.zombies.get(motionEntity).right_side_collision = false;
+            registry.zombies.get(motionEntity).left_side_collision = false;
+        }
+
 		// handle platform collisions
 		for (int i = 0; i < blocks.size(); i++)
 		{
@@ -660,10 +665,6 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 			float yBlockTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
 			float yBlockBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
 
-      if (isZombie) {
-        registry.zombies.get(motionEntity).block_side_collision = false;
-      }
-
 			// Add this check so that the player can pass through platforms when on a ladderd
 			if (!motion.climbing)
 			{
@@ -671,19 +672,6 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 				if (motion.velocity.y >= 0 && entityBottom >= yBlockTop && entityBottom < yBlockTop + 20.f &&
 					entityRightSide > xBlockLeftBound && entityLeftSide < xBlockRightBound)
 				{
-					// Move character with moving block (currently not using moving plaftforms)
-					/*
-					if (registry.keyframeAnimations.has(blocks[i]))
-					{
-						motion.position.x += blockMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
-						charactersOnMovingPlat.push_back(std::make_tuple(&motion, &blockMotion)); // track collision if platform is moving down
-					}
-					*/
-
-					// if (motion.offGround)
-					// {
-					// 	Mix_PlayChannel(-1, player_land_sound, 0);
-					// }
 					motion.position.y = yBlockTop - motion.scale[1] / 2.f;
 					motion.velocity.y = 0.f;
 					motion.offGround = false;
@@ -715,7 +703,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 					}
 				}
 				else if (isZombie) {
-          registry.zombies.get(motionEntity).block_side_collision = true;
+                    registry.zombies.get(motionEntity).right_side_collision = true;
 
 					if (curr_level == NEST && !motion.offGround)
 					{
@@ -723,8 +711,8 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 						motion.velocity[1] -= 200;
 					}
 				} else {
-          motion.velocity.x = 0;
-        }
+                    motion.velocity.x = 0;
+                }
 			}
 
 			// Collision with Left edge of block
@@ -743,7 +731,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 					}
 				}
 				else if (isZombie) {
-          registry.zombies.get(motionEntity).block_side_collision = true;
+                    registry.zombies.get(motionEntity).left_side_collision = true;
 
 					if (curr_level == NEST && isZombie && !motion.offGround)
 					{
@@ -751,9 +739,8 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 						motion.velocity[1] -= 200;
 					}
 				} else {
-          motion.velocity.x = 0;
-        }
-
+                    motion.velocity.x = 0;
+                }
 			}
 		}
 
@@ -988,10 +975,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	int bozo_level = checkLevel(bozo_motion);
 	int zombie_level = checkLevel(motion);
 
-  if (registry.zombies.get(zombie).block_side_collision) {
-    motion.velocity.x = 0;
-  }
-	else if (curr_level == BUS) {
+	if (curr_level == BUS) {
 		motion.velocity = { 0.f,0.f };
 		return;
 	}
@@ -1187,6 +1171,10 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	else {
 		motion.reflect[0] = false;
 	}
+
+    if ((registry.zombies.get(zombie).right_side_collision && motion.velocity.x < 0) || (registry.zombies.get(zombie).left_side_collision && motion.velocity.x > 0)) {
+        motion.velocity.x = 0;
+    }
 
 
 	// update sprite animation depending on distance to player
