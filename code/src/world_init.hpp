@@ -20,6 +20,7 @@ const vec2 CLIMBABLE_DIM = { 30.f, 32.f };
 
 const float ZOMBIE_SPEED = 120.f;
 const float PLAYER_SPEED = 230;
+const float MMBOSS_SPEED = 140.f;
 
 // the player
 Entity createBozo(RenderSystem* renderer, vec2 pos);
@@ -28,7 +29,7 @@ Entity createBozoPointer(RenderSystem* renderer, vec2 pos);
 // the prey
 Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId);
 // the enemy
-Entity createZombie(RenderSystem* renderer, vec2 position);
+Entity createZombie(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId);
 // a red line for debugging purposes
 Entity createLine(vec2 position, vec2 size);
 // one platform
@@ -57,7 +58,7 @@ Entity createCollectible(RenderSystem* renderer, float position_x, float positio
 // hearts
 Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
 
-Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic);
+Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic, bool bezier, int spriteCount);
 
 // label
 Entity createOverlay(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId, bool is_fading);
@@ -68,32 +69,43 @@ void removeEntity(Entity e);
 
 Entity createLoadingScreen(RenderSystem* renderer, vec2 position, vec2 scale);
 
+Entity createBoss(RenderSystem* renderer, vec2 position, vec2 scale, float health, float damage, TEXTURE_ASSET_ID assetID, vec2 trunc, std::vector<int> counts);
+
+Entity createHPBar(RenderSystem* renderer, vec2 position);
+
+Entity createHP(RenderSystem* renderer, vec2 position);
+
+Entity createAnimatedBackgroundObject(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, std::vector<int> spriteCounts, vec2 trunc);
+
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 
 enum level {
-	TUTORIAL = 0,
-	NEST = 3,
-	BEACH = 2,
-	LIBRARY = 1,
-  TBC = 4
+	BUS = 0,
+	TUTORIAL = 1,
+	LIBRARY = 2,
+	MMBOSS = 3,
+	NEST = 4,
+	BEACH = 5,
 };
 
 // For swapping levels around
 const std::vector<int> asset_mapping = {
-  0, 
-  3, 
-  2, 
+  5,
+  0,
+  3,
+  4,
   1,
-  4
+  2
 };
 
 const std::vector<std::string> LEVEL_DESCRIPTORS = {
+  level_path("5_bus.json"),
   level_path("0_tutorial.json"),
   level_path("3_library.json"),
-  level_path("2_beach.json"),
+  level_path("4_mmboss.json"),
   level_path("1_nest.json"),
-  level_path("to_be_continued.json"),
+  level_path("2_beach.json"),
 };
 
 const std::string SAVE_STATE_FILE = level_path("save_state.json");
@@ -132,24 +144,21 @@ const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_A
 		{ TEXTURE_ASSET_ID::LIBRARY_FRAME, 0.f }
 	},
   {
-		{ TEXTURE_ASSET_ID::TBC, 0.f }
-	}
+		{ TEXTURE_ASSET_ID::MM_BACKGROUND, 0.f }
+	},
+  {
+	  {TEXTURE_ASSET_ID::BUS_BG, 2.f},
+	  {TEXTURE_ASSET_ID::BUS_WINDOW, 0.f}
+  }
 };
-
-/*
-const std::vector<std::vector<TEXTURE_ASSET_ID>> BACKGROUND_ASSET = {
-	{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND1, TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND2, TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND3, TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND4, TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND0 },
-	{ TEXTURE_ASSET_ID::BACKGROUND, TEXTURE_ASSET_ID::BACKGROUND_INDOOR, TEXTURE_ASSET_ID::BASEMENT},
-	{ TEXTURE_ASSET_ID::BEACH_SKY, TEXTURE_ASSET_ID::BEACH_SEA, TEXTURE_ASSET_ID::BEACH_LAND, TEXTURE_ASSET_ID::BEACH_CLOUD},
-	{ TEXTURE_ASSET_ID::LIBRARY_FILL, TEXTURE_ASSET_ID::LIBRARY_OBJECTS, TEXTURE_ASSET_ID::LIBRARY_FRAME}
-};
-*/
 
 const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
   TEXTURE_ASSET_ID::TUTORIAL_PLAT,
   TEXTURE_ASSET_ID::STEP1,
   TEXTURE_ASSET_ID::BEACH_PLAT,
   TEXTURE_ASSET_ID::LIBRARY_PLAT,
+  TEXTURE_ASSET_ID::MM_PLAT,
+  TEXTURE_ASSET_ID::STEP1
 };
 
 const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
@@ -157,13 +166,35 @@ const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
   TEXTURE_ASSET_ID::LADDER2,
   TEXTURE_ASSET_ID::BEACH_LADDER,
   TEXTURE_ASSET_ID::LIBRARY_LAD,
+  TEXTURE_ASSET_ID::LIBRARY_LAD,
+  TEXTURE_ASSET_ID::LADDER2
+};
+
+const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
+	TEXTURE_ASSET_ID::GHETTO_DOOR,
+	TEXTURE_ASSET_ID::NEST_DOOR,
+	TEXTURE_ASSET_ID::BEACH_DOOR,
+	TEXTURE_ASSET_ID::LIBRARY_DOOR,
+	TEXTURE_ASSET_ID::MM_DOOR,
+	TEXTURE_ASSET_ID::NEST_DOOR
 };
 
 const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
   TEXTURE_ASSET_ID::TUTORIAL_NPC,
-  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::NEST_NPC,
+  TEXTURE_ASSET_ID::BEACH_NPC,
+  TEXTURE_ASSET_ID::NEST_NPC,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT
+};
+
+const std::vector<TEXTURE_ASSET_ID> ZOMBIE_ASSET = {
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::BEACH_ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
 };
 
 const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
@@ -193,15 +224,21 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::LIB_COLL5,
 		TEXTURE_ASSET_ID::LIB_COLL3,
 		TEXTURE_ASSET_ID::LIB_COLL4,
-		TEXTURE_ASSET_ID::LIB_COLL2},
-  {}
+		TEXTURE_ASSET_ID::LIB_COLL2
+	},
+  {},
+	{
+		TEXTURE_ASSET_ID::BURGER
+	}
 };
 
 const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
 	TEXTURE_ASSET_ID::TUTORIAL_WEAPON,
+	TEXTURE_ASSET_ID::CLEAVER_WEAPON,
+	TEXTURE_ASSET_ID::BEACH_WEAPON,
 	TEXTURE_ASSET_ID::BOOK,
-	TEXTURE_ASSET_ID::BOOK,
-	TEXTURE_ASSET_ID::BOOK,
+  TEXTURE_ASSET_ID::MM_PROJECTILE,
+  TEXTURE_ASSET_ID::BOOK
 };
 
 // ---------------------SOUNDS-------------------------
@@ -209,13 +246,27 @@ const std::vector<std::string> BACKGROUND_MUSIC = {
 	"tutorial.wav",
 	"soundtrack.wav",
 	"beach.wav",
-	"library.wav"
+	"library.wav",
+	"library.wav",
+	"soundtrack.wav",
 };
 
 const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
-	TEXTURE_ASSET_ID::LABEL_TUTORIAL,
+	TEXTURE_ASSET_ID::LABEL_STREET,
 	TEXTURE_ASSET_ID::LABEL_NEST,
 	TEXTURE_ASSET_ID::LABEL_BEACH,
 	TEXTURE_ASSET_ID::LABEL_LIB,
-  TEXTURE_ASSET_ID::LABEL_LIB,
+  TEXTURE_ASSET_ID::LABEL_MM,
+  TEXTURE_ASSET_ID::LABEL_BUS
+};
+
+
+// ---------------------BOSSES-------------------------
+const std::vector<TEXTURE_ASSET_ID> BOSS_ASSET = {
+  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::MM_BOSS,
+  TEXTURE_ASSET_ID::STUDENT
 };
