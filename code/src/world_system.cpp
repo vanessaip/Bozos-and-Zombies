@@ -1083,15 +1083,15 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		float speed = ZOMBIE_SPEED;
 		motion.velocity.x = direction * speed;
 
-		if (!motion.offGround) {
-			for (float pos : jump_positions[zombie_level]) {
-				if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
-				{
-					motion.velocity.y = -600;
-					motion.offGround = true;
-				}
-			}
-		}
+		// if (!motion.offGround) {
+		// 	for (float pos : jump_positions[zombie_level]) {
+		// 		if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
+		// 		{
+		// 			motion.velocity.y = -600;
+		// 			motion.offGround = true;
+		// 		}
+		// 	}
+		// }
 
 	}
 	else if (zombie_level < bozo_level)
@@ -1105,7 +1105,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 
 		// Move toward the target_ladder
-		float target_ladder = getClosestLadder(zombie_level, bozo_motion);
+		float target_ladder = getClosestLadder(zombie_level, motion);
 
 		if ((target_ladder - motion.position.x) > 0)
 		{
@@ -1135,7 +1135,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	{
 		// Zombie is a level above bozo and needs to climb down
 		// Move toward the target_ladder
-		float target_ladder = getClosestLadder(zombie_level - 1, bozo_motion);
+		float target_ladder = getClosestLadder(zombie_level - 1, motion);
 
 		if ((target_ladder - motion.position.x) > 0)
 		{
@@ -1163,6 +1163,16 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 
 	}
+	if (!motion.offGround) {
+		for (float pos : jump_positions[zombie_level]) {
+			if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
+			{
+				motion.velocity.x *= 10;
+				motion.velocity.y = -575;
+				motion.offGround = true;
+			}
+		}
+	}
 
 	// update zombie direction
 	if (motion.velocity.x > 0 && (zombie_level != bozo_level || abs(motion.position.x - bozo_motion.position.x) > 5)) {
@@ -1172,10 +1182,10 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		motion.reflect[0] = false;
 	}
 
-    if ((registry.zombies.get(zombie).right_side_collision && motion.velocity.x < 0) || (registry.zombies.get(zombie).left_side_collision && motion.velocity.x > 0)) {
+    // if ((registry.zombies.get(zombie).right_side_collision && motion.velocity.x < 0) || (registry.zombies.get(zombie).left_side_collision && motion.velocity.x > 0)) {
+    if ((registry.zombies.get(zombie).right_side_collision) || (registry.zombies.get(zombie).left_side_collision)) {
         motion.velocity.x = 0;
     }
-
 
 	// update sprite animation depending on distance to player
 	SpriteSheet& zombieSheet = registry.spriteSheets.get(zombie);
@@ -1198,17 +1208,17 @@ int WorldSystem::checkLevel(Motion& motion)
 	return floor_positions.size() - 1;
 }
 
-float WorldSystem::getClosestLadder(int zombie_level, Motion& bozo_motion)
+float WorldSystem::getClosestLadder(int zombie_level, Motion& motion)
 {
 	std::vector<float> ladders = ladder_positions[zombie_level];
 
-	// Find the closest ladder to get to bozo
+	// Find the closest ladder to get to position specified by motion
 	int closest = 0;
 	float min_dist = 10000;
 
 	for (int i = 0; i < ladders.size(); i++)
 	{
-		float dist = abs(ladders[i] - bozo_motion.position.x);
+		float dist = abs(ladders[i] - motion.position.x);
 		if (dist < min_dist)
 		{
 			closest = i;
