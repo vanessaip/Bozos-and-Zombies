@@ -713,6 +713,9 @@ Entity createCutscene(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE
 	motion.position = position;
 	motion.scale = scale;
 
+	CutsceneTimer& cs_timer = registry.cutSceneTimers.emplace(entity);
+	cs_timer.timer = switchTime * spriteCounts[0];
+
 	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, switchTime, trunc);
 
 	registry.renderRequests.insert(

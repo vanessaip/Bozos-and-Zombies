@@ -101,7 +101,7 @@ class RenderSystem {
 		textures_path("locations/label_nest.png"),
 		textures_path("locations/label_beach.png"),
 		textures_path("locations/label_library.png"),
-		textures_path("locations/label_tutorial.png"),
+	textures_path("locations/label_street.png"),
 	textures_path("beach/beach-apple.png"),
 	textures_path("beach/beach-chest.png"),
 	textures_path("beach/beach-chest2.png"),
@@ -134,7 +134,10 @@ class RenderSystem {
 	textures_path("mm/mm-door-sprite-sheet.png"),
 	textures_path("mm/mm-projectile.png"),
 	textures_path("locations/label_mm.png"),
-	textures_path("cutscenes/cut1.png")
+	textures_path("tutorial/bus_bg.png"),
+	textures_path("tutorial/bus_windows.png"),
+	textures_path("locations/label_bus.png"),
+	textures_path("cutscenes/cutscene_1.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

@@ -350,12 +350,7 @@ void RenderSystem::step(float elapsed_time_ms) {
 			sheet.timer_ms = 0;
 
 			if (sheet.offset.x / sheet.spriteDim.x >= sheet.getCurrentSpriteCount()) {
-				if (sheet.loop == false) {
-
-				}
-				else {
-					sheet.offset.x = 0.f;
-				}
+				sheet.offset.x = 0.f;
 			}
 
 			updateSpriteSheetGeometryBuffer(sheet);

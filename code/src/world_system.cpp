@@ -357,7 +357,13 @@ void WorldSystem::handleRespawn(float elapsed_ms_since_last_update) {
 			{
 				Entity student = createStudent(renderer, npcSpawnPos, NPC_ASSET[asset_mapping[curr_level]]);
 				Motion& student_motion = registry.motions.get(student);
-				student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+				if (curr_level == BUS) {
+					student_motion.velocity = { 0.f,0.f };
+				}
+				else {
+					student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+				}
+
 				npcSpawnTimer = 0.f;
 				break;
 			}
@@ -445,6 +451,16 @@ bool WorldSystem::handleTimers(Motion& motion, Entity motionEntity, float elapse
 		timer.timer_ms -= elapsed_ms_since_last_update;
 		if (timer.timer_ms < 0) {
 			removeEntity(motionEntity); // remove zombie (also removes timer)
+		}
+	}
+
+	else if (registry.cutSceneTimers.has(motionEntity)) {
+		CutsceneTimer& cs_timer = registry.cutSceneTimers.get(motionEntity);
+		cs_timer.timer -= elapsed_ms_since_last_update;
+		if (cs_timer.timer < 0) {
+			removeEntity(motionEntity);
+			curr_level++;
+			restart_level();
 		}
 	}
 
@@ -974,7 +990,11 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	int bozo_level = checkLevel(bozo_motion);
 	int zombie_level = checkLevel(motion);
 
-	if (curr_level == MMBOSS) {
+	if (curr_level == BUS) {
+		motion.velocity = { 0.f,0.f };
+		return;
+	}
+	else if (curr_level == MMBOSS) {
 		motion.climbing = false;
 		float direction = -1;
 		if ((bozo_motion.position.x - motion.position.x) > 0)
@@ -1505,7 +1525,12 @@ void WorldSystem::restart_level()
 			Entity student = createStudent(renderer, pos, NPC_ASSET[asset_mapping[curr_level]]);
 			// coded back+forth motion
 			Motion& student_motion = registry.motions.get(student);
-			student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+			if (curr_level == BUS) {
+				student_motion.velocity = { 0.f,0.f };
+			}
+			else {
+				student_motion.velocity.x = uniform_dist(rng) > 0.5f ? 100.f : -100.f;
+			}
 		}
 		s++;
 	}
@@ -1543,29 +1568,38 @@ void WorldSystem::restart_level()
 		}
 	}
 	// Lives can probably stay hardcoded?
-	float heart_pos_x = 1385;
-	float heart_starting_pos_y = 40;
 
-	Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
-	Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
-	Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
-	Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
-	Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
+	if (jsonData["isCutscene"] == true) {
+		playCutscene(renderer);
+	}
+	else {
+		float heart_pos_x = 1385;
+		float heart_starting_pos_y = 40;
 
-	player_hearts = { heart0, heart1, heart2, heart3, heart4 };
+		Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
+		Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
+		Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
+		Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
+		Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
 
-	// Create label
-	Entity label = createOverlay(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]], true);
+		player_hearts = { heart0, heart1, heart2, heart3, heart4 };
 
-	setup_keyframes(renderer);
+		// Create label
+		Entity label = createOverlay(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]], true);
 
-	points = 0;
-	level_start_time = Clock::now();
+		setup_keyframes(renderer);
+		points = 0;
+		level_start_time = Clock::now();
+	}
 }
 
 void WorldSystem::addAnimatedMMBossTextures(RenderSystem* renderer)
 {
 	createAnimatedBackgroundObject(renderer, { 728, 720 }, { 130, 130 }, TEXTURE_ASSET_ID::MM_FOUNTAIN, { 4 }, { 0, 0.01 });
+}
+
+void WorldSystem::playCutscene(RenderSystem* renderer) {
+	createCutscene(renderer, { 1080, 608 }, { 720, 405 }, TEXTURE_ASSET_ID::CUTSCENE_1, { 4 }, 5000.f, { 0, 0 });
 }
 
 // Compute collisions between entities
@@ -1939,6 +1973,12 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			debugging.in_full_view_mode = false;
 		else
 			debugging.in_full_view_mode = true;
+	}
+
+	// Get location
+	if (action == GLFW_RELEASE && key == GLFW_KEY_M) {
+		Motion motion = registry.motions.get(player_bozo);
+		printf("%f, %f\n", motion.position.x, motion.position.y);
 	}
 
 	// Pause

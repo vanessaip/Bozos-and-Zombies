@@ -1,0 +1,96 @@
+{
+  "isCutscene": false,
+  "platform_scale": {
+    "x": 50,
+    "y": 30
+  },
+  "platforms": [
+    {
+      "x": 0.0,
+      "y": 820.0,
+      "num_tiles": 30,
+      "visible": true
+    },
+    {
+      "x": 0.0,
+      "y": 550.0,
+      "num_tiles": 30,
+      "visible": false
+    },
+    {
+      "x": 340.0,
+      "y": 665.0,
+      "num_tiles": 1,
+      "visible": true
+    }
+  ],
+  "floor_positions": [
+    0
+  ],
+  "stairs": [],
+  "walls": [],
+  "climbables": [
+    {
+      "x": 340.0,
+      "y": 665.0,
+      "sections": 5
+    }
+  ],
+  "zombie_climb_points": [
+    [ 0 ]
+  ],
+  "zombie_jump_points": [
+    [ 0 ]
+  ],
+  "spikes": [
+    {
+      "x": 1170.0,
+      "y": 795.0,
+      "colour": [ 1.0, 0.0, 0.0 ]
+    }
+  ],
+  "wheels": [],
+  "player": {
+    "position": {
+      "x": 100,
+      "y": 700
+    }
+  },
+  "zombies": {
+    "num_starting": 1,
+    "positions": [
+      {
+        "x": 750,
+        "y": 780
+      }
+    ],
+    "spawn_timer": null
+  },
+  "students": {
+    "num_starting": 1,
+    "positions": [
+      {
+        "x": 480,
+        "y": 780
+      }
+    ],
+    "spawn_timer": 10
+  },
+  "collectibles": {
+    "scale": {
+      "x": 30,
+      "y": 30
+    },
+    "positions": [
+      {
+        "x": 1310,
+        "y": 790
+      }
+    ]
+  },
+  "bgm": "soundtrack.wav",
+  "door": {
+    "position": [ 1370, 780 ],
+    "scale": [ 40, 60 ]
+  }
+}

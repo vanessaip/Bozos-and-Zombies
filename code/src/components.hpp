@@ -153,6 +153,11 @@ struct ZombieDeathTimer
 	float timer_ms = 600.f;
 };
 
+struct CutsceneTimer
+{
+	float timer;
+};
+
 // Keyframe animation stores all keyframes and timing data for a given entity
 struct KeyframeAnimation
 {
@@ -360,8 +365,8 @@ enum class TEXTURE_ASSET_ID
 	LABEL_NEST = LIBRARY_LAD + 1,
 	LABEL_BEACH = LABEL_NEST + 1,
 	LABEL_LIB = LABEL_BEACH + 1,
-	LABEL_TUTORIAL = LABEL_LIB + 1,
-	BEACH_APPLE = LABEL_TUTORIAL + 1,
+	LABEL_STREET = LABEL_LIB + 1,
+	BEACH_APPLE = LABEL_STREET + 1,
 	BEACH_CHEST = BEACH_APPLE + 1,
 	BEACH_CHEST2 = BEACH_CHEST + 1,
 	BEACH_DIAMOND = BEACH_CHEST2 + 1,
@@ -393,7 +398,10 @@ enum class TEXTURE_ASSET_ID
 	MM_DOOR = MM_RAIN + 1,
 	MM_PROJECTILE = MM_DOOR + 1,
 	LABEL_MM = MM_PROJECTILE + 1,
-	CUTSCENE_1 = LABEL_MM + 1,
+	BUS_BG = LABEL_MM + 1,
+	BUS_WINDOW = BUS_BG + 1,
+	LABEL_BUS = BUS_WINDOW + 1,
+	CUTSCENE_1 = LABEL_BUS + 1,
 	TEXTURE_COUNT = CUTSCENE_1 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
