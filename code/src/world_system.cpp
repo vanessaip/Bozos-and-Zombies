@@ -181,6 +181,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			assert(registry.bosses.entities.size() > 0);
 			boss_active = true;
 			removeEntity(boss_blockade);
+			Mix_PlayChannel(-1, boss_summon_sound, 0);
 		}
 	}
 	else if (curr_level == MMBOSS && registry.bosses.entities.size() == 0 && this->game_over == false) {
