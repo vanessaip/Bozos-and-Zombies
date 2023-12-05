@@ -377,8 +377,8 @@
     ]
   },
   "bgm": "forest.wav",
-  "door_win_pos": {
-    "x": 1000,
-    "y": 730
+  "door": {
+    "position": [ 1300, 725 ],
+    "scale": [ 60, 60 ]
   }
 }
