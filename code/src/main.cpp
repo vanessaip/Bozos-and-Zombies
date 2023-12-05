@@ -40,27 +40,51 @@ int main()
 
 	// initialize the main systems
 	render_system.init(window);
-  world_system.init(&render_system);
+    world_system.init(&render_system);
 	debugging.in_full_view_mode = true;
 	Entity loadingScreen = createLoadingScreen(&render_system, { window_width_px / 2, window_height_px / 2 }, { 2 * window_width_px, 3 * window_height_px });
-  // Entity loadingScreen = createAnimatedBackgroundObject(&render_system, { 728, 720 }, { 130, 130 }, TEXTURE_ASSET_ID::MM_FOUNTAIN, { 4 }, { 0, 0.01 });
+
+    Entity playButton = createBackground(&render_system, TEXTURE_ASSET_ID::MENU_PLAY, 0.f, { 700, 600 }, { 100, 50 });
+    // Entity loadingScreen = createAnimatedBackgroundObject(&render_system, { 728, 720 }, { 130, 130 }, TEXTURE_ASSET_ID::MM_FOUNTAIN, { 4 }, { 0, 0.01 });
 	// variable timestep loop
+
 	auto t = Clock::now();
 	float total_elapsed = 0.f;
-  while (total_elapsed < 4000.f) {
-    glfwPollEvents();
-    auto now = Clock::now();
-		float elapsed_ms =
-			((float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000) - world_system.pause_duration;
-		total_elapsed += elapsed_ms;
-		t = now;
-    render_system.step(elapsed_ms);
-    render_system.drawMenu(elapsed_ms);
-  }
+    while (world_system.game_state == MENU) {
 
-  world_system.initGameState();
+        glfwPollEvents();
+        auto now = Clock::now();
+        float elapsed_ms =
+            ((float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000) - world_system.pause_duration;
+        total_elapsed += elapsed_ms;
+        t = now;
+
+        Motion& play_button_motion = registry.motions.get(playButton);
+
+        if (world_system.checkPointerInBoundingBox(play_button_motion, world_system.menu_pointer)) {
+            play_button_motion.scale = { 120, 60 };
+        } else {
+            play_button_motion.scale = { 100, 50 };
+        }
+        
+        if (world_system.checkPointerInBoundingBox(play_button_motion, world_system.menu_click_pos)) {
+            break;
+        }
+
+        render_system.step(elapsed_ms);
+        render_system.drawMenu(elapsed_ms);
+    }
+
+    world_system.initGameState();
+
+    debugging.in_full_view_mode = false;
+    registry.remove_all_components_of(loadingScreen);
+    registry.remove_all_components_of(playButton);
+
 	while (!world_system.is_over()) {
-    world_system.game_state = PLAYING;
+
+        world_system.game_state = PLAYING;
+
 		while (world_system.pause) {
 			glfwPollEvents();
 			printf("PAUSING \n");
@@ -78,17 +102,10 @@ int main()
 		world_system.pause_duration = 0.f;
 		// printf("elapsed time: %f\n", elapsed_ms);
 
-		// printf("total elapsed time: %f\n", total_elapsed);
-		if (total_elapsed > 4000.f) {
-			if(registry.motions.has(loadingScreen)) {
-				debugging.in_full_view_mode = false;
-				registry.remove_all_components_of(loadingScreen);
-			}
-			world_system.step(elapsed_ms);
-			physics_system.step(elapsed_ms);
-			render_system.step(elapsed_ms);
-			world_system.handle_collisions();
-		}
+        world_system.step(elapsed_ms);
+        physics_system.step(elapsed_ms);
+        render_system.step(elapsed_ms);
+        world_system.handle_collisions();
 
 		render_system.draw(elapsed_ms);
 	}

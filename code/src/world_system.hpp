@@ -30,7 +30,9 @@ public:
 	std::chrono::time_point<std::chrono::steady_clock> pause_start;
 	std::chrono::time_point<std::chrono::steady_clock> pause_end;
 	float pause_duration = 0.f;
-  int game_state = MENU;
+    int game_state = MENU;
+    vec2 menu_pointer;
+    vec2 menu_click_pos;
 
 	WorldSystem();
 
@@ -67,6 +69,8 @@ public:
 	float getClosestLadder(int zombie_level, Motion& bozo_motion);
 
 	bool isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& motion_container);
+
+    bool checkPointerInBoundingBox(Motion& motion, vec2 pointer_pos);
 private:
 	void handleGameOver();
 	void updateWindowTitle();
@@ -79,8 +83,8 @@ private:
 	void handleWorldCollisions(Motion& motion, Entity motionEntity, Motion& bozo_motion, ComponentContainer<Motion>& motion_container, float elapsed_ms_since_last_update);
 	void boundEntitiesToWindow(Motion& motion, bool isPlayer);
 	void handlePlatformCollision(Motion& blockMotion, vec4 entityBB);
-  void addAnimatedMMBossTextures(RenderSystem* renderer);
-  void updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_motion, float elapsed_ms_since_last_update);
+    void addAnimatedMMBossTextures(RenderSystem* renderer);
+    void updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_motion, float elapsed_ms_since_last_update);
 	
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
@@ -150,7 +154,7 @@ private:
 	float zombie_spawn_threshold;
 	float student_spawn_threshold;
 	uint num_collectibles;
-  std::vector<Entity> mm_boss_rain;
+    std::vector<Entity> mm_boss_rain;
 
 
 	// music references
@@ -161,10 +165,10 @@ private:
 	Mix_Chunk* player_land_sound;
 	Mix_Chunk* collect_book_sound;
 	Mix_Chunk* zombie_kill_sound;
-  Mix_Chunk* level_success_sound;
-  Mix_Chunk* next_level_sound;
-  Mix_Chunk* collected_sound;
-  Mix_Chunk* boss_summon_sound;
+    Mix_Chunk* level_success_sound;
+    Mix_Chunk* next_level_sound;
+    Mix_Chunk* collected_sound;
+    Mix_Chunk* boss_summon_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;

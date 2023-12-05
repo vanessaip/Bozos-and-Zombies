@@ -1974,13 +1974,16 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  vec2 pos = relativePos(mouse_position);
-  printf("Radians: %f\n", pos[0]);
+    vec2 pos = relativePos(mouse_position);
+
+    if (game_state == MENU) {
+        menu_pointer = mouse_position;
+    }
 
 	if (game_state == PLAYING && !pause && !registry.deathTimers.has(player_bozo))
 	{
 		Motion& motion = registry.motions.get(player_bozo_pointer);
-    float radians = atan2(pos.y - motion.position.y, pos.x - motion.position.x);
+        float radians = atan2(pos.y - motion.position.y, pos.x - motion.position.x);
 		motion.angle = radians;
 	}
 }
@@ -1999,6 +2002,11 @@ vec2 WorldSystem::relativePos(vec2 mouse_position) {
 
 void WorldSystem::on_mouse_button(int button, int action, int mod)
 {
+    if (game_state == MENU) {
+        printf("Position: %f\n", menu_pointer[0]);
+        menu_click_pos = menu_pointer;
+    }
+
 	if (registry.deathTimers.has(player_bozo))
 	{
 		return;
@@ -2076,4 +2084,13 @@ void WorldSystem::writeJson(Json::Value& json, std::string file_name) {
 	else {
 		printf("ERROR: unable to open %s for writing\n", file_name.c_str());
 	}
+}
+
+bool WorldSystem::checkPointerInBoundingBox(Motion& motion, vec2 pointer_pos) {
+    float left = motion.position[0] - motion.scale[0] / 2;
+    float right = motion.position[0] + motion.scale[0] / 2;
+    float top = motion.position[1] - motion.scale[1] / 2;
+    float bottom = motion.position[1] + motion.scale[1] / 2;
+
+    return pointer_pos[0] > left && pointer_pos[0] < right && pointer_pos[1] > top && pointer_pos[1] < bottom;
 }
