@@ -454,6 +454,16 @@ bool WorldSystem::handleTimers(Motion& motion, Entity motionEntity, float elapse
 		}
 	}
 
+	else if (registry.cutSceneTimers.has(motionEntity)) {
+		CutsceneTimer& cs_timer = registry.cutSceneTimers.get(motionEntity);
+		cs_timer.timer -= elapsed_ms_since_last_update;
+		if (cs_timer.timer < 0) {
+			removeEntity(motionEntity);
+			curr_level++;
+			restart_level();
+		}
+	}
+
 	return false;
 }
 
@@ -1556,29 +1566,38 @@ void WorldSystem::restart_level()
 		}
 	}
 	// Lives can probably stay hardcoded?
-	float heart_pos_x = 1385;
-	float heart_starting_pos_y = 40;
 
-	Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
-	Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
-	Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
-	Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
-	Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
+	if (jsonData["isCutscene"] == true) {
+		playCutscene(renderer);
+	}
+	else {
+		float heart_pos_x = 1385;
+		float heart_starting_pos_y = 40;
 
-	player_hearts = { heart0, heart1, heart2, heart3, heart4 };
+		Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
+		Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
+		Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
+		Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
+		Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
 
-	// Create label
-	Entity label = createOverlay(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]], true);
+		player_hearts = { heart0, heart1, heart2, heart3, heart4 };
 
-	setup_keyframes(renderer);
+		// Create label
+		Entity label = createOverlay(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]], true);
 
-	points = 0;
-	level_start_time = Clock::now();
+		setup_keyframes(renderer);
+		points = 0;
+		level_start_time = Clock::now();
+	}
 }
 
 void WorldSystem::addAnimatedMMBossTextures(RenderSystem* renderer)
 {
 	createAnimatedBackgroundObject(renderer, { 728, 720 }, { 130, 130 }, TEXTURE_ASSET_ID::MM_FOUNTAIN, { 4 }, { 0, 0.01 });
+}
+
+void WorldSystem::playCutscene(RenderSystem* renderer) {
+	createCutscene(renderer, { 1080, 608 }, { 720, 405 }, TEXTURE_ASSET_ID::CUTSCENE_1, { 4 }, 5000.f, { 0, 0 });
 }
 
 // Compute collisions between entities

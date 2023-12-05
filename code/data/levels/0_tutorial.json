@@ -1,4 +1,5 @@
 {
+  "isCutscene": false,
   "platform_scale": {
     "x": 32,
     "y": 30
@@ -248,7 +249,7 @@
   },
   "bgm": "tutorial.wav",
   "door": {
-    "position": [710, 747],
-    "scale": [40, 60]
+    "position": [ 710, 747 ],
+    "scale": [ 40, 60 ]
   }
 }

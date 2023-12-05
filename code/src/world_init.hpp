@@ -77,29 +77,34 @@ Entity createHP(RenderSystem* renderer, vec2 position);
 
 Entity createAnimatedBackgroundObject(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, std::vector<int> spriteCounts, vec2 trunc);
 
+Entity createCutscene(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, std::vector<int> spriteCounts, float switchTime, vec2 trunc);
+
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 
 enum level {
-	BUS = 0,
-	TUTORIAL = 1,
-	LIBRARY = 2,
-	MMBOSS = 3,
-	NEST = 4,
-	BEACH = 5,
+	CUT_1 = 0,
+	BUS = 1,
+	TUTORIAL = 2,
+	LIBRARY = 3,
+	MMBOSS = 4,
+	NEST = 5,
+	BEACH = 6,
 };
 
 // For swapping levels around
 const std::vector<int> asset_mapping = {
+  6,
   5,
   0,
   3,
   4,
   1,
-  2
+  2,
 };
 
 const std::vector<std::string> LEVEL_DESCRIPTORS = {
+  level_path("6_cut1.json"),
   level_path("5_bus.json"),
   level_path("0_tutorial.json"),
   level_path("3_library.json"),
@@ -149,7 +154,8 @@ const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_A
   {
 	  {TEXTURE_ASSET_ID::BUS_BG, 2.f},
 	  {TEXTURE_ASSET_ID::BUS_WINDOW, 0.f}
-  }
+  },
+	{}
 };
 
 const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
@@ -158,7 +164,8 @@ const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
   TEXTURE_ASSET_ID::BEACH_PLAT,
   TEXTURE_ASSET_ID::LIBRARY_PLAT,
   TEXTURE_ASSET_ID::MM_PLAT,
-  TEXTURE_ASSET_ID::STEP1
+  TEXTURE_ASSET_ID::STEP1,
+  TEXTURE_ASSET_ID::STEP1,
 };
 
 const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
@@ -167,7 +174,8 @@ const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
   TEXTURE_ASSET_ID::BEACH_LADDER,
   TEXTURE_ASSET_ID::LIBRARY_LAD,
   TEXTURE_ASSET_ID::LIBRARY_LAD,
-  TEXTURE_ASSET_ID::LADDER2
+  TEXTURE_ASSET_ID::LADDER2,
+  TEXTURE_ASSET_ID::LADDER2,
 };
 
 const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
@@ -176,6 +184,7 @@ const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
 	TEXTURE_ASSET_ID::BEACH_DOOR,
 	TEXTURE_ASSET_ID::LIBRARY_DOOR,
 	TEXTURE_ASSET_ID::MM_DOOR,
+	TEXTURE_ASSET_ID::NEST_DOOR,
 	TEXTURE_ASSET_ID::NEST_DOOR
 };
 
@@ -185,6 +194,7 @@ const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
   TEXTURE_ASSET_ID::BEACH_NPC,
   TEXTURE_ASSET_ID::NEST_NPC,
   TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT
 };
 
@@ -192,6 +202,7 @@ const std::vector<TEXTURE_ASSET_ID> ZOMBIE_ASSET = {
 	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::BEACH_ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::ZOMBIE,
@@ -229,7 +240,8 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
   {},
 	{
 		TEXTURE_ASSET_ID::BURGER
-	}
+	},
+  {}
 };
 
 const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
@@ -238,6 +250,7 @@ const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
 	TEXTURE_ASSET_ID::BEACH_WEAPON,
 	TEXTURE_ASSET_ID::BOOK,
   TEXTURE_ASSET_ID::MM_PROJECTILE,
+  TEXTURE_ASSET_ID::BOOK,
   TEXTURE_ASSET_ID::BOOK
 };
 
@@ -249,6 +262,7 @@ const std::vector<std::string> BACKGROUND_MUSIC = {
 	"library.wav",
 	"library.wav",
 	"soundtrack.wav",
+	"soundtrack.wav"
 };
 
 const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
@@ -257,6 +271,7 @@ const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
 	TEXTURE_ASSET_ID::LABEL_BEACH,
 	TEXTURE_ASSET_ID::LABEL_LIB,
   TEXTURE_ASSET_ID::LABEL_MM,
+  TEXTURE_ASSET_ID::LABEL_BUS,
   TEXTURE_ASSET_ID::LABEL_BUS
 };
 
@@ -268,5 +283,16 @@ const std::vector<TEXTURE_ASSET_ID> BOSS_ASSET = {
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::MM_BOSS,
+  TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT
+};
+
+const std::vector<TEXTURE_ASSET_ID> CUTSCENE_ASSET = {
+  TEXTURE_ASSET_ID::CUTSCENE_1,
+  TEXTURE_ASSET_ID::CUTSCENE_1,
+  TEXTURE_ASSET_ID::CUTSCENE_1,
+  TEXTURE_ASSET_ID::CUTSCENE_1,
+  TEXTURE_ASSET_ID::CUTSCENE_1,
+  TEXTURE_ASSET_ID::CUTSCENE_1,
+  TEXTURE_ASSET_ID::CUTSCENE_1,
 };
