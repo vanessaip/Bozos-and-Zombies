@@ -660,6 +660,10 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 			float yBlockTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
 			float yBlockBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
 
+      if (isZombie) {
+        registry.zombies.get(motionEntity).block_side_collision = false;
+      }
+
 			// Add this check so that the player can pass through platforms when on a ladderd
 			if (!motion.climbing)
 			{
@@ -710,15 +714,17 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 						motion.velocity.x = -motion.velocity.x;
 					}
 				}
-				else {
-					motion.velocity.x = 0;
+				else if (isZombie) {
+          registry.zombies.get(motionEntity).block_side_collision = true;
 
-					if (curr_level == NEST && isZombie && !motion.offGround)
+					if (curr_level == NEST && !motion.offGround)
 					{
 						motion.offGround = true;
 						motion.velocity[1] -= 200;
 					}
-				}
+				} else {
+          motion.velocity.x = 0;
+        }
 			}
 
 			// Collision with Left edge of block
@@ -736,15 +742,17 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 						motion.velocity.x = -motion.velocity.x;
 					}
 				}
-				else {
-					motion.velocity.x = 0;
+				else if (isZombie) {
+          registry.zombies.get(motionEntity).block_side_collision = true;
 
 					if (curr_level == NEST && isZombie && !motion.offGround)
 					{
 						motion.offGround = true;
 						motion.velocity[1] -= 200;
 					}
-				}
+				} else {
+          motion.velocity.x = 0;
+        }
 
 			}
 		}
@@ -980,7 +988,10 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	int bozo_level = checkLevel(bozo_motion);
 	int zombie_level = checkLevel(motion);
 
-	if (curr_level == BUS) {
+  if (registry.zombies.get(zombie).block_side_collision) {
+    motion.velocity.x = 0;
+  }
+	else if (curr_level == BUS) {
 		motion.velocity = { 0.f,0.f };
 		return;
 	}

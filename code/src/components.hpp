@@ -21,6 +21,7 @@ struct PlayerEffects
 // Zombies can turn Humans into Zombies
 struct Zombie
 {
+  bool block_side_collision = false;
 };
 
 // Player and Student(s) are Human
