@@ -21,6 +21,8 @@ struct PlayerEffects
 // Zombies can turn Humans into Zombies
 struct Zombie
 {
+  bool right_side_collision = false;
+  bool left_side_collision = false;
 };
 
 // Player and Student(s) are Human
@@ -252,7 +254,7 @@ struct Dangerous
 	vec2 p3;
 	bool cubic;
 	float bezier_time = 0;
-  bool bezier;
+	bool bezier;
 };
 
 struct Fading
@@ -263,13 +265,13 @@ struct Fading
 
 struct Boss
 {
-  float health = 100.f;
+	float health = 100.f;
 
-  // num hearts that the boss damages
-  float damage = 1.f;
+	// num hearts that the boss damages
+	float damage = 1.f;
 
-  float summon_timer_ms = 10000.f;
-  bool rain_active = false;
+	float summon_timer_ms = 10000.f;
+	bool rain_active = false;
 };
 
 /**
@@ -367,6 +369,7 @@ enum class TEXTURE_ASSET_ID
 	LABEL_LIB = LABEL_BEACH + 1,
 	LABEL_TUTORIAL = LABEL_LIB + 1,
 	LABEL_FOREST = LABEL_TUTORIAL + 1,
+  LABEL_STREET = LABEL_FOREST + 1,
 	BEACH_APPLE = LABEL_FOREST + 1,
 	BEACH_CHEST = BEACH_APPLE + 1,
 	BEACH_CHEST2 = BEACH_CHEST + 1,
@@ -410,12 +413,15 @@ enum class TEXTURE_ASSET_ID
 	NEST_NPC = BEACH_NPC + 1,
 	CLEAVER_WEAPON = NEST_NPC + 1,
 	BEACH_WEAPON = CLEAVER_WEAPON + 1,
-  MM_FOUNTAIN = BEACH_WEAPON + 1,
-  MM_RAIN = MM_FOUNTAIN + 1,
-  MM_DOOR = MM_RAIN + 1,
-  MM_PROJECTILE = MM_DOOR + 1,
-  LABEL_MM = MM_PROJECTILE + 1,
-	TEXTURE_COUNT = LABEL_MM + 1
+	MM_FOUNTAIN = BEACH_WEAPON + 1,
+	MM_RAIN = MM_FOUNTAIN + 1,
+	MM_DOOR = MM_RAIN + 1,
+	MM_PROJECTILE = MM_DOOR + 1,
+	LABEL_MM = MM_PROJECTILE + 1,
+	BUS_BG = LABEL_MM + 1,
+	BUS_WINDOW = BUS_BG + 1,
+	LABEL_BUS = BUS_WINDOW + 1,
+	TEXTURE_COUNT = LABEL_BUS + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -455,11 +461,11 @@ enum class ANIMATION_MODE
 	ATTACK = RUN + 1,
 	HURT = ATTACK + 1,
 	CLIMB = HURT + 1,
-  FIFTH_INDEX = CLIMB + 1,
-  SIXTH_INDEX = FIFTH_INDEX + 1,
-  SEVENTH_INDEX = SIXTH_INDEX + 1,
-  EIGTH_INDEX = SEVENTH_INDEX + 1,
-  NINTH_INDEX = EIGTH_INDEX + 1,
+	FIFTH_INDEX = CLIMB + 1,
+	SIXTH_INDEX = FIFTH_INDEX + 1,
+	SEVENTH_INDEX = SIXTH_INDEX + 1,
+	EIGTH_INDEX = SEVENTH_INDEX + 1,
+	NINTH_INDEX = EIGTH_INDEX + 1,
 	MODE_COUNT = NINTH_INDEX + 1
 };
 const int animation_mode_count = (int)ANIMATION_MODE::MODE_COUNT;
