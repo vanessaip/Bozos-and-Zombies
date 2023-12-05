@@ -40,13 +40,24 @@ int main()
 
 	// initialize the main systems
 	render_system.init(window);
-	world_system.init(&render_system);
-
 	debugging.in_full_view_mode = true;
-	Entity loadingScreen = createLoadingScreen(&render_system, { window_width_px / 2, window_height_px / 2 }, { 2 * window_width_px, 3 * window_height_px });
+	// Entity loadingScreen = createLoadingScreen(&render_system, { window_width_px / 2, window_height_px / 2 }, { 2 * window_width_px, 3 * window_height_px });
+  Entity loadingScreen = createAnimatedBackgroundObject(&render_system, { 728, 720 }, { 130, 130 }, TEXTURE_ASSET_ID::MM_FOUNTAIN, { 4 }, { 0, 0.01 });
 	// variable timestep loop
 	auto t = Clock::now();
 	float total_elapsed = 0.f;
+  while (total_elapsed < 4000.f) {
+    glfwPollEvents();
+    auto now = Clock::now();
+		float elapsed_ms =
+			((float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000) - world_system.pause_duration;
+		total_elapsed += elapsed_ms;
+		t = now;
+    render_system.step(elapsed_ms);
+    render_system.drawMenu(elapsed_ms);
+  }
+
+  world_system.init(&render_system);
 	while (!world_system.is_over()) {
 		while (world_system.pause) {
 			glfwPollEvents();

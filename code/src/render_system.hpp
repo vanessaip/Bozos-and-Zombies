@@ -190,6 +190,8 @@ public:
 	// Draw all entities
 	void draw(float elapsed_time_ms);
 
+  void drawMenu(float elapsed_time_ms);
+
 	void step(float elapsed_time_ms);
 
 	void initializeSpriteSheet(Entity& entity, ANIMATION_MODE defaultMode, std::vector<int> spriteCounts, float switchTime, vec2 trunc);
