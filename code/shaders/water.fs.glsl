@@ -17,8 +17,8 @@ vec2 distort(vec2 uv)
 if (!is_poisoned){
 	return uv;
 }
-	float distortionStrength = 0.02; 
-    vec2 distortion = vec2(sin(time) * distortionStrength, cos(time) * distortionStrength);
+	float distortionStrength = 0.005; 
+    vec2 distortion = vec2(sin(time/2) * distortionStrength, cos(time/2) * distortionStrength);
     return uv + distortion;
 }
 
