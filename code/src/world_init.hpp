@@ -77,23 +77,25 @@ Entity createHP(RenderSystem* renderer, vec2 position);
 
 Entity createAnimatedBackgroundObject(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, std::vector<int> spriteCounts, vec2 trunc);
 
+Entity createCutscene(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, std::vector<int> spriteCounts, float switchTime, vec2 trunc);
+
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 
 enum level {
 	TUTORIAL = 0,
-  LIBRARY = 1,
-  MMBOSS = 2,
-  NEST = 3,
-  BEACH = 4
+	LIBRARY = 1,
+	MMBOSS = 2,
+	NEST = 3,
+	BEACH = 4
 };
 
 // For swapping levels around
 const std::vector<int> asset_mapping = {
-  0, 
-  3, 
+  0,
+  3,
   4,
-  1, 
+  1,
   2
 };
 

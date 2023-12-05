@@ -94,7 +94,8 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		if (registry.fading.has(entity)) {
 			Fading& fade = registry.fading.get(entity);
 			glUniform1f(fade_timer_uloc, fade.fading_factor);
-		} else {
+		}
+		else {
 			glUniform1f(fade_timer_uloc, 0.f);
 		}
 	}
@@ -135,13 +136,13 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		// Define colors for the wheel and spikes
 		vec3 wheelColor = vec3(0.5f, 0.35f, 0.05); // Brown color for the wheel
-		vec3 spikeColor = vec3(0.628,0.095,0.990); // Purple color for the spikes
+		vec3 spikeColor = vec3(0.628, 0.095, 0.990); // Purple color for the spikes
 
 		// Set the uniform values for the colors
 		glUniform3fv(wheelColor_uloc, 1, (float*)&wheelColor);
 		glUniform3fv(spikeColor_uloc, 1, (float*)&spikeColor);
 		gl_has_errors();
-	
+
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_color_loc = glGetAttribLocation(program, "in_color");
 		gl_has_errors();
@@ -295,12 +296,12 @@ void RenderSystem::draw(float elapsed_time_ms)
 			continue;
 		// Note, its not very efficient to access elements indirectly via the entity
 		// albeit iterating through all Sprites in sequence. A good point to optimize
-		bool isParallax  = false;
-		if (registry.backgrounds.has(entity)) 
+		bool isParallax = false;
+		if (registry.backgrounds.has(entity))
 		{
 			Background& background = registry.backgrounds.get(entity);
 			// adjust projection matrix based on depth of scrolling background
-			if (background.depth > 0) 
+			if (background.depth > 0)
 			{
 				isParallax = true;
 				float horizontalShift = (currLeft - prevLeft) / background.depth; // horizontal shift inversely proportional to depth
@@ -314,20 +315,20 @@ void RenderSystem::draw(float elapsed_time_ms)
 					background.parallaxCam.left,
 					background.parallaxCam.top,
 					background.parallaxCam.right,
-					background.parallaxCam.bottom );
+					background.parallaxCam.bottom);
 			}
 		}
-		
+
 		if (registry.overlay.has(entity)) {
 			drawTexturedMesh(entity, projectionBasic);
 		}
 		else {
-			
+
 			if (isParallax)
 				drawTexturedMesh(entity, projectionParallax);
 			else
 				drawTexturedMesh(entity, projection_2D);
-				
+
 		}
 	}
 
@@ -348,8 +349,14 @@ void RenderSystem::step(float elapsed_time_ms) {
 			sheet.offset.x += sheet.spriteDim.x;
 			sheet.timer_ms = 0;
 
-			if (sheet.offset.x / sheet.spriteDim.x >= sheet.getCurrentSpriteCount())
-				sheet.offset.x = 0.f;
+			if (sheet.offset.x / sheet.spriteDim.x >= sheet.getCurrentSpriteCount()) {
+				if (sheet.loop == false) {
+
+				}
+				else {
+					sheet.offset.x = 0.f;
+				}
+			}
 
 			updateSpriteSheetGeometryBuffer(sheet);
 		}
@@ -521,7 +528,7 @@ void RenderSystem::updateCameraBounds(float elapsed_time_ms)
 		// inerpolate camera "position" to get smooth movement
 		float nextLeft = (playerMotion.position.x + playerMotion.velocity.x * 2.f * elapsed_time_ms / 1000.f - (screen_width / 2.0)) + playerCamera.xOffset;
 
-		
+
 		if (playerCamera.timer_ms_x / playerCamera.timer_stop_ms < 1.f)
 			left = left + (nextLeft - left) * (playerCamera.timer_ms_x / playerCamera.timer_stop_ms);
 		else
@@ -563,7 +570,7 @@ void RenderSystem::updateCameraBounds(float elapsed_time_ms)
 	playerCamera.bottom = clampedBounds[3];
 }
 
-vec4 RenderSystem::clampCam(float left, float top) 
+vec4 RenderSystem::clampCam(float left, float top)
 {
 	left = max<float>(left, 0);
 	float right = min<float>(left + screen_width, window_width_px * 1.f);
@@ -581,7 +588,7 @@ vec4 RenderSystem::clampCam(float left, float top)
 int RenderSystem::findFirstAvailableBufferSlot()
 {
 	int size = sizeof(bufferIds) / sizeof(int);
-	for (int i = geometry_count; i < size; i++) 
+	for (int i = geometry_count; i < size; i++)
 	{
 		if (bufferIds[i] == -1)
 			return i;
