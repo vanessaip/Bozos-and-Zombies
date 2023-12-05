@@ -16,6 +16,11 @@
 
 #include "render_system.hpp"
 
+enum game_state {
+	MENU = 0,
+  PLAYING = 1,
+};
+
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class WorldSystem
@@ -25,6 +30,7 @@ public:
 	std::chrono::time_point<std::chrono::steady_clock> pause_start;
 	std::chrono::time_point<std::chrono::steady_clock> pause_end;
 	float pause_duration = 0.f;
+  int game_state = MENU;
 
 	WorldSystem();
 

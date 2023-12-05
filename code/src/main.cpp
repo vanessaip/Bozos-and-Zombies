@@ -40,9 +40,10 @@ int main()
 
 	// initialize the main systems
 	render_system.init(window);
+  world_system.init(&render_system);
 	debugging.in_full_view_mode = true;
-	// Entity loadingScreen = createLoadingScreen(&render_system, { window_width_px / 2, window_height_px / 2 }, { 2 * window_width_px, 3 * window_height_px });
-  Entity loadingScreen = createAnimatedBackgroundObject(&render_system, { 728, 720 }, { 130, 130 }, TEXTURE_ASSET_ID::MM_FOUNTAIN, { 4 }, { 0, 0.01 });
+	Entity loadingScreen = createLoadingScreen(&render_system, { window_width_px / 2, window_height_px / 2 }, { 2 * window_width_px, 3 * window_height_px });
+  // Entity loadingScreen = createAnimatedBackgroundObject(&render_system, { 728, 720 }, { 130, 130 }, TEXTURE_ASSET_ID::MM_FOUNTAIN, { 4 }, { 0, 0.01 });
 	// variable timestep loop
 	auto t = Clock::now();
 	float total_elapsed = 0.f;
@@ -57,8 +58,9 @@ int main()
     render_system.drawMenu(elapsed_ms);
   }
 
-  world_system.init(&render_system);
+  world_system.initGameState();
 	while (!world_system.is_over()) {
+    world_system.game_state = PLAYING;
 		while (world_system.pause) {
 			glfwPollEvents();
 			printf("PAUSING \n");

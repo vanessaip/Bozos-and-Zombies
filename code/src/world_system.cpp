@@ -166,7 +166,10 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 	save_state = readJson(SAVE_STATE_FILE);
 	curr_level = save_state["current_level"].asInt();
 
-	// Set all states to default for current level
+}
+
+void WorldSystem::initGameState() {
+  // Set all states to default for current level
 	restart_level();
 }
 
@@ -1854,139 +1857,113 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	Motion& motion = registry.motions.get(player_bozo);
-	Player& player = registry.players.get(player_bozo);
+  if (game_state == PLAYING) {
+    Motion& motion = registry.motions.get(player_bozo);
+    Player& player = registry.players.get(player_bozo);
 
-	if (!pause && action == GLFW_PRESS && !registry.deathTimers.has(player_bozo))
-	{
-		if (key == GLFW_KEY_A)
-		{
-			player.keyPresses[0] = true;
-		}
-		if (key == GLFW_KEY_D)
-		{
-			player.keyPresses[1] = true;
-		}
+    if (!pause && action == GLFW_PRESS && !registry.deathTimers.has(player_bozo))
+    {
+      if (key == GLFW_KEY_A)
+      {
+        player.keyPresses[0] = true;
+      }
+      if (key == GLFW_KEY_D)
+      {
+        player.keyPresses[1] = true;
+      }
 
-		if (key == GLFW_KEY_W)
-		{
-			player.keyPresses[2] = true;
-		}
+      if (key == GLFW_KEY_W)
+      {
+        player.keyPresses[2] = true;
+      }
 
-		if (key == GLFW_KEY_S)
-		{
-			player.keyPresses[3] = true;
-		}
+      if (key == GLFW_KEY_S)
+      {
+        player.keyPresses[3] = true;
+      }
 
-		if (key == GLFW_KEY_SPACE && !motion.offGround && !motion.climbing)
-		{
-			motion.offGround = true;
-			motion.velocity[1] = -600;
-			Mix_PlayChannel(-1, player_jump_sound, 0);
-		}
+      if (key == GLFW_KEY_SPACE && !motion.offGround && !motion.climbing)
+      {
+        motion.offGround = true;
+        motion.velocity[1] = -600;
+        Mix_PlayChannel(-1, player_jump_sound, 0);
+      }
 
-		if (key == GLFW_KEY_P) {
-			debugging.in_full_view_mode = !debugging.in_full_view_mode;
-		}
+      if (key == GLFW_KEY_P) {
+        debugging.in_full_view_mode = !debugging.in_full_view_mode;
+      }
 
-		if (key == GLFW_KEY_L) {
-			curr_level++;
-			if (curr_level > max_level) {
-				curr_level = 0;
-			}
+      if (key == GLFW_KEY_L) {
+        curr_level++;
+        if (curr_level > max_level) {
+          curr_level = 0;
+        }
 
-			restart_level();
-		}
-	}
+        restart_level();
+      }
+    }
 
-	// For camera (because I don't have a mouse) - Justin
-	/*
-	if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT) { // && action == GLFW_RELEASE
-		auto& booksRegistry = registry.books;
-		for (int i = 0; i < booksRegistry.size(); i++) {
-			Entity entity = booksRegistry.entities[i];
-			Book& book = registry.books.get(entity);
-			if (book.offHand == false) {
-				Motion& motion_book = registry.motions.get(entity);
-				Motion& motion_bozo = registry.motions.get(player_bozo);
+    if (!pause && action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo)))
+    {
+      if (key == GLFW_KEY_A)
+      {
+        player.keyPresses[0] = false;
+      }
+      if (key == GLFW_KEY_D)
+      {
+        player.keyPresses[1] = false;
+      }
+      if (key == GLFW_KEY_W)
+      {
+        player.keyPresses[2] = false;
+      }
+      if (key == GLFW_KEY_S)
+      {
+        player.keyPresses[3] = false;
+      }
+    }
 
-				double xpos, ypos;
-				glfwGetCursorPos(window, &xpos, &ypos);
-				vec2& position = motion_bozo.position;
-				double direction = atan2(ypos - position[1], xpos - position[0]);
+    // Resetting game (can be done while paused)
+    if (action == GLFW_RELEASE && key == GLFW_KEY_R)
+    {
+      int w, h;
+      glfwGetWindowSize(window, &w, &h);
 
-				motion_book.velocity.x = 500.f * cos(direction);
-				motion_book.velocity.y = 500.f * sin(direction);
+      pause = false;
+      restart_level();
+    }
 
-				motion_book.offGround = true;
-				book.offHand = true;
-				--points;
-				break;
-			}
-		}
-	}
-	*/
+    // Debugging (can be done while paused)
+    if (key == GLFW_KEY_BACKSLASH)
+    {
+      if (action == GLFW_RELEASE)
+        debugging.in_full_view_mode = false;
+      else
+        debugging.in_full_view_mode = true;
+    }
 
-	if (!pause && action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo)))
-	{
-		if (key == GLFW_KEY_A)
-		{
-			player.keyPresses[0] = false;
-		}
-		if (key == GLFW_KEY_D)
-		{
-			player.keyPresses[1] = false;
-		}
-		if (key == GLFW_KEY_W)
-		{
-			player.keyPresses[2] = false;
-		}
-		if (key == GLFW_KEY_S)
-		{
-			player.keyPresses[3] = false;
-		}
-	}
+    // Get location
+    if (action == GLFW_RELEASE && key == GLFW_KEY_M) {
+      Motion motion = registry.motions.get(player_bozo);
+      printf("%f, %f\n", motion.position.x, motion.position.y);
+    }
 
-	// Resetting game (can be done while paused)
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
-	{
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-
-		pause = false;
-		restart_level();
-	}
-
-	// Debugging (can be done while paused)
-	if (key == GLFW_KEY_BACKSLASH)
-	{
-		if (action == GLFW_RELEASE)
-			debugging.in_full_view_mode = false;
-		else
-			debugging.in_full_view_mode = true;
-	}
-
-	// Get location
-	if (action == GLFW_RELEASE && key == GLFW_KEY_M) {
-		Motion motion = registry.motions.get(player_bozo);
-		printf("%f, %f\n", motion.position.x, motion.position.y);
-	}
-
-	// Pause
-	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
-		pause = !pause;
-		if (pause) {
-			pause_ui = createOverlay(renderer, { window_width_px / 2, window_height_px / 2 }, { 400.f, 300.f }, TEXTURE_ASSET_ID::PAUSE, false);
-			pause_start = Clock::now();
-		}
-		else {
-			if (registry.overlay.has(pause_ui)) {
-				registry.remove_all_components_of(pause_ui);
-			}
-			pause_end = Clock::now();
-			pause_duration = (float)(std::chrono::duration_cast<std::chrono::microseconds>(pause_end - pause_start)).count() / 1000;
-		}
-	}
+    // Pause
+    if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+      pause = !pause;
+      if (pause) {
+        pause_ui = createOverlay(renderer, { window_width_px / 2, window_height_px / 2 }, { 400.f, 300.f }, TEXTURE_ASSET_ID::PAUSE, false);
+        pause_start = Clock::now();
+      }
+      else {
+        if (registry.overlay.has(pause_ui)) {
+          registry.remove_all_components_of(pause_ui);
+        }
+        pause_end = Clock::now();
+        pause_duration = (float)(std::chrono::duration_cast<std::chrono::microseconds>(pause_end - pause_start)).count() / 1000;
+      }
+    }
+  }
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position)
@@ -1997,12 +1974,13 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	if (!pause && !registry.deathTimers.has(player_bozo))
+  vec2 pos = relativePos(mouse_position);
+  printf("Radians: %f\n", pos[0]);
+
+	if (game_state == PLAYING && !pause && !registry.deathTimers.has(player_bozo))
 	{
 		Motion& motion = registry.motions.get(player_bozo_pointer);
-		vec2 pos = relativePos(mouse_position);
-		float radians = atan2(pos.y - motion.position.y, pos.x - motion.position.x);
-		// printf("Radians: %f\n", radians);
+    float radians = atan2(pos.y - motion.position.y, pos.x - motion.position.x);
 		motion.angle = radians;
 	}
 }
