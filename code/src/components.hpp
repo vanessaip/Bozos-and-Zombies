@@ -155,6 +155,11 @@ struct ZombieDeathTimer
 	float timer_ms = 600.f;
 };
 
+struct CutsceneTimer
+{
+	float timer;
+};
+
 // Keyframe animation stores all keyframes and timing data for a given entity
 struct KeyframeAnimation
 {
@@ -413,7 +418,8 @@ enum class TEXTURE_ASSET_ID
 	BUS_BG = LABEL_MM + 1,
 	BUS_WINDOW = BUS_BG + 1,
 	LABEL_BUS = BUS_WINDOW + 1,
-	TEXTURE_COUNT = LABEL_BUS + 1
+	CUTSCENE_1 = LABEL_BUS + 1,
+	TEXTURE_COUNT = CUTSCENE_1 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -475,6 +481,7 @@ struct SpriteSheet
 	std::vector<int> spriteCount;
 	uint bufferId;
 	ANIMATION_MODE mode = ANIMATION_MODE::IDLE;
+	bool loop = true;
 
 	SpriteSheet(uint bId, ANIMATION_MODE defaultMode, std::vector<int>& spriteCt, float switchTime, vec2 trunc)
 	{
