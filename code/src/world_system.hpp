@@ -46,9 +46,9 @@ public:
 	// Should the game be over ?
 	bool is_over()const;
 
-  void updateHPBar(float percent_full);
+	void updateHPBar(float percent_full);
 
-  void updateBossMotion(Motion& bozo_motion, float elapsed_ms_since_last_update);
+	void updateBossMotion(Motion& bozo_motion, float elapsed_ms_since_last_update);
 
 	void updateZombieMovement(Motion& motion, Motion& bozo_motion, Entity& zombie, bool offAll);
 
@@ -71,6 +71,8 @@ private:
 	void handleWorldCollisions(Motion& motion, Entity motionEntity, Motion& bozo_motion, ComponentContainer<Motion>& motion_container, float elapsed_ms_since_last_update);
 	void boundEntitiesToWindow(Motion& motion, bool isPlayer);
 	void handlePlatformCollision(Motion& blockMotion, vec4 entityBB);
+  void addAnimatedMMBossTextures(RenderSystem* renderer);
+  void updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_motion, float elapsed_ms_since_last_update);
 	
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
@@ -133,13 +135,15 @@ private:
 	std::vector<std::vector<float>> jump_positions;
 	float PLATFORM_WIDTH;
 	float PLATFORM_HEIGHT;
-  vec2 door_win_pos;
-  int total_collectables;
+	vec2 door_win_pos;
+	int total_collectables;
 	bool zombie_spawn_on;
 	bool student_spawn_on;
 	float zombie_spawn_threshold;
 	float student_spawn_threshold;
 	uint num_collectibles;
+  std::vector<Entity> mm_boss_rain;
+
 
 	// music references
 	Mix_Music* background_music;
@@ -152,6 +156,7 @@ private:
   Mix_Chunk* level_success_sound;
   Mix_Chunk* next_level_sound;
   Mix_Chunk* collected_sound;
+  Mix_Chunk* boss_summon_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;
