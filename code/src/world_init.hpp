@@ -38,7 +38,7 @@ std::vector<Entity> createPlatforms(RenderSystem* renderer, float left_position_
 // helper for steps
 std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, vec2 scale, uint num_steps, uint step_blocks, bool left);
 // walls
-Entity createWall(RenderSystem* renderer, float position_x, float position_y, float width, float height, bool visible);
+Entity createWall(RenderSystem* renderer, float position_x, float position_y, float width, float height, bool visible, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::WALL);
 // ladders
 std::vector<Entity> createClimbable(RenderSystem* renderer, float top_position_x, float top_position_y, uint num_sections, TEXTURE_ASSET_ID texture);
 // spikes
@@ -86,6 +86,7 @@ enum level {
 	MMBOSS = 3,
 	NEST = 4,
 	BEACH = 5,
+	LAB = 6,
 };
 
 // For swapping levels around
@@ -299,5 +300,5 @@ const std::vector<TEXTURE_ASSET_ID> BOSS_ASSET = {
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::MM_BOSS,
   TEXTURE_ASSET_ID::STUDENT,
-  TEXTURE_ASSET_ID::MM_BOSS
+  TEXTURE_ASSET_ID::LAB_BOSS
 };

@@ -212,7 +212,7 @@ std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, vec2 step
 }
 
 // Wall has variable height
-Entity createWall(RenderSystem* renderer, float position_x, float position_y, float width, float height, bool visible)
+Entity createWall(RenderSystem* renderer, float position_x, float position_y, float width, float height, bool visible, TEXTURE_ASSET_ID texture)
 {
 	auto entity = Entity();
 
@@ -234,7 +234,7 @@ Entity createWall(RenderSystem* renderer, float position_x, float position_y, fl
 	if (visible == true) {
 		registry.renderRequests.insert(
 			entity,
-			{ TEXTURE_ASSET_ID::WALL,
+			{ texture,
 			 EFFECT_ASSET_ID::TEXTURED,
 			 GEOMETRY_BUFFER_ID::SPRITE });
 	}
@@ -616,12 +616,12 @@ Entity createBoss(RenderSystem* renderer, vec2 position, vec2 scale, float healt
 
 	Boss& boss = registry.bosses.emplace(entity);
 
-  registry.colors.insert(entity, { 1, 1, 1 });
+	registry.colors.insert(entity, { 1, 1, 1 });
 
-  boss.health = health;
-  boss.damage = damage;
+	boss.health = health;
+	boss.damage = damage;
 
-  std::vector<int> spriteCounts = counts;
+  	std::vector<int> spriteCounts = counts;
 	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, trunc);
 
 	registry.renderRequests.insert(

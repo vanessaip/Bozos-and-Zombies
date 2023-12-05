@@ -101,6 +101,7 @@ private:
 	Entity player_bozo;
 	Entity player_bozo_pointer;
 	Entity door;
+	Entity boss_blockade;
 	float enemySpawnTimer = 0.f;
 	float npcSpawnTimer = 0.f;
 	float doorOpenTimer = 0.f;
@@ -123,6 +124,7 @@ private:
 	int player_lives = 4;
 	std::vector<Entity> player_hearts;
 	bool game_over;
+	bool boss_active;
 
 	// Level definitions
 	int curr_level = 0;

@@ -174,7 +174,14 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
 	if (registry.zombies.entities.size() < 1 && (num_collectibles > 0 && collectibles_collected >= num_collectibles) && this->game_over == false) {
-		handleGameOver();
+		if (curr_level != LAB || (curr_level == LAB && boss_active && registry.bosses.entities.size() == 0)) {
+			handleGameOver();
+		} else if (curr_level == LAB && !boss_active) { // level == LAB, activate the boss after all zombies and collectibles are cleared
+			// remove the blockade, transform professor, play sound effect
+			assert(registry.bosses.entities.size() > 0);
+			boss_active = true;
+			removeEntity(boss_blockade);
+		}
 	}
 	else if (curr_level == MMBOSS && registry.bosses.entities.size() == 0 && this->game_over == false) {
 		handleGameOver();
@@ -235,7 +242,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	updateSpriteSheetAnimation(bozo_motion, elapsed_ms_since_last_update);
 
 	// If it is a boss level
-	if (curr_level == MMBOSS && registry.bosses.has(boss)) {
+	if ((curr_level == MMBOSS || (curr_level == LAB && boss_active)) && registry.bosses.has(boss)) {
 		if (!registry.zombieDeathTimers.has(hp) && registry.motions.has(hp)) {
 			updateHPBar(bossHealth / registry.bosses.get(boss).health * 100);
 		}
@@ -845,7 +852,7 @@ void WorldSystem::updateBossMotion(Motion& bozo_motion, float elapsed_ms_since_l
 		// If boss is not damaged, follow the player
 		if (!registry.lostLifeTimer.has(boss)) {
 
-			if (curr_level == MMBOSS) {
+			if (curr_level == MMBOSS || curr_level == LAB) {
 				updateMainMallBossMovement(bozo_motion, bossMotion, elapsed_ms_since_last_update);
 			}
 
@@ -1346,6 +1353,7 @@ void WorldSystem::restart_level()
 	collectibles_collected_pos = 50.f;
 	player_lives = 4;
 	collectibles_collected = 0;
+	boss_active = false;
 
 	// reset screen brightness
 	assert(registry.screenStates.components.size() <= 1);
@@ -1422,6 +1430,11 @@ void WorldSystem::restart_level()
 	// Create walls
 	for (const auto& wall_data : jsonData["walls"]) {
 		createWall(renderer, wall_data["x"].asFloat(), wall_data["y"].asFloat(), WALL_WIDTH, wall_data["height"].asFloat(), wall_data["visible"].asBool());
+	}
+
+	// create temporary blockade for the boss in lab level
+	if (curr_level == LAB) {
+		boss_blockade = createWall(renderer, jsonData["boss-blockade"]["position"][0].asFloat(), jsonData["boss-blockade"]["position"][1].asFloat(), jsonData["boss-blockade"]["scale"][0].asFloat(), jsonData["boss-blockade"]["scale"][1].asFloat(), true, TEXTURE_ASSET_ID::LAB_BLOCKADE);
 	}
 
 	door = createDoor(renderer, { jsonData["door"]["position"][0].asFloat(), jsonData["door"]["position"][1].asFloat() }, { jsonData["door"]["scale"][0].asFloat(), jsonData["door"]["scale"][1].asFloat() }, DOOR_ASSET[asset_mapping[curr_level]]);
@@ -1815,7 +1828,7 @@ void WorldSystem::handle_collisions()
 		}
 
 		// Check Spike - Zombie collision
-		else if (!game_over && registry.zombies.has(entity) && registry.spikes.has(entity_other)) {
+		else if (!game_over && (registry.zombies.has(entity) || registry.bosses.has(entity)) && registry.spikes.has(entity_other)) {
 			removeEntity(entity);
 		}
 

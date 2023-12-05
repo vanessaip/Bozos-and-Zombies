@@ -76,7 +76,7 @@
         {"x": 912, "y": 528, "height": 96, "visible": true},
         {"x": 976, "y": 576, "height": 192, "visible": true},
         {"x": 1136, "y": 464, "height": 288, "visible": true},
-        {"x": 1360, "y": 368, "height": 96, "visible": true},
+        {"x": 1360, "y": 384, "height": 128, "visible": true},
         {"x": 1232, "y": 512, "height": 192, "visible": true},
 
         {"x": 1232, "y": 784, "height": 96, "visible": true},
@@ -116,22 +116,35 @@
       }
     },
     "zombies": {
-      "num_starting": 3,
+      "num_starting": 0,
       "positions": [
         {"x": 480, "y": 760},
-        {"x": 1056, "y": 542},
+        {"x": 1056, "y": 542}
         // {"x": 384, "y": 382},
         // {"x": 528, "y": 190},
-        {"x": 1136, "y": 286}
+        // {"x": 1136, "y": 286}
       ],
       "spawn_timer": null
     },
     "students": {
-      "num_starting": 0,
+      "num_starting": 5,
       "positions": [
-        {"x": 1136, "y": 295}
+        {"x": 64, "y": 352},
+        {"x": 64, "y": 352},
+        {"x": 64, "y": 352},
+        {"x": 64, "y": 352},
+        {"x": 64, "y": 352}
       ],
       "spawn_timer": null
+    },
+    "boss": {
+      "num_starting": 1,
+      "scale": {"x": 72, "y": 72},
+      "position": {"x": 146, "y": 738},
+      "trunc": {"x": 0.0, "y": 0.0},
+      "sprite_counts": [4, 6, 6, 4, 6, 6, 6, 6, 2, 6],
+      "health": 100,
+      "damage": 1
     },
     "collectibles": {
       "scale": {
@@ -151,5 +164,9 @@
     "door": {
       "position": [146, 770],
       "scale": [40, 60]
+    },
+    "boss-blockade": {
+      "position": [400, 768],
+      "scale": [32, 64]
     }
   }

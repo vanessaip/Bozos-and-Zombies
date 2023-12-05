@@ -158,6 +158,8 @@ class RenderSystem {
 		textures_path("lab/lab-collect3.png"),
 		textures_path("lab/lab-collect4.png"),
 		textures_path("lab/lab-collect5.png"),
+		textures_path("lab/boss-blockade.png"),
+		textures_path("lab/lab-boss-sheet.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;
