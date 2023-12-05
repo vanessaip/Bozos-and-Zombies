@@ -131,7 +131,7 @@ GLFWwindow* WorldSystem::create_window()
 
 	background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[0]).c_str());
 	player_death_sound = Mix_LoadWAV(audio_path("player_death.wav").c_str());
-	student_disappear_sound = Mix_LoadWAV(audio_path("student_disappear.wav").c_str());
+	student_disappear_sound = Mix_LoadWAV(audio_path("student_disappear_quiet.wav").c_str());
 	player_jump_sound = Mix_LoadWAV(audio_path("player_jump.wav").c_str());
 	player_land_sound = Mix_LoadWAV(audio_path("player_land.wav").c_str());
 	collect_book_sound = Mix_LoadWAV(audio_path("Mario-coin-sound.wav").c_str());
@@ -147,7 +147,7 @@ GLFWwindow* WorldSystem::create_window()
 			audio_path("beach.wav").c_str(),
 			audio_path("soundtrack.wav").c_str(),
 			audio_path("player_death.wav").c_str(),
-			audio_path("student_disappear.wav").c_str(),
+			audio_path("student_disappear_quiet.wav").c_str(),
 			audio_path("player_jump.wav").c_str(),
 			audio_path("player_land.wav").c_str(),
 			audio_path("Mario-coin-sound.wav").c_str(),
@@ -457,6 +457,16 @@ bool WorldSystem::handleTimers(Motion& motion, Entity motionEntity, float elapse
 		}
 	}
 
+	else if (registry.cutSceneTimers.has(motionEntity)) {
+		CutsceneTimer& cs_timer = registry.cutSceneTimers.get(motionEntity);
+		cs_timer.timer -= elapsed_ms_since_last_update;
+		if (cs_timer.timer < 0) {
+			removeEntity(motionEntity);
+			curr_level++;
+			restart_level();
+		}
+	}
+
 	return false;
 }
 
@@ -653,6 +663,11 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 			blocks.push_back(walls.entities[i]);
 		}
 
+        if (isZombie) {
+            registry.zombies.get(motionEntity).right_side_collision = false;
+            registry.zombies.get(motionEntity).left_side_collision = false;
+        }
+
 		// handle platform collisions
 		for (int i = 0; i < blocks.size(); i++)
 		{
@@ -663,10 +678,6 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 			float yBlockTop = blockMotion.position.y - blockMotion.scale[1] / 2.f;
 			float yBlockBottom = blockMotion.position.y + blockMotion.scale[1] / 2.f;
 
-      if (isZombie) {
-        registry.zombies.get(motionEntity).block_side_collision = false;
-      }
-
 			// Add this check so that the player can pass through platforms when on a ladderd
 			if (!motion.climbing)
 			{
@@ -674,19 +685,6 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 				if (motion.velocity.y >= 0 && entityBottom >= yBlockTop && entityBottom < yBlockTop + 20.f &&
 					entityRightSide > xBlockLeftBound && entityLeftSide < xBlockRightBound)
 				{
-					// Move character with moving block (currently not using moving plaftforms)
-					/*
-					if (registry.keyframeAnimations.has(blocks[i]))
-					{
-						motion.position.x += blockMotion.velocity.x * (elapsed_ms_since_last_update / 1000.f);
-						charactersOnMovingPlat.push_back(std::make_tuple(&motion, &blockMotion)); // track collision if platform is moving down
-					}
-					*/
-
-					// if (motion.offGround)
-					// {
-					// 	Mix_PlayChannel(-1, player_land_sound, 0);
-					// }
 					motion.position.y = yBlockTop - motion.scale[1] / 2.f;
 					motion.velocity.y = 0.f;
 					motion.offGround = false;
@@ -718,7 +716,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 					}
 				}
 				else if (isZombie) {
-          registry.zombies.get(motionEntity).block_side_collision = true;
+                    registry.zombies.get(motionEntity).right_side_collision = true;
 
 					if (curr_level == NEST && !motion.offGround)
 					{
@@ -726,8 +724,8 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 						motion.velocity[1] -= 200;
 					}
 				} else {
-          motion.velocity.x = 0;
-        }
+                    motion.velocity.x = 0;
+                }
 			}
 
 			// Collision with Left edge of block
@@ -746,7 +744,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 					}
 				}
 				else if (isZombie) {
-          registry.zombies.get(motionEntity).block_side_collision = true;
+                    registry.zombies.get(motionEntity).left_side_collision = true;
 
 					if (curr_level == NEST && isZombie && !motion.offGround)
 					{
@@ -754,9 +752,8 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 						motion.velocity[1] -= 200;
 					}
 				} else {
-          motion.velocity.x = 0;
-        }
-
+                    motion.velocity.x = 0;
+                }
 			}
 		}
 
@@ -991,10 +988,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	int bozo_level = checkLevel(bozo_motion);
 	int zombie_level = checkLevel(motion);
 
-  if (registry.zombies.get(zombie).block_side_collision) {
-    motion.velocity.x = 0;
-  }
-	else if (curr_level == BUS) {
+	if (curr_level == BUS) {
 		motion.velocity = { 0.f,0.f };
 		return;
 	}
@@ -1016,6 +1010,33 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 					motion.offGround = true;
 				}
 			}
+		}
+	}
+	else if (curr_level == SEWERS) {
+		float dist = distance(motion.position, bozo_motion.position);
+		if (dist < 150.0 && bozo_motion.position.y - 15.f <= motion.position.y) {
+			if ((motion.position.x - bozo_motion.position.x) < -10 ) {
+				motion.velocity.x = ZOMBIE_SPEED / 1.f;
+			}
+			else if ((motion.position.x - bozo_motion.position.x) > 10) {
+				motion.velocity.x = -ZOMBIE_SPEED / 1.5f;
+			}
+			else {
+				motion.velocity.x = 0.f;
+			}
+		}
+		else {
+			motion.velocity.x = 0.f;
+		}
+
+		if (offAll) {
+			if (motion.velocity.x > 0) {
+				motion.position.x -= 15.f;
+			}
+			else {
+				motion.position.x += 15.f;
+			}
+			motion.velocity.x = -motion.velocity.x;
 		}
 	}
 	else if (curr_level == NEST && (zombie_level == bozo_level || (bozo_level <= 1 && zombie_level <= 1)))
@@ -1191,14 +1212,24 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		motion.reflect[0] = false;
 	}
 
+    if ((registry.zombies.get(zombie).right_side_collision && motion.velocity.x < 0) || (registry.zombies.get(zombie).left_side_collision && motion.velocity.x > 0)) {
+        motion.velocity.x = 0;
+    }
+
 
 	// update sprite animation depending on distance to player
 	SpriteSheet& zombieSheet = registry.spriteSheets.get(zombie);
 	float length = sqrt(abs(motion.position.x - bozo_motion.position.x) + abs(motion.position.y - bozo_motion.position.y));
 	if (length < 10.f)
 		zombieSheet.updateAnimation(ANIMATION_MODE::ATTACK);
-	else
-		zombieSheet.updateAnimation(ANIMATION_MODE::RUN);
+	else {
+		if (motion.velocity.x == 0.f) {
+			zombieSheet.updateAnimation(ANIMATION_MODE::IDLE);
+		}
+		else {
+			zombieSheet.updateAnimation(ANIMATION_MODE::RUN);
+		}
+	}
 }
 
 int WorldSystem::checkLevel(Motion& motion)
@@ -1362,6 +1393,9 @@ void WorldSystem::restart_level()
 	while (registry.motions.entities.size() > 0)
 		removeEntity(registry.motions.entities.back());
 
+	while (registry.lights.entities.size() > 0)
+		registry.remove_all_components_of(registry.lights.entities.back());
+
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
@@ -1386,25 +1420,45 @@ void WorldSystem::restart_level()
 	renderer->resetSpriteSheetTracker();
 
 	// Create background first (painter's algorithm for rendering)
-
 	for (std::tuple<TEXTURE_ASSET_ID, float> background : BACKGROUND_ASSET[asset_mapping[curr_level]]) {
 		createBackground(renderer, std::get<0>(background), std::get<1>(background));
 	}
 
 	if (curr_level == NEST)
-		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, 0.f, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f }); // egg
+		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, 0.f, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, false, { 250.f, 250.f }); // egg
 
 	// Tutorial sign only for the first level
-	if (curr_level == TUTORIAL) {
+	else if (curr_level == TUTORIAL) {
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_MOVEMENT, { window_width_px - 120.f, window_height_px - 80.f }, "", { 150.f, 70.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_CLIMB, { window_width_px - 480.f, window_height_px - 90.f }, "", { 115.f, 40.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_NPCS, { window_width_px - 800.f, window_height_px - 350.f }, "", { 150.f, 60.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_WEAPONS, { window_width_px - 900.f, window_height_px - 220.f }, "", { 200.f, 70.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_GOAL, { 130.f, window_height_px - 200.f }, "", { 180.f, 100.f });
 	}
-
+	
+	
+	else if (curr_level == SEWERS) 
+	{
+		glm::vec3 lights[8] = 
+		{ 
+			{ 15, 700, 1.5f },
+			{ 1340, 550, 1.5f },
+			{ 927, 670, 1.5f },
+			{ 850, 450, 1.7f },
+			{ 1400, 150, 1.4f },
+			{ 500, 790, 1.7f },
+			{ 430, 400, 1.6f },
+			{ 630, 30, 1.5f },
+		};
+		for (vec3 light : lights) 
+		{
+			createLight(renderer, { light.x, light.y }, light.z);
+		}
+	
+	}
+	
 	// AnimateBackgrounds for Main Mall Boss level
-	if (curr_level == MMBOSS) {
+	else if (curr_level == MMBOSS) {
 		addAnimatedMMBossTextures(renderer);
 	}
 
@@ -1560,7 +1614,7 @@ void WorldSystem::restart_level()
 	if (curr_level == BEACH) {
 		createDangerous(renderer, { 280, 130 }, { 30, 30 }, TEXTURE_ASSET_ID::SPIKE_BALL, { 280, 130 }, { 500, 10 }, { 650, 250 }, { 0, 0 }, false, true, 6);
 		createDangerous(renderer, { 280, 130 }, { 50, 50 }, TEXTURE_ASSET_ID::BEACH_BIRD, { 0, 400 }, { 500, 50 }, { 1000, 750 }, { 1450, 400 }, true, true, 6);
-		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, { 230, 155 }, { 80, 60 });
+		createBackground(renderer, TEXTURE_ASSET_ID::CANNON, 0.f, { 230, 155 }, false, { 80, 60 });
 	}
 
 	mm_boss_rain.clear();
@@ -1571,29 +1625,38 @@ void WorldSystem::restart_level()
 		}
 	}
 	// Lives can probably stay hardcoded?
-	float heart_pos_x = 1385;
-	float heart_starting_pos_y = 40;
 
-	Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
-	Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
-	Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
-	Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
-	Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
+	if (jsonData["isCutscene"] == true) {
+		playCutscene(renderer);
+	}
+	else {
+		float heart_pos_x = 1385;
+		float heart_starting_pos_y = 40;
 
-	player_hearts = { heart0, heart1, heart2, heart3, heart4 };
+		Entity heart0 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y }, { 60, 60 });
+		Entity heart1 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 60 }, { 60, 60 });
+		Entity heart2 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 120 }, { 60, 60 });
+		Entity heart3 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 180 }, { 60, 60 });
+		Entity heart4 = createHeart(renderer, { heart_pos_x, heart_starting_pos_y + 240 }, { 60, 60 });
 
-	// Create label
-	Entity label = createOverlay(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]], true);
+		player_hearts = { heart0, heart1, heart2, heart3, heart4 };
 
-	setup_keyframes(renderer);
+		// Create label
+		Entity label = createOverlay(renderer, { 100, 600 }, { 150 , 75 }, LABEL_ASSETS[asset_mapping[curr_level]], true);
 
-	points = 0;
-	level_start_time = Clock::now();
+		setup_keyframes(renderer);
+		points = 0;
+		level_start_time = Clock::now();
+	}
 }
 
 void WorldSystem::addAnimatedMMBossTextures(RenderSystem* renderer)
 {
 	createAnimatedBackgroundObject(renderer, { 728, 720 }, { 130, 130 }, TEXTURE_ASSET_ID::MM_FOUNTAIN, { 4 }, { 0, 0.01 });
+}
+
+void WorldSystem::playCutscene(RenderSystem* renderer) {
+	createCutscene(renderer, { 1080, 608 }, { 720, 405 }, TEXTURE_ASSET_ID::CUTSCENE_1, { 4 }, 5000.f, { 0, 0 });
 }
 
 // Compute collisions between entities
@@ -1828,7 +1891,7 @@ void WorldSystem::handle_collisions()
 		else if (!game_over && registry.collectible.has(entity) && registry.players.has(entity_other)) {
 			Mix_PlayChannel(-1, collected_sound, 0);
 			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID)registry.collectible.get(entity).collectible_id;
-			Entity collectible = createCollectible(renderer, collectibles_collected_pos, 50, id, { 60, 60 }, true);
+			Entity collectible = createOverlay(renderer, { collectibles_collected_pos, 50 }, { 60, 60 }, id, false);
 
 			removeEntity(entity);
 

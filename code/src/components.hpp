@@ -21,7 +21,8 @@ struct PlayerEffects
 // Zombies can turn Humans into Zombies
 struct Zombie
 {
-  bool block_side_collision = false;
+  bool right_side_collision = false;
+  bool left_side_collision = false;
 };
 
 // Player and Student(s) are Human
@@ -154,6 +155,11 @@ struct ZombieDeathTimer
 	float timer_ms = 600.f;
 };
 
+struct CutsceneTimer
+{
+	float timer;
+};
+
 // Keyframe animation stores all keyframes and timing data for a given entity
 struct KeyframeAnimation
 {
@@ -255,6 +261,12 @@ struct Fading
 {
 	float fading_factor = 1.f;
 	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
+};
+
+struct Light 
+{
+	vec2 position;
+	float intensity_dropoff_factor;
 };
 
 struct Boss
@@ -376,7 +388,16 @@ enum class TEXTURE_ASSET_ID
 	LIB_COLL4 = LIB_COLL3 + 1,
 	LIB_COLL5 = LIB_COLL4 + 1,
 	TBC = LIB_COLL5 + 1,
-	GHETTO_DOOR = TBC + 1,
+	DARK_BACKGROUND0 = TBC + 1,
+	DARK_BACKGROUND1 = DARK_BACKGROUND0 + 1,
+	LIGHT = DARK_BACKGROUND1 + 1,
+	SEWER_COLLECT1 = LIGHT + 1,
+	SEWER_COLLECT2 = SEWER_COLLECT1 + 1,
+	SEWER_COLLECT3 = SEWER_COLLECT2 + 1,
+	SEWER_COLLECT4 = SEWER_COLLECT3 + 1,
+	SEWER_COLLECT5 = SEWER_COLLECT4 + 1,
+	SEWER_COLLECT6 = SEWER_COLLECT5 + 1,
+	GHETTO_DOOR = SEWER_COLLECT6 + 1,
 	BEACH_DOOR = GHETTO_DOOR + 1,
 	NEST_DOOR = BEACH_DOOR + 1,
 	MM_BACKGROUND = NEST_DOOR + 1,
@@ -397,7 +418,8 @@ enum class TEXTURE_ASSET_ID
 	BUS_BG = LABEL_MM + 1,
 	BUS_WINDOW = BUS_BG + 1,
 	LABEL_BUS = BUS_WINDOW + 1,
-    MENU_PLAY = LABEL_BUS + 1,
+	CUTSCENE_1 = LABEL_BUS + 1,
+    MENU_PLAY = CUTSCENE_1 + 1,
 	TEXTURE_COUNT = MENU_PLAY + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
@@ -408,7 +430,9 @@ enum class EFFECT_ASSET_ID
 	SPIKE = COLOURED + 1, // can reuse if we end up having meshes
 	WHEEL = SPIKE + 1,
 	TEXTURED = WHEEL + 1,
-	WATER = TEXTURED + 1,
+	OVERLAY_TEXTURED = TEXTURED + 1,
+	BLENDED = OVERLAY_TEXTURED + 1,
+	WATER = BLENDED + 1,
 	EFFECT_COUNT = WATER + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
@@ -458,6 +482,7 @@ struct SpriteSheet
 	std::vector<int> spriteCount;
 	uint bufferId;
 	ANIMATION_MODE mode = ANIMATION_MODE::IDLE;
+	bool loop = true;
 
 	SpriteSheet(uint bId, ANIMATION_MODE defaultMode, std::vector<int>& spriteCt, float switchTime, vec2 trunc)
 	{
