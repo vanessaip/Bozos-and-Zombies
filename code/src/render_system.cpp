@@ -13,6 +13,8 @@ int bufferIds[50];
 float previousLeft = 0.f;
 float currentLeft = 0.f;
 
+//glm::vec3 lights[2] = { { 250, 175, 1.1f }, { 1300 , 700, 1.5f } };
+
 void RenderSystem::drawTexturedMesh(Entity entity,
 	const mat3& projection)
 {
@@ -62,6 +64,84 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 	// Input data location as in the vertex buffer
 	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED)
+	{
+		GLint in_position_loc = glGetAttribLocation(program, "in_position");
+		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+		gl_has_errors();
+		assert(in_texcoord_loc >= 0);
+
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(TexturedVertex), (void*)0);
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_texcoord_loc);
+		glVertexAttribPointer(
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			(void*)sizeof(
+				vec3)); // note the stride to skip the preceeding vertex position
+
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
+		gl_has_errors();
+
+		assert(registry.renderRequests.has(entity));
+		GLuint texture_id = texture_gl_handles[(GLuint)render_request.used_texture];
+
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		gl_has_errors();
+
+		// Lighting
+		GLuint hasLights_loc = glGetUniformLocation(program, "hasLights");
+		GLuint lights_loc = glGetUniformLocation(program, "lights");
+		if (registry.lights.size() > 0) 
+		{
+			glUniform1f(hasLights_loc, true);
+			glUniform3fv(lights_loc, registry.lights.components.size(), reinterpret_cast<GLfloat*>(&registry.lights.components[0]));
+		}
+		else 
+		{
+			glUniform1f(hasLights_loc, false);
+			vec3 lights[2] = { {0,0,0}, {0,0,0} };
+			glUniform3fv(lights_loc, sizeof(lights) / sizeof(glm::vec3), reinterpret_cast<GLfloat*>(&lights[0]));
+		}
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	}
+
+	else if (render_request.used_effect == EFFECT_ASSET_ID::BLENDED) 
+	{
+		GLint in_position_loc = glGetAttribLocation(program, "in_position");
+		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+		gl_has_errors();
+		assert(in_texcoord_loc >= 0);
+
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(TexturedVertex), (void*)0);
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_texcoord_loc);
+		glVertexAttribPointer(
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			(void*)sizeof(
+				vec3)); // note the stride to skip the preceeding vertex position
+
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
+		gl_has_errors();
+
+		assert(registry.renderRequests.has(entity));
+		GLuint texture_id = texture_gl_handles[(GLuint)render_request.used_texture];
+
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		gl_has_errors();
+
+		//glEnable(GL_BLEND);
+		//glBlendFunc(GL_ONE, GL_ONE);
+	}
+	else if (render_request.used_effect == EFFECT_ASSET_ID::OVERLAY_TEXTURED) 
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
@@ -289,6 +369,7 @@ void RenderSystem::draw(float elapsed_time_ms)
 	mat3 projection_2D = createProjectionMatrix(playerCamera.left, playerCamera.top, playerCamera.right, playerCamera.bottom);
 	mat3 projectionBasic = createBasicProjectionMatrix();
 	mat3 projectionParallax;
+
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{

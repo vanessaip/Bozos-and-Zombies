@@ -42,7 +42,8 @@ public:
 	ComponentContainer<Fading> fading;
 	ComponentContainer<Door> doors;
 	ComponentContainer<Bounce> bounce;
-	ComponentContainer<Boss> bosses;
+	ComponentContainer<Light> lights;
+  	ComponentContainer<Boss> bosses;
 	ComponentContainer<ZombieDeathTimer> zombieDeathTimers;
 	ComponentContainer<CutsceneTimer> cutSceneTimers;
 
@@ -81,7 +82,8 @@ public:
 		registry_list.push_back(&fading);
 		registry_list.push_back(&doors);
 		registry_list.push_back(&bounce);
-		registry_list.push_back(&bosses);
+		registry_list.push_back(&lights);
+    	registry_list.push_back(&bosses);
 		registry_list.push_back(&zombieDeathTimers);
 		registry_list.push_back(&cutSceneTimers);
 	}

@@ -60,7 +60,7 @@ Entity createBozoPointer(RenderSystem* renderer, vec2 pos)
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::BOZO_POINTER,
-			EFFECT_ASSET_ID::TEXTURED,
+			EFFECT_ASSET_ID::OVERLAY_TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
@@ -273,7 +273,7 @@ std::vector<Entity> createClimbable(RenderSystem* renderer, float top_position_x
 	return sections;
 }
 
-Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, float depth, vec2 position, vec2 scale)
+Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, float depth, vec2 position, bool blended, vec2 scale)
 {
 	auto entity = Entity();
 
@@ -297,7 +297,7 @@ Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, float 
 	registry.renderRequests.insert(
 		entity,
 		{ texture,
-		 EFFECT_ASSET_ID::TEXTURED,
+		 blended ? EFFECT_ASSET_ID::BLENDED : EFFECT_ASSET_ID::TEXTURED,
 		 GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
@@ -484,7 +484,7 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale) {
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::HEART,
-			EFFECT_ASSET_ID::TEXTURED,
+			EFFECT_ASSET_ID::OVERLAY_TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
@@ -540,7 +540,7 @@ Entity createLoadingScreen(RenderSystem* renderer, vec2 position, vec2 scale) {
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::LOADING_SCREEN,
-			EFFECT_ASSET_ID::TEXTURED,
+			EFFECT_ASSET_ID::OVERLAY_TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
@@ -570,7 +570,7 @@ Entity createOverlay(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_
 	registry.renderRequests.insert(
 		entity,
 		{ assetID,
-			EFFECT_ASSET_ID::TEXTURED,
+			EFFECT_ASSET_ID::OVERLAY_TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 	return entity;
 }
@@ -671,6 +671,30 @@ Entity createHP(RenderSystem* renderer, vec2 position) {
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::HP,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createLight(RenderSystem* renderer, vec2 position, float intensity_dropoff_factor)
+{
+	auto entity = Entity();
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	Light& light = registry.lights.emplace(entity);
+	light.position = position;
+	light.intensity_dropoff_factor = intensity_dropoff_factor;
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = vec2(100.f);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::LIGHT,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 

@@ -263,6 +263,12 @@ struct Fading
 	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
 };
 
+struct Light 
+{
+	vec2 position;
+	float intensity_dropoff_factor;
+};
+
 struct Boss
 {
 	float health = 100.f;
@@ -382,7 +388,16 @@ enum class TEXTURE_ASSET_ID
 	LIB_COLL4 = LIB_COLL3 + 1,
 	LIB_COLL5 = LIB_COLL4 + 1,
 	TBC = LIB_COLL5 + 1,
-	GHETTO_DOOR = TBC + 1,
+	DARK_BACKGROUND0 = TBC + 1,
+	DARK_BACKGROUND1 = DARK_BACKGROUND0 + 1,
+	LIGHT = DARK_BACKGROUND1 + 1,
+	SEWER_COLLECT1 = LIGHT + 1,
+	SEWER_COLLECT2 = SEWER_COLLECT1 + 1,
+	SEWER_COLLECT3 = SEWER_COLLECT2 + 1,
+	SEWER_COLLECT4 = SEWER_COLLECT3 + 1,
+	SEWER_COLLECT5 = SEWER_COLLECT4 + 1,
+	SEWER_COLLECT6 = SEWER_COLLECT5 + 1,
+	GHETTO_DOOR = SEWER_COLLECT6 + 1,
 	BEACH_DOOR = GHETTO_DOOR + 1,
 	NEST_DOOR = BEACH_DOOR + 1,
 	MM_BACKGROUND = NEST_DOOR + 1,
@@ -414,7 +429,9 @@ enum class EFFECT_ASSET_ID
 	SPIKE = COLOURED + 1, // can reuse if we end up having meshes
 	WHEEL = SPIKE + 1,
 	TEXTURED = WHEEL + 1,
-	WATER = TEXTURED + 1,
+	OVERLAY_TEXTURED = TEXTURED + 1,
+	BLENDED = OVERLAY_TEXTURED + 1,
+	WATER = BLENDED + 1,
 	EFFECT_COUNT = WATER + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
