@@ -45,6 +45,8 @@ int main()
     while (!world_system.is_over()) {
 
         if (world_system.prev_state == PAUSE && world_system.game_state == MENU) {
+            world_system.transitionToMenuState();
+
             loadingScreen = createLoadingScreen(&render_system, { window_width_px / 2, window_height_px / 2 }, { 2 * window_width_px, 3 * window_height_px });
             playButton = createBackground(&render_system, TEXTURE_ASSET_ID::PLAY_BUTTON, 0.f, { window_width_px / 2, 600 }, false, { 120, 60 });
         }
@@ -52,9 +54,6 @@ int main()
         // ------------------------ GAME STATE MENU ------------------------
         while (world_system.game_state == MENU && !world_system.is_over()) {
             glfwPollEvents();
-            auto now = Clock::now();
-            total_elapsed = 0;
-            t = now;
 
             Motion& play_button_motion = registry.motions.get(playButton);
 
@@ -82,6 +81,9 @@ int main()
             world_system.game_state = PLAYING;
 
             world_system.initGameState();
+            auto now = Clock::now();
+            total_elapsed = 0;
+            t = now;
         }
 
         // ------------------------ GAME STATE PLAYING ------------------------

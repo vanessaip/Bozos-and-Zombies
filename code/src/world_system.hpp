@@ -82,6 +82,8 @@ public:
     bool checkPointerInBoundingBox(Motion& motion, vec2 pointer_pos);
 
     void unPause();
+
+    void transitionToMenuState();
 private:
 	void handleGameOver();
 	void updateWindowTitle();

@@ -1650,6 +1650,38 @@ void WorldSystem::restart_level()
 	}
 }
 
+void WorldSystem::transitionToMenuState() {
+    debugging.in_full_view_mode = false;
+	this->game_over = false;
+	// Debugging for memory/component leaks
+	registry.list_all_components();
+	printf("Restarting\n");
+
+	// Reset the game state variables
+	enemySpawnTimer = 0.f;
+	npcSpawnTimer = 0.f;
+	doorOpenTimer = 0.f;
+	collectibles_collected_pos = 50.f;
+	player_lives = 4;
+	collectibles_collected = 0;
+
+	// reset screen brightness
+	assert(registry.screenStates.components.size() <= 1);
+	ScreenState& screen = registry.screenStates.components[0];
+	screen.screen_darken_factor = 0;
+
+	// Remove all entities that we created
+	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
+	while (registry.motions.entities.size() > 0)
+		removeEntity(registry.motions.entities.back());
+
+	while (registry.lights.entities.size() > 0)
+		registry.remove_all_components_of(registry.lights.entities.back());
+
+    Mix_HaltMusic();
+
+}
+
 void WorldSystem::addAnimatedMMBossTextures(RenderSystem* renderer)
 {
 	createAnimatedBackgroundObject(renderer, { 728, 720 }, { 130, 130 }, TEXTURE_ASSET_ID::MM_FOUNTAIN, { 4 }, { 0, 0.01 });
@@ -1920,7 +1952,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  if (game_state == PLAYING || game_state == PAUSE) {
+  if (game_state == PLAYING) {
     Motion& motion = registry.motions.get(player_bozo);
     Player& player = registry.players.get(player_bozo);
 

@@ -205,7 +205,7 @@ public:
 	// Draw all entities
 	void draw(float elapsed_time_ms);
 
-  void drawMenu(float elapsed_time_ms);
+    void drawMenu(float elapsed_time_ms);
 
 	void step(float elapsed_time_ms);
 
