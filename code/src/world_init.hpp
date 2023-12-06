@@ -59,7 +59,7 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
 
 Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic);
 
-Entity createBus(RenderSystem* renderer, vec2 position, vec2 scale);
+Entity createBus(RenderSystem* renderer, vec2 position, vec2 scale, vec2 velocity = { 0.f, 0.f });
 
 // label
 Entity createOverlay(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId, bool is_fading);
@@ -177,7 +177,7 @@ const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
 const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
 	TEXTURE_ASSET_ID::GHETTO_DOOR,
 	// BUS LOOP TEMP
-	TEXTURE_ASSET_ID::BEACH_DOOR,
+	TEXTURE_ASSET_ID::NEST_DOOR,
 
 	TEXTURE_ASSET_ID::LIBRARY_DOOR,
 	TEXTURE_ASSET_ID::BEACH_DOOR,
@@ -227,7 +227,9 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 	},
 	// BUSLOOP TEMP
 	{
-		TEXTURE_ASSET_ID::BEACH_COIN
+		TEXTURE_ASSET_ID::BEACH_COIN,
+		TEXTURE_ASSET_ID::BEACH_APPLE,
+		TEXTURE_ASSET_ID::MUFFIN,
   	},
   {}
 };

@@ -46,6 +46,11 @@ struct Wheel
 
 };
 
+struct Bus
+{
+
+};
+
 // Ladders and maybe stairs?
 struct Climbable
 {

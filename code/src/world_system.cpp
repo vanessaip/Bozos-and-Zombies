@@ -225,10 +225,24 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 
 	// If it is a boss level
-  	if (curr_level == 2) {
+  	if (curr_level == MMBOSS) {
 	    updateBossMotion(bozo_motion, elapsed_ms_since_last_update);
 		updateHPBar(bossHealth / registry.bosses.get(boss).health * 100);
   	}
+
+	if (curr_level == BUSLOOP) {
+		if (registry.buses.entities.size() > 0) {
+			for (Entity entity : bus_array) {
+				Motion& bus_motion = registry.motions.get(entity);
+				if (bus_motion.velocity.x > 0) {
+					bus_motion.reflect[0] = true;
+				} else {
+					bus_motion.reflect[0] = false;
+				}
+			}
+		}
+		// print the size of registry.buses.entities
+	}
 	return true;
 }
 
@@ -573,6 +587,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 	bool isBook = registry.books.has(motionEntity);
 	bool isBoss = registry.bosses.has(motionEntity);
 	bool isWheel = registry.wheels.has(motionEntity);
+	bool isBus = registry.buses.has(motionEntity);
 
 	updateWheelRotation();
 
@@ -610,7 +625,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 
 	}
 	// Bounding entities to window
-	if (isHuman || isZombie || isBook || isWheel || isBoss)
+	if (isHuman || isZombie || isBook || isWheel || isBoss || isBus)
 	{
 		float entityRightSide = motion.position.x + abs(motion.scale[0]) / 2.f;
 		float entityLeftSide = motion.position.x - abs(motion.scale[0]) / 2.f;
@@ -1221,11 +1236,18 @@ void WorldSystem::restart_level()
 	renderer->resetCamera(bozo_start_pos);
 	renderer->resetSpriteSheetTracker();
 
+
 	// Create background first (painter's algorithm for rendering)
 
 	for (std::tuple<TEXTURE_ASSET_ID, float> background : BACKGROUND_ASSET[asset_mapping[curr_level]]) {
 		createBackground(renderer, std::get<0>(background), std::get<1>(background));
 	}
+
+	bus_array.clear();
+	if (curr_level == BUSLOOP) {
+		bus_array.push_back(createBus(renderer, { 1322, 720 }, { 230.f, 80.f }, { -300, 0}));
+	}
+
 
 	if (curr_level == NEST)
 		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, 0.f, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, { 250.f, 250.f }); // egg
@@ -1386,10 +1408,6 @@ void WorldSystem::restart_level()
 		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false);
 	}
 
-	if (curr_level == BUSLOOP) {
-		createBus(renderer, { 200, 200 }, { 100.f, 100.f });
-	}
-
 	// This is specific to the beach level
 	if (curr_level == BEACH) {
 		createDangerous(renderer, { 280, 130 }, { 30, 30 }, TEXTURE_ASSET_ID::SPIKE_BALL, { 280, 130 }, { 500, 10 }, { 650, 250 }, { 0, 0 }, false);
@@ -1439,7 +1457,8 @@ void WorldSystem::handle_collisions()
       bool isDangerous = registry.dangerous.has(entity_other);
       bool isWheel = registry.wheels.has(entity_other);
       bool isBoss = registry.bosses.has(entity_other);
-			if (!game_over && isZombie || isSpikes || isDangerous || isWheel || isBoss)
+	  bool isBus = registry.buses.has(entity_other);
+			if (!game_over && isZombie || isSpikes || isDangerous || isWheel || isBoss || isBus)
 			{
 				// Reduce hearts if player has lives left
 				if (!registry.deathTimers.has(entity) && !registry.lostLifeTimer.has(player_bozo) && player_lives > 0) {

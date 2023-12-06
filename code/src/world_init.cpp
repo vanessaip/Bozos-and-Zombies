@@ -519,7 +519,7 @@ Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTUR
 	return entity;
 }
 
-Entity createBus(RenderSystem* renderer, vec2 position, vec2 scale) {
+Entity createBus(RenderSystem* renderer, vec2 position, vec2 scale, vec2 velocity) {
 	// Reserve en entity
 	auto entity = Entity();
 
@@ -531,6 +531,10 @@ Entity createBus(RenderSystem* renderer, vec2 position, vec2 scale) {
 	auto& motion = registry.motions.emplace(entity);
 	motion.position = position;
 	motion.scale = scale;
+
+	motion.velocity = velocity;
+
+	registry.buses.emplace(entity);
 	
 	registry.renderRequests.insert(
 		entity,

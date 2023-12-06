@@ -33,6 +33,7 @@ public:
 	ComponentContainer<Wall> walls;
 	ComponentContainer<Spike> spikes;
 	ComponentContainer<Wheel> wheels;
+	ComponentContainer<Bus> buses;
 	ComponentContainer<Climbable> climbables;
 	ComponentContainer<Book> books;
 	ComponentContainer<TextBox> textboxes;
