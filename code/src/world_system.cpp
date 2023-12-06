@@ -325,7 +325,7 @@ void WorldSystem::handleGameOver() {
 
 void WorldSystem::updateWindowTitle() {
 	std::stringstream title_ss;
-	title_ss << "Books: " << points << " ";
+	title_ss << "Weapons: " << points << " ";
 	float curr_high_score = save_state["high_scores"][curr_level].asFloat() / 1000;
 	if (curr_high_score > 0) { // will be 0 if null
 		title_ss << "High Score: " << curr_high_score << " s";
