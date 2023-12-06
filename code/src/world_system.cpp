@@ -50,6 +50,8 @@ WorldSystem::~WorldSystem()
 		Mix_FreeChunk(collected_sound);
 	if (boss_summon_sound != nullptr)
 		Mix_FreeChunk(boss_summon_sound);
+    if (button_hover_sound != nullptr)
+		Mix_FreeChunk(button_hover_sound);
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -140,6 +142,7 @@ GLFWwindow* WorldSystem::create_window()
 	next_level_sound = Mix_LoadWAV(audio_path("next-level.wav").c_str());
 	collected_sound = Mix_LoadWAV(audio_path("collected.wav").c_str());
 	boss_summon_sound = Mix_LoadWAV(audio_path("boss-summon.wav").c_str());
+    button_hover_sound = Mix_LoadWAV(audio_path("button-hover.wav").c_str());
 
 	if (background_music == nullptr || player_death_sound == nullptr || student_disappear_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr || zombie_kill_sound == nullptr)
 	{
@@ -163,12 +166,18 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 {
 	this->renderer = renderer_arg;
 
-	// get level left off on
+    // get level left off on
 	save_state = readJson(SAVE_STATE_FILE);
 	curr_level = save_state["current_level"].asInt();
+}
 
-	// Set all states to default for current level
+void WorldSystem::initGameState() {
+    // Set all states to default for current level
 	restart_level();
+}
+
+void WorldSystem::loadFromSave() {
+    curr_level = save_state["current_level"].asInt();
 }
 
 // Update our game world
@@ -316,7 +325,7 @@ void WorldSystem::handleGameOver() {
 
 void WorldSystem::updateWindowTitle() {
 	std::stringstream title_ss;
-	title_ss << "Books: " << points << " ";
+	title_ss << "Weapons: " << points << " ";
 	float curr_high_score = save_state["high_scores"][curr_level].asFloat() / 1000;
 	if (curr_high_score > 0) { // will be 0 if null
 		title_ss << "High Score: " << curr_high_score << " s";
@@ -1695,6 +1704,38 @@ void WorldSystem::restart_level()
 	}
 }
 
+void WorldSystem::transitionToMenuState() {
+    debugging.in_full_view_mode = false;
+	this->game_over = false;
+	// Debugging for memory/component leaks
+	registry.list_all_components();
+	printf("Restarting\n");
+
+	// Reset the game state variables
+	enemySpawnTimer = 0.f;
+	npcSpawnTimer = 0.f;
+	doorOpenTimer = 0.f;
+	collectibles_collected_pos = 50.f;
+	player_lives = 4;
+	collectibles_collected = 0;
+
+	// reset screen brightness
+	assert(registry.screenStates.components.size() <= 1);
+	ScreenState& screen = registry.screenStates.components[0];
+	screen.screen_darken_factor = 0;
+
+	// Remove all entities that we created
+	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
+	while (registry.motions.entities.size() > 0)
+		removeEntity(registry.motions.entities.back());
+
+	while (registry.lights.entities.size() > 0)
+		registry.remove_all_components_of(registry.lights.entities.back());
+
+    Mix_HaltMusic();
+
+}
+
 void WorldSystem::addAnimatedMMBossTextures(RenderSystem* renderer)
 {
 	createAnimatedBackgroundObject(renderer, { 728, 720 }, { 130, 130 }, TEXTURE_ASSET_ID::MM_FOUNTAIN, { 4 }, { 0, 0.01 });
@@ -1971,140 +2012,109 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	Motion& motion = registry.motions.get(player_bozo);
-	Player& player = registry.players.get(player_bozo);
+  if (game_state == PLAYING) {
+    Motion& motion = registry.motions.get(player_bozo);
+    Player& player = registry.players.get(player_bozo);
 
-	if (!pause && action == GLFW_PRESS && !registry.deathTimers.has(player_bozo))
-	{
-		if (key == GLFW_KEY_A)
-		{
-			player.keyPresses[0] = true;
-		}
-		if (key == GLFW_KEY_D)
-		{
-			player.keyPresses[1] = true;
-		}
+    if (!pause && action == GLFW_PRESS && !registry.deathTimers.has(player_bozo))
+    {
+      if (key == GLFW_KEY_A)
+      {
+        player.keyPresses[0] = true;
+      }
+      if (key == GLFW_KEY_D)
+      {
+        player.keyPresses[1] = true;
+      }
 
-		if (key == GLFW_KEY_W)
-		{
-			player.keyPresses[2] = true;
-		}
+      if (key == GLFW_KEY_W)
+      {
+        player.keyPresses[2] = true;
+      }
 
-		if (key == GLFW_KEY_S)
-		{
-			player.keyPresses[3] = true;
-		}
+      if (key == GLFW_KEY_S)
+      {
+        player.keyPresses[3] = true;
+      }
 
-		if (key == GLFW_KEY_SPACE && !motion.offGround && !motion.climbing)
-		{
-			motion.offGround = true;
-			motion.velocity[1] = -600;
-			Mix_PlayChannel(-1, player_jump_sound, 0);
-		}
+      if (key == GLFW_KEY_SPACE && !motion.offGround && !motion.climbing)
+      {
+        motion.offGround = true;
+        motion.velocity[1] = -600;
+        Mix_PlayChannel(-1, player_jump_sound, 0);
+      }
 
-		if (key == GLFW_KEY_P) {
-			debugging.in_full_view_mode = !debugging.in_full_view_mode;
-		}
+      if (key == GLFW_KEY_P) {
+        debugging.in_full_view_mode = !debugging.in_full_view_mode;
+      }
 
-		// if (curr_level == TBC && key == GLFW_KEY_L) {
-		if (key == GLFW_KEY_L) {
-			curr_level++;
-			if (curr_level > max_level) {
-				curr_level = 0;
-			}
+      if (key == GLFW_KEY_L) {
+        curr_level++;
+        if (curr_level > max_level) {
+          curr_level = 0;
+        }
 
-			restart_level();
-		}
-	}
+        restart_level();
+      }
+    }
 
-	// For camera (because I don't have a mouse) - Justin
-	/*
-	if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT) { // && action == GLFW_RELEASE
-		auto& booksRegistry = registry.books;
-		for (int i = 0; i < booksRegistry.size(); i++) {
-			Entity entity = booksRegistry.entities[i];
-			Book& book = registry.books.get(entity);
-			if (book.offHand == false) {
-				Motion& motion_book = registry.motions.get(entity);
-				Motion& motion_bozo = registry.motions.get(player_bozo);
+    if (!pause && action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo)))
+    {
+      if (key == GLFW_KEY_A)
+      {
+        player.keyPresses[0] = false;
+      }
+      if (key == GLFW_KEY_D)
+      {
+        player.keyPresses[1] = false;
+      }
+      if (key == GLFW_KEY_W)
+      {
+        player.keyPresses[2] = false;
+      }
+      if (key == GLFW_KEY_S)
+      {
+        player.keyPresses[3] = false;
+      }
+    }
 
-				double xpos, ypos;
-				glfwGetCursorPos(window, &xpos, &ypos);
-				vec2& position = motion_bozo.position;
-				double direction = atan2(ypos - position[1], xpos - position[0]);
+    // Resetting game (can be done while paused)
+    if (action == GLFW_RELEASE && key == GLFW_KEY_R)
+    {
+      int w, h;
+      glfwGetWindowSize(window, &w, &h);
 
-				motion_book.velocity.x = 500.f * cos(direction);
-				motion_book.velocity.y = 500.f * sin(direction);
+      pause = false;
+      restart_level();
+    }
 
-				motion_book.offGround = true;
-				book.offHand = true;
-				--points;
-				break;
-			}
-		}
-	}
-	*/
+    // Debugging (can be done while paused)
+    if (key == GLFW_KEY_BACKSLASH)
+    {
+      if (action == GLFW_RELEASE)
+        debugging.in_full_view_mode = false;
+      else
+        debugging.in_full_view_mode = true;
+    }
 
-	if (!pause && action == GLFW_RELEASE && (!registry.deathTimers.has(player_bozo)))
-	{
-		if (key == GLFW_KEY_A)
-		{
-			player.keyPresses[0] = false;
-		}
-		if (key == GLFW_KEY_D)
-		{
-			player.keyPresses[1] = false;
-		}
-		if (key == GLFW_KEY_W)
-		{
-			player.keyPresses[2] = false;
-		}
-		if (key == GLFW_KEY_S)
-		{
-			player.keyPresses[3] = false;
-		}
-	}
+    // Get location
+    if (action == GLFW_RELEASE && key == GLFW_KEY_M) {
+      Motion motion = registry.motions.get(player_bozo);
+      printf("%f, %f\n", motion.position.x, motion.position.y);
+    }
 
-	// Resetting game (can be done while paused)
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
-	{
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-
-		pause = false;
-		restart_level();
-	}
-
-	// Debugging (can be done while paused)
-	if (key == GLFW_KEY_BACKSLASH)
-	{
-		if (action == GLFW_RELEASE)
-			debugging.in_full_view_mode = false;
-		else
-			debugging.in_full_view_mode = true;
-	}
-
-	// Get location
-	if (action == GLFW_RELEASE && key == GLFW_KEY_M) {
-		Motion motion = registry.motions.get(player_bozo);
-		printf("%f, %f\n", motion.position.x, motion.position.y);
-	}
-
-	// Pause
-	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
-		pause = !pause;
-		if (pause) {
-			pause_ui = createOverlay(renderer, { window_width_px / 2, window_height_px / 2 }, { 400.f, 300.f }, TEXTURE_ASSET_ID::PAUSE, false);
-			pause_start = Clock::now();
-		}
-		else {
-			if (registry.overlay.has(pause_ui)) {
-				registry.remove_all_components_of(pause_ui);
-			}
-			pause_end = Clock::now();
-			pause_duration = (float)(std::chrono::duration_cast<std::chrono::microseconds>(pause_end - pause_start)).count() / 1000;
-		}
-	}
+    // Pause
+    if (!pause && action == GLFW_PRESS && key == GLFW_KEY_ENTER && curr_level != CUT_1 && curr_level != CUT_2 && curr_level != CUT_3 && curr_level != CUT_4) {
+      pause = true;
+      if (pause) {
+        pause_ui = createOverlay(renderer, { window_width_px / 2, window_height_px / 2 - 100}, { 300.f, 500.f }, TEXTURE_ASSET_ID::PAUSE, false);
+        pause_resume = createOverlay(renderer, { window_width_px / 2, 400 - 100}, { 120, 60 }, TEXTURE_ASSET_ID::BACK_BUTTON, false);
+        pause_restart_button = createOverlay(renderer, { window_width_px / 2, 490 - 100}, { 120, 60 }, TEXTURE_ASSET_ID::RETRY_BUTTON, false);
+        pause_menu_button = createOverlay(renderer, { window_width_px / 2, 310 - 100}, { 120, 60 }, TEXTURE_ASSET_ID::MENU_BUTTON, false);
+        pause_start = Clock::now();
+      }
+    }
+  }
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position)
@@ -2115,12 +2125,16 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	if (!pause && !registry.deathTimers.has(player_bozo))
+    vec2 pos = relativePos(mouse_position);
+
+    if (game_state == MENU || game_state == PAUSE) {
+        menu_pointer = mouse_position;
+    }
+
+	if (game_state == PLAYING && !pause && !registry.deathTimers.has(player_bozo))
 	{
 		Motion& motion = registry.motions.get(player_bozo_pointer);
-		vec2 pos = relativePos(mouse_position);
-		float radians = atan2(pos.y - motion.position.y, pos.x - motion.position.x);
-		// printf("Radians: %f\n", radians);
+        float radians = atan2(pos.y - motion.position.y, pos.x - motion.position.x);
 		motion.angle = radians;
 		// print mouse position
 		printf("Mouse position: %f, %f\n", pos.x, pos.y); 
@@ -2141,6 +2155,11 @@ vec2 WorldSystem::relativePos(vec2 mouse_position) {
 
 void WorldSystem::on_mouse_button(int button, int action, int mod)
 {
+    if (game_state == MENU || game_state == PAUSE) {
+        printf("Position: %f\n", menu_pointer[0]);
+        menu_click_pos = menu_pointer;
+    }
+
 	if (registry.deathTimers.has(player_bozo))
 	{
 		return;
@@ -2218,4 +2237,26 @@ void WorldSystem::writeJson(Json::Value& json, std::string file_name) {
 	else {
 		printf("ERROR: unable to open %s for writing\n", file_name.c_str());
 	}
+}
+
+bool WorldSystem::checkPointerInBoundingBox(Motion& motion, vec2 pointer_pos) {
+    float left = motion.position[0] - motion.scale[0] / 2;
+    float right = motion.position[0] + motion.scale[0] / 2;
+    float top = motion.position[1] - motion.scale[1] / 2;
+    float bottom = motion.position[1] + motion.scale[1] / 2;
+
+    return pointer_pos[0] > left && pointer_pos[0] < right && pointer_pos[1] > top && pointer_pos[1] < bottom;
+}
+
+void WorldSystem::unPause() {
+    pause = !pause;
+    registry.remove_all_components_of(pause_ui);
+    registry.remove_all_components_of(pause_resume);
+    registry.remove_all_components_of(pause_menu_button);
+    registry.remove_all_components_of(pause_restart_button);
+    menu_click_pos = {0, 0};
+}
+
+void WorldSystem::playHover() {
+    Mix_PlayChannel(-1, button_hover_sound, 0);
 }

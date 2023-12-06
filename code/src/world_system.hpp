@@ -16,6 +16,12 @@
 
 #include "render_system.hpp"
 
+enum game_state {
+	MENU = 0,
+    PLAYING = 1,
+    PAUSE = 2,
+};
+
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class WorldSystem
@@ -25,6 +31,20 @@ public:
 	std::chrono::time_point<std::chrono::steady_clock> pause_start;
 	std::chrono::time_point<std::chrono::steady_clock> pause_end;
 	float pause_duration = 0.f;
+    int game_state = MENU;
+    int prev_state = PAUSE;
+
+    // Menu ui 
+    vec2 menu_pointer;
+    vec2 menu_click_pos;
+
+    // Pause ui
+    Entity pause_ui;
+    Entity pause_resume;
+    Entity pause_menu_button;
+    Entity pause_restart_button;
+
+    int curr_level = 0;
 
 	WorldSystem();
 
@@ -33,6 +53,8 @@ public:
 
 	// starts the game
 	void init(RenderSystem* renderer);
+
+  void initGameState();
 
 	// Releases all associated resources
 	~WorldSystem();
@@ -59,6 +81,16 @@ public:
 	float getClosestLadder(int zombie_level, Motion& motion);
 
 	bool isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& motion_container);
+
+    bool checkPointerInBoundingBox(Motion& motion, vec2 pointer_pos);
+
+    void unPause();
+
+    void transitionToMenuState();
+
+    void playHover();
+
+    void loadFromSave();
 private:
 	void handleGameOver();
 	void updateWindowTitle();
@@ -115,7 +147,6 @@ private:
 	vec2 platformDimensions{ 0.f, 0.f }; // unused
 	std::chrono::time_point<std::chrono::steady_clock> level_start_time;
 	Json::Value save_state;
-	Entity pause_ui;
 	std::vector<Entity> bus_array;
 	Entity boss;
 	Entity hp_bar;
@@ -129,7 +160,6 @@ private:
 	bool boss_active;
 
 	// Level definitions
-	int curr_level = 0;
 	Json::Value jsonData;
 	vec2 bozo_start_pos;
 	std::vector<vec2> zombie_spawn_pos;
@@ -164,6 +194,7 @@ private:
 	Mix_Chunk* next_level_sound;
 	Mix_Chunk* collected_sound;
 	Mix_Chunk* boss_summon_sound;
+    Mix_Chunk* button_hover_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;
