@@ -174,6 +174,8 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
+
+	// Game over
 	if (registry.zombies.entities.size() < 1 && (num_collectibles > 0 && collectibles_collected >= num_collectibles) && this->game_over == false) {
 		if (curr_level != LAB || (curr_level == LAB && boss_active && registry.bosses.entities.size() == 0)) {
 			handleGameOver();
@@ -243,8 +245,22 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// outside the loop since the logic inside updateSpriteSheetAnimation is just for bozo and the door
 	updateSpriteSheetAnimation(bozo_motion, elapsed_ms_since_last_update);
 
+	if (curr_level == BUSLOOP) {
+		if (registry.buses.entities.size() > 0) {
+			for (Entity entity : bus_array) {
+				Motion& bus_motion = registry.motions.get(entity);
+				if (bus_motion.velocity.x > 0) {
+					bus_motion.reflect[0] = true;
+				} else {
+					bus_motion.reflect[0] = false;
+				}
+			}
+		}
+	}
+
 	// If it is a boss level
-	if ((curr_level == MMBOSS || (curr_level == LAB && boss_active)) && registry.bosses.has(boss)) {
+	else if ((curr_level == MMBOSS || (curr_level == LAB && boss_active)) && registry.bosses.has(boss)) {
+
 		if (!registry.zombieDeathTimers.has(hp) && registry.motions.has(hp)) {
 			updateHPBar(bossHealth / registry.bosses.get(boss).health * 100);
 		}
@@ -616,6 +632,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 	bool isBook = registry.books.has(motionEntity);
 	bool isBoss = registry.bosses.has(motionEntity);
 	bool isWheel = registry.wheels.has(motionEntity);
+	bool isBus = registry.buses.has(motionEntity);
 
 	updateWheelRotation();
 
@@ -648,7 +665,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 
 	}
 	// Bounding entities to window
-	if (isHuman || isZombie || isBook || isWheel || isBoss)
+	if (isHuman || isZombie || isBook || isWheel || isBoss || isBus)
 	{
 		float entityRightSide = motion.position.x + abs(motion.scale[0]) / 2.f;
 		float entityLeftSide = motion.position.x - abs(motion.scale[0]) / 2.f;
@@ -1435,10 +1452,17 @@ void WorldSystem::restart_level()
 	renderer->resetCamera(bozo_start_pos);
 	renderer->resetSpriteSheetTracker();
 
+
 	// Create background first (painter's algorithm for rendering)
 	for (std::tuple<TEXTURE_ASSET_ID, float> background : BACKGROUND_ASSET[asset_mapping[curr_level]]) {
 		createBackground(renderer, std::get<0>(background), std::get<1>(background));
 	}
+
+	bus_array.clear();
+	if (curr_level == BUSLOOP) {
+		bus_array.push_back(createBus(renderer, { 1322, 720 }, { 230.f, 80.f }, { -300, 0}));
+	}
+
 
 	if (curr_level == NEST)
 		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, 0.f, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, false, { 250.f, 250.f }); // egg
@@ -1619,6 +1643,10 @@ void WorldSystem::restart_level()
 	num_collectibles = collectiblesPositions.size(); // set number of collectibles
 	vec2 collectible_scale = { jsonData["collectibles"]["scale"]["x"].asFloat(), jsonData["collectibles"]["scale"]["y"].asFloat() };
 	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[asset_mapping[curr_level]];
+	//print asset_mapping[curr_level]
+	printf("asset_mapping[curr_level]: %d\n", asset_mapping[curr_level]);
+	printf("curr_level: %d\n", curr_level);	
+	printf("num_collectibles: %d, collectible_assets.size(): %d\n", num_collectibles, collectible_assets.size());
 	assert(num_collectibles == collectible_assets.size());
 	for (uint i = 0; i < num_collectibles; i++) {
 		bool isPoisonous = collectible_assets[i] == TEXTURE_ASSET_ID::FOREST_MUSHROOM ? true : false;
@@ -1696,8 +1724,9 @@ void WorldSystem::handle_collisions()
 			bool isDangerous = registry.dangerous.has(entity_other);
 			bool isWheel = registry.wheels.has(entity_other);
 			bool isBoss = registry.bosses.has(entity_other);
+			bool isBus = registry.buses.has(entity_other);
 			if (!game_over &&
-				((isZombie && !registry.zombieDeathTimers.has(entity_other)) || isSpikes || isDangerous || isWheel || isBoss) &&
+				((isZombie && !registry.zombieDeathTimers.has(entity_other)) || isSpikes || isDangerous || isWheel || isBoss || isBus) &&
 				!registry.deathTimers.has(entity) &&
 				!registry.lostLifeTimer.has(player_bozo))
 			{
@@ -1975,6 +2004,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			debugging.in_full_view_mode = !debugging.in_full_view_mode;
 		}
 
+		// if (curr_level == TBC && key == GLFW_KEY_L) {
 		if (key == GLFW_KEY_L) {
 			curr_level++;
 			if (curr_level > max_level) {
@@ -2090,6 +2120,8 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 		float radians = atan2(pos.y - motion.position.y, pos.x - motion.position.x);
 		// printf("Radians: %f\n", radians);
 		motion.angle = radians;
+		// print mouse position
+		printf("Mouse position: %f, %f\n", pos.x, pos.y); 
 	}
 }
 

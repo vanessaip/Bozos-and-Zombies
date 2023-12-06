@@ -55,6 +55,11 @@ Entity createStaticTexture(RenderSystem* renderer, TEXTURE_ASSET_ID textureID, v
 Entity createCollectible(RenderSystem* renderer, float position_x, float position_y, TEXTURE_ASSET_ID collectible, vec2 scale, bool overlay, bool isPoisonous);
 // hearts
 Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
+
+// Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic);
+
+Entity createBus(RenderSystem* renderer, vec2 position, vec2 scale, vec2 velocity = { 0.f, 0.f });
+
 // dangerous object
 Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic, bool bezier, int spriteCount);
 // label
@@ -96,12 +101,13 @@ enum level {
 	SEWERS = 9,
 	FOREST = 10,
 	LAB = 11,
-	CUT_4 = 12
+	CUT_4 = 12,
+	BUSLOOP = 13,
 };
 
 // For swapping levels around
 const std::vector<int> asset_mapping = {
-6,
+  6,
   5,
   10,
   0,
@@ -113,7 +119,8 @@ const std::vector<int> asset_mapping = {
   7,
   8,
   9,
-  12
+  12,
+  13
 };
 
 const std::vector<std::string> LEVEL_DESCRIPTORS = {
@@ -129,12 +136,14 @@ const std::vector<std::string> LEVEL_DESCRIPTORS = {
   level_path("5_sewers.json"),
   level_path("5_forest.json"),
   level_path("6_lab.json"),
-  level_path("10_cut4.json")
+  level_path("10_cut4.json"),
+  level_path("4_busloop.json"),
 };
 
 const std::string SAVE_STATE_FILE = level_path("save_state.json");
 
 // ---------------------BACKGROUNDS-------------------------
+// uses asset_mapping
 const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_ASSET = {
 	{
 		{ TEXTURE_ASSET_ID::TUTORIAL_BACKGROUND1, 16.f },
@@ -149,11 +158,6 @@ const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_A
 		{ TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_1, 6.0f},
 		{ TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_2, 4.0f},
 		{ TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_3, 2.0f},
-		//{ TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_0, 1.7f},
-		//{ TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_1, 1.5f},
-		//{ TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_3, 1.3f},
-		//{ TEXTURE_ASSET_ID::PARALLAX_FOREGROUND_4, 1.1f},
-		{ TEXTURE_ASSET_ID::BACKGROUND_INDOOR, 0.f},
 		{ TEXTURE_ASSET_ID::BASEMENT, 0.f},
 	},
 	{
@@ -202,9 +206,12 @@ const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_A
 	},
 	{},
 	{},
-	{}
+	{},
+	{
+		{ TEXTURE_ASSET_ID::BUSLOOP_BACKGROUND, 0.f }
+	},
 };
-
+// uses asset_mapping
 const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
   TEXTURE_ASSET_ID::TUTORIAL_PLAT,
   TEXTURE_ASSET_ID::STEP1,
@@ -218,9 +225,10 @@ const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
   TEXTURE_ASSET_ID::STEP1,
   TEXTURE_ASSET_ID::STEP1,
   TEXTURE_ASSET_ID::STEP1,
+  TEXTURE_ASSET_ID::STEP1,
   TEXTURE_ASSET_ID::STEP1
 };
-
+// uses asset_mapping
 const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
   TEXTURE_ASSET_ID::LADDER2,
   TEXTURE_ASSET_ID::LADDER2,
@@ -234,9 +242,10 @@ const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
   TEXTURE_ASSET_ID::LAB_LADDER,
   TEXTURE_ASSET_ID::LADDER2,
   TEXTURE_ASSET_ID::LADDER2,
-  TEXTURE_ASSET_ID::LADDER2
+  TEXTURE_ASSET_ID::LADDER2,
+  TEXTURE_ASSET_ID::BEACH_LADDER
 };
-
+// does NOT use asset_mapping
 const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
 	TEXTURE_ASSET_ID::GHETTO_DOOR,
 	TEXTURE_ASSET_ID::NEST_DOOR,
@@ -250,9 +259,10 @@ const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
 	TEXTURE_ASSET_ID::NEST_DOOR,
 	TEXTURE_ASSET_ID::NEST_DOOR,
 	TEXTURE_ASSET_ID::NEST_DOOR,
-	TEXTURE_ASSET_ID::NEST_DOOR
+	TEXTURE_ASSET_ID::NEST_DOOR,
+	TEXTURE_ASSET_ID::BEACH_DOOR
 };
-
+// does NOT use asset_mapping
 const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
   TEXTURE_ASSET_ID::TUTORIAL_NPC,
   TEXTURE_ASSET_ID::NEST_NPC,
@@ -266,9 +276,11 @@ const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
   TEXTURE_ASSET_ID::LAB_NPC,
 	TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
-  TEXTURE_ASSET_ID::STUDENT
+  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::STUDENT,
 };
 
+// uses asset_mapping
 const std::vector<TEXTURE_ASSET_ID> ZOMBIE_ASSET = {
 	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::ZOMBIE,
@@ -282,9 +294,11 @@ const std::vector<TEXTURE_ASSET_ID> ZOMBIE_ASSET = {
 	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::ZOMBIE,
-	TEXTURE_ASSET_ID::ZOMBIE
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
 };
 
+// uses asset mapping
 const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 	{
 		TEXTURE_ASSET_ID::TUTORIAL_COLLECTIBLE1,
@@ -298,7 +312,7 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::NOODLES,
 		TEXTURE_ASSET_ID::ONIGIRI,
 		TEXTURE_ASSET_ID::PIZZA
-	},
+	},	
 	{
 		TEXTURE_ASSET_ID::BEACH_APPLE,
 		TEXTURE_ASSET_ID::BEACH_CHEST,
@@ -344,9 +358,14 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 	},
   {},
   {},
-  {}
+  {},
+	{
+		TEXTURE_ASSET_ID::BEACH_COIN,
+		TEXTURE_ASSET_ID::BEACH_APPLE,
+		TEXTURE_ASSET_ID::MUFFIN,
+	},
 };
-
+// uses asset_mapping
 const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
 	TEXTURE_ASSET_ID::TUTORIAL_WEAPON,
 	TEXTURE_ASSET_ID::NEST_WEAPON,
@@ -356,13 +375,14 @@ const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
 	TEXTURE_ASSET_ID::BOOK,
 	TEXTURE_ASSET_ID::BOOK,
 	TEXTURE_ASSET_ID::BOOK,
+	TEXTURE_ASSET_ID::CLEAVER_WEAPON,
 	TEXTURE_ASSET_ID::NEST_WEAPON,
 	TEXTURE_ASSET_ID::LAB_WEAPON,
 	TEXTURE_ASSET_ID::BOOK,
-  TEXTURE_ASSET_ID::BOOK,
-  TEXTURE_ASSET_ID::BOOK
+	TEXTURE_ASSET_ID::BOOK,
+	TEXTURE_ASSET_ID::BOOK
 };
-
+// uses asset_mapping
 const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
 	TEXTURE_ASSET_ID::LABEL_STREET,
 	TEXTURE_ASSET_ID::LABEL_NEST,
@@ -376,7 +396,8 @@ const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
   TEXTURE_ASSET_ID::LABEL_MM,
   TEXTURE_ASSET_ID::LABEL_BUS,
   TEXTURE_ASSET_ID::LABEL_BUS,
-  TEXTURE_ASSET_ID::LABEL_BUS
+  TEXTURE_ASSET_ID::LABEL_BUS,
+	TEXTURE_ASSET_ID::LABEL_BUSLOOP
 };
 
 
@@ -395,6 +416,7 @@ const std::vector<TEXTURE_ASSET_ID> BOSS_ASSET = {
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::STUDENT,
 };
 
 const std::vector<TEXTURE_ASSET_ID> CUTSCENE_ASSET = {
@@ -410,5 +432,6 @@ const std::vector<TEXTURE_ASSET_ID> CUTSCENE_ASSET = {
   TEXTURE_ASSET_ID::CUT_1,
   TEXTURE_ASSET_ID::CUT_2,
   TEXTURE_ASSET_ID::CUT_3,
-  TEXTURE_ASSET_ID::CUT_4
+  TEXTURE_ASSET_ID::CUT_4,
+  TEXTURE_ASSET_ID::CUT_1
 };
