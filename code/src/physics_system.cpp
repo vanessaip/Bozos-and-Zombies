@@ -340,17 +340,6 @@ void PhysicsSystem::step(float elapsed_ms)
 					registry.collisions.emplace_with_duplicates(entity_j, entity_i);
 				}
 			}
-			else if (registry.wheels.has(entity_i) && (registry.wheels.has(entity_j)))
-			{
-
-				std::vector<glm::vec2> transformedVertices1 = getTransformedVertices(mesh_i, motion_i);
-				std::vector<glm::vec2> transformedVertices2 = getTransformedVertices(mesh_j, motion_j);
-
-				if (checkSATIntersection(transformedVertices1, transformedVertices2))
-				{
-					resolve_bounce_collision(entity_i, entity_j);
-				}
-			}
 			else if ((registry.wheels.has(entity_i) && registry.spikes.has(entity_j)) || (registry.wheels.has(entity_j) && registry.spikes.has(entity_i)))
 			{
 
