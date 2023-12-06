@@ -68,18 +68,17 @@ int main()
             playButton = createOverlay(&render_system, { window_width_px / 2, 350 }, { 160, 80 }, TEXTURE_ASSET_ID::PLAY_BUTTON, false);
 
             bus_level = createOverlay(&render_system, { window_width_px / 2 - 400, 500 }, { 160, 160 }, TEXTURE_ASSET_ID::BUS_LVL, false);
-            busloop_level = createOverlay(&render_system, {  window_width_px / 2 - 200, 500 }, { 160, 160 }, TEXTURE_ASSET_ID::BUSLOOP_LVL, false);
-            street_level = createOverlay(&render_system, { window_width_px / 2, 500 }, { 160, 160 }, TEXTURE_ASSET_ID::STREET_LVL, false);
-            ikb_level = createOverlay(&render_system, { window_width_px / 2 + 200, 500 }, { 160, 160 }, TEXTURE_ASSET_ID::IKB_LVL, false);
-            mainmall_level = createOverlay(&render_system, { window_width_px / 2 + 400, 500 }, { 160, 160 }, TEXTURE_ASSET_ID::MAINMALL_LVL, false);
-            nest_level = createOverlay(&render_system, { window_width_px / 2 - 400, 700 }, { 160, 160 }, TEXTURE_ASSET_ID::NEST_LVL, false);
-            wreck_level = createOverlay(&render_system, { window_width_px / 2 - 200, 700 }, { 160, 160 }, TEXTURE_ASSET_ID::WRECK_LVL, false);
-            forest_level = createOverlay(&render_system, { window_width_px / 2, 700 }, { 160, 160 }, TEXTURE_ASSET_ID::FOREST_LVL, false);
-            sewer_level = createOverlay(&render_system, { window_width_px / 2 + 200, 700 }, { 160, 160 }, TEXTURE_ASSET_ID::SEWER_LVL, false);
-            lab_level = createOverlay(&render_system, { window_width_px / 2 + 400, 700 }, { 160, 160 }, TEXTURE_ASSET_ID::LAB_LVL, false);
+            street_level = createOverlay(&render_system, { window_width_px / 2 - 200, 500 }, { 160, 160 }, TEXTURE_ASSET_ID::STREET_LVL, false);
+            ikb_level = createOverlay(&render_system, { window_width_px / 2, 500 }, { 160, 160 }, TEXTURE_ASSET_ID::IKB_LVL, false);
+            mainmall_level = createOverlay(&render_system, { window_width_px / 2 + 200, 500 }, { 160, 160 }, TEXTURE_ASSET_ID::MAINMALL_LVL, false);
+            nest_level = createOverlay(&render_system, { window_width_px / 2 + 400, 500 }, { 160, 160 }, TEXTURE_ASSET_ID::NEST_LVL, false);
+            wreck_level = createOverlay(&render_system, { window_width_px / 2 - 400, 700 }, { 160, 160 }, TEXTURE_ASSET_ID::WRECK_LVL, false);
+            forest_level = createOverlay(&render_system, { window_width_px / 2 - 200, 700 }, { 160, 160 }, TEXTURE_ASSET_ID::FOREST_LVL, false);
+            sewer_level = createOverlay(&render_system, { window_width_px / 2, 700 }, { 160, 160 }, TEXTURE_ASSET_ID::SEWER_LVL, false);
+            lab_level = createOverlay(&render_system, { window_width_px / 2 + 200, 700 }, { 160, 160 }, TEXTURE_ASSET_ID::LAB_LVL, false);
+            busloop_level = createOverlay(&render_system, {  window_width_px / 2 + 400, 700 }, { 160, 160 }, TEXTURE_ASSET_ID::BUSLOOP_LVL, false);
             menu_entities.push_back(playButton);
             menu_entities.push_back(bus_level);
-            menu_entities.push_back(busloop_level);
             menu_entities.push_back(street_level);
             menu_entities.push_back(ikb_level);
             menu_entities.push_back(mainmall_level);
@@ -88,6 +87,7 @@ int main()
             menu_entities.push_back(forest_level);
             menu_entities.push_back(sewer_level);
             menu_entities.push_back(lab_level);
+            menu_entities.push_back(busloop_level);
         }
 
         // ------------------------ GAME STATE MENU ------------------------
@@ -147,45 +147,38 @@ int main()
                 break;
             }
 
-            if (world_system.checkPointerInBoundingBox(busloop_motion, world_system.menu_click_pos)) {
+            if (world_system.checkPointerInBoundingBox(street_motion, world_system.menu_click_pos)) {
                 world_system.prev_state = MENU;
                 world_system.menu_click_pos = {0, 0};
                 levelSelected = 2;
                 break;
             }
 
-            if (world_system.checkPointerInBoundingBox(street_motion, world_system.menu_click_pos)) {
+            if (world_system.checkPointerInBoundingBox(ikb_motion, world_system.menu_click_pos)) {
                 world_system.prev_state = MENU;
                 world_system.menu_click_pos = {0, 0};
                 levelSelected = 4;
                 break;
             }
 
-            if (world_system.checkPointerInBoundingBox(ikb_motion, world_system.menu_click_pos)) {
-                world_system.prev_state = MENU;
-                world_system.menu_click_pos = {0, 0};
-                levelSelected = 5;
-                break;
-            }
-
             if (world_system.checkPointerInBoundingBox(mainmall_motion, world_system.menu_click_pos)) {
                 world_system.prev_state = MENU;
                 world_system.menu_click_pos = {0, 0};
-                levelSelected = 7;
+                levelSelected = 6;
                 break;
             }
 
             if (world_system.checkPointerInBoundingBox(nest_motion, world_system.menu_click_pos)) {
                 world_system.prev_state = MENU;
                 world_system.menu_click_pos = {0, 0};
-                levelSelected = 8;
+                levelSelected = 7;
                 break;
             }
 
             if (world_system.checkPointerInBoundingBox(wreck_motion, world_system.menu_click_pos)) {
                 world_system.prev_state = MENU;
                 world_system.menu_click_pos = {0, 0};
-                levelSelected = 9;
+                levelSelected = 8;
                 break;
             }
 
@@ -199,14 +192,21 @@ int main()
             if (world_system.checkPointerInBoundingBox(sewer_motion, world_system.menu_click_pos)) {
                 world_system.prev_state = MENU;
                 world_system.menu_click_pos = {0, 0};
-                levelSelected = 11;
+                levelSelected = 9;
                 break;
             }
 
             if (world_system.checkPointerInBoundingBox(lab_motion, world_system.menu_click_pos)) {
                 world_system.prev_state = MENU;
                 world_system.menu_click_pos = {0, 0};
-                levelSelected = 12;
+                levelSelected = 11;
+                break;
+            }
+
+            if (world_system.checkPointerInBoundingBox(busloop_motion, world_system.menu_click_pos)) {
+                world_system.prev_state = MENU;
+                world_system.menu_click_pos = {0, 0};
+                levelSelected = 13;
                 break;
             }
 
@@ -339,6 +339,7 @@ int main()
                 world_system.game_state = PLAYING;
                 // Trick the game into restarting the level
                 world_system.prev_state = MENU;
+                levelSelected = world_system.curr_level;
                 world_system.menu_click_pos = {0, 0};
                 break;
             }
