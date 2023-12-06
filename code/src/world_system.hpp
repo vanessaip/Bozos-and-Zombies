@@ -89,6 +89,8 @@ public:
     void transitionToMenuState();
 
     void playHover();
+
+    void loadFromSave();
 private:
 	void handleGameOver();
 	void updateWindowTitle();

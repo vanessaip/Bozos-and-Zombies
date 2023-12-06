@@ -35,6 +35,7 @@ int main()
 	// initialize the main systems
 	render_system.init(window);
     world_system.init(&render_system);
+    world_system.loadFromSave();
 	debugging.in_full_view_mode = true;
 	Entity loadingScreen;
     Entity ubzTitle;
@@ -53,6 +54,7 @@ int main()
     bool isHovering = false;
     bool firstLoad = true;
     int levelSelected = 0;
+    bool isLevelSelected = true;
 
 	auto t = Clock::now();
 	float total_elapsed = 0.f;
@@ -132,9 +134,12 @@ int main()
             if (!hoveringSomething) {
                 isHovering = false;
             }
+
+            isLevelSelected = true;
             
             // TODO-Will refactor this if time allows
             if (world_system.checkPointerInBoundingBox(play_button_motion, world_system.menu_click_pos)) {
+                isLevelSelected = false;
                 world_system.prev_state = MENU;
                 world_system.menu_click_pos = {0, 0};
                 break;
@@ -224,8 +229,10 @@ int main()
 
             world_system.game_state = PLAYING;
 
-            world_system.curr_level = levelSelected;
-
+            world_system.loadFromSave();
+            if (isLevelSelected) {
+                world_system.curr_level = levelSelected;
+            }
             world_system.initGameState();
             if (!firstLoad) {
                 world_system.pause_end = Clock::now();

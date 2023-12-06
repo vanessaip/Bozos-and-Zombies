@@ -176,6 +176,10 @@ void WorldSystem::initGameState() {
 	restart_level();
 }
 
+void WorldSystem::loadFromSave() {
+    curr_level = save_state["current_level"].asInt();
+}
+
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
