@@ -129,7 +129,7 @@ GLFWwindow* WorldSystem::create_window()
 		return nullptr;
 	}
 
-	background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[0]).c_str());
+	background_music = Mix_LoadMUS(audio_path("tutorial.wav").c_str());
 	player_death_sound = Mix_LoadWAV(audio_path("player_death.wav").c_str());
 	student_disappear_sound = Mix_LoadWAV(audio_path("student_disappear_quiet.wav").c_str());
 	player_jump_sound = Mix_LoadWAV(audio_path("player_jump.wav").c_str());
@@ -177,7 +177,15 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// Game over
 	if (registry.zombies.entities.size() < 1 && (num_collectibles > 0 && collectibles_collected >= num_collectibles) && this->game_over == false) {
-		handleGameOver();
+		if (curr_level != LAB || (curr_level == LAB && boss_active && registry.bosses.entities.size() == 0)) {
+			handleGameOver();
+		} else if (curr_level == LAB && !boss_active) { // level == LAB, activate the boss after all zombies and collectibles are cleared
+			// remove the blockade, transform professor, play sound effect
+			assert(registry.bosses.entities.size() > 0);
+			boss_active = true;
+			removeEntity(boss_blockade);
+			Mix_PlayChannel(-1, boss_summon_sound, 0);
+		}
 	}
 	else if (curr_level == MMBOSS && registry.bosses.entities.size() == 0 && this->game_over == false) {
 		handleGameOver();
@@ -237,8 +245,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// outside the loop since the logic inside updateSpriteSheetAnimation is just for bozo and the door
 	updateSpriteSheetAnimation(bozo_motion, elapsed_ms_since_last_update);
 
-	// If it is a boss level
-
 	if (curr_level == BUSLOOP) {
 		if (registry.buses.entities.size() > 0) {
 			for (Entity entity : bus_array) {
@@ -251,8 +257,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			}
 		}
 	}
-		// print the size of registry.buses.entities
-	if (curr_level == MMBOSS && registry.bosses.has(boss)) {
+
+	// If it is a boss level
+	else if ((curr_level == MMBOSS || (curr_level == LAB && boss_active)) && registry.bosses.has(boss)) {
+
 		if (!registry.zombieDeathTimers.has(hp) && registry.motions.has(hp)) {
 			updateHPBar(bossHealth / registry.bosses.get(boss).health * 100);
 		}
@@ -318,14 +326,15 @@ void WorldSystem::updateWindowTitle() {
 
 void WorldSystem::handleRespawn(float elapsed_ms_since_last_update) {
 	// Remove entities that leave the screen on the left side
-	// Iterate backwards to be able to remove without unterfering with the next object to visit
+	// Iterate backwards to be able to remove without interfering with the next object to visit
 	// (the containers exchange the last element with the current)
 	// generate new zombie every 20s
 	enemySpawnTimer += elapsed_ms_since_last_update;
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
 
-	if (!game_over && zombie_spawn_on && enemySpawnTimer / 1000.f > zombie_spawn_threshold && spawn_on) {
+	if (!game_over && zombie_spawn_on && enemySpawnTimer / 1000.f > zombie_spawn_threshold
+		&& spawn_on && registry.zombies.entities.size() < num_start_zombies) {
 		vec2 enemySpawnPos;
 		for (int i = 0; i < zombie_spawn_pos.size(); i++)  // try a few times
 		{
@@ -352,7 +361,8 @@ void WorldSystem::handleRespawn(float elapsed_ms_since_last_update) {
 		}
 	}
 
-	if (!game_over && student_spawn_on && npcSpawnTimer / 1000.f > student_spawn_threshold && spawn_on) {
+	if (!game_over && student_spawn_on && npcSpawnTimer / 1000.f > student_spawn_threshold 
+		&& spawn_on && registry.humans.entities.size() < num_start_students) {
 		vec2 npcSpawnPos;
 		for (int i = 0; i < npc_spawn_pos.size(); i++)  // try a few times
 		{
@@ -476,7 +486,7 @@ bool WorldSystem::handleTimers(Motion& motion, Entity motionEntity, float elapse
 		cs_timer.timer -= elapsed_ms_since_last_update;
 		if (cs_timer.timer < 0) {
 			removeEntity(motionEntity);
-			curr_level++;
+			curr_level = curr_level + 1 > max_level ? 0 : curr_level + 1;
 			restart_level();
 		}
 	}
@@ -678,10 +688,10 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 			blocks.push_back(walls.entities[i]);
 		}
 
-        if (isZombie) {
-            registry.zombies.get(motionEntity).right_side_collision = false;
-            registry.zombies.get(motionEntity).left_side_collision = false;
-        }
+		if (isZombie) {
+			registry.zombies.get(motionEntity).right_side_collision = false;
+			registry.zombies.get(motionEntity).left_side_collision = false;
+		}
 
 		// handle platform collisions
 		for (int i = 0; i < blocks.size(); i++)
@@ -731,16 +741,17 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 					}
 				}
 				else if (isZombie) {
-                    registry.zombies.get(motionEntity).right_side_collision = true;
+					registry.zombies.get(motionEntity).right_side_collision = true;
 
 					if (curr_level == NEST && !motion.offGround)
 					{
 						motion.offGround = true;
 						motion.velocity[1] -= 200;
 					}
-				} else {
-                    motion.velocity.x = 0;
-                }
+				}
+				else {
+					motion.velocity.x = 0;
+				}
 			}
 
 			// Collision with Left edge of block
@@ -759,16 +770,17 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 					}
 				}
 				else if (isZombie) {
-                    registry.zombies.get(motionEntity).left_side_collision = true;
+					registry.zombies.get(motionEntity).left_side_collision = true;
 
 					if (curr_level == NEST && isZombie && !motion.offGround)
 					{
 						motion.offGround = true;
 						motion.velocity[1] -= 200;
 					}
-				} else {
-                    motion.velocity.x = 0;
-                }
+				}
+				else {
+					motion.velocity.x = 0;
+				}
 			}
 		}
 
@@ -873,7 +885,7 @@ void WorldSystem::updateBossMotion(Motion& bozo_motion, float elapsed_ms_since_l
 		// If boss is not damaged, follow the player
 		if (!registry.lostLifeTimer.has(boss)) {
 
-			if (curr_level == MMBOSS) {
+			if (curr_level == MMBOSS || curr_level == LAB) {
 				updateMainMallBossMovement(bozo_motion, bossMotion, elapsed_ms_since_last_update);
 			}
 
@@ -1030,7 +1042,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	else if (curr_level == SEWERS) {
 		float dist = distance(motion.position, bozo_motion.position);
 		if (dist < 150.0 && bozo_motion.position.y - 15.f <= motion.position.y) {
-			if ((motion.position.x - bozo_motion.position.x) < -10 ) {
+			if ((motion.position.x - bozo_motion.position.x) < -10) {
 				motion.velocity.x = ZOMBIE_SPEED / 1.f;
 			}
 			else if ((motion.position.x - bozo_motion.position.x) > 10) {
@@ -1138,15 +1150,15 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		float speed = ZOMBIE_SPEED;
 		motion.velocity.x = direction * speed;
 
-		if (!motion.offGround) {
-			for (float pos : jump_positions[zombie_level]) {
-				if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
-				{
-					motion.velocity.y = -600;
-					motion.offGround = true;
-				}
-			}
-		}
+		// if (!motion.offGround) {
+		// 	for (float pos : jump_positions[zombie_level]) {
+		// 		if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
+		// 		{
+		// 			motion.velocity.y = -600;
+		// 			motion.offGround = true;
+		// 		}
+		// 	}
+		// }
 
 	}
 	else if (zombie_level < bozo_level)
@@ -1160,7 +1172,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 
 		// Move toward the target_ladder
-		float target_ladder = getClosestLadder(zombie_level, bozo_motion);
+		float target_ladder = getClosestLadder(zombie_level, motion);
 
 		if ((target_ladder - motion.position.x) > 0)
 		{
@@ -1190,7 +1202,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	{
 		// Zombie is a level above bozo and needs to climb down
 		// Move toward the target_ladder
-		float target_ladder = getClosestLadder(zombie_level - 1, bozo_motion);
+		float target_ladder = getClosestLadder(zombie_level - 1, motion);
 
 		if ((target_ladder - motion.position.x) > 0)
 		{
@@ -1218,6 +1230,16 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 
 	}
+	if (!motion.offGround) {
+		for (float pos : jump_positions[zombie_level]) {
+			if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
+			{
+				motion.velocity.x *= 10;
+				motion.velocity.y = -575;
+				motion.offGround = true;
+			}
+		}
+	}
 
 	// update zombie direction
 	if (motion.velocity.x > 0 && (zombie_level != bozo_level || abs(motion.position.x - bozo_motion.position.x) > 5)) {
@@ -1227,10 +1249,10 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		motion.reflect[0] = false;
 	}
 
-    if ((registry.zombies.get(zombie).right_side_collision && motion.velocity.x < 0) || (registry.zombies.get(zombie).left_side_collision && motion.velocity.x > 0)) {
+    // if ((registry.zombies.get(zombie).right_side_collision && motion.velocity.x < 0) || (registry.zombies.get(zombie).left_side_collision && motion.velocity.x > 0)) {
+    if ((registry.zombies.get(zombie).right_side_collision) || (registry.zombies.get(zombie).left_side_collision)) {
         motion.velocity.x = 0;
     }
-
 
 	// update sprite animation depending on distance to player
 	SpriteSheet& zombieSheet = registry.spriteSheets.get(zombie);
@@ -1259,17 +1281,17 @@ int WorldSystem::checkLevel(Motion& motion)
 	return floor_positions.size() - 1;
 }
 
-float WorldSystem::getClosestLadder(int zombie_level, Motion& bozo_motion)
+float WorldSystem::getClosestLadder(int zombie_level, Motion& motion)
 {
 	std::vector<float> ladders = ladder_positions[zombie_level];
 
-	// Find the closest ladder to get to bozo
+	// Find the closest ladder to get to position specified by motion
 	int closest = 0;
 	float min_dist = 10000;
 
 	for (int i = 0; i < ladders.size(); i++)
 	{
-		float dist = abs(ladders[i] - bozo_motion.position.x);
+		float dist = abs(ladders[i] - motion.position.x);
 		if (dist < min_dist)
 		{
 			closest = i;
@@ -1388,6 +1410,7 @@ void WorldSystem::restart_level()
 	collectibles_collected_pos = 50.f;
 	player_lives = 4;
 	collectibles_collected = 0;
+	boss_active = false;
 
 	// reset screen brightness
 	assert(registry.screenStates.components.size() <= 1);
@@ -1420,6 +1443,7 @@ void WorldSystem::restart_level()
 	// set paltform dimensions
 	PLATFORM_WIDTH = jsonData["platform_scale"]["x"].asFloat();
 	PLATFORM_HEIGHT = jsonData["platform_scale"]["y"].asFloat();
+	WALL_WIDTH = jsonData["wall-width"].asFloat();
 
 	const Json::Value& playerData = jsonData["player"];
 	bozo_start_pos = { playerData["position"]["x"].asFloat(), playerData["position"]["y"].asFloat() };
@@ -1443,20 +1467,10 @@ void WorldSystem::restart_level()
 	if (curr_level == NEST)
 		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, 0.f, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, false, { 250.f, 250.f }); // egg
 
-	// Tutorial sign only for the first level
-	else if (curr_level == TUTORIAL) {
-		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_MOVEMENT, { window_width_px - 120.f, window_height_px - 80.f }, "", { 150.f, 70.f });
-		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_CLIMB, { window_width_px - 480.f, window_height_px - 90.f }, "", { 115.f, 40.f });
-		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_NPCS, { window_width_px - 800.f, window_height_px - 350.f }, "", { 150.f, 60.f });
-		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_WEAPONS, { window_width_px - 900.f, window_height_px - 220.f }, "", { 200.f, 70.f });
-		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_GOAL, { 130.f, window_height_px - 200.f }, "", { 180.f, 100.f });
-	}
-	
-	
 	else if (curr_level == SEWERS) 
 	{
-		glm::vec3 lights[8] = 
-		{ 
+		glm::vec3 lights[8] =
+		{
 			{ 15, 700, 1.5f },
 			{ 1340, 550, 1.5f },
 			{ 927, 670, 1.5f },
@@ -1466,13 +1480,13 @@ void WorldSystem::restart_level()
 			{ 430, 400, 1.6f },
 			{ 630, 30, 1.5f },
 		};
-		for (vec3 light : lights) 
+		for (vec3 light : lights)
 		{
 			createLight(renderer, { light.x, light.y }, light.z);
 		}
-	
+
 	}
-	
+
 	// AnimateBackgrounds for Main Mall Boss level
 	else if (curr_level == MMBOSS) {
 		addAnimatedMMBossTextures(renderer);
@@ -1495,7 +1509,12 @@ void WorldSystem::restart_level()
 
 	// Create walls
 	for (const auto& wall_data : jsonData["walls"]) {
-		createWall(renderer, wall_data["x"].asFloat(), wall_data["y"].asFloat(), wall_data["height"].asFloat(), wall_data["visible"].asBool());
+		createWall(renderer, wall_data["x"].asFloat(), wall_data["y"].asFloat(), WALL_WIDTH, wall_data["height"].asFloat(), wall_data["visible"].asBool());
+	}
+
+	// create temporary blockade for the boss in lab level
+	if (curr_level == LAB) {
+		boss_blockade = createWall(renderer, jsonData["boss-blockade"]["position"][0].asFloat(), jsonData["boss-blockade"]["position"][1].asFloat(), jsonData["boss-blockade"]["scale"][0].asFloat(), jsonData["boss-blockade"]["scale"][1].asFloat(), true, TEXTURE_ASSET_ID::LAB_BLOCKADE);
 	}
 
 	door = createDoor(renderer, { jsonData["door"]["position"][0].asFloat(), jsonData["door"]["position"][1].asFloat() }, { jsonData["door"]["scale"][0].asFloat(), jsonData["door"]["scale"][1].asFloat() }, DOOR_ASSET[asset_mapping[curr_level]]);
@@ -1569,13 +1588,13 @@ void WorldSystem::restart_level()
 
 	// Create zombies
 	zombie_spawn_pos.clear();
-	uint num_starting_zombies = jsonData["zombies"]["num_starting"].asInt(); // so that zombie positions are separate from how many start
-	assert(num_starting_zombies <= jsonData["zombies"]["positions"].size());
+	num_start_zombies = jsonData["zombies"]["num_starting"].asInt(); // so that zombie positions are separate from how many start
+	assert(num_start_zombies <= jsonData["zombies"]["positions"].size());
 	uint z = 0;
 	for (const auto& zombie_pos : jsonData["zombies"]["positions"]) {
 		vec2 pos = { zombie_pos["x"].asFloat(), zombie_pos["y"].asFloat() };
 		zombie_spawn_pos.push_back(pos);
-		if (z < num_starting_zombies) {
+		if (z < num_start_zombies) {
 			createZombie(renderer, pos, ZOMBIE_ASSET[asset_mapping[curr_level]]);
 		}
 		z++;
@@ -1591,14 +1610,14 @@ void WorldSystem::restart_level()
 
 	// Create students
 	npc_spawn_pos.clear();
-	uint num_starting_students = jsonData["students"]["num_starting"].asInt();
-	assert(num_starting_students <= jsonData["students"]["positions"].size());
+	num_start_students = jsonData["students"]["num_starting"].asInt();
+	assert(num_start_students <= jsonData["students"]["positions"].size());
 	uint s = 0;
 	for (const auto& student_pos : jsonData["students"]["positions"]) {
 		vec2 pos = { student_pos["x"].asFloat(), student_pos["y"].asFloat() };
 		npc_spawn_pos.push_back(pos);
-		if (s < num_starting_students) {
-			Entity student = createStudent(renderer, pos, NPC_ASSET[curr_level]);
+		if (s < num_start_students) {
+			Entity student = createStudent(renderer, pos, NPC_ASSET[asset_mapping[curr_level]]);
 			// coded back+forth motion
 			Motion& student_motion = registry.motions.get(student);
 			if (curr_level == BUS) {
@@ -1680,7 +1699,9 @@ void WorldSystem::addAnimatedMMBossTextures(RenderSystem* renderer)
 }
 
 void WorldSystem::playCutscene(RenderSystem* renderer) {
-	createCutscene(renderer, { 1080, 608 }, { 720, 405 }, TEXTURE_ASSET_ID::CUTSCENE_1, { 4 }, 5000.f, { 0, 0 });
+	int num_of_sprites = jsonData["num"].asInt();
+	float time_of_switch = jsonData["time"].asFloat();
+	createCutscene(renderer, { 1080, 608 }, { 720, 405 }, CUTSCENE_ASSET[asset_mapping[curr_level]], { num_of_sprites }, time_of_switch, { 0, 0 });
 }
 
 // Compute collisions between entities
@@ -1907,7 +1928,7 @@ void WorldSystem::handle_collisions()
 		}
 
 		// Check Spike - Zombie collision
-		else if (!game_over && registry.zombies.has(entity) && registry.spikes.has(entity_other)) {
+		else if (!game_over && (registry.zombies.has(entity) || registry.bosses.has(entity)) && registry.spikes.has(entity_other)) {
 			removeEntity(entity);
 		}
 

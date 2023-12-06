@@ -1,4 +1,5 @@
-{
+{ 
+  "isCutscene" : false,
   "platform_scale": {
     "x": 32,
     "y": 8
@@ -112,6 +113,19 @@
       "y": 750,
       "num_tiles": 1,
       "visible": true
+    },
+
+    {
+      "x": 527,
+      "y": 160,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 623,
+      "y": 160,
+      "num_tiles": 1,
+      "visible": true
     }
 
   ],
@@ -138,8 +152,8 @@
     }
 
   ],
-  "zombie_climb_points": [],
-  "zombie_jump_points": [],
+  "zombie_climb_points": [[0]],
+  "zombie_jump_points": [[0]],
   "spikes": [
     {
       "x": 0.0,
@@ -279,8 +293,8 @@
     },
     "positions": [
       {
-        "x": 432,
-        "y": 450
+        "x": 625,
+        "y": 150
       },
       {
         "x": 1430,
