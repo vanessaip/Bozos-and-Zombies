@@ -710,7 +710,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 			if (entityLeftSide < xBlockRightBound &&
 				entityLeftSide > xBlockRightBound - abs(motion.scale[0]) / 3.f &&
 				entityTop < yBlockBottom &&
-				entityBottom > yBlockTop && (player.keyPresses[0] || isZombie || isNPC || isWheel))
+				entityBottom > yBlockTop && (player.keyPresses[0] || isZombie || isNPC || isWheel || isBook))
 			{
 				if (isNPC || isWheel) {
 					if (registry.platforms.has(blocks[i])) {
@@ -738,7 +738,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 			if (entityRightSide > xBlockLeftBound &&
 				entityRightSide < xBlockLeftBound + abs(motion.scale[0]) / 3.f &&
 				entityTop < yBlockBottom &&
-				entityBottom > yBlockTop && (player.keyPresses[1] || isZombie || isNPC || isWheel))
+				entityBottom > yBlockTop && (player.keyPresses[1] || isZombie || isNPC || isWheel || isBook))
 			{
 				if (isNPC || isWheel) {
 					if (registry.platforms.has(blocks[i])) {
@@ -1129,16 +1129,8 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		float speed = ZOMBIE_SPEED;
 		motion.velocity.x = direction * speed;
 
-		// if (!motion.offGround) {
-		// 	for (float pos : jump_positions[zombie_level]) {
-		// 		if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
-		// 		{
-		// 			motion.velocity.y = -600;
-		// 			motion.offGround = true;
-		// 		}
-		// 	}
-		// }
-
+	} else if (curr_level == LAB && zombie_level != bozo_level) {
+		motion.velocity.x = 0;
 	}
 	else if (zombie_level < bozo_level)
 	{
