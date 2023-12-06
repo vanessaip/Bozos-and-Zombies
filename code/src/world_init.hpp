@@ -92,17 +92,17 @@ enum level {
 	CUT_1 = 0,
 	BUS = 1,
 	CUT_2 = 2,
-	TUTORIAL = 3,
-	LIBRARY = 4,
-	CUT_3 = 5,
-	MMBOSS = 6,
-	NEST = 7,
-	BEACH = 8,
-	SEWERS = 9,
-	FOREST = 10,
-	LAB = 11,
-	CUT_4 = 12,
-	BUSLOOP = 13,
+	BUSLOOP = 3,
+	TUTORIAL = 4,
+	LIBRARY = 5,
+	CUT_3 = 6,
+	MMBOSS = 7,
+	NEST = 8,
+	BEACH = 9,
+	SEWERS = 10,
+	FOREST = 11,
+	LAB = 12,
+	CUT_4 = 13
 };
 
 // For swapping levels around
@@ -110,6 +110,7 @@ const std::vector<int> asset_mapping = {
   6,
   5,
   10,
+  13,
   0,
   3,
   11,
@@ -119,14 +120,14 @@ const std::vector<int> asset_mapping = {
   7,
   8,
   9,
-  12,
-  13
+  12
 };
 
 const std::vector<std::string> LEVEL_DESCRIPTORS = {
   level_path("7_cut1.json"),
   level_path("5_bus.json"),
   level_path("8_cut2.json"),
+  level_path("4_busloop.json"),
   level_path("0_tutorial.json"),
   level_path("3_library.json"),
   level_path("9_cut3.json"),
@@ -136,8 +137,7 @@ const std::vector<std::string> LEVEL_DESCRIPTORS = {
   level_path("5_sewers.json"),
   level_path("5_forest.json"),
   level_path("6_lab.json"),
-  level_path("10_cut4.json"),
-  level_path("4_busloop.json"),
+  level_path("10_cut4.json")
 };
 
 const std::string SAVE_STATE_FILE = level_path("save_state.json");
@@ -312,7 +312,7 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::NOODLES,
 		TEXTURE_ASSET_ID::ONIGIRI,
 		TEXTURE_ASSET_ID::PIZZA
-	},	
+	},
 	{
 		TEXTURE_ASSET_ID::BEACH_APPLE,
 		TEXTURE_ASSET_ID::BEACH_CHEST,
