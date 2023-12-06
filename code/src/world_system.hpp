@@ -44,6 +44,8 @@ public:
     Entity pause_menu_button;
     Entity pause_restart_button;
 
+    int curr_level = 0;
+
 	WorldSystem();
 
 	// Creates a window
@@ -155,7 +157,6 @@ private:
 	bool boss_active;
 
 	// Level definitions
-	int curr_level = 0;
 	Json::Value jsonData;
 	vec2 bozo_start_pos;
 	std::vector<vec2> zombie_spawn_pos;

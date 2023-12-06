@@ -192,7 +192,17 @@ class RenderSystem
         textures_path("menu/menu-button.png"),
         textures_path("menu/back-button.png"),
         textures_path("menu/retry-button.png"),
-        textures_path("ubz-title.png")
+        textures_path("ubz-title.png"),
+        textures_path("menu/street.png"),
+        textures_path("menu/lab.png"),
+        textures_path("menu/busloop.png"),
+        textures_path("menu/sewer.png"),
+        textures_path("menu/wreck.png"),
+        textures_path("menu/nest.png"),
+        textures_path("menu/mainmall.png"),
+        textures_path("menu/ikb.png"),
+        textures_path("menu/bus.png"),
+        textures_path("menu/forest.png")
     };
 
 	std::array<GLuint, effect_count> effects;

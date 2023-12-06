@@ -166,13 +166,12 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 {
 	this->renderer = renderer_arg;
 
-}
-
-void WorldSystem::initGameState() {
     // get level left off on
 	save_state = readJson(SAVE_STATE_FILE);
 	curr_level = save_state["current_level"].asInt();
+}
 
+void WorldSystem::initGameState() {
     // Set all states to default for current level
 	restart_level();
 }
@@ -2077,10 +2076,10 @@ void WorldSystem::on_key(int key, int, int action, int mod)
     if (!pause && action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
       pause = true;
       if (pause) {
-        pause_ui = createOverlay(renderer, { window_width_px / 2, window_height_px / 2 }, { 300.f, 500.f }, TEXTURE_ASSET_ID::PAUSE, false);
-        pause_resume = createOverlay(renderer, { window_width_px / 2, 310 }, { 120, 60 }, TEXTURE_ASSET_ID::BACK_BUTTON, false);
-        pause_restart_button = createOverlay(renderer, { window_width_px / 2, 400 }, { 120, 60 }, TEXTURE_ASSET_ID::RETRY_BUTTON, false);
-        pause_menu_button = createOverlay(renderer, { window_width_px / 2, 490 }, { 120, 60 }, TEXTURE_ASSET_ID::MENU_BUTTON, false);
+        pause_ui = createOverlay(renderer, { window_width_px / 2, window_height_px / 2 - 100}, { 300.f, 500.f }, TEXTURE_ASSET_ID::PAUSE, false);
+        pause_resume = createOverlay(renderer, { window_width_px / 2, 400 - 100}, { 120, 60 }, TEXTURE_ASSET_ID::BACK_BUTTON, false);
+        pause_restart_button = createOverlay(renderer, { window_width_px / 2, 490 - 100}, { 120, 60 }, TEXTURE_ASSET_ID::RETRY_BUTTON, false);
+        pause_menu_button = createOverlay(renderer, { window_width_px / 2, 310 - 100}, { 120, 60 }, TEXTURE_ASSET_ID::MENU_BUTTON, false);
         pause_start = Clock::now();
       }
     }

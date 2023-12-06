@@ -37,10 +37,22 @@ int main()
     world_system.init(&render_system);
 	debugging.in_full_view_mode = true;
 	Entity loadingScreen;
-    Entity playButton;
     Entity ubzTitle;
+    Entity playButton;
+    Entity lab_level;
+    Entity busloop_level;
+    Entity sewer_level;
+    Entity wreck_level;
+    Entity nest_level;
+    Entity mainmall_level;
+    Entity ikb_level;
+    Entity street_level;
+    Entity bus_level;
+    Entity forest_level;
+    std::vector<Entity> menu_entities;
     bool isHovering = false;
     bool firstLoad = true;
+    int levelSelected = 0;
 
 	auto t = Clock::now();
 	float total_elapsed = 0.f;
@@ -49,27 +61,58 @@ int main()
 
         if (world_system.prev_state == PAUSE && world_system.game_state == MENU) {
             world_system.transitionToMenuState();
+            world_system.menu_click_pos = {0, 0};
 
             loadingScreen = createOverlay(&render_system, { window_width_px / 2, window_height_px / 2 }, { 1440, 810 }, TEXTURE_ASSET_ID::LOADING_SCREEN, false);
-            ubzTitle = createOverlay(&render_system, { window_width_px / 2, window_height_px / 2  - 100}, { 600, 600 }, TEXTURE_ASSET_ID::UBZ_TITLE, false);
-            playButton = createOverlay(&render_system, { window_width_px / 2, 550 }, { 160, 80 }, TEXTURE_ASSET_ID::PLAY_BUTTON, false);
+            ubzTitle = createOverlay(&render_system, { window_width_px / 2, window_height_px / 2  - 200}, { 600, 600 }, TEXTURE_ASSET_ID::UBZ_TITLE, false);
+            playButton = createOverlay(&render_system, { window_width_px / 2, 350 }, { 160, 80 }, TEXTURE_ASSET_ID::PLAY_BUTTON, false);
+            menu_entities.push_back(playButton);
+            // lab_level =
+            // busloop_level = 
+            // sewer_level =
+            // wreck_level =
+            // nest_level =
+            // mainmall_level =
+            // ikb_level = 
+            street_level = createOverlay(&render_system, { window_width_px / 2, 500 }, { 160, 160 }, TEXTURE_ASSET_ID::STREET_LVL, false);
+            menu_entities.push_back(street_level);
+            // bus_level =
+            // forest_level =
+
         }
 
         // ------------------------ GAME STATE MENU ------------------------
         while (world_system.game_state == MENU && !world_system.is_over()) {
-            glfwPollEvents();
 
             Motion& play_button_motion = registry.motions.get(playButton);
+            Motion& beach_motion = registry.motions.get(street_level);
 
-            if (world_system.checkPointerInBoundingBox(play_button_motion, world_system.menu_pointer)) {
-                if (!isHovering) {
-                    world_system.playHover();
+            bool hoveringSomething = false;
+            for (int i = 0; i < menu_entities.size(); i++) {
+                Motion& button_motion = registry.motions.get(menu_entities[i]);
+                bool hover = world_system.checkPointerInBoundingBox(button_motion, world_system.menu_pointer);
+                if (hover) {
+                    if (!isHovering) {
+                        world_system.playHover();
+                    }
+                    hoveringSomething = true;
                     isHovering = true;
+                    if (i == 0) {
+                        button_motion.scale = { 200, 100 };
+                    } else {
+                        button_motion.scale = { 200, 200 };
+                    }
+                } else {
+                    if (i == 0) {
+                        button_motion.scale = { 160, 80 };
+                    } else {
+                        button_motion.scale = { 160, 160 };
+                    }
                 }
-                play_button_motion.scale = { 200, 100 };
-            } else {
+            }
+
+            if (!hoveringSomething) {
                 isHovering = false;
-                play_button_motion.scale = { 160, 80 };
             }
             
             if (world_system.checkPointerInBoundingBox(play_button_motion, world_system.menu_click_pos)) {
@@ -78,17 +121,28 @@ int main()
                 break;
             }
 
+            if (world_system.checkPointerInBoundingBox(beach_motion, world_system.menu_click_pos)) {
+                world_system.prev_state = MENU;
+                world_system.menu_click_pos = {0, 0};
+                levelSelected = 2;
+                break;
+            }
+
             render_system.drawMenu(0);
+            glfwPollEvents();
         }
 
         if (world_system.prev_state == MENU) {
 
             debugging.in_full_view_mode = false;
+            menu_entities.clear();
             registry.remove_all_components_of(loadingScreen);
             registry.remove_all_components_of(ubzTitle);
             registry.remove_all_components_of(playButton);
 
             world_system.game_state = PLAYING;
+
+            world_system.curr_level = levelSelected;
 
             world_system.initGameState();
             if (!firstLoad) {
@@ -104,6 +158,7 @@ int main()
             if (world_system.pause) {
                 world_system.game_state = PAUSE;
                 world_system.prev_state = PLAYING;
+                world_system.menu_click_pos = {0, 0};
                 break;
             }
             // Processes system messages, if this wasn't present the window would become unresponsive
