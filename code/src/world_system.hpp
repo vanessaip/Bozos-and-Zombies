@@ -56,7 +56,7 @@ public:
 
 	int checkLevel(Motion& motion);
 
-	float getClosestLadder(int zombie_level, Motion& bozo_motion);
+	float getClosestLadder(int zombie_level, Motion& motion);
 
 	bool isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& motion_container);
 private:
@@ -102,10 +102,11 @@ private:
 	Entity player_bozo;
 	Entity player_bozo_pointer;
 	Entity door;
+	Entity boss_blockade;
 	float enemySpawnTimer = 0.f;
 	float npcSpawnTimer = 0.f;
 	float doorOpenTimer = 0.f;
-	int max_level = 7;
+	int max_level = 12;
 	float collectibles_collected_pos = 50;
 	int collectibles_collected = 0;
 	Entity loadingScreen;
@@ -124,6 +125,7 @@ private:
 	int player_lives = 4;
 	std::vector<Entity> player_hearts;
 	bool game_over;
+	bool boss_active;
 
 	// Level definitions
 	int curr_level = 0;
@@ -136,6 +138,7 @@ private:
 	std::vector<std::vector<float>> jump_positions;
 	float PLATFORM_WIDTH;
 	float PLATFORM_HEIGHT;
+	float WALL_WIDTH;
 	vec2 door_win_pos;
 	int total_collectables;
 	bool zombie_spawn_on;
