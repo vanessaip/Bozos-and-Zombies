@@ -139,6 +139,7 @@
     663
   ],
   "stairs": [],
+  "wall-width": 20,
   "walls": [],
   "climbables": [
     {

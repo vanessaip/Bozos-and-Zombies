@@ -66,6 +66,7 @@
     495
   ],
   "stairs": [],
+  "wall-width": 20,
   "walls": [
     {
       "x": 32.0,
