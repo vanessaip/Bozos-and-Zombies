@@ -19,14 +19,6 @@ void main()
 {
 	color = vec4(fcolor, 1) * texture(sampler0, vec2(texcoord.x, texcoord.y));
 
-	/*
-	if (worldPos.x < 400.f) 
-	{
-		vec3 bColor = vec3(0.0);
-		color.xyz = bColor.xyz;
-	}
-	*/
-
 	if (hasLights) 
 	{
 		bool isLit = false;
@@ -36,6 +28,7 @@ void main()
 			vec3 light = lights[i];
 			float dist = distance(worldPos.xy, light.xy);
 
+			// darker at larger distance, larger drop-off value simulates smaller light source
 			float lightIntensity = 300.0 / pow(dist, light.z);
 
 			baseColor.xyz += lightIntensity * color.xyz;
@@ -50,13 +43,7 @@ void main()
 		
 		if (isLit) 
 		{
-			color.z /= 1.3;
-			//color.xyz = vec3(min(baseColor.x, 1), min(baseColor.y, 1), min(baseColor.z, 1));
-		}
-		else 
-		{
-			//vec3 bColor = vec3(0.0);
-			//color.xyz = bColor.xyz;
+			color.z /= 1.3; // slightly yellow tinge
 		}
 		
 	}

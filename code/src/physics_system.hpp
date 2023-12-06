@@ -10,7 +10,7 @@ class PhysicsSystem
 {
 public:
 	void step(float elapsed_ms);
-	float GRAVITY = 1300.f;
+	float GRAVITY = 1000.f;
 
 	PhysicsSystem()
 	{

@@ -124,7 +124,7 @@ Entity createZombie(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID text
 	registry.zombies.emplace(entity);
 	registry.colors.insert(entity, { 1, 1, 1 });
 	std::vector<int> spriteCounts = { 4, 6, 6, 6 };
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.0f, 0.0f));
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.0f, 0.01f));
 
 	registry.renderRequests.insert(
 		entity,
