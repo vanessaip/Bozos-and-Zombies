@@ -86,41 +86,50 @@ Entity createCutscene(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE
 enum level {
 	CUT_1 = 0,
 	BUS = 1,
-	TUTORIAL = 2,
-	LIBRARY = 3,
-	MMBOSS = 4,
-	NEST = 5,
-	BEACH = 6,
-	SEWERS = 7,
-  	FOREST = 8,
-	LAB = 9,
+	CUT_2 = 2,
+	TUTORIAL = 3,
+	LIBRARY = 4,
+	CUT_3 = 5,
+	MMBOSS = 6,
+	NEST = 7,
+	BEACH = 8,
+	SEWERS = 9,
+	FOREST = 10,
+	LAB = 11,
+	CUT_4 = 12
 };
 
 // For swapping levels around
 const std::vector<int> asset_mapping = {
-  6,
+6,
   5,
+  10,
   0,
   3,
+  11,
   4,
   1,
   2,
   7,
   8,
-  9
+  9,
+  12
 };
 
 const std::vector<std::string> LEVEL_DESCRIPTORS = {
-  level_path("6_cut1.json"),
+  level_path("7_cut1.json"),
   level_path("5_bus.json"),
+  level_path("8_cut2.json"),
   level_path("0_tutorial.json"),
   level_path("3_library.json"),
+  level_path("9_cut3.json"),
   level_path("4_mmboss.json"),
   level_path("1_nest.json"),
   level_path("2_beach.json"),
   level_path("5_sewers.json"),
   level_path("5_forest.json"),
   level_path("6_lab.json"),
+  level_path("10_cut4.json")
 };
 
 const std::string SAVE_STATE_FILE = level_path("save_state.json");
@@ -164,13 +173,13 @@ const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_A
 	{
 	  {TEXTURE_ASSET_ID::BUS_BG, 2.f},
 	  {TEXTURE_ASSET_ID::BUS_WINDOW, 0.f}
-  	},
+	},
 	{},
 	{
 		{ TEXTURE_ASSET_ID::DARK_BACKGROUND1, 2.f },
 		{ TEXTURE_ASSET_ID::DARK_BACKGROUND0, 0.f }
 	},
-   	{
+	{
 		{ TEXTURE_ASSET_ID::FOREST_BACKGROUND_1, 32.f },
 		{ TEXTURE_ASSET_ID::FOREST_BACKGROUND_2, 16.f },
 		{ TEXTURE_ASSET_ID::FOREST_BACKGROUND_3, 8.f },
@@ -191,6 +200,9 @@ const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_A
 		{ TEXTURE_ASSET_ID::LAB_OVERLAY, 0.f},
 		{ TEXTURE_ASSET_ID::LAB_MAP, 0.f},
 	},
+	{},
+	{},
+	{}
 };
 
 const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
@@ -203,6 +215,9 @@ const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
   TEXTURE_ASSET_ID::STEP1,
   TEXTURE_ASSET_ID::TUTORIAL_PLAT,
   TEXTURE_ASSET_ID::FOREST_PLATFORM,
+  TEXTURE_ASSET_ID::STEP1,
+  TEXTURE_ASSET_ID::STEP1,
+  TEXTURE_ASSET_ID::STEP1,
   TEXTURE_ASSET_ID::STEP1
 };
 
@@ -217,6 +232,9 @@ const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
   TEXTURE_ASSET_ID::LADDER2,
   TEXTURE_ASSET_ID::FOREST_LADDER,
   TEXTURE_ASSET_ID::LAB_LADDER,
+  TEXTURE_ASSET_ID::LADDER2,
+  TEXTURE_ASSET_ID::LADDER2,
+  TEXTURE_ASSET_ID::LADDER2
 };
 
 const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
@@ -229,6 +247,9 @@ const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
 	TEXTURE_ASSET_ID::NEST_DOOR,
 	TEXTURE_ASSET_ID::GHETTO_DOOR,
 	TEXTURE_ASSET_ID::BEACH_DOOR,
+	TEXTURE_ASSET_ID::NEST_DOOR,
+	TEXTURE_ASSET_ID::NEST_DOOR,
+	TEXTURE_ASSET_ID::NEST_DOOR,
 	TEXTURE_ASSET_ID::NEST_DOOR
 };
 
@@ -242,13 +263,19 @@ const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
-  TEXTURE_ASSET_ID::LAB_NPC
+  TEXTURE_ASSET_ID::LAB_NPC,
+	TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::STUDENT
 };
 
 const std::vector<TEXTURE_ASSET_ID> ZOMBIE_ASSET = {
 	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::BEACH_ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::ZOMBIE,
 	TEXTURE_ASSET_ID::ZOMBIE,
@@ -279,7 +306,7 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::BEACH_DIAMOND,
 		TEXTURE_ASSET_ID::BEACH_STAR,
 		TEXTURE_ASSET_ID::BEACH_COIN
- 	},
+	},
 	{
 		TEXTURE_ASSET_ID::LIB_COLL1,
 		TEXTURE_ASSET_ID::LIB_COLL5,
@@ -287,12 +314,12 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::LIB_COLL4,
 		TEXTURE_ASSET_ID::LIB_COLL2
 	},
-  	{},
+	{},
 	{
 		TEXTURE_ASSET_ID::BURGER
 	},
-  	{},
-    {
+  {},
+	{
 		TEXTURE_ASSET_ID::SEWER_COLLECT2,
 		TEXTURE_ASSET_ID::SEWER_COLLECT3,
 		TEXTURE_ASSET_ID::SEWER_COLLECT4,
@@ -314,7 +341,10 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::LAB_COLLECT3,
 		TEXTURE_ASSET_ID::LAB_COLLECT4,
 		TEXTURE_ASSET_ID::LAB_COLLECT5,
-	}
+	},
+  {},
+  {},
+  {}
 };
 
 const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
@@ -322,25 +352,15 @@ const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
 	TEXTURE_ASSET_ID::NEST_WEAPON,
 	TEXTURE_ASSET_ID::BEACH_WEAPON,
 	TEXTURE_ASSET_ID::BOOK,
- 	TEXTURE_ASSET_ID::MM_PROJECTILE,
+	TEXTURE_ASSET_ID::MM_PROJECTILE,
 	TEXTURE_ASSET_ID::BOOK,
 	TEXTURE_ASSET_ID::BOOK,
 	TEXTURE_ASSET_ID::BOOK,
 	TEXTURE_ASSET_ID::NEST_WEAPON,
 	TEXTURE_ASSET_ID::LAB_WEAPON,
-};
-
-// ---------------------SOUNDS-------------------------
-const std::vector<std::string> BACKGROUND_MUSIC = {
-	"tutorial.wav",
-	"soundtrack.wav",
-	"beach.wav",
-	"library.wav",
-	"library.wav",
-	"library.wav",
-	"soundtrack.wav",
-	"Ghost_Story.wav",
-  "forest.wav"
+	TEXTURE_ASSET_ID::BOOK,
+  TEXTURE_ASSET_ID::BOOK,
+  TEXTURE_ASSET_ID::BOOK
 };
 
 const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
@@ -354,6 +374,9 @@ const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
   TEXTURE_ASSET_ID::LABEL_LIB, // add new label for sewer
   TEXTURE_ASSET_ID::LABEL_FOREST,
   TEXTURE_ASSET_ID::LABEL_MM,
+  TEXTURE_ASSET_ID::LABEL_BUS,
+  TEXTURE_ASSET_ID::LABEL_BUS,
+  TEXTURE_ASSET_ID::LABEL_BUS
 };
 
 
@@ -368,18 +391,24 @@ const std::vector<TEXTURE_ASSET_ID> BOSS_ASSET = {
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
-  TEXTURE_ASSET_ID::LAB_BOSS
+  TEXTURE_ASSET_ID::LAB_BOSS,
+  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::STUDENT,
 };
 
 const std::vector<TEXTURE_ASSET_ID> CUTSCENE_ASSET = {
-  TEXTURE_ASSET_ID::CUTSCENE_1,
-  TEXTURE_ASSET_ID::CUTSCENE_1,
-  TEXTURE_ASSET_ID::CUTSCENE_1,
-  TEXTURE_ASSET_ID::CUTSCENE_1,
-  TEXTURE_ASSET_ID::CUTSCENE_1,
-  TEXTURE_ASSET_ID::CUTSCENE_1,
-  TEXTURE_ASSET_ID::CUTSCENE_1,
-  TEXTURE_ASSET_ID::CUTSCENE_1,
-  TEXTURE_ASSET_ID::CUTSCENE_1,
-  TEXTURE_ASSET_ID::CUTSCENE_1,
+  TEXTURE_ASSET_ID::CUT_1,
+  TEXTURE_ASSET_ID::CUT_1,
+  TEXTURE_ASSET_ID::CUT_1,
+  TEXTURE_ASSET_ID::CUT_1,
+  TEXTURE_ASSET_ID::CUT_1,
+  TEXTURE_ASSET_ID::CUT_1,
+  TEXTURE_ASSET_ID::CUT_1,
+  TEXTURE_ASSET_ID::CUT_1,
+  TEXTURE_ASSET_ID::CUT_1,
+  TEXTURE_ASSET_ID::CUT_1,
+  TEXTURE_ASSET_ID::CUT_2,
+  TEXTURE_ASSET_ID::CUT_3,
+  TEXTURE_ASSET_ID::CUT_4
 };

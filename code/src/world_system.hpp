@@ -106,7 +106,7 @@ private:
 	float enemySpawnTimer = 0.f;
 	float npcSpawnTimer = 0.f;
 	float doorOpenTimer = 0.f;
-	int max_level = 9;
+	int max_level = 12;
 	float collectibles_collected_pos = 50;
 	int collectibles_collected = 0;
 	Entity loadingScreen;

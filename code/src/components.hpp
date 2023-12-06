@@ -21,8 +21,8 @@ struct PlayerEffects
 // Zombies can turn Humans into Zombies
 struct Zombie
 {
-  bool right_side_collision = false;
-  bool left_side_collision = false;
+	bool right_side_collision = false;
+	bool left_side_collision = false;
 };
 
 // Player and Student(s) are Human
@@ -268,7 +268,7 @@ struct Fading
 	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
 };
 
-struct Light 
+struct Light
 {
 	vec2 position;
 	float intensity_dropoff_factor;
@@ -379,7 +379,7 @@ enum class TEXTURE_ASSET_ID
 	LABEL_BEACH = LABEL_NEST + 1,
 	LABEL_LIB = LABEL_BEACH + 1,
 	LABEL_FOREST = LABEL_LIB + 1,
-  LABEL_STREET = LABEL_FOREST + 1,
+	LABEL_STREET = LABEL_FOREST + 1,
 	BEACH_APPLE = LABEL_STREET + 1,
 	BEACH_CHEST = BEACH_APPLE + 1,
 	BEACH_CHEST2 = BEACH_CHEST + 1,
@@ -393,8 +393,8 @@ enum class TEXTURE_ASSET_ID
 	LIB_COLL3 = LIB_COLL2 + 1,
 	LIB_COLL4 = LIB_COLL3 + 1,
 	LIB_COLL5 = LIB_COLL4 + 1,
-  TBC = LIB_COLL5 + 1,
-  DARK_BACKGROUND0 = TBC + 1,
+	TBC = LIB_COLL5 + 1,
+	DARK_BACKGROUND0 = TBC + 1,
 	DARK_BACKGROUND1 = DARK_BACKGROUND0 + 1,
 	LIGHT = DARK_BACKGROUND1 + 1,
 	SEWER_COLLECT1 = LIGHT + 1,
@@ -440,8 +440,7 @@ enum class TEXTURE_ASSET_ID
 	BUS_BG = LABEL_MM + 1,
 	BUS_WINDOW = BUS_BG + 1,
 	LABEL_BUS = BUS_WINDOW + 1,
-	CUTSCENE_1 = LABEL_BUS + 1,
-	LAB_MAP = CUTSCENE_1 + 1,
+	LAB_MAP = LABEL_BUS + 1,
 	LAB_BACKGROUND_0 = LAB_MAP + 1,
 	LAB_BACKGROUND_1 = LAB_BACKGROUND_0 + 1,
 	LAB_BACKGROUND_2 = LAB_BACKGROUND_1 + 1,
@@ -464,7 +463,11 @@ enum class TEXTURE_ASSET_ID
 	LAB_COLLECT5 = LAB_COLLECT4 + 1,
 	LAB_BLOCKADE = LAB_COLLECT5 + 1,
 	LAB_BOSS = LAB_BLOCKADE + 1,
-	TEXTURE_COUNT = LAB_BOSS + 1
+	CUT_1 = LAB_BOSS + 1,
+	CUT_2 = CUT_1 + 1,
+	CUT_3 = CUT_2 + 1,
+	CUT_4 = CUT_3 + 1,
+	TEXTURE_COUNT = CUT_4 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
