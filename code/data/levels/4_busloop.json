@@ -1,0 +1,187 @@
+{
+  "platform_scale": {
+    "x": 50,
+    "y": 30
+  },
+  "platforms": [
+    {
+      "x": 0.0,
+      "y": 798.0,
+      "num_tiles": 30,
+      "visible": true
+    },
+    {
+      "x": 1140.0,
+      "y": 645.0,
+      "num_tiles": 10,
+      "visible": true
+    },
+    {
+      "x": 1354.0,
+      "y": 427.0,
+      "num_tiles": 3,
+      "visible": true
+    },
+    {
+      "x": 1100.0,
+      "y": 427.0,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 949.0,
+      "y": 296.0,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 838.0,
+      "y": 360.0,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 525.0,
+      "y": 350.0,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 525.0,
+      "y": 249.0,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 525.0,
+      "y": 565.0,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 371.0,
+      "y": 424.0,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 13.0,
+      "y": 167.0,
+      "num_tiles": 4,
+      "visible": true
+    }
+  ],
+  "floor_positions": [
+    788,
+    634,
+    420
+  ],
+  "stairs": [],
+  "walls": [
+    {
+      "x": 837.0,
+      "y": 180.0,
+      "height": 200,
+      "visible": true
+    }
+  ],
+  "climbables": [
+    {
+      "x": 1238,
+      "y": 640,
+      "sections": 5
+    },
+    {
+      "x": 1389,
+      "y": 425,
+      "sections": 7
+    },
+    {
+      "x": 164,
+      "y": 160,
+      "sections": 8
+    }    
+
+  ],
+  "zombie_climb_points": [
+    [ 1237 ],
+    [ 1388 ],
+    [ 1388 ]
+
+  ],
+  "zombie_jump_points": [
+    [ 1332 ],
+    [ 0],
+    [ 0]
+  ],
+  "spikes": [],
+  "wheels": [
+  ],
+  "player": {
+    "position": {
+      "x": 720,
+      "y": 760
+    }
+  },
+  "zombies": {
+    "num_starting": 3,
+    "positions": [
+      {
+        "x": 166,
+        "y": 725
+      },
+      {
+        "x": 1397,
+        "y": 722
+      },
+      {
+        "x": 1131,
+        "y": 596
+      }
+    ],
+    "spawn_timer": null
+  },
+  "students": {
+    "num_starting": 3,
+    "positions": [
+      {
+        "x": 524,
+        "y": 126
+      },
+      {
+        "x": 522,
+        "y": 529
+      },
+      {
+        "x": 129,
+        "y": 102
+      }
+    ],
+    "spawn_timer": null
+  },
+  "collectibles": {
+    "scale": {
+      "x": 30,
+      "y": 30
+    },
+    "positions": [
+      {
+        "x": 20,
+        "y": 770
+      },
+      {
+        "x": 836,
+        "y": 335
+      },
+      {
+        "x": 371,
+        "y": 400
+      }
+    ]
+  },
+  "bgm": "beach.wav",
+  "door": {
+    "position": [100, 754],
+    "scale": [60, 60]
+  }
+}
