@@ -278,26 +278,105 @@ The only runtime bottleneck we discovered was at the beginning of the game when 
 - Implemented response elastic collision between Spikes and Wheels (physics_system.cpp (line 109 - 134))
 
 ## [19] Reloadability
+using jsoncpp library from https://github.com/open-source-parsers/jsoncpp downloaded during build using cmake
+each level's entities and environment variables are described in a json file under code/data/levels
+restart_level() loads in the json for the current level world_system.cpp line 1123 and initializes all entities of that level using the data
+last level completed and high scores for each level are saved to code/data/levels/save_state.json in world_system.cpp step() line 184
+game starts at level after the last successfully completed when restarted, high score is displayed in top window bar for each level
 
-## [Custom] Pause functionality
+# Milestone 4 Proposal Alignment
+In milestone 4, we added 6 new unique levels to the game as well as creative features like distortion, lighting effects, complex geometry and collisions, a pause function that triggers a menu, and multiple cut scenes for story elements.
+
+# Milestone 4 Deliverables
+
+# Stability 
+## Prior missed milestone features & bug fixes
+Called Mix_FreeChunk() for all sounds to resolve memory leaks.
+
+## No crashes, glitches, unpredictable behaviour
+
+# Playability
+## 10 minutes of non-repetitive gameplay
+**Following is the final level order(6 new ones added):**  
+Bus Level 
+Bus Loop Level
+Street Level
+IKB Library Level
+Boss Main Mall Level
+AMS Nest Level
+Wreck Beach Level
+Magic Forest Level
+Nightmare Sewer Level
+Boss Lab Level
+
+# User Experience
+## Comprehensive tutorial
+A tutorial level is added, including step-by-step instructions on moving, collecting & throwing projectiles, avoiding dangerous, game winning objectives (data/levels/5_bus.json, data/textures/tutorial)
+## Optimize user interaction and REPORT it 
+	Link to file:  
+https://github.students.cs.ubc.ca/CPSC427-2023W-T1/Team08UBZ/blob/Add-UX-Report/docu/UBZ%20User%20Experience%20Report.pdf
+
+# Creative
+## [1] Simple rendering effects
+- Adjusts brightness of texture fragments based on distance to light sources (textured.fs.glsl)
+- Light sources are defined as point locations with a intensity drop-off value (world_system.cpp line 1472)
+- Light vectors are passed as uniforms to the fragment shader (render_system.cpp line 95)
+- Vertex position in world-coordinates is passed from vertex shader to fragment shader (textured.vs.glsl)
+
+## [3] Complex geometry
+- Added a complex mesh for Spike Wheels with different parts having different colour (wheel.obj, wheel.fs.glsl, wheel.vs.glsl, render_system.cpp (line 136 - 165))
+- Initial Spike Meshes from M2 with gradient coloring (spike.obj, spike.fs.glsl, spike.vs.glsl, render_system.cpp (line 109 - 135))
+
+## [10] Precise Collisions
+- Implemented precise mesh-mesh collision detection using Separating Axis Theorem (physics_system.cpp (line 17 - 109))
+- Implemented response elastic collision between Spikes and Wheels (physics_system.cpp (line 109 - 134))
+
+## [27] Story elements 
+4 cutscenes are added. The scenes are merged into textures and rendered as sprites sheets(data/textures/cutscenes)
+The cutscenes are loaded into the game as empty levels with isCutscene boolean set to be true(data/levels/cut1-4.json). A countdown timer will be set to the number of sprites * switch time when the cutscene starts playing(world_system.cpp(line 1673 - 1677), world_init.cpp(line 730 - 754)). After timer hits 0, curr_level will be incremented and restart_level() will be called(world_system.cpp(line 468 - 476))
+
+## [Custom] Menu and Pause UI
+3 new game states are defined (MENU, PLAYING, and PAUSE)
+All transitions are handled in main which renders the main menu assets and the pause menu assets. Hover states are detected and click areas are detected to determine transition states per level. This applies to both the pause menu ui and the main menu ui.
+world_system.cpp line 1513 in on_key() handles pressing ENTER to toggle pause flag
+added simple UI that appears on the screen when the game is paused on line 1622 in world_system.cpp:on_key
+game loop is stalled and key/mouse inputs are disabled while pausing main.cpp line 46
+records duration of the pause to subtract it from the elapsed time in the main game loop line 56
 
 # Project References
 
 Level ending sound effect - pixabay.com  
 Collected item sound effect - pixabay.com  
 Tutorial background music - pixabay.com  
-Wreck Beach level background music - "Tahitian Remix Despacito" by Tulei  
+Wreck Beach level background music - "Tahitian Remix Despacito" by Tulei 
+Magic Forest Level Background music - Forest Ambush https://www.youtube.com/watch?v=morqY2DkGuk
+Magic Forest Level Assets - craftpix.net - TINY FOREST TILESET PLATFORMER PIXEL ART
+Lab level bgm - https://www.chosic.com/download-audio/28510/
+
+ 
 To be Continue music - "Grim Grinning Ghosts (Electro Swing Mix)" by Glenn Gatsby and Ashley Slater  
 Tutorial level assets - craftpix.net  
 
-**Library level assets:**
+Library level assets:  
 - Background music - Harry Potter theme song  
 - craftpix.net - FREE MEDIEVAL TILESET PIXEL ART PACK
 - craftpix.net - MEDIEVAL PIXEL ART TILESET
-- craftpix.net - MAGIC WAND AND BOOK ICON PACK
 - https://pff_nox.artstation.com/projects/8e3wkQ
 
 
 Beach level assets - craftpix.net
 
+Main Mall boss level background -  https://twitter.com/UBC/status/1600198159178792961
+
 Separating Axis Theorem: github.com/winstxnhdw/2d-separating-axis-theorem
+
+Tutorial level assets:  
+craftpix.net - FREE SKY WITH CLOUDS BACKGROUND PIXEL ART SET
+craftpix.net - FREE BILLBOARDS AND ADVERTISING PIXEL ART
+
+Lab level assets: - craftpix.net
+
+Cutscenes:  
+www.shutterstock.com
+pixabay.com
+
