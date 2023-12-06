@@ -477,7 +477,8 @@ enum class TEXTURE_ASSET_ID
 	CUT_2 = CUT_1 + 1,
 	CUT_3 = CUT_2 + 1,
 	CUT_4 = CUT_3 + 1,
-	TEXTURE_COUNT = CUT_4 + 1
+	LABEL_LAB = CUT_4 + 1,
+	TEXTURE_COUNT = LABEL_LAB + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

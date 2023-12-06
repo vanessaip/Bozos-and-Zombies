@@ -196,6 +196,7 @@ class RenderSystem
 		textures_path("cutscenes/cut_2.png"),
 		textures_path("cutscenes/cut_3.png"),
 		textures_path("cutscenes/cut_4.png"),
+		textures_path("locations/label_lab.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;
