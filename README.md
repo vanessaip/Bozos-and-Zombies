@@ -313,8 +313,8 @@ Boss Lab Level
 ## Comprehensive tutorial
 A tutorial level is added, including step-by-step instructions on moving, collecting & throwing projectiles, avoiding dangerous, game winning objectives (data/levels/5_bus.json, data/textures/tutorial)
 ## Optimize user interaction and REPORT it 
-	Link to file:  
-https://github.students.cs.ubc.ca/CPSC427-2023W-T1/Team08UBZ/blob/Add-UX-Report/docu/UBZ%20User%20Experience%20Report.pdf
+Path for the doc:  
+docu/UBZ User Experience Report.pdf
 
 # Creative
 ## [1] Simple rendering effects
