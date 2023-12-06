@@ -1,4 +1,5 @@
-{
+{ 
+  "isCutscene" : false,
   "platform_scale": {
     "x": 32,
     "y": 8
@@ -138,8 +139,8 @@
     }
 
   ],
-  "zombie_climb_points": [],
-  "zombie_jump_points": [],
+  "zombie_climb_points": [[0]],
+  "zombie_jump_points": [[0]],
   "spikes": [
     {
       "x": 0.0,
