@@ -42,6 +42,7 @@ public:
     Entity pause_ui;
     Entity pause_resume;
     Entity pause_menu_button;
+    Entity pause_restart_button;
 
 	WorldSystem();
 
@@ -84,6 +85,8 @@ public:
     void unPause();
 
     void transitionToMenuState();
+
+    void playHover();
 private:
 	void handleGameOver();
 	void updateWindowTitle();
@@ -182,6 +185,7 @@ private:
 	Mix_Chunk* next_level_sound;
 	Mix_Chunk* collected_sound;
 	Mix_Chunk* boss_summon_sound;
+    Mix_Chunk* button_hover_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;

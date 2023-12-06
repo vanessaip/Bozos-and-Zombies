@@ -38,6 +38,8 @@ int main()
 	debugging.in_full_view_mode = true;
 	Entity loadingScreen;
     Entity playButton;
+    bool isHovering = false;
+    bool firstLoad = true;
 
 	auto t = Clock::now();
 	float total_elapsed = 0.f;
@@ -58,8 +60,13 @@ int main()
             Motion& play_button_motion = registry.motions.get(playButton);
 
             if (world_system.checkPointerInBoundingBox(play_button_motion, world_system.menu_pointer)) {
+                if (!isHovering) {
+                    world_system.playHover();
+                    isHovering = true;
+                }
                 play_button_motion.scale = { 150, 75 };
             } else {
+                isHovering = false;
                 play_button_motion.scale = { 120, 60};
             }
             
@@ -81,9 +88,11 @@ int main()
             world_system.game_state = PLAYING;
 
             world_system.initGameState();
-            auto now = Clock::now();
-            total_elapsed = 0;
-            t = now;
+            if (!firstLoad) {
+                world_system.pause_end = Clock::now();
+                world_system.pause_duration = (float)(std::chrono::duration_cast<std::chrono::microseconds>(world_system.pause_end - world_system.pause_start)).count() / 1000;
+            }
+            firstLoad = false;
         }
 
         // ------------------------ GAME STATE PLAYING ------------------------
@@ -104,8 +113,6 @@ int main()
             total_elapsed += elapsed_ms;
             t = now;
             world_system.pause_duration = 0.f;
-            // printf("pause duration: %f ", world_system.pause_duration);
-            // printf("elapsed time: %f\n", elapsed_ms);
 
             world_system.step(elapsed_ms);
             physics_system.step(elapsed_ms);
@@ -122,35 +129,76 @@ int main()
 
             Motion& resume_motion = registry.motions.get(world_system.pause_resume);
             Motion& menu_motion = registry.motions.get(world_system.pause_menu_button);
+            Motion& restart_motion = registry.motions.get(world_system.pause_restart_button);
+
+            bool hoveringResume = world_system.checkPointerInBoundingBox(resume_motion, world_system.menu_pointer);
+            bool hoveringMenu = world_system.checkPointerInBoundingBox(menu_motion, world_system.menu_pointer);
+            bool hoveringRestart = world_system.checkPointerInBoundingBox(restart_motion, world_system.menu_pointer);
 
             // Button hover logic for "BACK" button
-            if (world_system.checkPointerInBoundingBox(resume_motion, world_system.menu_pointer)) {
+            if (hoveringResume) {
+                if (!isHovering) {
+                    world_system.playHover();
+                    isHovering = true;
+                }
                 resume_motion.scale = { 150, 75 };
             } else {
                 resume_motion.scale = { 120, 60 };
             }
 
             // Button hover logic for "MENU" button
-            if (world_system.checkPointerInBoundingBox(menu_motion, world_system.menu_pointer)) {
+            if (hoveringMenu) {
+                if (!isHovering) {
+                    world_system.playHover();
+                    isHovering = true;
+                }
                 menu_motion.scale = { 150, 75 };
             } else {
                 menu_motion.scale = { 120, 60 };
             }
+
+            // Button hover logic for "Restart" button
+            if (hoveringRestart) {
+                if (!isHovering) {
+                    world_system.playHover();
+                    isHovering = true;
+                }
+                restart_motion.scale = { 150, 75 };
+            } else {
+                restart_motion.scale = { 120, 60 };
+            }
+
+            if (!hoveringMenu && !hoveringResume && !hoveringRestart) {
+                isHovering = false;
+            }
             
             // If the "BACK" button is clicked, return to game
-            if (world_system.checkPointerInBoundingBox(resume_motion, world_system.menu_click_pos)) {\
+            if (world_system.checkPointerInBoundingBox(resume_motion, world_system.menu_click_pos)) {
                 world_system.unPause();
                 world_system.game_state = PLAYING;
+                world_system.prev_state = PAUSE;
+                world_system.menu_click_pos = {0, 0};
+
+                world_system.pause_end = Clock::now();
+                world_system.pause_duration = (float)(std::chrono::duration_cast<std::chrono::microseconds>(world_system.pause_end - world_system.pause_start)).count() / 1000;
+                break;
+            }
+
+            // If the "MENU" button is clicked, go to the main menu
+            if (world_system.checkPointerInBoundingBox(menu_motion, world_system.menu_click_pos)) {
+                world_system.unPause();
+                world_system.game_state = MENU;
                 world_system.prev_state = PAUSE;
                 world_system.menu_click_pos = {0, 0};
                 break;
             }
 
-            // If the "MENU" button is clicked, go to the main menu
-            if (world_system.checkPointerInBoundingBox(menu_motion, world_system.menu_click_pos)) {\
+            // If the "RETRY" button is clicked, restart the level
+            if (world_system.checkPointerInBoundingBox(restart_motion, world_system.menu_click_pos)) {
                 world_system.unPause();
-                world_system.game_state = MENU;
-                world_system.prev_state = PAUSE;
+                world_system.game_state = PLAYING;
+                // Trick the game into restarting the level
+                world_system.prev_state = MENU;
                 world_system.menu_click_pos = {0, 0};
                 break;
             }

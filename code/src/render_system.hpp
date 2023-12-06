@@ -167,7 +167,8 @@ class RenderSystem
         textures_path("cutscenes/cutscene_1.png"),
         textures_path("menu/play.png"),
         textures_path("menu/menu-button.png"),
-        textures_path("menu/back-button.png")
+        textures_path("menu/back-button.png"),
+        textures_path("menu/retry-button.png")
     };
 
 	std::array<GLuint, effect_count> effects;

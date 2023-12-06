@@ -50,6 +50,8 @@ WorldSystem::~WorldSystem()
 		Mix_FreeChunk(collected_sound);
 	if (boss_summon_sound != nullptr)
 		Mix_FreeChunk(boss_summon_sound);
+    if (button_hover_sound != nullptr)
+		Mix_FreeChunk(button_hover_sound);
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -140,6 +142,7 @@ GLFWwindow* WorldSystem::create_window()
 	next_level_sound = Mix_LoadWAV(audio_path("next-level.wav").c_str());
 	collected_sound = Mix_LoadWAV(audio_path("collected.wav").c_str());
 	boss_summon_sound = Mix_LoadWAV(audio_path("boss-summon.wav").c_str());
+    button_hover_sound = Mix_LoadWAV(audio_path("button-hover.wav").c_str());
 
 	if (background_music == nullptr || player_death_sound == nullptr || student_disappear_sound == nullptr || player_jump_sound == nullptr || player_land_sound == nullptr || collect_book_sound == nullptr || zombie_kill_sound == nullptr)
 	{
@@ -2057,7 +2060,8 @@ void WorldSystem::on_key(int key, int, int action, int mod)
       if (pause) {
         pause_ui = createOverlay(renderer, { window_width_px / 2, window_height_px / 2 }, { 300.f, 500.f }, TEXTURE_ASSET_ID::PAUSE, false);
         pause_resume = createOverlay(renderer, { window_width_px / 2, 310 }, { 120, 60 }, TEXTURE_ASSET_ID::BACK_BUTTON, false);
-        pause_menu_button = createOverlay(renderer, { window_width_px / 2, 400 }, { 120, 60 }, TEXTURE_ASSET_ID::MENU_BUTTON, false);
+        pause_restart_button = createOverlay(renderer, { window_width_px / 2, 400 }, { 120, 60 }, TEXTURE_ASSET_ID::RETRY_BUTTON, false);
+        pause_menu_button = createOverlay(renderer, { window_width_px / 2, 490 }, { 120, 60 }, TEXTURE_ASSET_ID::MENU_BUTTON, false);
         pause_start = Clock::now();
       }
     }
@@ -2198,8 +2202,10 @@ void WorldSystem::unPause() {
     registry.remove_all_components_of(pause_ui);
     registry.remove_all_components_of(pause_resume);
     registry.remove_all_components_of(pause_menu_button);
+    registry.remove_all_components_of(pause_restart_button);
     menu_click_pos = {0, 0};
+}
 
-    pause_end = Clock::now();
-    pause_duration = (float)(std::chrono::duration_cast<std::chrono::microseconds>(pause_end - pause_start)).count() / 1000;
+void WorldSystem::playHover() {
+    Mix_PlayChannel(-1, button_hover_sound, 0);
 }
