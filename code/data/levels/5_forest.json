@@ -26,7 +26,7 @@
       "x": 675.0,
       "y": 223.0,
       "num_tiles": 5,
-      "visible": true  // tree 2
+      "visible": true  
     },
     {
       "x": 200.0,
@@ -56,7 +56,7 @@
       "x": 340.0,
       "y": 245.0,
       "num_tiles": 2,
-      "visible": true // tree 1
+      "visible": true
     },
     {
       "x": 645.0,
@@ -231,7 +231,8 @@
         0.5,
         0.5,
         0.5
-      ]
+      ],
+      "angle": 3.14
     },
     {
       "x": 625.0,
@@ -240,7 +241,8 @@
         0.5,
         0.5,
         0.5
-      ]
+      ],
+      "angle": 3.14
     }
   ],
   "wheels": [
@@ -257,7 +259,8 @@
       "velocity": [
         100,
         0
-      ]
+      ],
+      "size": 15
     },
     {
       "position": [
@@ -272,7 +275,8 @@
       "velocity": [
         -100,
         0
-      ]
+      ],
+      "size": 15
     },
     {
       "position": [
@@ -287,7 +291,8 @@
       "velocity": [
         -100,
         0
-      ]
+      ],
+      "size": 15
     }
   ],
   "player": {
@@ -370,7 +375,7 @@
   },
   "bgm": "forest.wav",
   "door": {
-    "position": [ 1300, 725 ],
+    "position": [ 750, 180 ],
     "scale": [ 60, 60 ]
   }
 }

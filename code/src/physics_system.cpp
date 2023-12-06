@@ -41,6 +41,17 @@ bool isOverlapping(const std::vector<double> &projections1, const std::vector<do
 	return !(maxProj1 < minProj2 || maxProj2 < minProj1);
 }
 
+bool isPointInsidePolygon(const glm::vec2& point, const std::vector<glm::vec2>& polygon) {
+    bool inside = false;
+    for (size_t i = 0, j = polygon.size() - 1; i < polygon.size(); j = i++) {
+        if (((polygon[i].y > point.y) != (polygon[j].y > point.y)) &&
+            (point.x < (polygon[j].x - polygon[i].x) * (point.y - polygon[i].y) / (polygon[j].y - polygon[i].y) + polygon[i].x)) {
+            inside = !inside;
+        }
+    }
+    return inside;
+}
+
 bool checkSATIntersection(const std::vector<glm::vec2> &vertices1, const std::vector<glm::vec2> &vertices2)
 {
 	std::vector<double> projections1, projections2;
@@ -69,8 +80,20 @@ bool checkSATIntersection(const std::vector<glm::vec2> &vertices1, const std::ve
 		}
 	}
 
-	return true;
-}
+// Check containment
+    for (const auto& vertex : vertices1) {
+        if (isPointInsidePolygon(vertex, vertices2)) {
+            return true;
+        }
+    }
+    for (const auto& vertex : vertices2) {
+        if (isPointInsidePolygon(vertex, vertices1)) {
+            return true;
+        }
+    }
+
+    return true;
+	}
 
 std::vector<glm::vec2> getTransformedVertices(const Mesh *mesh, const Motion &motion)
 {
@@ -315,17 +338,6 @@ void PhysicsSystem::step(float elapsed_ms)
 					// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
 					registry.collisions.emplace_with_duplicates(entity_i, entity_j);
 					registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-				}
-			}
-			else if (registry.wheels.has(entity_i) && (registry.wheels.has(entity_j)))
-			{
-
-				std::vector<glm::vec2> transformedVertices1 = getTransformedVertices(mesh_i, motion_i);
-				std::vector<glm::vec2> transformedVertices2 = getTransformedVertices(mesh_j, motion_j);
-
-				if (checkSATIntersection(transformedVertices1, transformedVertices2) || checkSATIntersection(transformedVertices2, transformedVertices1))
-				{
-					resolve_bounce_collision(entity_i, entity_j);
 				}
 			}
 			else if ((registry.wheels.has(entity_i) && registry.spikes.has(entity_j)) || (registry.wheels.has(entity_j) && registry.spikes.has(entity_i)))
