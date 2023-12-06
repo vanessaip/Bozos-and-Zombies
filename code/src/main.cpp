@@ -49,8 +49,8 @@ int main()
         if (world_system.prev_state == PAUSE && world_system.game_state == MENU) {
             world_system.transitionToMenuState();
 
-            loadingScreen = createLoadingScreen(&render_system, { window_width_px / 2, window_height_px / 2 }, { 2 * window_width_px, 3 * window_height_px });
-            playButton = createBackground(&render_system, TEXTURE_ASSET_ID::PLAY_BUTTON, 0.f, { window_width_px / 2, 600 }, false, { 120, 60 });
+            loadingScreen = createOverlay(&render_system, { window_width_px / 2, window_height_px / 2 }, { 1440, 810 }, TEXTURE_ASSET_ID::LOADING_SCREEN, false);
+            playButton = createOverlay(&render_system, { window_width_px / 2, 600 }, { 120, 60 }, TEXTURE_ASSET_ID::PLAY_BUTTON, false);
         }
 
         // ------------------------ GAME STATE MENU ------------------------
