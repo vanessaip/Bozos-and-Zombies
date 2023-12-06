@@ -1341,19 +1341,10 @@ void WorldSystem::updateWheelRotation()
 		float circumference = 2 * M_PI * 10.f;			 // M_PI is a constant for π
 		float distanceTraveled = wheelMotion.velocity.x; // If velocity is per second, multiply by deltaTime
 		float rotationRadians = distanceTraveled / circumference * 2 * M_PI;
-		float rotationDegrees = rotationRadians * 180 / M_PI;
 
-		wheelMotion.angle += rotationDegrees;
+		wheelMotion.angle += rotationRadians;
 
-		if (wheelMotion.angle >= 360.0f)
-		{
-			wheelMotion.angle -= 360.0f;
-		}
-		else if (wheelMotion.angle < 0.0f)
-		{
-			wheelMotion.angle += 360.0f;
-		}
-
+		
 		// 	const float rotationSpeed = 0.0001f;
 		// 	if (wheelMotion.velocity.x >= 0)
 		// 		wheelMotion.angle += rotationSpeed * wheelMotion.velocity.x;
@@ -1514,14 +1505,17 @@ void WorldSystem::restart_level()
 	for (const auto& spikeData : jsonData["spikes"]) {
 		Entity spike = createSpike(renderer, { spikeData["x"].asFloat(), spikeData["y"].asFloat() });
 		registry.colors.insert(spike, { spikeData["colour"][0].asFloat(), spikeData["colour"][1].asFloat(), spikeData["colour"][2].asFloat() });
+		Motion& spikeMotion = registry.motions.get(spike);
+		spikeMotion.angle -= spikeData["angle"].asFloat();
 	}
 
 	// Create wheels
 	for (const auto& data : jsonData["wheels"]) {
 		Entity wheel = createWheel(renderer, { data["position"][0].asFloat(), data["position"][1].asFloat() });
 		// registry.colors.insert(wheel, { data["colour"][0].asFloat(), data["colour"][1].asFloat(), data["colour"][2].asFloat() });
-		Motion& motion1 = registry.motions.get(wheel);
-		motion1.velocity = { data["velocity"][0].asFloat(), data["velocity"][1].asFloat() };
+		Motion& wheelMotion = registry.motions.get(wheel);
+		wheelMotion.velocity = { data["velocity"][0].asFloat(), data["velocity"][1].asFloat() };
+		wheelMotion.scale = wheelMotion.scale * data["size"].asFloat();
 	}
 
 	// Create boss

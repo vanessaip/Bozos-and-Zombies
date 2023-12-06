@@ -337,8 +337,8 @@ Entity createSpike(RenderSystem* renderer, vec2 pos)
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 25.f;
-	motion.scale.y *= -1.25;
-	Bounce& bounce = registry.bounce.emplace(entity);
+	// motion.scale.y *= -1.25;
+	Bounce &bounce = registry.bounce.emplace(entity);
 	bounce.mass = std::numeric_limits<int>::max();
 
 	registry.spikes.emplace(entity);
@@ -364,7 +364,7 @@ Entity createWheel(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 15.f;
+	motion.scale = mesh.original_size;
 	motion.offGround = true;
 
 	registry.wheels.emplace(entity);
