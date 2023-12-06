@@ -1377,12 +1377,14 @@ void WorldSystem::updateWheelRotation()
 	for (Entity wheel : registry.wheels.entities)
 	{
 		Motion& wheelMotion = registry.motions.get(wheel);
-		float circumference = 2 * M_PI * 10.f;			 // M_PI is a constant for π
+		float circumference = 2 * M_PI * wheelMotion.scale.x;			 // M_PI is a constant for π
 		float distanceTraveled = wheelMotion.velocity.x; // If velocity is per second, multiply by deltaTime
 		float rotationRadians = distanceTraveled / circumference * 2 * M_PI;
 
 		wheelMotion.angle += rotationRadians;
-
+		if (abs(wheelMotion.velocity.x) < 15.0){
+			wheelMotion.velocity = { 200, 0 };
+		}
 		
 		// 	const float rotationSpeed = 0.0001f;
 		// 	if (wheelMotion.velocity.x >= 0)
