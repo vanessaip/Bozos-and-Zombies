@@ -323,7 +323,7 @@ void PhysicsSystem::step(float elapsed_ms)
 				std::vector<glm::vec2> transformedVertices1 = getTransformedVertices(mesh_i, motion_i);
 				std::vector<glm::vec2> transformedVertices2 = getTransformedVertices(mesh_j, motion_j);
 
-				if (checkSATIntersection(transformedVertices1, transformedVertices2) || checkSATIntersection(transformedVertices2, transformedVertices1))
+				if (checkSATIntersection(transformedVertices1, transformedVertices2))
 				{
 					resolve_bounce_collision(entity_i, entity_j);
 				}
