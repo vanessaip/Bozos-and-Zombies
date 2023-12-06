@@ -20,6 +20,7 @@ const vec2 CLIMBABLE_DIM = { 30.f, 32.f };
 
 const float ZOMBIE_SPEED = 120.f;
 const float PLAYER_SPEED = 230;
+const float MMBOSS_SPEED = 140.f;
 
 // the player
 Entity createBozo(RenderSystem* renderer, vec2 pos);
@@ -28,7 +29,7 @@ Entity createBozoPointer(RenderSystem* renderer, vec2 pos);
 // the prey
 Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId);
 // the enemy
-Entity createZombie(RenderSystem* renderer, vec2 position);
+Entity createZombie(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId);
 // a red line for debugging purposes
 Entity createLine(vec2 position, vec2 size);
 // one platform
@@ -46,25 +47,30 @@ Entity createSpike(RenderSystem* renderer, vec2 pos);
 // wheels
 Entity createWheel(RenderSystem* renderer, vec2 pos);
 // background
-Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_0, float depth = 0.f, vec2 position = { window_width_px / 2, window_height_px / 2 }, vec2 scale = { window_width_px, window_height_px });
+Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::PARALLAX_BACKGROUND_0, float depth = 0.f, vec2 position = { window_width_px / 2, window_height_px / 2 }, bool blended = false, vec2 scale = { window_width_px, window_height_px });
 // book
 Entity createBook(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId);
 // text box
 Entity createStaticTexture(RenderSystem* renderer, TEXTURE_ASSET_ID textureID, vec2 position, std::string text, vec2 scale = { 1.f, 1.f });
 // collectible
-Entity createCollectible(RenderSystem* renderer, float position_x, float position_y, TEXTURE_ASSET_ID collectible, vec2 scale, bool overlay);
-
+Entity createCollectible(RenderSystem* renderer, float position_x, float position_y, TEXTURE_ASSET_ID collectible, vec2 scale, bool overlay, bool isPoisonous);
 // hearts
 Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale);
 
-Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic);
+// Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic);
 
 Entity createBus(RenderSystem* renderer, vec2 position, vec2 scale, vec2 velocity = { 0.f, 0.f });
 
+// dangerous object
+Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic, bool bezier, int spriteCount);
 // label
 Entity createOverlay(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId, bool is_fading);
-
+// door
 Entity createDoor(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID textureId);
+// loading screen
+Entity createLoadingScreen(RenderSystem* renderer, vec2 position, vec2 scale);
+// lights
+Entity createLight(RenderSystem* renderer, vec2 position, float intensity_dropoff_factor);
 
 void removeEntity(Entity e);
 
@@ -76,37 +82,51 @@ Entity createHPBar(RenderSystem* renderer, vec2 position);
 
 Entity createHP(RenderSystem* renderer, vec2 position);
 
+Entity createAnimatedBackgroundObject(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, std::vector<int> spriteCounts, vec2 trunc);
+
+Entity createCutscene(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, std::vector<int> spriteCounts, float switchTime, vec2 trunc);
+
 // ----------------- Level variables go here -----------------
 // Index 0 is level 1, index 1 is level 2 etc.
 
 enum level {
-	TUTORIAL = 0,
-	BUSLOOP = 1,
-	LIBRARY = 2,
-	MMBOSS = 3,
-	NEST = 4,
-	BEACH = 5
+	CUT_1 = 0,
+	BUS = 1,
+	TUTORIAL = 2,
+	LIBRARY = 3,
+	MMBOSS = 4,
+	NEST = 5,
+	BEACH = 6,
+	SEWERS = 7,
+	BUSLOOP = 8,
+  FOREST = 9,
 };
 
 // For swapping levels around
-// current asset_mapping order:
-// tutorial, nest, beach, library, busloop
 const std::vector<int> asset_mapping = {
-  0, //tutorial 0 -> 0
-  4, //busloop  1 -> 4
-  3, //library  2 -> 3
-  5, //mmboss   3 -> 5
-  1, //nest     4 -> 1
-  2  //beach    5 -> 2
+  6, // cut1
+  5, // bus
+  0, // tutrial
+  3, // lib
+  4, // mmboss
+  1, // nest
+  2, // beach
+  7, // sewers
+  9, // busloop
+  8  // forest
 };
 
 const std::vector<std::string> LEVEL_DESCRIPTORS = {
+  level_path("6_cut1.json"),
+  level_path("5_bus.json"),
   level_path("0_tutorial.json"),
-  level_path("4_busloop.json"),
   level_path("3_library.json"),
   level_path("4_mmboss.json"),
   level_path("1_nest.json"),
   level_path("2_beach.json"),
+  level_path("5_sewers.json"),
+  level_path("4_busloop.json"),
+  level_path("5_forest.json")
 };
 
 const std::string SAVE_STATE_FILE = level_path("save_state.json");
@@ -145,13 +165,29 @@ const std::vector<std::vector<std::tuple<TEXTURE_ASSET_ID, float>>> BACKGROUND_A
 		{ TEXTURE_ASSET_ID::LIBRARY_OBJECTS, 2.f },
 		{ TEXTURE_ASSET_ID::LIBRARY_FRAME, 0.f }
 	},
+  	{
+		{ TEXTURE_ASSET_ID::MM_BACKGROUND, 0.f }
+	},
+	{
+	  {TEXTURE_ASSET_ID::BUS_BG, 2.f},
+	  {TEXTURE_ASSET_ID::BUS_WINDOW, 0.f}
+	},
+	{},
+		{
+		{ TEXTURE_ASSET_ID::DARK_BACKGROUND1, 2.f },
+		{ TEXTURE_ASSET_ID::DARK_BACKGROUND0, 0.f }
+	},
+   {
+		{ TEXTURE_ASSET_ID::FOREST_BACKGROUND_1, 32.f },
+		{ TEXTURE_ASSET_ID::FOREST_BACKGROUND_2, 16.f },
+		{ TEXTURE_ASSET_ID::FOREST_BACKGROUND_3, 8.f },
+		{ TEXTURE_ASSET_ID::FOREST_BACKGROUND_4, 4.f },
+		{ TEXTURE_ASSET_ID::FOREST_BACKGROUND_5, 0.f }
+	},
 	// BUSLOOP TEMP
 	{
 		{ TEXTURE_ASSET_ID::BUSLOOP_BACKGROUND, 0.f }
 	},
-  	{
-		{ TEXTURE_ASSET_ID::MM_BACKGROUND, 0.f }
-	}
 };
 // uses asset_mapping
 const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
@@ -159,9 +195,13 @@ const std::vector<TEXTURE_ASSET_ID> PLATFORM_ASSET = {
   TEXTURE_ASSET_ID::STEP1,
   TEXTURE_ASSET_ID::BEACH_PLAT,
   TEXTURE_ASSET_ID::LIBRARY_PLAT,
-  // BUSLOOP TEMP
-  TEXTURE_ASSET_ID::STEP1,
   TEXTURE_ASSET_ID::MM_PLAT,
+  TEXTURE_ASSET_ID::STEP1,
+  TEXTURE_ASSET_ID::STEP1,
+  TEXTURE_ASSET_ID::TUTORIAL_PLAT,
+  TEXTURE_ASSET_ID::FOREST_PLATFORM,
+  // BUSLOOP TEMP
+  TEXTURE_ASSET_ID::STEP1
 };
 // uses asset_mapping
 const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
@@ -169,25 +209,35 @@ const std::vector<TEXTURE_ASSET_ID> CLIMBABLE_ASSET = {
   TEXTURE_ASSET_ID::LADDER2,
   TEXTURE_ASSET_ID::BEACH_LADDER,
   TEXTURE_ASSET_ID::LIBRARY_LAD,
-  // BUSLOOP TEMP
-  TEXTURE_ASSET_ID::BEACH_LADDER,
   TEXTURE_ASSET_ID::LIBRARY_LAD,
+  TEXTURE_ASSET_ID::LADDER2,
+  TEXTURE_ASSET_ID::LADDER2,
+  TEXTURE_ASSET_ID::LADDER2,
+  TEXTURE_ASSET_ID::FOREST_LADDER,
+  // BUSLOOP TEMP
+  TEXTURE_ASSET_ID::BEACH_LADDER
 };
 // does NOT use asset_mapping
 const std::vector<TEXTURE_ASSET_ID> DOOR_ASSET = {
 	TEXTURE_ASSET_ID::GHETTO_DOOR,
+	TEXTURE_ASSET_ID::NEST_DOOR,
+	TEXTURE_ASSET_ID::BEACH_DOOR,
+	TEXTURE_ASSET_ID::LIBRARY_DOOR,
+	TEXTURE_ASSET_ID::MM_DOOR,
+	TEXTURE_ASSET_ID::NEST_DOOR,
+	TEXTURE_ASSET_ID::NEST_DOOR,
+	TEXTURE_ASSET_ID::GHETTO_DOOR,
 	// BUS LOOP TEMP
 	TEXTURE_ASSET_ID::NEST_DOOR,
-
-	TEXTURE_ASSET_ID::LIBRARY_DOOR,
-	TEXTURE_ASSET_ID::BEACH_DOOR,
-	TEXTURE_ASSET_ID::NEST_DOOR,
-	TEXTURE_ASSET_ID::NEST_DOOR,
-	
+	TEXTURE_ASSET_ID::BEACH_DOOR
 };
 // does NOT use asset_mapping
 const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
   TEXTURE_ASSET_ID::TUTORIAL_NPC,
+  TEXTURE_ASSET_ID::NEST_NPC,
+  TEXTURE_ASSET_ID::BEACH_NPC,
+  TEXTURE_ASSET_ID::NEST_NPC,
+  TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
@@ -196,6 +246,21 @@ const std::vector<TEXTURE_ASSET_ID> NPC_ASSET = {
 };
 
 // uses asset_mapping
+const std::vector<TEXTURE_ASSET_ID> ZOMBIE_ASSET = {
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::BEACH_ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE,
+	TEXTURE_ASSET_ID::ZOMBIE
+
+};
+
+// uses asset mapping
 const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 	{
 		TEXTURE_ASSET_ID::TUTORIAL_COLLECTIBLE1,
@@ -223,7 +288,27 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::LIB_COLL5,
 		TEXTURE_ASSET_ID::LIB_COLL3,
 		TEXTURE_ASSET_ID::LIB_COLL4,
-		TEXTURE_ASSET_ID::LIB_COLL2,
+		TEXTURE_ASSET_ID::LIB_COLL2
+	},
+  {},
+	{
+		TEXTURE_ASSET_ID::BURGER
+	},
+  {},
+    {
+		TEXTURE_ASSET_ID::SEWER_COLLECT2,
+		TEXTURE_ASSET_ID::SEWER_COLLECT3,
+		TEXTURE_ASSET_ID::SEWER_COLLECT4,
+		TEXTURE_ASSET_ID::SEWER_COLLECT6,
+  },
+  {
+		TEXTURE_ASSET_ID::FOREST_CHERRY,
+		TEXTURE_ASSET_ID::FOREST_MEAT,
+		TEXTURE_ASSET_ID::FOREST_RADISH,
+		TEXTURE_ASSET_ID::FOREST_SQUASH,
+		TEXTURE_ASSET_ID::FOREST_TOMATO,
+		TEXTURE_ASSET_ID::FOREST_STRAWBERRY,
+		TEXTURE_ASSET_ID::FOREST_MUSHROOM
 	},
 	// BUSLOOP TEMP
 	{
@@ -231,16 +316,20 @@ const std::vector<std::vector<TEXTURE_ASSET_ID>> COLLECTIBLE_ASSETS = {
 		TEXTURE_ASSET_ID::BEACH_APPLE,
 		TEXTURE_ASSET_ID::MUFFIN,
   	},
-  {}
 };
 // uses asset_mapping
 const std::vector<TEXTURE_ASSET_ID> WEAPON_ASSETS = {
 	TEXTURE_ASSET_ID::TUTORIAL_WEAPON,
+	TEXTURE_ASSET_ID::CLEAVER_WEAPON,
+	TEXTURE_ASSET_ID::BEACH_WEAPON,
+	TEXTURE_ASSET_ID::BOOK,
+ 	TEXTURE_ASSET_ID::MM_PROJECTILE,
 	TEXTURE_ASSET_ID::BOOK,
 	TEXTURE_ASSET_ID::BOOK,
 	TEXTURE_ASSET_ID::BOOK,
-	TEXTURE_ASSET_ID::BOOK,
-	TEXTURE_ASSET_ID::BOOK
+	TEXTURE_ASSET_ID::CLEAVER_WEAPON,
+	TEXTURE_ASSET_ID::CLEAVER_WEAPON
+
 };
 
 // ---------------------SOUNDS-------------------------
@@ -250,16 +339,25 @@ const std::vector<std::string> BACKGROUND_MUSIC = {
 	"soundtrack.wav",
 	"beach.wav",
 	"library.wav",
-  "tbc-music.wav"
+	"library.wav",
+	"library.wav",
+	"soundtrack.wav",
+	"Ghost_Story.wav",
+  "forest.wav"
 };
 // uses asset_mapping
 const std::vector<TEXTURE_ASSET_ID> LABEL_ASSETS = {
-	TEXTURE_ASSET_ID::LABEL_TUTORIAL,
+	TEXTURE_ASSET_ID::LABEL_STREET,
 	TEXTURE_ASSET_ID::LABEL_NEST,
 	TEXTURE_ASSET_ID::LABEL_BEACH,
 	TEXTURE_ASSET_ID::LABEL_LIB,
-	TEXTURE_ASSET_ID::LABEL_BUSLOOP,
-  TEXTURE_ASSET_ID::LABEL_LIB,
+  TEXTURE_ASSET_ID::LABEL_MM,
+  TEXTURE_ASSET_ID::LABEL_BUS,
+  TEXTURE_ASSET_ID::LABEL_BUS,
+  TEXTURE_ASSET_ID::LABEL_LIB, // add new label for sewer
+  TEXTURE_ASSET_ID::LABEL_FOREST,
+	TEXTURE_ASSET_ID::LABEL_BUSLOOP
+
 };
 
 
@@ -269,6 +367,24 @@ const std::vector<TEXTURE_ASSET_ID> BOSS_ASSET = {
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
   TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::MM_BOSS,
   TEXTURE_ASSET_ID::STUDENT,
-  TEXTURE_ASSET_ID::MM_BOSS
+  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::STUDENT,
+  TEXTURE_ASSET_ID::STUDENT
+
+};
+
+const std::vector<TEXTURE_ASSET_ID> CUTSCENE_ASSET = {
+  TEXTURE_ASSET_ID::CUTSCENE_1,
+  TEXTURE_ASSET_ID::CUTSCENE_1,
+  TEXTURE_ASSET_ID::CUTSCENE_1,
+  TEXTURE_ASSET_ID::CUTSCENE_1,
+  TEXTURE_ASSET_ID::CUTSCENE_1,
+  TEXTURE_ASSET_ID::CUTSCENE_1,
+  TEXTURE_ASSET_ID::CUTSCENE_1,
+  TEXTURE_ASSET_ID::CUTSCENE_1,
+  TEXTURE_ASSET_ID::CUTSCENE_1
+
 };

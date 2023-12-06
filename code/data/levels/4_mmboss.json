@@ -1,4 +1,5 @@
 {
+  "isCutscene": false,
   "platform_scale": {
     "x": 50,
     "y": 30
@@ -9,18 +10,81 @@
       "y": 798.0,
       "num_tiles": 30,
       "visible": true
+    },
+    {
+      "x": 0.0,
+      "y": 610.0,
+      "num_tiles": 12,
+      "visible": true
+    },
+    {
+      "x": 80.0,
+      "y": 330.0,
+      "num_tiles": 2,
+      "visible": true
+    },
+    {
+      "x": 220.0,
+      "y": 480.0,
+      "num_tiles": 2,
+      "visible": true
+    },
+    {
+      "x": 900.0,
+      "y": 610.0,
+      "num_tiles": 12,
+      "visible": true
+    },
+    {
+      "x": 1300.0,
+      "y": 330.0,
+      "num_tiles": 2,
+      "visible": true
+    },
+    {
+      "x": 1140.0,
+      "y": 480.0,
+      "num_tiles": 2,
+      "visible": true
+    },
+    {
+      "x": 704.0,
+      "y": 480.0,
+      "num_tiles": 2,
+      "visible": true
     }
   ],
   "floor_positions": [
-    798
+    798,
+    610,
+    480,
+    330
   ],
   "stairs": [],
-  "walls": [],
+  "walls": [
+
+  ],
   "climbables": [
+    {
+      "x": 120,
+      "y": 610,
+      "sections": 6
+    },
+    {
+      "x": 1280,
+      "y": 610,
+      "sections": 6
+    }
   ],
   "zombie_climb_points": [
+    [],
+    [],
+    []
   ],
   "zombie_jump_points": [
+    [],
+    [],
+    []
   ],
   "spikes": [],
   "wheels": [],
@@ -33,16 +97,27 @@
   "zombies": {
     "num_starting": 0,
     "positions": [
-      
+
     ],
     "spawn_timer": null
   },
   "students": {
-    "num_starting": 1,
+    "num_starting": 3,
     "positions": [
-      {"x": 320, "y": 760}
+      {
+        "x": 720,
+        "y": 430
+      },
+      {
+        "x": 80,
+        "y": 300
+      },
+      {
+        "x": 1300,
+        "y": 300
+      }
     ],
-    "spawn_timer": null
+    "spawn_timer": 10
   },
   "boss": {
     "num_starting": 1,
@@ -50,16 +125,15 @@
       "x": 50,
       "y": 75
     },
-    "position": 
-    {
-      "x": 720,
-      "y": 500
+    "position": {
+      "x": 1000,
+      "y": 650
     },
     "trunc": {
       "x": 0.0,
       "y": 0.03
     },
-    "sprite_counts": [ 3, 6 ],
+    "sprite_counts": [ 5, 5, 5, 4, 4, 7, 7, 4, 3, 4 ],
     "health": 100,
     "damage": 1
   },
@@ -69,12 +143,12 @@
       "y": 30
     },
     "positions": [
-    
+
     ]
   },
   "bgm": "tbc-music.wav",
-  "door_win_pos": {
-    "x": 100,
-    "y": 754
+  "door": {
+    "position": [ 730, 423 ],
+    "scale": [ 70, 90 ]
   }
 }

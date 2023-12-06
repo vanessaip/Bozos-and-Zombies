@@ -24,8 +24,8 @@ Entity createBozo(RenderSystem* renderer, vec2 pos)
 	registry.players.emplace(entity);
 	registry.humans.emplace(entity); // zombies will target all entities with human component
 
-	std::vector<int> spriteCounts = { 4, 6, 6, 6 };
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.05f, 0.08f));
+	std::vector<int> spriteCounts = { 4, 6, 6, 2, 6 };
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.06f, 0.065f));
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::BOZO,
@@ -60,7 +60,7 @@ Entity createBozoPointer(RenderSystem* renderer, vec2 pos)
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::BOZO_POINTER,
-			EFFECT_ASSET_ID::TEXTURED,
+			EFFECT_ASSET_ID::OVERLAY_TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
@@ -89,8 +89,8 @@ Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID tex
 	registry.humans.emplace(entity);
 	registry.colors.insert(entity, { 1, 0.8f, 0.8f });
 
-	std::vector<int> spriteCounts = { 4, 6, 6 };
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.05f, 0.1f));
+	std::vector<int> spriteCounts = { 4, 6 };
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.08f, 0.08f));
 
 	registry.renderRequests.insert(
 		entity,
@@ -101,7 +101,7 @@ Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID tex
 	return entity;
 }
 
-Entity createZombie(RenderSystem* renderer, vec2 position)
+Entity createZombie(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID textureId)
 {
 	auto entity = Entity();
 
@@ -122,12 +122,13 @@ Entity createZombie(RenderSystem* renderer, vec2 position)
 
 	// Create and (empty) Zombie component to be able to refer to all zombies
 	registry.zombies.emplace(entity);
-	std::vector<int> spriteCounts = { 8, 6, 5 };
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 75.f, vec2(0.01f, 0.1f));
+	registry.colors.insert(entity, { 1, 1, 1 });
+	std::vector<int> spriteCounts = { 4, 6, 6, 6 };
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.0f, 0.0f));
 
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::ZOMBIE,
+		{ textureId,
 		 EFFECT_ASSET_ID::TEXTURED,
 		 GEOMETRY_BUFFER_ID::SPRITE_SHEET });
 
@@ -272,7 +273,7 @@ std::vector<Entity> createClimbable(RenderSystem* renderer, float top_position_x
 	return sections;
 }
 
-Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, float depth, vec2 position, vec2 scale)
+Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, float depth, vec2 position, bool blended, vec2 scale)
 {
 	auto entity = Entity();
 
@@ -296,7 +297,7 @@ Entity createBackground(RenderSystem* renderer, TEXTURE_ASSET_ID texture, float 
 	registry.renderRequests.insert(
 		entity,
 		{ texture,
-		 EFFECT_ASSET_ID::TEXTURED,
+		 blended ? EFFECT_ASSET_ID::BLENDED : EFFECT_ASSET_ID::TEXTURED,
 		 GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
@@ -337,7 +338,7 @@ Entity createSpike(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 25.f;
 	motion.scale.y *= -1.25;
-	Bounce &bounce = registry.bounce.emplace(entity);
+	Bounce& bounce = registry.bounce.emplace(entity);
 	bounce.mass = std::numeric_limits<int>::max();
 
 	registry.spikes.emplace(entity);
@@ -367,7 +368,7 @@ Entity createWheel(RenderSystem* renderer, vec2 pos)
 	motion.offGround = true;
 
 	registry.wheels.emplace(entity);
-	Bounce &bounce = registry.bounce.emplace(entity);
+	Bounce& bounce = registry.bounce.emplace(entity);
 	bounce.mass = 100.0f;
 	registry.renderRequests.insert(
 		entity,
@@ -434,7 +435,7 @@ Entity createStaticTexture(RenderSystem* renderer, TEXTURE_ASSET_ID textureID, v
 	return entity;
 }
 
-Entity createCollectible(RenderSystem* renderer, float position_x, float position_y, TEXTURE_ASSET_ID collectible, vec2 scale, bool overlay = false)
+Entity createCollectible(RenderSystem* renderer, float position_x, float position_y, TEXTURE_ASSET_ID collectible, vec2 scale, bool overlay = false, bool isPoisonous = false)
 {
 	// Reserve en entity
 	auto entity = Entity();
@@ -448,6 +449,9 @@ Entity createCollectible(RenderSystem* renderer, float position_x, float positio
 	motion.position = { position_x, position_y };
 	motion.scale = scale;
 
+	if (isPoisonous){
+		registry.poisonous.emplace(entity);
+	}
 	if (overlay) {
 		registry.overlay.emplace(entity);
 	}
@@ -483,13 +487,13 @@ Entity createHeart(RenderSystem* renderer, vec2 position, vec2 scale) {
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::HEART,
-			EFFECT_ASSET_ID::TEXTURED,
+			EFFECT_ASSET_ID::OVERLAY_TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
 
-Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic) {
+Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, vec2 p0, vec2 p1, vec2 p2, vec2 p3, bool cubic, bool bezier, int spriteCount) {
 	// Reserve en entity
 	auto entity = Entity();
 
@@ -504,17 +508,21 @@ Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTUR
 
 	Dangerous& dangerous = registry.dangerous.emplace(entity);
 
-  dangerous.p0 = p0;
-  dangerous.p1 = p1;
-  dangerous.p2 = p2;
-  dangerous.p3 = p3;
-  dangerous.cubic = cubic;
+	dangerous.p0 = p0;
+	dangerous.p1 = p1;
+	dangerous.p2 = p2;
+	dangerous.p3 = p3;
+	dangerous.cubic = cubic;
+	dangerous.bezier = bezier;
+
+	std::vector<int> spriteCounts = { spriteCount };
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, vec2(0.f, 0.f));
 
 	registry.renderRequests.insert(
 		entity,
 		{ assetID,
 			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			GEOMETRY_BUFFER_ID::SPRITE_SHEET });
 
 	return entity;
 }
@@ -557,11 +565,11 @@ Entity createLoadingScreen(RenderSystem* renderer, vec2 position, vec2 scale) {
 	auto& motion = registry.motions.emplace(entity);
 	motion.position = position;
 	motion.scale = scale;
-	
+
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::LOADING_SCREEN,
-			EFFECT_ASSET_ID::TEXTURED,
+			EFFECT_ASSET_ID::OVERLAY_TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
@@ -580,7 +588,7 @@ Entity createOverlay(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_
 	motion.position = position;
 	motion.scale = scale;
 
-	if(is_fading) {
+	if (is_fading) {
 		registry.fading.emplace(entity);
 		Fading& fading = registry.fading.get(entity);
 		fading.fading_timer = Clock::now();
@@ -591,7 +599,7 @@ Entity createOverlay(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_
 	registry.renderRequests.insert(
 		entity,
 		{ assetID,
-			EFFECT_ASSET_ID::TEXTURED,
+			EFFECT_ASSET_ID::OVERLAY_TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 	return entity;
 }
@@ -637,12 +645,12 @@ Entity createBoss(RenderSystem* renderer, vec2 position, vec2 scale, float healt
 
 	Boss& boss = registry.bosses.emplace(entity);
 
-  registry.colors.insert(entity, { 1, 1, 1 });
+	registry.colors.insert(entity, { 1, 1, 1 });
 
-  boss.health = health;
-  boss.damage = damage;
+	boss.health = health;
+	boss.damage = damage;
 
-  std::vector<int> spriteCounts = counts;
+	std::vector<int> spriteCounts = counts;
 	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, trunc);
 
 	registry.renderRequests.insert(
@@ -655,7 +663,7 @@ Entity createBoss(RenderSystem* renderer, vec2 position, vec2 scale, float healt
 }
 
 Entity createHPBar(RenderSystem* renderer, vec2 position) {
-  // Reserve en entity
+	// Reserve en entity
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
@@ -665,7 +673,7 @@ Entity createHPBar(RenderSystem* renderer, vec2 position) {
 	// Initialize the position, scale, and physics components
 	auto& motion = registry.motions.emplace(entity);
 	motion.position = position;
-	motion.scale = {80, 10};
+	motion.scale = { 80, 10 };
 
 	registry.renderRequests.insert(
 		entity,
@@ -677,7 +685,7 @@ Entity createHPBar(RenderSystem* renderer, vec2 position) {
 }
 
 Entity createHP(RenderSystem* renderer, vec2 position) {
-  // Reserve en entity
+	// Reserve en entity
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
@@ -687,7 +695,7 @@ Entity createHP(RenderSystem* renderer, vec2 position) {
 	// Initialize the position, scale, and physics components
 	auto& motion = registry.motions.emplace(entity);
 	motion.position = position;
-	motion.scale = {80, 10};
+	motion.scale = { 80, 10 };
 
 	registry.renderRequests.insert(
 		entity,
@@ -695,6 +703,79 @@ Entity createHP(RenderSystem* renderer, vec2 position) {
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
+	return entity;
+}
+
+Entity createLight(RenderSystem* renderer, vec2 position, float intensity_dropoff_factor)
+{
+	auto entity = Entity();
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	Light& light = registry.lights.emplace(entity);
+	light.position = position;
+	light.intensity_dropoff_factor = intensity_dropoff_factor;
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = vec2(100.f);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::LIGHT,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createAnimatedBackgroundObject(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, std::vector<int> spriteCounts, vec2 trunc) {
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, 100.f, trunc);
+
+	registry.renderRequests.insert(
+		entity,
+		{ assetID,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE_SHEET });
+	return entity;
+}
+
+Entity createCutscene(RenderSystem* renderer, vec2 position, vec2 scale, TEXTURE_ASSET_ID assetID, std::vector<int> spriteCounts, float switchTime, vec2 trunc) {
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	CutsceneTimer& cs_timer = registry.cutSceneTimers.emplace(entity);
+	cs_timer.timer = switchTime * spriteCounts[0];
+
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::IDLE, spriteCounts, switchTime, trunc);
+
+	registry.renderRequests.insert(
+		entity,
+		{ assetID,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE_SHEET });
 	return entity;
 }
 

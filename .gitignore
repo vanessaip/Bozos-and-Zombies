@@ -7,3 +7,4 @@ code/ext/project_path.hpp
 /code/ext/project_path.hpp
 build/
 CppProperties.json
+code/data/levels/save_state.json
