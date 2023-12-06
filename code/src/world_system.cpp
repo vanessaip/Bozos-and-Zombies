@@ -297,7 +297,7 @@ void WorldSystem::handleGameOver() {
 	}
 	writeJson(save_state, SAVE_STATE_FILE);
 
-	// remove zombies, NPC's, wheels, and books on level completion
+	// remove zombies, NPC's, wheels, dangerous, and books on level completion
 	while (registry.zombies.entities.size() > 0) {
 		removeEntity(registry.zombies.entities.back());
 	}
@@ -312,6 +312,9 @@ void WorldSystem::handleGameOver() {
 	}
 	while (registry.wheels.entities.size() > 0) {
 		removeEntity(registry.wheels.entities.back());
+	}
+	while(registry.dangerous.entities.size() > 0) {
+		removeEntity(registry.dangerous.entities.back());
 	}
 }
 
