@@ -162,14 +162,14 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 {
 	this->renderer = renderer_arg;
 
-	// get level left off on
-	save_state = readJson(SAVE_STATE_FILE);
-	curr_level = save_state["current_level"].asInt();
-
 }
 
 void WorldSystem::initGameState() {
-  // Set all states to default for current level
+    // get level left off on
+	save_state = readJson(SAVE_STATE_FILE);
+	curr_level = save_state["current_level"].asInt();
+
+    // Set all states to default for current level
 	restart_level();
 }
 
@@ -1920,7 +1920,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  if (game_state == PLAYING) {
+  if (game_state == PLAYING || game_state == PAUSE) {
     Motion& motion = registry.motions.get(player_bozo);
     Player& player = registry.players.get(player_bozo);
 
@@ -2012,18 +2012,13 @@ void WorldSystem::on_key(int key, int, int action, int mod)
     }
 
     // Pause
-    if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
-      pause = !pause;
+    if (!pause && action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+      pause = true;
       if (pause) {
-        pause_ui = createOverlay(renderer, { window_width_px / 2, window_height_px / 2 }, { 400.f, 300.f }, TEXTURE_ASSET_ID::PAUSE, false);
+        pause_ui = createOverlay(renderer, { window_width_px / 2, window_height_px / 2 }, { 300.f, 500.f }, TEXTURE_ASSET_ID::PAUSE, false);
+        pause_resume = createOverlay(renderer, { window_width_px / 2, 310 }, { 120, 60 }, TEXTURE_ASSET_ID::BACK_BUTTON, false);
+        pause_menu_button = createOverlay(renderer, { window_width_px / 2, 400 }, { 120, 60 }, TEXTURE_ASSET_ID::MENU_BUTTON, false);
         pause_start = Clock::now();
-      }
-      else {
-        if (registry.overlay.has(pause_ui)) {
-          registry.remove_all_components_of(pause_ui);
-        }
-        pause_end = Clock::now();
-        pause_duration = (float)(std::chrono::duration_cast<std::chrono::microseconds>(pause_end - pause_start)).count() / 1000;
       }
     }
   }
@@ -2039,7 +2034,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 
     vec2 pos = relativePos(mouse_position);
 
-    if (game_state == MENU) {
+    if (game_state == MENU || game_state == PAUSE) {
         menu_pointer = mouse_position;
     }
 
@@ -2065,7 +2060,7 @@ vec2 WorldSystem::relativePos(vec2 mouse_position) {
 
 void WorldSystem::on_mouse_button(int button, int action, int mod)
 {
-    if (game_state == MENU) {
+    if (game_state == MENU || game_state == PAUSE) {
         printf("Position: %f\n", menu_pointer[0]);
         menu_click_pos = menu_pointer;
     }
@@ -2156,4 +2151,15 @@ bool WorldSystem::checkPointerInBoundingBox(Motion& motion, vec2 pointer_pos) {
     float bottom = motion.position[1] + motion.scale[1] / 2;
 
     return pointer_pos[0] > left && pointer_pos[0] < right && pointer_pos[1] > top && pointer_pos[1] < bottom;
+}
+
+void WorldSystem::unPause() {
+    pause = !pause;
+    registry.remove_all_components_of(pause_ui);
+    registry.remove_all_components_of(pause_resume);
+    registry.remove_all_components_of(pause_menu_button);
+    menu_click_pos = {0, 0};
+
+    pause_end = Clock::now();
+    pause_duration = (float)(std::chrono::duration_cast<std::chrono::microseconds>(pause_end - pause_start)).count() / 1000;
 }

@@ -18,7 +18,8 @@
 
 enum game_state {
 	MENU = 0,
-  PLAYING = 1,
+    PLAYING = 1,
+    PAUSE = 2,
 };
 
 // Container for all our entities and game logic. Individual rendering / update is
@@ -31,8 +32,16 @@ public:
 	std::chrono::time_point<std::chrono::steady_clock> pause_end;
 	float pause_duration = 0.f;
     int game_state = MENU;
+    int prev_state = PAUSE;
+
+    // Menu ui 
     vec2 menu_pointer;
     vec2 menu_click_pos;
+
+    // Pause ui
+    Entity pause_ui;
+    Entity pause_resume;
+    Entity pause_menu_button;
 
 	WorldSystem();
 
@@ -71,6 +80,8 @@ public:
 	bool isBottomOfLadder(vec2 nextPos, ComponentContainer<Motion>& motion_container);
 
     bool checkPointerInBoundingBox(Motion& motion, vec2 pointer_pos);
+
+    void unPause();
 private:
 	void handleGameOver();
 	void updateWindowTitle();
@@ -126,7 +137,6 @@ private:
 	vec2 platformDimensions{ 0.f, 0.f }; // unused
 	std::chrono::time_point<std::chrono::steady_clock> level_start_time;
 	Json::Value save_state;
-	Entity pause_ui;
 	Entity boss;
 	Entity hp_bar;
 	Entity hp;
