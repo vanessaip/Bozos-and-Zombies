@@ -148,7 +148,7 @@
       "position": {"x": 146, "y": 738},
       "trunc": {"x": 0.0, "y": 0.0},
       "sprite_counts": [4, 6, 6, 4, 6, 6, 6, 6, 2, 6],
-      "health": 100,
+      "health": 200,
       "damage": 1
     },
     "collectibles": {

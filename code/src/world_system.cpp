@@ -180,6 +180,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		} else if (curr_level == LAB && !boss_active) { // level == LAB, activate the boss after all zombies and collectibles are cleared
 			// remove the blockade, transform professor, play sound effect
 			assert(registry.bosses.entities.size() > 0);
+			debugging.in_full_view_mode = true;
 			boss_active = true;
 			removeEntity(boss_blockade);
 			Mix_PlayChannel(-1, boss_summon_sound, 0);
@@ -958,12 +959,14 @@ void WorldSystem::updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_m
 				boss_motion.reflect[0] = true;
 			}
 
+			handleJumpPoints(boss_motion, boss_level);
+
 			// This is actually run
 			// TODO-Will fix the sprite sheet
 			mmBossSheet.updateAnimation(ANIMATION_MODE::ATTACK);
 
 		}
-		else if (boss_level < bozo_level)
+		else if (curr_level == MMBOSS && boss_level < bozo_level)
 		{
 			// Boss floats to bozo's level
 
@@ -974,7 +977,7 @@ void WorldSystem::updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_m
 			// Update to flying animation
 			mmBossSheet.updateAnimation(ANIMATION_MODE::SEVENTH_INDEX);
 		}
-		else
+		else if (curr_level == MMBOSS)
 		{
 			boss_motion.position.y += 20;
 			boss_motion.velocity.y = MMBOSS_SPEED;
@@ -1008,15 +1011,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		float speed = ZOMBIE_SPEED;
 		motion.velocity.x = direction * speed;
 
-		if (!motion.offGround) {
-			for (float pos : jump_positions[zombie_level]) {
-				if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
-				{
-					motion.velocity.y = -600;
-					motion.offGround = true;
-				}
-			}
-		}
+		handleJumpPoints(motion, zombie_level);
 	}
 	else if (curr_level == SEWERS) {
 		float dist = distance(motion.position, bozo_motion.position);
@@ -1201,16 +1196,8 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 
 	}
-	if (!motion.offGround) {
-		for (float pos : jump_positions[zombie_level]) {
-			if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
-			{
-				motion.velocity.x *= 10;
-				motion.velocity.y = -575;
-				motion.offGround = true;
-			}
-		}
-	}
+
+	handleJumpPoints(motion, zombie_level);
 
 	// update zombie direction
 	if (motion.velocity.x > 0 && (zombie_level != bozo_level || abs(motion.position.x - bozo_motion.position.x) > 5)) {
@@ -1236,6 +1223,19 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 		else {
 			zombieSheet.updateAnimation(ANIMATION_MODE::RUN);
+		}
+	}
+}
+
+void WorldSystem::handleJumpPoints(Motion& motion, int level) {
+	if (!motion.offGround) {
+		for (float pos : jump_positions[level]) {
+			if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
+			{
+				motion.velocity.x *= 10;
+				motion.velocity.y = -575;
+				motion.offGround = true;
+			}
 		}
 	}
 }
