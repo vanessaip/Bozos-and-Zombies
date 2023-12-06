@@ -118,6 +118,15 @@ class RenderSystem
     textures_path("library/coll4.png"),
     textures_path("library/coll5.png"),
     textures_path("TBC.png"),
+    textures_path("darkLevel/dark_background0.png"),
+		textures_path("darkLevel/dark_background1.jpg"),
+		textures_path("darkLevel/light.png"),
+		textures_path("darkLevel/collectible1.png"),
+		textures_path("darkLevel/collectible2.png"),
+		textures_path("darkLevel/collectible3.png"),
+		textures_path("darkLevel/collectible4.png"),
+		textures_path("darkLevel/collectible5.png"),
+		textures_path("darkLevel/collectible6.png"),
     textures_path("forest/background/background_1.png"),
 		textures_path("forest/background/background_2.png"),
 		textures_path("forest/background/background_3.png"),
@@ -154,7 +163,8 @@ class RenderSystem
     textures_path("locations/label_mm.png"),
     textures_path("tutorial/bus_bg.png"),
 	  textures_path("tutorial/bus_windows.png"),
-	  textures_path("locations/label_bus.png")
+	  textures_path("locations/label_bus.png"),
+    textures_path("cutscenes/cutscene_1.png")
     };
 
 	std::array<GLuint, effect_count> effects;
@@ -164,7 +174,9 @@ class RenderSystem
 		shader_path("spike"),
 		shader_path("wheel"),
 		shader_path("textured"),
-		shader_path("water")};
+		shader_path("overlay"),
+		shader_path("blended"),
+		shader_path("water") };
 
 	// TODO (Justin): update size of array if we exceed 50 sprite sheet entities
 	std::array<GLuint, 50> vertex_buffers;
