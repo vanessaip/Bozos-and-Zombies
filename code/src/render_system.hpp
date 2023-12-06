@@ -210,7 +210,8 @@ class RenderSystem
         textures_path("menu/mainmall.png"),
         textures_path("menu/ikb.png"),
         textures_path("menu/bus.png"),
-        textures_path("menu/forest.png")
+        textures_path("menu/forest.png"),
+		textures_path("locations/label_lab.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;
