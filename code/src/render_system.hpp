@@ -146,7 +146,8 @@ class RenderSystem {
 		textures_path("tutorial/bus_bg.png"),
 		textures_path("tutorial/bus_windows.png"),
 		textures_path("locations/label_bus.png"),
-		textures_path("cutscenes/cutscene_1.png")
+		textures_path("cutscenes/cutscene_1.png"),
+		textures_path("locations/label_sewer.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

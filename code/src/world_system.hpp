@@ -142,6 +142,8 @@ private:
 	bool student_spawn_on;
 	float zombie_spawn_threshold;
 	float student_spawn_threshold;
+	uint num_start_zombies;
+	uint num_start_students;
 	uint num_collectibles;
 	std::vector<Entity> mm_boss_rain;
 

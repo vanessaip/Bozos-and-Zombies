@@ -301,14 +301,15 @@ void WorldSystem::updateWindowTitle() {
 
 void WorldSystem::handleRespawn(float elapsed_ms_since_last_update) {
 	// Remove entities that leave the screen on the left side
-	// Iterate backwards to be able to remove without unterfering with the next object to visit
+	// Iterate backwards to be able to remove without interfering with the next object to visit
 	// (the containers exchange the last element with the current)
 	// generate new zombie every 20s
 	enemySpawnTimer += elapsed_ms_since_last_update;
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
 
-	if (!game_over && zombie_spawn_on && enemySpawnTimer / 1000.f > zombie_spawn_threshold && spawn_on) {
+	if (!game_over && zombie_spawn_on && enemySpawnTimer / 1000.f > zombie_spawn_threshold
+		&& spawn_on && registry.zombies.entities.size() < num_start_zombies) {
 		vec2 enemySpawnPos;
 		for (int i = 0; i < zombie_spawn_pos.size(); i++)  // try a few times
 		{
@@ -335,7 +336,8 @@ void WorldSystem::handleRespawn(float elapsed_ms_since_last_update) {
 		}
 	}
 
-	if (!game_over && student_spawn_on && npcSpawnTimer / 1000.f > student_spawn_threshold && spawn_on) {
+	if (!game_over && student_spawn_on && npcSpawnTimer / 1000.f > student_spawn_threshold 
+		&& spawn_on && registry.humans.entities.size() < num_start_students) {
 		vec2 npcSpawnPos;
 		for (int i = 0; i < npc_spawn_pos.size(); i++)  // try a few times
 		{
@@ -1423,16 +1425,6 @@ void WorldSystem::restart_level()
 
 	if (curr_level == NEST)
 		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, 0.f, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, false, { 250.f, 250.f }); // egg
-
-	// Tutorial sign only for the first level
-	else if (curr_level == TUTORIAL) {
-		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_MOVEMENT, { window_width_px - 120.f, window_height_px - 80.f }, "", { 150.f, 70.f });
-		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_CLIMB, { window_width_px - 480.f, window_height_px - 90.f }, "", { 115.f, 40.f });
-		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_NPCS, { window_width_px - 800.f, window_height_px - 350.f }, "", { 150.f, 60.f });
-		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_WEAPONS, { window_width_px - 900.f, window_height_px - 220.f }, "", { 200.f, 70.f });
-		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_GOAL, { 130.f, window_height_px - 200.f }, "", { 180.f, 100.f });
-	}
-	
 	
 	else if (curr_level == SEWERS) 
 	{
@@ -1547,13 +1539,13 @@ void WorldSystem::restart_level()
 
 	// Create zombies
 	zombie_spawn_pos.clear();
-	uint num_starting_zombies = jsonData["zombies"]["num_starting"].asInt(); // so that zombie positions are separate from how many start
-	assert(num_starting_zombies <= jsonData["zombies"]["positions"].size());
+	num_start_zombies = jsonData["zombies"]["num_starting"].asInt(); // so that zombie positions are separate from how many start
+	assert(num_start_zombies <= jsonData["zombies"]["positions"].size());
 	uint z = 0;
 	for (const auto& zombie_pos : jsonData["zombies"]["positions"]) {
 		vec2 pos = { zombie_pos["x"].asFloat(), zombie_pos["y"].asFloat() };
 		zombie_spawn_pos.push_back(pos);
-		if (z < num_starting_zombies) {
+		if (z < num_start_zombies) {
 			createZombie(renderer, pos, ZOMBIE_ASSET[asset_mapping[curr_level]]);
 		}
 		z++;
@@ -1569,13 +1561,13 @@ void WorldSystem::restart_level()
 
 	// Create students
 	npc_spawn_pos.clear();
-	uint num_starting_students = jsonData["students"]["num_starting"].asInt();
-	assert(num_starting_students <= jsonData["students"]["positions"].size());
+	num_start_students = jsonData["students"]["num_starting"].asInt();
+	assert(num_start_students <= jsonData["students"]["positions"].size());
 	uint s = 0;
 	for (const auto& student_pos : jsonData["students"]["positions"]) {
 		vec2 pos = { student_pos["x"].asFloat(), student_pos["y"].asFloat() };
 		npc_spawn_pos.push_back(pos);
-		if (s < num_starting_students) {
+		if (s < num_start_students) {
 			Entity student = createStudent(renderer, pos, NPC_ASSET[asset_mapping[curr_level]]);
 			// coded back+forth motion
 			Motion& student_motion = registry.motions.get(student);
