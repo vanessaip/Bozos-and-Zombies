@@ -2100,7 +2100,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
     }
 
     // Pause
-    if (!pause && action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+    if (!pause && action == GLFW_PRESS && key == GLFW_KEY_ENTER && curr_level != CUT_1 && curr_level != CUT_2 && curr_level != CUT_3 && curr_level != CUT_4) {
       pause = true;
       if (pause) {
         pause_ui = createOverlay(renderer, { window_width_px / 2, window_height_px / 2 - 100}, { 300.f, 500.f }, TEXTURE_ASSET_ID::PAUSE, false);
