@@ -3,6 +3,7 @@
 uniform sampler2D screen_texture;
 uniform float time;
 uniform float screen_darken_factor;
+uniform bool is_poisoned;
 
 in vec2 texcoord;
 
@@ -13,8 +14,12 @@ vec2 distort(vec2 uv)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// TODO A1: HANDLE THE WATER WAVE DISTORTION HERE (you may want to try sin/cos)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	return uv;
+	if (!is_poisoned){
+		return uv;
+	}
+		float distortionStrength = 0.005; 
+		vec2 distortion = vec2(sin(time/2) * distortionStrength, cos(time/2) * distortionStrength);
+		return uv + distortion;
 }
 
 vec4 color_shift(vec4 in_color) 
@@ -22,9 +27,13 @@ vec4 color_shift(vec4 in_color)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// TODO A1: HANDLE THE COLOR SHIFTING HERE (you may want to make it blue-ish)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	return in_color;
-}
+	if (!is_poisoned){
+		return in_color;
+	}
+		vec4 purpleTint = vec4(0.5, 0.2, 0.5, 1.0);
+		float mixFactor = 0.5;
+		return mix(in_color, purpleTint, mixFactor);
+	}
 
 vec4 fade_color(vec4 in_color) 
 {
@@ -35,9 +44,9 @@ vec4 fade_color(vec4 in_color)
 
 void main()
 {
-	vec2 coord = distort(texcoord);
-
-    vec4 in_color = texture(screen_texture, coord);
-    color = color_shift(in_color);
-    color = fade_color(color);
+		vec2 coord = distort(texcoord);
+		vec4 in_color = texture(screen_texture, coord);
+		color = color_shift(in_color);
+		color = fade_color(color);
+	
 }

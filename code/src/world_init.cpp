@@ -435,7 +435,7 @@ Entity createStaticTexture(RenderSystem* renderer, TEXTURE_ASSET_ID textureID, v
 	return entity;
 }
 
-Entity createCollectible(RenderSystem* renderer, float position_x, float position_y, TEXTURE_ASSET_ID collectible, vec2 scale, bool overlay = false)
+Entity createCollectible(RenderSystem* renderer, float position_x, float position_y, TEXTURE_ASSET_ID collectible, vec2 scale, bool overlay = false, bool isPoisonous = false)
 {
 	// Reserve en entity
 	auto entity = Entity();
@@ -449,6 +449,9 @@ Entity createCollectible(RenderSystem* renderer, float position_x, float positio
 	motion.position = { position_x, position_y };
 	motion.scale = scale;
 
+	if (isPoisonous){
+		registry.poisonous.emplace(entity);
+	}
 	if (overlay) {
 		registry.overlay.emplace(entity);
 	}
