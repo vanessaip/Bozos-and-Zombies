@@ -38,6 +38,7 @@ int main()
 	debugging.in_full_view_mode = true;
 	Entity loadingScreen;
     Entity playButton;
+    Entity ubzTitle;
     bool isHovering = false;
     bool firstLoad = true;
 
@@ -50,7 +51,8 @@ int main()
             world_system.transitionToMenuState();
 
             loadingScreen = createOverlay(&render_system, { window_width_px / 2, window_height_px / 2 }, { 1440, 810 }, TEXTURE_ASSET_ID::LOADING_SCREEN, false);
-            playButton = createOverlay(&render_system, { window_width_px / 2, 600 }, { 120, 60 }, TEXTURE_ASSET_ID::PLAY_BUTTON, false);
+            ubzTitle = createOverlay(&render_system, { window_width_px / 2, window_height_px / 2  - 100}, { 600, 600 }, TEXTURE_ASSET_ID::UBZ_TITLE, false);
+            playButton = createOverlay(&render_system, { window_width_px / 2, 550 }, { 160, 80 }, TEXTURE_ASSET_ID::PLAY_BUTTON, false);
         }
 
         // ------------------------ GAME STATE MENU ------------------------
@@ -64,10 +66,10 @@ int main()
                     world_system.playHover();
                     isHovering = true;
                 }
-                play_button_motion.scale = { 150, 75 };
+                play_button_motion.scale = { 200, 100 };
             } else {
                 isHovering = false;
-                play_button_motion.scale = { 120, 60};
+                play_button_motion.scale = { 160, 80 };
             }
             
             if (world_system.checkPointerInBoundingBox(play_button_motion, world_system.menu_click_pos)) {
@@ -83,6 +85,7 @@ int main()
 
             debugging.in_full_view_mode = false;
             registry.remove_all_components_of(loadingScreen);
+            registry.remove_all_components_of(ubzTitle);
             registry.remove_all_components_of(playButton);
 
             world_system.game_state = PLAYING;
