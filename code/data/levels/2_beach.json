@@ -1,4 +1,5 @@
 {
+  "isCutscene": false,
   "platform_scale": {
     "x": 50,
     "y": 30
@@ -179,7 +180,7 @@
   },
   "bgm": "beach.wav",
   "door": {
-    "position": [100, 754],
-    "scale": [60, 60]
+    "position": [ 100, 754 ],
+    "scale": [ 60, 60 ]
   }
 }

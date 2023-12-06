@@ -1,0 +1,291 @@
+{
+  "platform_scale": {
+    "x": 32,
+    "y": 8
+  },
+  "platforms": [
+    {
+      "x": 527,
+      "y": 64, // ladder
+      "num_tiles": 6,
+      "visible": true
+    },
+    {
+      "x": 1263,
+      "y": 96,
+      "num_tiles": 6,
+      "visible": true
+    },
+    {
+      "x": 79,
+      "y": 160,
+      "num_tiles": 12,
+      "visible": true
+    },
+    {
+      "x": 1231,
+      "y": 230,
+      "num_tiles": 2,
+      "visible": true
+    },
+    {
+      "x": 815,
+      "y": 325,
+      "num_tiles": 11,
+      "visible": true
+    },
+    {
+      "x": 687,
+      "y": 421, // ladder
+      "num_tiles": 7,
+      "visible": true
+    },
+    {
+      "x": 1231,
+      "y": 487,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 1327,
+      "y": 487,
+      "num_tiles": 2,
+      "visible": true
+    },
+    {
+      "x": 1231,
+      "y": 683,
+      "num_tiles": 7,
+      "visible": true
+    },
+    {
+      "x": 15,    // ladder
+      "y": 494,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 911,
+      "y": 750,
+      "num_tiles": 6,
+      "visible": true
+    },
+    {
+      "x": 431,
+      "y": 750,
+      "num_tiles": 4,
+      "visible": true
+    },
+    {
+      "x": 15,
+      "y": 782,
+      "num_tiles": 1,
+      "visible": true
+    },
+
+    {
+      "x": 431,
+      "y": 256, // ladder
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 463,
+      "y": 548,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 463,
+      "y": 682,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 399,
+      "y": 715,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 623,
+      "y": 750,
+      "num_tiles": 1,
+      "visible": true
+    }
+
+  ],
+  "floor_positions": [
+    64,
+  ],
+  "stairs": [],
+  "walls": [],
+  "climbables": [
+    {
+      "x": 783,
+      "y": 426,
+      "sections": 5
+    },
+    {
+      "x": 431,
+      "y": 261,
+      "sections": 3
+    },
+    {
+      "x": 15,
+      "y": 500,
+      "sections": 6
+    }
+
+  ],
+  "zombie_climb_points": [],
+  "zombie_jump_points": [],
+  "spikes": [
+    {
+      "x": 0.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 120.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 240.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 360.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 480.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 600.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 720.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 840.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 960.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 1080.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 1200.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 1320.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "x": 1440.0,
+      "y": 810.0,
+      "colour": [ 0.0, 0.0, 0.0 ]
+    }
+  ],
+  "wheels": [],
+  "player": {
+    "position": {
+      "x": 1400,
+      "y": 655
+    }
+  },
+  "zombies": {
+    "num_starting": 4,
+    "positions": [
+      {
+        "x": 1060,
+        "y": 712
+      },
+      {
+        "x": 900,
+        "y": 400
+      },
+      {
+        "x": 1300,
+        "y": 50
+      },
+      {
+        "x": 100,
+        "y": 100
+      }
+
+    ],
+    "spawn_timer": null
+  },
+  "students": {
+    "num_starting": 4,
+    "positions": [
+      {
+        "x": 1320,
+        "y": 460
+      },
+      {
+        "x": 800,
+        "y": 305
+      },
+      {
+        "x": 520,
+        "y": 40
+      },
+      {
+        "x": 1220,
+        "y": 660
+      }
+    ],
+    "spawn_timer": 30
+  },
+  "collectibles": {
+    "scale": {
+      "x": 25,
+      "y": 15
+    },
+    "positions": [
+      {
+        "x": 432,
+        "y": 450
+      },
+      {
+        "x": 1430,
+        "y": 85
+      },
+      {
+        "x": 530,
+        "y": 740
+      },
+      {
+        "x": 1230,
+        "y": 476
+      }
+    ]
+  },
+  "bgm": "Ghost_Story.wav",
+  "door": {
+    "position":  [17, 750],
+    "scale": [ 40, 60 ]
+  }
+}
