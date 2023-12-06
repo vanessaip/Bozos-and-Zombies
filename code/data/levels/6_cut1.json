@@ -1,5 +1,7 @@
 {
   "isCutscene": true,
+  "num": 7,
+  "time": 5000,
   "platform_scale": {
     "x": 50,
     "y": 30
@@ -42,7 +44,7 @@
     },
     "positions": []
   },
-  "bgm": "soundtrack.wav",
+  "bgm": "suspense.wav",
   "door": {
     "position": [ 1500, 0 ],
     "scale": [ 40, 60 ]

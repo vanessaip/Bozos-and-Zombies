@@ -21,8 +21,8 @@ struct PlayerEffects
 // Zombies can turn Humans into Zombies
 struct Zombie
 {
-  bool right_side_collision = false;
-  bool left_side_collision = false;
+	bool right_side_collision = false;
+	bool left_side_collision = false;
 };
 
 // Player and Student(s) are Human
@@ -263,7 +263,7 @@ struct Fading
 	std::chrono::time_point<std::chrono::steady_clock> fading_timer;
 };
 
-struct Light 
+struct Light
 {
 	vec2 position;
 	float intensity_dropoff_factor;
@@ -418,8 +418,11 @@ enum class TEXTURE_ASSET_ID
 	BUS_BG = LABEL_MM + 1,
 	BUS_WINDOW = BUS_BG + 1,
 	LABEL_BUS = BUS_WINDOW + 1,
-	CUTSCENE_1 = LABEL_BUS + 1,
-	TEXTURE_COUNT = CUTSCENE_1 + 1
+	CUT_1 = LABEL_BUS + 1,
+	CUT_2 = CUT_1 + 1,
+	CUT_3 = CUT_2 + 1,
+	CUT_4 = CUT_3 + 1,
+	TEXTURE_COUNT = CUT_4 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

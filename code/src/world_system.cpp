@@ -459,7 +459,7 @@ bool WorldSystem::handleTimers(Motion& motion, Entity motionEntity, float elapse
 		cs_timer.timer -= elapsed_ms_since_last_update;
 		if (cs_timer.timer < 0) {
 			removeEntity(motionEntity);
-			curr_level++;
+			curr_level = curr_level + 1 > max_level ? 0 : curr_level + 1;
 			restart_level();
 		}
 	}
@@ -660,10 +660,10 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 			blocks.push_back(walls.entities[i]);
 		}
 
-        if (isZombie) {
-            registry.zombies.get(motionEntity).right_side_collision = false;
-            registry.zombies.get(motionEntity).left_side_collision = false;
-        }
+		if (isZombie) {
+			registry.zombies.get(motionEntity).right_side_collision = false;
+			registry.zombies.get(motionEntity).left_side_collision = false;
+		}
 
 		// handle platform collisions
 		for (int i = 0; i < blocks.size(); i++)
@@ -713,16 +713,17 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 					}
 				}
 				else if (isZombie) {
-                    registry.zombies.get(motionEntity).right_side_collision = true;
+					registry.zombies.get(motionEntity).right_side_collision = true;
 
 					if (curr_level == NEST && !motion.offGround)
 					{
 						motion.offGround = true;
 						motion.velocity[1] -= 200;
 					}
-				} else {
-                    motion.velocity.x = 0;
-                }
+				}
+				else {
+					motion.velocity.x = 0;
+				}
 			}
 
 			// Collision with Left edge of block
@@ -741,16 +742,17 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 					}
 				}
 				else if (isZombie) {
-                    registry.zombies.get(motionEntity).left_side_collision = true;
+					registry.zombies.get(motionEntity).left_side_collision = true;
 
 					if (curr_level == NEST && isZombie && !motion.offGround)
 					{
 						motion.offGround = true;
 						motion.velocity[1] -= 200;
 					}
-				} else {
-                    motion.velocity.x = 0;
-                }
+				}
+				else {
+					motion.velocity.x = 0;
+				}
 			}
 		}
 
@@ -1012,7 +1014,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	else if (curr_level == SEWERS) {
 		float dist = distance(motion.position, bozo_motion.position);
 		if (dist < 150.0 && bozo_motion.position.y - 15.f <= motion.position.y) {
-			if ((motion.position.x - bozo_motion.position.x) < -10 ) {
+			if ((motion.position.x - bozo_motion.position.x) < -10) {
 				motion.velocity.x = ZOMBIE_SPEED / 1.f;
 			}
 			else if ((motion.position.x - bozo_motion.position.x) > 10) {
@@ -1209,9 +1211,9 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		motion.reflect[0] = false;
 	}
 
-    if ((registry.zombies.get(zombie).right_side_collision && motion.velocity.x < 0) || (registry.zombies.get(zombie).left_side_collision && motion.velocity.x > 0)) {
-        motion.velocity.x = 0;
-    }
+	if ((registry.zombies.get(zombie).right_side_collision && motion.velocity.x < 0) || (registry.zombies.get(zombie).left_side_collision && motion.velocity.x > 0)) {
+		motion.velocity.x = 0;
+	}
 
 
 	// update sprite animation depending on distance to player
@@ -1432,12 +1434,12 @@ void WorldSystem::restart_level()
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_WEAPONS, { window_width_px - 900.f, window_height_px - 220.f }, "", { 200.f, 70.f });
 		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_GOAL, { 130.f, window_height_px - 200.f }, "", { 180.f, 100.f });
 	}
-	
-	
-	else if (curr_level == SEWERS) 
+
+
+	else if (curr_level == SEWERS)
 	{
-		glm::vec3 lights[8] = 
-		{ 
+		glm::vec3 lights[8] =
+		{
 			{ 15, 700, 1.5f },
 			{ 1340, 550, 1.5f },
 			{ 927, 670, 1.5f },
@@ -1447,13 +1449,13 @@ void WorldSystem::restart_level()
 			{ 430, 400, 1.6f },
 			{ 630, 30, 1.5f },
 		};
-		for (vec3 light : lights) 
+		for (vec3 light : lights)
 		{
 			createLight(renderer, { light.x, light.y }, light.z);
 		}
-	
+
 	}
-	
+
 	// AnimateBackgrounds for Main Mall Boss level
 	else if (curr_level == MMBOSS) {
 		addAnimatedMMBossTextures(renderer);
@@ -1653,7 +1655,9 @@ void WorldSystem::addAnimatedMMBossTextures(RenderSystem* renderer)
 }
 
 void WorldSystem::playCutscene(RenderSystem* renderer) {
-	createCutscene(renderer, { 1080, 608 }, { 720, 405 }, TEXTURE_ASSET_ID::CUTSCENE_1, { 4 }, 5000.f, { 0, 0 });
+	int num_of_sprites = jsonData["num"].asInt();
+	float time_of_switch = jsonData["time"].asFloat();
+	createCutscene(renderer, { 1080, 608 }, { 720, 405 }, CUTSCENE_ASSET[asset_mapping[curr_level]], { num_of_sprites }, time_of_switch, { 0, 0 });
 }
 
 // Compute collisions between entities
