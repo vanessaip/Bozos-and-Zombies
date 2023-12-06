@@ -1,0 +1,376 @@
+{
+  "platform_scale": {
+    "x": 48.0,
+    "y": 17.0
+  },
+  "platforms": [
+    {
+      "x": 30.0,
+      "y": 765.0,
+      "num_tiles": 40,
+      "visible": true
+    },
+    {
+      "x": 10.0,
+      "y": 180.0,
+      "num_tiles": 4,
+      "visible": true
+    },
+    {
+      "x": 1127.0,
+      "y": 180.0,
+      "num_tiles": 3,
+      "visible": true
+    },
+    {
+      "x": 675.0,
+      "y": 223.0,
+      "num_tiles": 5,
+      "visible": true  // tree 2
+    },
+    {
+      "x": 200.0,
+      "y": 650.0,
+      "num_tiles": 3,
+      "visible": true
+    },
+    {
+      "x": 10.0,
+      "y": 465.0,
+      "num_tiles": 7,
+      "visible": true
+    },
+    {
+      "x": 250.0,
+      "y": 325.0,
+      "num_tiles": 2,
+      "visible": true
+    },
+    {
+      "x": 427.0,
+      "y": 325.0,
+      "num_tiles": 2,
+      "visible": true
+    },
+    {
+      "x": 340.0,
+      "y": 245.0,
+      "num_tiles": 2,
+      "visible": true // tree 1
+    },
+    {
+      "x": 645.0,
+      "y": 400.0,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 427.0,
+      "y": 500.0,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 427.0,
+      "y": 675.0,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 645.0,
+      "y": 600.0,
+      "num_tiles": 1,
+      "visible": true
+    },
+    {
+      "x": 889.0,
+      "y": 325.0,
+      "num_tiles": 8,
+      "visible": true
+    },
+    {
+      "x": 890.0,
+      "y": 465.0,
+      "num_tiles": 5,
+      "visible": true
+    },
+    {
+      "x": 1028.0,
+      "y": 650.0,
+      "num_tiles": 5,
+      "visible": true
+    },
+    {
+      "x": 45.0,
+      "y": 45.0,
+      "num_tiles": 30,
+      "visible": false
+    }
+  ],
+  "floor_positions": [
+    765,
+    650,
+    465
+    ],
+  "stairs": [],
+  "walls": [
+    {
+      "x": 10.0,
+      "y": 405.0,
+      "height": 810,
+      "visible": false
+    },
+    {
+      "x": 332.0,
+      "y": 495.0,
+      "height": 520,
+      "visible": false
+    },
+    {
+      "x": 390.0,
+      "y": 495.0,
+      "height": 520,
+      "visible": false
+    },
+    {
+      "x": 675.0,
+      "y": 490.0,
+      "height": 550,
+      "visible": false
+    },
+    {
+      "x": 854.0,
+      "y": 490.0,
+      "height": 550,
+      "visible": false
+    },
+    {
+      "x": 1255.0,
+      "y": 440.0,
+      "height": 650,
+      "visible": false
+    },
+    {
+      "x": 1335.0,
+      "y": 440.0,
+      "height": 650,
+      "visible": false
+    },
+    {
+      "x": 1408.0,
+      "y": 405.0,
+      "height": 810,
+      "visible": false
+    }
+  ],
+  "climbables": [
+    {
+      "x": 200,
+      "y": 655,
+      "sections": 4
+    },
+    {
+      "x": 300,
+      "y": 468,
+      "sections": 6
+    },
+    {
+      "x": 60,
+      "y": 185,
+      "sections": 9
+    },
+    {
+      "x": 1125,
+      "y": 180,
+      "sections": 5
+    },
+    {
+      "x": 900,
+      "y": 330,
+      "sections": 5
+    },
+    {
+      "x": 1050,
+      "y": 465,
+      "sections": 6
+    },
+    {
+      "x": 1225,
+      "y": 655,
+      "sections": 4
+    }
+  ],
+  "zombie_climb_points": [
+    [
+      200
+    ],
+    [
+      300
+    ],
+    [
+      0,
+      600
+    ]
+  ],
+  "zombie_jump_points": [
+    [
+      0
+    ],
+    [
+      400
+    ],
+    [
+      0
+    ]
+  ],
+  "spikes": [
+    {
+      "x": 450.0,
+      "y": 750.0,
+      "colour": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "x": 625.0,
+      "y": 750.0,
+      "colour": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    }
+  ],
+  "wheels": [
+    {
+      "position": [
+        200,
+        350
+      ],
+      "colour": [
+        1.0,
+        0,
+        0
+      ],
+      "velocity": [
+        100,
+        0
+      ]
+    },
+    {
+      "position": [
+        900,
+        710
+      ],
+      "colour": [
+        1.0,
+        0,
+        0
+      ],
+      "velocity": [
+        -100,
+        0
+      ]
+    },
+    {
+      "position": [
+        900,
+        300
+      ],
+      "colour": [
+        1.0,
+        0,
+        0
+      ],
+      "velocity": [
+        -100,
+        0
+      ]
+    }
+  ],
+  "player": {
+    "position": {
+      "x": 100,
+      "y": 710
+    }
+  },
+  "zombies": {
+    "num_starting": 3,
+    "positions": [
+      {
+        "x": 1200,
+        "y": 600
+      },
+      {
+        "x": 300,
+        "y": 600
+      },
+      {
+        "x": 800,
+        "y": 30
+      }
+    ],
+    "spawn_timer": null
+  },
+  "students": {
+    "num_starting": 3,
+    "positions": [
+      {
+        "x": 300,
+        "y": 250
+      },
+      {
+        "x": 900,
+        "y": 500
+      },
+      {
+        "x": 1110,
+        "y": 150
+      }
+    ],
+    "spawn_timer": 20
+  },
+  "collectibles": {
+    "scale": {
+      "x": 30,
+      "y": 30
+    },
+    "positions": [
+      {
+        "x": 170,
+        "y": 440
+      },
+      {
+        "x": 100,
+        "y": 150
+      },
+      {
+        "x": 540,
+        "y": 740
+      },
+      {
+        "x": 925,
+        "y": 740
+      },
+      {
+        "x": 960,
+        "y": 445
+      },
+      {
+        "x": 1200,
+        "y": 150
+      },
+      {
+        "x": 225,
+        "y": 625
+      }
+    ]
+  },
+  "bgm": "forest.wav",
+  "door": {
+    "position": [ 1300, 725 ],
+    "scale": [ 60, 60 ]
+  }
+}

@@ -1,4 +1,5 @@
 {
+  "isCutscene": false,
   "platform_scale": {
     "x": 50,
     "y": 30
@@ -97,16 +98,25 @@
   "zombies": {
     "num_starting": 0,
     "positions": [
-      
+
     ],
     "spawn_timer": null
   },
   "students": {
     "num_starting": 3,
     "positions": [
-      {"x": 720, "y": 430},
-      {"x": 80, "y": 300},
-      {"x": 1300, "y": 300}
+      {
+        "x": 720,
+        "y": 430
+      },
+      {
+        "x": 80,
+        "y": 300
+      },
+      {
+        "x": 1300,
+        "y": 300
+      }
     ],
     "spawn_timer": 10
   },
@@ -116,8 +126,7 @@
       "x": 50,
       "y": 75
     },
-    "position": 
-    {
+    "position": {
       "x": 1000,
       "y": 650
     },
@@ -135,12 +144,12 @@
       "y": 30
     },
     "positions": [
-    
+
     ]
   },
   "bgm": "tbc-music.wav",
   "door": {
-    "position": [730, 423],
-    "scale": [70, 90]
+    "position": [ 730, 423 ],
+    "scale": [ 70, 90 ]
   }
 }

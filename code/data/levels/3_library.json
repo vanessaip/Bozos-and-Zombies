@@ -1,4 +1,5 @@
 {
+  "isCutscene": false,
   "platform_scale": {
     "x": 48.0,
     "y": 17.0
@@ -113,7 +114,11 @@
     [ 0 ]
   ],
   "spikes": [
-    {"x": 1320.0, "y": 750.0, "colour": [0.5, 0.5, 0.5]}
+    {
+      "x": 1320.0,
+      "y": 750.0,
+      "colour": [ 0.5, 0.5, 0.5 ]
+    }
   ],
   "wheels": [
     {
@@ -187,7 +192,7 @@
   },
   "bgm": "library.wav",
   "door": {
-    "position": [1000, 730],
-    "scale": [40, 60]
+    "position": [ 1000, 730 ],
+    "scale": [ 40, 60 ]
   }
 }

@@ -1,4 +1,5 @@
 {
+    "isCutscene": false,
     "platform_scale": {"x": 50, "y": 30},
     "platforms": [
         {"x": 345.0, "y": 798.0, "num_tiles": 16, "visible": true},
