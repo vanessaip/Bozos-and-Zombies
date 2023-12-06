@@ -151,7 +151,8 @@ GLFWwindow* WorldSystem::create_window()
 			audio_path("player_jump.wav").c_str(),
 			audio_path("player_land.wav").c_str(),
 			audio_path("Mario-coin-sound.wav").c_str(),
-			audio_path("library.wav").c_str());
+			audio_path("library.wav").c_str(),
+			audio_path("forest.wav").c_str());
 		return nullptr;
 	}
 
@@ -1385,6 +1386,9 @@ void WorldSystem::restart_level()
 	ScreenState& screen = registry.screenStates.components[0];
 	screen.screen_darken_factor = 0;
 
+	// set poisoned to be false
+	screen.is_poisoned = false;
+
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
@@ -1604,7 +1608,8 @@ void WorldSystem::restart_level()
 	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[asset_mapping[curr_level]];
 	assert(num_collectibles == collectible_assets.size());
 	for (uint i = 0; i < num_collectibles; i++) {
-		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false);
+		bool isPoisonous = collectible_assets[i] == TEXTURE_ASSET_ID::FOREST_MUSHROOM ? true : false;
+		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false, isPoisonous);
 	}
 
 	// This is specific to the beach level
@@ -1888,8 +1893,11 @@ void WorldSystem::handle_collisions()
 		else if (!game_over && registry.collectible.has(entity) && registry.players.has(entity_other)) {
 			Mix_PlayChannel(-1, collected_sound, 0);
 			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID)registry.collectible.get(entity).collectible_id;
-			Entity collectible = createOverlay(renderer, { collectibles_collected_pos, 50 }, { 60, 60 }, id, false);
-
+			Entity collectible = createCollectible(renderer, collectibles_collected_pos, 50, id, { 60, 60 }, true, false);
+			if (registry.poisonous.has(entity)){
+				ScreenState& screen = registry.screenStates.components[0];
+				screen.is_poisoned = true;
+			}
 			removeEntity(entity);
 
 			collectibles_collected++;

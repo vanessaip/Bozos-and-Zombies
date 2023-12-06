@@ -314,9 +314,11 @@ void RenderSystem::drawToScreen()
 	// Set clock
 	GLuint time_uloc = glGetUniformLocation(water_program, "time");
 	GLuint dead_timer_uloc = glGetUniformLocation(water_program, "screen_darken_factor");
+	GLuint is_poisoned = glGetUniformLocation(water_program, "is_poisoned");
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 	ScreenState& screen = registry.screenStates.get(screen_state_entity);
 	glUniform1f(dead_timer_uloc, screen.screen_darken_factor);
+	glUniform1f(is_poisoned, screen.is_poisoned);
 	gl_has_errors();
 	// Set the vertex position and vertex texture coordinates (both stored in the
 	// same VBO)
