@@ -1,5 +1,5 @@
 {
-	"current_level" : 1,
+	"current_level" : 2,
 	"high_scores" : 
 	[
 		6686.22412109375,
@@ -9,6 +9,6 @@
 		23665.66015625,
 		29452.9765625,
 		null,
-    null
+		null
 	]
 }
