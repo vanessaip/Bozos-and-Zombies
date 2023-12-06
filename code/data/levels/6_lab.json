@@ -1,0 +1,174 @@
+{
+    "platform_scale": {
+      "x": 32,
+      "y": 32
+    },
+    "platforms": [
+      {"x": 16, "y": 16, "num_tiles": 4, "visible": false},
+      {"x": 112, "y": 112, "num_tiles": 7, "visible": false},
+      {"x": 304, "y": 80, "num_tiles": 16, "visible": false},
+      {"x": 784, "y": 112, "num_tiles": 3, "visible": false},
+      {"x": 48, "y": 176, "num_tiles": 2, "visible": false},
+      {"x": 112, "y": 368, "num_tiles": 3, "visible": false},
+      {"x": 208, "y": 240, "num_tiles": 6, "visible": false},
+      {"x": 496, "y": 240, "num_tiles": 6, "visible": false},
+      {"x": 720, "y": 272, "num_tiles": 4, "visible": false},
+
+      {"x": 912, "y": 208, "num_tiles": 3, "visible": false},
+
+      {"x": 1008, "y": 16, "num_tiles": 15, "visible": false},
+      {"x": 1008, "y": 80, "num_tiles": 6, "visible": false},
+      {"x": 1200, "y": 176, "num_tiles": 2, "visible": false},
+      {"x": 1296, "y": 112, "num_tiles": 5, "visible": false},
+
+      {"x": 16, "y": 528, "num_tiles": 9, "visible": false},
+      {"x": 304, "y": 432, "num_tiles": 15, "visible": false},
+      {"x": 720, "y": 400, "num_tiles": 2, "visible": false},
+      {"x": 16, "y": 656, "num_tiles": 6, "visible": false},
+      {"x": 240, "y": 592, "num_tiles": 2, "visible": false},
+      {"x": 304, "y": 720, "num_tiles": 4, "visible": false},
+      {"x": 400, "y": 656, "num_tiles": 4, "visible": false},
+      {"x": 496, "y": 688, "num_tiles": 3, "visible": false},
+      {"x": 432, "y": 560, "num_tiles": 6, "visible": false},
+
+      {"x": 752, "y": 560, "num_tiles": 6, "visible": false},
+      {"x": 944, "y": 496, "num_tiles": 1, "visible": false},
+      {"x": 1008, "y": 592, "num_tiles": 7, "visible": false},
+      {"x": 1136, "y": 336, "num_tiles": 10, "visible": false},
+      {"x": 1232, "y": 432, "num_tiles": 4, "visible": false},
+      {"x": 784, "y": 656, "num_tiles": 6, "visible": false},
+
+      {"x": 16, "y": 816, "num_tiles": 34, "visible": false},
+
+      {"x": 1232, "y": 752, "num_tiles": 7, "visible": false},
+      {"x": 1360, "y": 624, "num_tiles": 3, "visible": false},
+      {"x": 1360, "y": 528, "num_tiles": 3, "visible": false}
+    ],
+    "floor_positions": [
+        816,
+        592,
+        528,
+        336,
+        240,
+        112
+    ],
+    "wall-width": 32,
+    "walls": [
+        {"x": 112, "y": 64, "height": 128, "visible": false},
+        {"x": 848, "y": 192, "height": 192, "visible": false},
+        {"x": 688, "y": 192, "height": 192, "visible": false},
+        {"x": 400, "y": 176, "height": 160, "visible": false},
+        {"x": 176, "y": 304, "height": 160, "visible": false},
+        {"x": 112, "y": 288, "height": 192, "visible": false},
+        {"x": 16, "y": 288, "height": 192, "visible": false},
+
+        {"x": 976, "y": 48, "height": 96, "visible": false},
+        {"x": 1168, "y": 128, "height": 128, "visible": false},
+        {"x": 1264, "y": 144, "height": 96, "visible": false},
+
+        {"x": 304, "y": 464, "height": 96, "visible": false},
+        {"x": 432, "y": 496, "height": 160, "visible": false},
+        {"x": 592, "y": 624, "height": 160, "visible": false},
+        {"x": 400, "y": 688, "height": 96, "visible": false},
+        {"x": 304, "y": 656, "height": 160, "visible": false},
+        {"x": 208, "y": 624, "height": 96, "visible": false},
+        {"x": 16, "y": 736, "height": 192, "visible": false},
+
+        {"x": 752, "y": 608, "height": 128, "visible": false},
+        {"x": 912, "y": 528, "height": 96, "visible": false},
+        {"x": 976, "y": 576, "height": 192, "visible": false},
+        {"x": 1136, "y": 464, "height": 288, "visible": false},
+        {"x": 1360, "y": 384, "height": 128, "visible": false},
+        {"x": 1232, "y": 512, "height": 192, "visible": false},
+
+        {"x": 1232, "y": 784, "height": 96, "visible": false},
+        {"x": 1424, "y": 688, "height": 160, "visible": false},
+        {"x": 1328, "y": 576, "height": 128, "visible": false}
+    ],
+    "climbables": [
+      {"x": 496, "y": 238, "sections": 6},
+      {"x": 592, "y": 430, "sections": 4},
+      {"x": 1328, "y": 526, "sections": 7},
+      {"x": 1424, "y": 334, "sections": 6}
+    ],
+    "zombie_climb_points": [
+      [1328],
+      [592, 1328, 1424],
+      [496],
+      [496],
+      [0],
+      [0]
+    ],
+    "zombie_jump_points": [
+      [1104, 1216],
+      [816, 1056],
+      [224, 672, 912],
+      [0],
+      [0],
+      [224, 816, 944]
+    ],
+    "spikes": [
+      {"x": 1152, "y": 810, "colour": [100, 255, 0]}
+    ],
+    "wheels": [],
+    "player": {
+      "position": {
+        "x": 80,
+        "y": 487
+      }
+    },
+    "zombies": {
+      "num_starting": 0,
+      "positions": [
+        {"x": 480, "y": 760},
+        // {"x": 1050, "y": 542}
+        // {"x": 384, "y": 382},
+        // {"x": 528, "y": 190},
+        {"x": 1136, "y": 286}
+      ],
+      "spawn_timer": null
+    },
+    "students": {
+      "num_starting": 5,
+      "positions": [
+        {"x": 64, "y": 352},
+        {"x": 64, "y": 352},
+        {"x": 64, "y": 352},
+        {"x": 64, "y": 352},
+        {"x": 64, "y": 352}
+      ],
+      "spawn_timer": null
+    },
+    "boss": {
+      "num_starting": 1,
+      "scale": {"x": 72, "y": 72},
+      "position": {"x": 146, "y": 738},
+      "trunc": {"x": 0.0, "y": 0.0},
+      "sprite_counts": [4, 6, 6, 4, 6, 6, 6, 6, 2, 6],
+      "health": 100,
+      "damage": 1
+    },
+    "collectibles": {
+      "scale": {
+        "x": 30,
+        "y": 30
+      },
+      "positions": [
+        {"x": 64, "y": 352},
+        {"x": 224, "y": 75},
+        {"x": 1056, "y": 160},
+        {"x": 864, "y": 320},
+        {"x": 1120, "y": 656},
+        {"x": 448, "y": 710}
+      ]
+    },
+    "bgm": "lab-music.wav",
+    "door": {
+      "position": [146, 770],
+      "scale": [40, 60]
+    },
+    "boss-blockade": {
+      "position": [400, 768],
+      "scale": [32, 64]
+    }
+  }

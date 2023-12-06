@@ -129,7 +129,7 @@ GLFWwindow* WorldSystem::create_window()
 		return nullptr;
 	}
 
-	background_music = Mix_LoadMUS(audio_path(BACKGROUND_MUSIC[0]).c_str());
+	background_music = Mix_LoadMUS(audio_path("tutorial.wav").c_str());
 	player_death_sound = Mix_LoadWAV(audio_path("player_death.wav").c_str());
 	student_disappear_sound = Mix_LoadWAV(audio_path("student_disappear_quiet.wav").c_str());
 	player_jump_sound = Mix_LoadWAV(audio_path("player_jump.wav").c_str());
@@ -151,7 +151,8 @@ GLFWwindow* WorldSystem::create_window()
 			audio_path("player_jump.wav").c_str(),
 			audio_path("player_land.wav").c_str(),
 			audio_path("Mario-coin-sound.wav").c_str(),
-			audio_path("library.wav").c_str());
+			audio_path("library.wav").c_str(),
+			audio_path("forest.wav").c_str());
 		return nullptr;
 	}
 
@@ -174,7 +175,15 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
 	if (registry.zombies.entities.size() < 1 && (num_collectibles > 0 && collectibles_collected >= num_collectibles) && this->game_over == false) {
-		handleGameOver();
+		if (curr_level != LAB || (curr_level == LAB && boss_active && registry.bosses.entities.size() == 0)) {
+			handleGameOver();
+		} else if (curr_level == LAB && !boss_active) { // level == LAB, activate the boss after all zombies and collectibles are cleared
+			// remove the blockade, transform professor, play sound effect
+			assert(registry.bosses.entities.size() > 0);
+			boss_active = true;
+			removeEntity(boss_blockade);
+			Mix_PlayChannel(-1, boss_summon_sound, 0);
+		}
 	}
 	else if (curr_level == MMBOSS && registry.bosses.entities.size() == 0 && this->game_over == false) {
 		handleGameOver();
@@ -235,7 +244,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	updateSpriteSheetAnimation(bozo_motion, elapsed_ms_since_last_update);
 
 	// If it is a boss level
-	if (curr_level == MMBOSS && registry.bosses.has(boss)) {
+	if ((curr_level == MMBOSS || (curr_level == LAB && boss_active)) && registry.bosses.has(boss)) {
 		if (!registry.zombieDeathTimers.has(hp) && registry.motions.has(hp)) {
 			updateHPBar(bossHealth / registry.bosses.get(boss).health * 100);
 		}
@@ -857,7 +866,7 @@ void WorldSystem::updateBossMotion(Motion& bozo_motion, float elapsed_ms_since_l
 		// If boss is not damaged, follow the player
 		if (!registry.lostLifeTimer.has(boss)) {
 
-			if (curr_level == MMBOSS) {
+			if (curr_level == MMBOSS || curr_level == LAB) {
 				updateMainMallBossMovement(bozo_motion, bossMotion, elapsed_ms_since_last_update);
 			}
 
@@ -1122,15 +1131,15 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		float speed = ZOMBIE_SPEED;
 		motion.velocity.x = direction * speed;
 
-		if (!motion.offGround) {
-			for (float pos : jump_positions[zombie_level]) {
-				if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
-				{
-					motion.velocity.y = -600;
-					motion.offGround = true;
-				}
-			}
-		}
+		// if (!motion.offGround) {
+		// 	for (float pos : jump_positions[zombie_level]) {
+		// 		if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
+		// 		{
+		// 			motion.velocity.y = -600;
+		// 			motion.offGround = true;
+		// 		}
+		// 	}
+		// }
 
 	}
 	else if (zombie_level < bozo_level)
@@ -1144,7 +1153,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 
 		// Move toward the target_ladder
-		float target_ladder = getClosestLadder(zombie_level, bozo_motion);
+		float target_ladder = getClosestLadder(zombie_level, motion);
 
 		if ((target_ladder - motion.position.x) > 0)
 		{
@@ -1174,7 +1183,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	{
 		// Zombie is a level above bozo and needs to climb down
 		// Move toward the target_ladder
-		float target_ladder = getClosestLadder(zombie_level - 1, bozo_motion);
+		float target_ladder = getClosestLadder(zombie_level - 1, motion);
 
 		if ((target_ladder - motion.position.x) > 0)
 		{
@@ -1202,6 +1211,16 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 
 	}
+	if (!motion.offGround) {
+		for (float pos : jump_positions[zombie_level]) {
+			if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
+			{
+				motion.velocity.x *= 10;
+				motion.velocity.y = -575;
+				motion.offGround = true;
+			}
+		}
+	}
 
 	// update zombie direction
 	if (motion.velocity.x > 0 && (zombie_level != bozo_level || abs(motion.position.x - bozo_motion.position.x) > 5)) {
@@ -1211,10 +1230,10 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		motion.reflect[0] = false;
 	}
 
-	if ((registry.zombies.get(zombie).right_side_collision && motion.velocity.x < 0) || (registry.zombies.get(zombie).left_side_collision && motion.velocity.x > 0)) {
-		motion.velocity.x = 0;
-	}
-
+    // if ((registry.zombies.get(zombie).right_side_collision && motion.velocity.x < 0) || (registry.zombies.get(zombie).left_side_collision && motion.velocity.x > 0)) {
+    if ((registry.zombies.get(zombie).right_side_collision) || (registry.zombies.get(zombie).left_side_collision)) {
+        motion.velocity.x = 0;
+    }
 
 	// update sprite animation depending on distance to player
 	SpriteSheet& zombieSheet = registry.spriteSheets.get(zombie);
@@ -1243,17 +1262,17 @@ int WorldSystem::checkLevel(Motion& motion)
 	return floor_positions.size() - 1;
 }
 
-float WorldSystem::getClosestLadder(int zombie_level, Motion& bozo_motion)
+float WorldSystem::getClosestLadder(int zombie_level, Motion& motion)
 {
 	std::vector<float> ladders = ladder_positions[zombie_level];
 
-	// Find the closest ladder to get to bozo
+	// Find the closest ladder to get to position specified by motion
 	int closest = 0;
 	float min_dist = 10000;
 
 	for (int i = 0; i < ladders.size(); i++)
 	{
-		float dist = abs(ladders[i] - bozo_motion.position.x);
+		float dist = abs(ladders[i] - motion.position.x);
 		if (dist < min_dist)
 		{
 			closest = i;
@@ -1342,19 +1361,10 @@ void WorldSystem::updateWheelRotation()
 		float circumference = 2 * M_PI * 10.f;			 // M_PI is a constant for π
 		float distanceTraveled = wheelMotion.velocity.x; // If velocity is per second, multiply by deltaTime
 		float rotationRadians = distanceTraveled / circumference * 2 * M_PI;
-		float rotationDegrees = rotationRadians * 180 / M_PI;
 
-		wheelMotion.angle += rotationDegrees;
+		wheelMotion.angle += rotationRadians;
 
-		if (wheelMotion.angle >= 360.0f)
-		{
-			wheelMotion.angle -= 360.0f;
-		}
-		else if (wheelMotion.angle < 0.0f)
-		{
-			wheelMotion.angle += 360.0f;
-		}
-
+		
 		// 	const float rotationSpeed = 0.0001f;
 		// 	if (wheelMotion.velocity.x >= 0)
 		// 		wheelMotion.angle += rotationSpeed * wheelMotion.velocity.x;
@@ -1381,11 +1391,15 @@ void WorldSystem::restart_level()
 	collectibles_collected_pos = 50.f;
 	player_lives = 4;
 	collectibles_collected = 0;
+	boss_active = false;
 
 	// reset screen brightness
 	assert(registry.screenStates.components.size() <= 1);
 	ScreenState& screen = registry.screenStates.components[0];
 	screen.screen_darken_factor = 0;
+
+	// set poisoned to be false
+	screen.is_poisoned = false;
 
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
@@ -1410,6 +1424,7 @@ void WorldSystem::restart_level()
 	// set paltform dimensions
 	PLATFORM_WIDTH = jsonData["platform_scale"]["x"].asFloat();
 	PLATFORM_HEIGHT = jsonData["platform_scale"]["y"].asFloat();
+	WALL_WIDTH = jsonData["wall-width"].asFloat();
 
 	const Json::Value& playerData = jsonData["player"];
 	bozo_start_pos = { playerData["position"]["x"].asFloat(), playerData["position"]["y"].asFloat() };
@@ -1478,7 +1493,12 @@ void WorldSystem::restart_level()
 
 	// Create walls
 	for (const auto& wall_data : jsonData["walls"]) {
-		createWall(renderer, wall_data["x"].asFloat(), wall_data["y"].asFloat(), wall_data["height"].asFloat(), wall_data["visible"].asBool());
+		createWall(renderer, wall_data["x"].asFloat(), wall_data["y"].asFloat(), WALL_WIDTH, wall_data["height"].asFloat(), wall_data["visible"].asBool());
+	}
+
+	// create temporary blockade for the boss in lab level
+	if (curr_level == LAB) {
+		boss_blockade = createWall(renderer, jsonData["boss-blockade"]["position"][0].asFloat(), jsonData["boss-blockade"]["position"][1].asFloat(), jsonData["boss-blockade"]["scale"][0].asFloat(), jsonData["boss-blockade"]["scale"][1].asFloat(), true, TEXTURE_ASSET_ID::LAB_BLOCKADE);
 	}
 
 	door = createDoor(renderer, { jsonData["door"]["position"][0].asFloat(), jsonData["door"]["position"][1].asFloat() }, { jsonData["door"]["scale"][0].asFloat(), jsonData["door"]["scale"][1].asFloat() }, DOOR_ASSET[asset_mapping[curr_level]]);
@@ -1512,14 +1532,17 @@ void WorldSystem::restart_level()
 	for (const auto& spikeData : jsonData["spikes"]) {
 		Entity spike = createSpike(renderer, { spikeData["x"].asFloat(), spikeData["y"].asFloat() });
 		registry.colors.insert(spike, { spikeData["colour"][0].asFloat(), spikeData["colour"][1].asFloat(), spikeData["colour"][2].asFloat() });
+		Motion& spikeMotion = registry.motions.get(spike);
+		spikeMotion.angle -= spikeData["angle"].asFloat();
 	}
 
 	// Create wheels
 	for (const auto& data : jsonData["wheels"]) {
 		Entity wheel = createWheel(renderer, { data["position"][0].asFloat(), data["position"][1].asFloat() });
 		// registry.colors.insert(wheel, { data["colour"][0].asFloat(), data["colour"][1].asFloat(), data["colour"][2].asFloat() });
-		Motion& motion1 = registry.motions.get(wheel);
-		motion1.velocity = { data["velocity"][0].asFloat(), data["velocity"][1].asFloat() };
+		Motion& wheelMotion = registry.motions.get(wheel);
+		wheelMotion.velocity = { data["velocity"][0].asFloat(), data["velocity"][1].asFloat() };
+		wheelMotion.scale = wheelMotion.scale * data["size"].asFloat();
 	}
 
 	// Create boss
@@ -1606,7 +1629,8 @@ void WorldSystem::restart_level()
 	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[asset_mapping[curr_level]];
 	assert(num_collectibles == collectible_assets.size());
 	for (uint i = 0; i < num_collectibles; i++) {
-		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false);
+		bool isPoisonous = collectible_assets[i] == TEXTURE_ASSET_ID::FOREST_MUSHROOM ? true : false;
+		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false, isPoisonous);
 	}
 
 	// This is specific to the beach level
@@ -1883,7 +1907,7 @@ void WorldSystem::handle_collisions()
 		}
 
 		// Check Spike - Zombie collision
-		else if (!game_over && registry.zombies.has(entity) && registry.spikes.has(entity_other)) {
+		else if (!game_over && (registry.zombies.has(entity) || registry.bosses.has(entity)) && registry.spikes.has(entity_other)) {
 			removeEntity(entity);
 		}
 
@@ -1892,8 +1916,11 @@ void WorldSystem::handle_collisions()
 		else if (!game_over && registry.collectible.has(entity) && registry.players.has(entity_other)) {
 			Mix_PlayChannel(-1, collected_sound, 0);
 			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID)registry.collectible.get(entity).collectible_id;
-			Entity collectible = createOverlay(renderer, { collectibles_collected_pos, 50 }, { 60, 60 }, id, false);
-
+			Entity collectible = createCollectible(renderer, collectibles_collected_pos, 50, id, { 60, 60 }, true, false);
+			if (registry.poisonous.has(entity)){
+				ScreenState& screen = registry.screenStates.components[0];
+				screen.is_poisoned = true;
+			}
 			removeEntity(entity);
 
 			collectibles_collected++;

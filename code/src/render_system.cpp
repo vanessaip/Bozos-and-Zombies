@@ -236,17 +236,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
 			sizeof(ColoredVertex), (void*)sizeof(vec3));
 		gl_has_errors();
-
-		if (render_request.used_effect == EFFECT_ASSET_ID::WHEEL)
-		{
-			// Light up?
-			GLint light_up_uloc = glGetUniformLocation(program, "light_up");
-			assert(light_up_uloc >= 0);
-
-			// !!! TODO A1: set the light_up shader variable using glUniform1i,
-			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
-			gl_has_errors();
-		}
 	}
 	else
 	{
@@ -314,9 +303,11 @@ void RenderSystem::drawToScreen()
 	// Set clock
 	GLuint time_uloc = glGetUniformLocation(water_program, "time");
 	GLuint dead_timer_uloc = glGetUniformLocation(water_program, "screen_darken_factor");
+	GLuint is_poisoned = glGetUniformLocation(water_program, "is_poisoned");
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 	ScreenState& screen = registry.screenStates.get(screen_state_entity);
 	glUniform1f(dead_timer_uloc, screen.screen_darken_factor);
+	glUniform1f(is_poisoned, screen.is_poisoned);
 	gl_has_errors();
 	// Set the vertex position and vertex texture coordinates (both stored in the
 	// same VBO)

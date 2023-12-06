@@ -87,7 +87,7 @@ Entity createStudent(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID tex
 
 	// Create an (empty) Student component to be able to refer to all students
 	registry.humans.emplace(entity);
-	registry.colors.insert(entity, { 1, 0.8f, 0.8f });
+	registry.colors.insert(entity, { 1, 1, 1 });
 
 	std::vector<int> spriteCounts = { 4, 6 };
 	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.08f, 0.08f));
@@ -212,7 +212,7 @@ std::vector<Entity> createSteps(RenderSystem* renderer, vec2 left_pos, vec2 step
 }
 
 // Wall has variable height
-Entity createWall(RenderSystem* renderer, float position_x, float position_y, float height, bool visible)
+Entity createWall(RenderSystem* renderer, float position_x, float position_y, float width, float height, bool visible, TEXTURE_ASSET_ID texture)
 {
 	auto entity = Entity();
 
@@ -227,14 +227,14 @@ Entity createWall(RenderSystem* renderer, float position_x, float position_y, fl
 	motion.position = { position_x, position_y };
 
 	// Setting initial values
-	motion.scale = vec2({ WALL_WIDTH, height });
+	motion.scale = vec2({ width, height });
 
 	// Create a Wall component
 	registry.walls.emplace(entity);
 	if (visible == true) {
 		registry.renderRequests.insert(
 			entity,
-			{ TEXTURE_ASSET_ID::WALL,
+			{ texture,
 			 EFFECT_ASSET_ID::TEXTURED,
 			 GEOMETRY_BUFFER_ID::SPRITE });
 	}
@@ -337,8 +337,8 @@ Entity createSpike(RenderSystem* renderer, vec2 pos)
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 25.f;
-	motion.scale.y *= -1.25;
-	Bounce& bounce = registry.bounce.emplace(entity);
+	// motion.scale.y *= -1.25;
+	Bounce &bounce = registry.bounce.emplace(entity);
 	bounce.mass = std::numeric_limits<int>::max();
 
 	registry.spikes.emplace(entity);
@@ -364,7 +364,7 @@ Entity createWheel(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 15.f;
+	motion.scale = mesh.original_size;
 	motion.offGround = true;
 
 	registry.wheels.emplace(entity);
@@ -435,7 +435,7 @@ Entity createStaticTexture(RenderSystem* renderer, TEXTURE_ASSET_ID textureID, v
 	return entity;
 }
 
-Entity createCollectible(RenderSystem* renderer, float position_x, float position_y, TEXTURE_ASSET_ID collectible, vec2 scale, bool overlay = false)
+Entity createCollectible(RenderSystem* renderer, float position_x, float position_y, TEXTURE_ASSET_ID collectible, vec2 scale, bool overlay = false, bool isPoisonous = false)
 {
 	// Reserve en entity
 	auto entity = Entity();
@@ -449,6 +449,9 @@ Entity createCollectible(RenderSystem* renderer, float position_x, float positio
 	motion.position = { position_x, position_y };
 	motion.scale = scale;
 
+	if (isPoisonous){
+		registry.poisonous.emplace(entity);
+	}
 	if (overlay) {
 		registry.overlay.emplace(entity);
 	}
