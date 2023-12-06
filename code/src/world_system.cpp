@@ -174,6 +174,8 @@ void WorldSystem::init(RenderSystem* renderer_arg)
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
+
+	// Game over
 	if (registry.zombies.entities.size() < 1 && (num_collectibles > 0 && collectibles_collected >= num_collectibles) && this->game_over == false) {
 		if (curr_level != LAB || (curr_level == LAB && boss_active && registry.bosses.entities.size() == 0)) {
 			handleGameOver();
@@ -244,8 +246,22 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// outside the loop since the logic inside updateSpriteSheetAnimation is just for bozo and the door
 	updateSpriteSheetAnimation(bozo_motion, elapsed_ms_since_last_update);
 
+	if (curr_level == BUSLOOP) {
+		if (registry.buses.entities.size() > 0) {
+			for (Entity entity : bus_array) {
+				Motion& bus_motion = registry.motions.get(entity);
+				if (bus_motion.velocity.x > 0) {
+					bus_motion.reflect[0] = true;
+				} else {
+					bus_motion.reflect[0] = false;
+				}
+			}
+		}
+	}
+
 	// If it is a boss level
-	if ((curr_level == MMBOSS || (curr_level == LAB && boss_active)) && registry.bosses.has(boss)) {
+	else if ((curr_level == MMBOSS || (curr_level == LAB && boss_active)) && registry.bosses.has(boss)) {
+
 		if (!registry.zombieDeathTimers.has(hp) && registry.motions.has(hp)) {
 			updateHPBar(bossHealth / registry.bosses.get(boss).health * 100);
 		}
@@ -311,14 +327,15 @@ void WorldSystem::updateWindowTitle() {
 
 void WorldSystem::handleRespawn(float elapsed_ms_since_last_update) {
 	// Remove entities that leave the screen on the left side
-	// Iterate backwards to be able to remove without unterfering with the next object to visit
+	// Iterate backwards to be able to remove without interfering with the next object to visit
 	// (the containers exchange the last element with the current)
 	// generate new zombie every 20s
 	enemySpawnTimer += elapsed_ms_since_last_update;
 	npcSpawnTimer += elapsed_ms_since_last_update;
 	vec4 cameraBounds = renderer->getCameraBounds();
 
-	if (!game_over && zombie_spawn_on && enemySpawnTimer / 1000.f > zombie_spawn_threshold && spawn_on) {
+	if (!game_over && zombie_spawn_on && enemySpawnTimer / 1000.f > zombie_spawn_threshold
+		&& spawn_on && registry.zombies.entities.size() < num_start_zombies) {
 		vec2 enemySpawnPos;
 		for (int i = 0; i < zombie_spawn_pos.size(); i++)  // try a few times
 		{
@@ -345,7 +362,8 @@ void WorldSystem::handleRespawn(float elapsed_ms_since_last_update) {
 		}
 	}
 
-	if (!game_over && student_spawn_on && npcSpawnTimer / 1000.f > student_spawn_threshold && spawn_on) {
+	if (!game_over && student_spawn_on && npcSpawnTimer / 1000.f > student_spawn_threshold 
+		&& spawn_on && registry.humans.entities.size() < num_start_students) {
 		vec2 npcSpawnPos;
 		for (int i = 0; i < npc_spawn_pos.size(); i++)  // try a few times
 		{
@@ -469,7 +487,7 @@ bool WorldSystem::handleTimers(Motion& motion, Entity motionEntity, float elapse
 		cs_timer.timer -= elapsed_ms_since_last_update;
 		if (cs_timer.timer < 0) {
 			removeEntity(motionEntity);
-			curr_level++;
+			curr_level = curr_level + 1 > max_level ? 0 : curr_level + 1;
 			restart_level();
 		}
 	}
@@ -615,6 +633,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 	bool isBook = registry.books.has(motionEntity);
 	bool isBoss = registry.bosses.has(motionEntity);
 	bool isWheel = registry.wheels.has(motionEntity);
+	bool isBus = registry.buses.has(motionEntity);
 
 	updateWheelRotation();
 
@@ -647,7 +666,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 
 	}
 	// Bounding entities to window
-	if (isHuman || isZombie || isBook || isWheel || isBoss)
+	if (isHuman || isZombie || isBook || isWheel || isBoss || isBus)
 	{
 		float entityRightSide = motion.position.x + abs(motion.scale[0]) / 2.f;
 		float entityLeftSide = motion.position.x - abs(motion.scale[0]) / 2.f;
@@ -670,10 +689,10 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 			blocks.push_back(walls.entities[i]);
 		}
 
-        if (isZombie) {
-            registry.zombies.get(motionEntity).right_side_collision = false;
-            registry.zombies.get(motionEntity).left_side_collision = false;
-        }
+		if (isZombie) {
+			registry.zombies.get(motionEntity).right_side_collision = false;
+			registry.zombies.get(motionEntity).left_side_collision = false;
+		}
 
 		// handle platform collisions
 		for (int i = 0; i < blocks.size(); i++)
@@ -723,16 +742,17 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 					}
 				}
 				else if (isZombie) {
-                    registry.zombies.get(motionEntity).right_side_collision = true;
+					registry.zombies.get(motionEntity).right_side_collision = true;
 
 					if (curr_level == NEST && !motion.offGround)
 					{
 						motion.offGround = true;
 						motion.velocity[1] -= 200;
 					}
-				} else {
-                    motion.velocity.x = 0;
-                }
+				}
+				else {
+					motion.velocity.x = 0;
+				}
 			}
 
 			// Collision with Left edge of block
@@ -751,16 +771,17 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 					}
 				}
 				else if (isZombie) {
-                    registry.zombies.get(motionEntity).left_side_collision = true;
+					registry.zombies.get(motionEntity).left_side_collision = true;
 
 					if (curr_level == NEST && isZombie && !motion.offGround)
 					{
 						motion.offGround = true;
 						motion.velocity[1] -= 200;
 					}
-				} else {
-                    motion.velocity.x = 0;
-                }
+				}
+				else {
+					motion.velocity.x = 0;
+				}
 			}
 		}
 
@@ -1016,7 +1037,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	else if (curr_level == SEWERS) {
 		float dist = distance(motion.position, bozo_motion.position);
 		if (dist < 150.0 && bozo_motion.position.y - 15.f <= motion.position.y) {
-			if ((motion.position.x - bozo_motion.position.x) < -10 ) {
+			if ((motion.position.x - bozo_motion.position.x) < -10) {
 				motion.velocity.x = ZOMBIE_SPEED / 1.f;
 			}
 			else if ((motion.position.x - bozo_motion.position.x) > 10) {
@@ -1348,12 +1369,14 @@ void WorldSystem::updateWheelRotation()
 	for (Entity wheel : registry.wheels.entities)
 	{
 		Motion& wheelMotion = registry.motions.get(wheel);
-		float circumference = 2 * M_PI * 10.f;			 // M_PI is a constant for π
+		float circumference = 2 * M_PI * wheelMotion.scale.x;			 // M_PI is a constant for π
 		float distanceTraveled = wheelMotion.velocity.x; // If velocity is per second, multiply by deltaTime
 		float rotationRadians = distanceTraveled / circumference * 2 * M_PI;
 
 		wheelMotion.angle += rotationRadians;
-
+		if (abs(wheelMotion.velocity.x) < 15.0){
+			wheelMotion.velocity = { 200, 0 };
+		}
 		
 		// 	const float rotationSpeed = 0.0001f;
 		// 	if (wheelMotion.velocity.x >= 0)
@@ -1423,28 +1446,25 @@ void WorldSystem::restart_level()
 	renderer->resetCamera(bozo_start_pos);
 	renderer->resetSpriteSheetTracker();
 
+
 	// Create background first (painter's algorithm for rendering)
 	for (std::tuple<TEXTURE_ASSET_ID, float> background : BACKGROUND_ASSET[asset_mapping[curr_level]]) {
 		createBackground(renderer, std::get<0>(background), std::get<1>(background));
 	}
 
+	bus_array.clear();
+	if (curr_level == BUSLOOP) {
+		bus_array.push_back(createBus(renderer, { 1322, 720 }, { 230.f, 80.f }, { -300, 0}));
+	}
+
+
 	if (curr_level == NEST)
 		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, 0.f, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, false, { 250.f, 250.f }); // egg
 
-	// Tutorial sign only for the first level
-	else if (curr_level == TUTORIAL) {
-		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_MOVEMENT, { window_width_px - 120.f, window_height_px - 80.f }, "", { 150.f, 70.f });
-		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_CLIMB, { window_width_px - 480.f, window_height_px - 90.f }, "", { 115.f, 40.f });
-		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_NPCS, { window_width_px - 800.f, window_height_px - 350.f }, "", { 150.f, 60.f });
-		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_WEAPONS, { window_width_px - 900.f, window_height_px - 220.f }, "", { 200.f, 70.f });
-		createStaticTexture(renderer, TEXTURE_ASSET_ID::TUTORIAL_GOAL, { 130.f, window_height_px - 200.f }, "", { 180.f, 100.f });
-	}
-	
-	
 	else if (curr_level == SEWERS) 
 	{
-		glm::vec3 lights[8] = 
-		{ 
+		glm::vec3 lights[8] =
+		{
 			{ 15, 700, 1.5f },
 			{ 1340, 550, 1.5f },
 			{ 927, 670, 1.5f },
@@ -1454,13 +1474,13 @@ void WorldSystem::restart_level()
 			{ 430, 400, 1.6f },
 			{ 630, 30, 1.5f },
 		};
-		for (vec3 light : lights) 
+		for (vec3 light : lights)
 		{
 			createLight(renderer, { light.x, light.y }, light.z);
 		}
-	
+
 	}
-	
+
 	// AnimateBackgrounds for Main Mall Boss level
 	else if (curr_level == MMBOSS) {
 		addAnimatedMMBossTextures(renderer);
@@ -1562,13 +1582,13 @@ void WorldSystem::restart_level()
 
 	// Create zombies
 	zombie_spawn_pos.clear();
-	uint num_starting_zombies = jsonData["zombies"]["num_starting"].asInt(); // so that zombie positions are separate from how many start
-	assert(num_starting_zombies <= jsonData["zombies"]["positions"].size());
+	num_start_zombies = jsonData["zombies"]["num_starting"].asInt(); // so that zombie positions are separate from how many start
+	assert(num_start_zombies <= jsonData["zombies"]["positions"].size());
 	uint z = 0;
 	for (const auto& zombie_pos : jsonData["zombies"]["positions"]) {
 		vec2 pos = { zombie_pos["x"].asFloat(), zombie_pos["y"].asFloat() };
 		zombie_spawn_pos.push_back(pos);
-		if (z < num_starting_zombies) {
+		if (z < num_start_zombies) {
 			createZombie(renderer, pos, ZOMBIE_ASSET[asset_mapping[curr_level]]);
 		}
 		z++;
@@ -1584,13 +1604,13 @@ void WorldSystem::restart_level()
 
 	// Create students
 	npc_spawn_pos.clear();
-	uint num_starting_students = jsonData["students"]["num_starting"].asInt();
-	assert(num_starting_students <= jsonData["students"]["positions"].size());
+	num_start_students = jsonData["students"]["num_starting"].asInt();
+	assert(num_start_students <= jsonData["students"]["positions"].size());
 	uint s = 0;
 	for (const auto& student_pos : jsonData["students"]["positions"]) {
 		vec2 pos = { student_pos["x"].asFloat(), student_pos["y"].asFloat() };
 		npc_spawn_pos.push_back(pos);
-		if (s < num_starting_students) {
+		if (s < num_start_students) {
 			Entity student = createStudent(renderer, pos, NPC_ASSET[asset_mapping[curr_level]]);
 			// coded back+forth motion
 			Motion& student_motion = registry.motions.get(student);
@@ -1617,6 +1637,10 @@ void WorldSystem::restart_level()
 	num_collectibles = collectiblesPositions.size(); // set number of collectibles
 	vec2 collectible_scale = { jsonData["collectibles"]["scale"]["x"].asFloat(), jsonData["collectibles"]["scale"]["y"].asFloat() };
 	std::vector<TEXTURE_ASSET_ID> collectible_assets = COLLECTIBLE_ASSETS[asset_mapping[curr_level]];
+	//print asset_mapping[curr_level]
+	printf("asset_mapping[curr_level]: %d\n", asset_mapping[curr_level]);
+	printf("curr_level: %d\n", curr_level);	
+	printf("num_collectibles: %d, collectible_assets.size(): %d\n", num_collectibles, collectible_assets.size());
 	assert(num_collectibles == collectible_assets.size());
 	for (uint i = 0; i < num_collectibles; i++) {
 		bool isPoisonous = collectible_assets[i] == TEXTURE_ASSET_ID::FOREST_MUSHROOM ? true : false;
@@ -1669,7 +1693,9 @@ void WorldSystem::addAnimatedMMBossTextures(RenderSystem* renderer)
 }
 
 void WorldSystem::playCutscene(RenderSystem* renderer) {
-	createCutscene(renderer, { 1080, 608 }, { 720, 405 }, TEXTURE_ASSET_ID::CUTSCENE_1, { 4 }, 5000.f, { 0, 0 });
+	int num_of_sprites = jsonData["num"].asInt();
+	float time_of_switch = jsonData["time"].asFloat();
+	createCutscene(renderer, { 1080, 608 }, { 720, 405 }, CUTSCENE_ASSET[asset_mapping[curr_level]], { num_of_sprites }, time_of_switch, { 0, 0 });
 }
 
 // Compute collisions between entities
@@ -1692,8 +1718,9 @@ void WorldSystem::handle_collisions()
 			bool isDangerous = registry.dangerous.has(entity_other);
 			bool isWheel = registry.wheels.has(entity_other);
 			bool isBoss = registry.bosses.has(entity_other);
+			bool isBus = registry.buses.has(entity_other);
 			if (!game_over &&
-				((isZombie && !registry.zombieDeathTimers.has(entity_other)) || isSpikes || isDangerous || isWheel || isBoss) &&
+				((isZombie && !registry.zombieDeathTimers.has(entity_other)) || isSpikes || isDangerous || isWheel || isBoss || isBus) &&
 				!registry.deathTimers.has(entity) &&
 				!registry.lostLifeTimer.has(player_bozo))
 			{
@@ -1971,6 +1998,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			debugging.in_full_view_mode = !debugging.in_full_view_mode;
 		}
 
+		// if (curr_level == TBC && key == GLFW_KEY_L) {
 		if (key == GLFW_KEY_L) {
 			curr_level++;
 			if (curr_level > max_level) {
@@ -2086,6 +2114,8 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 		float radians = atan2(pos.y - motion.position.y, pos.x - motion.position.x);
 		// printf("Radians: %f\n", radians);
 		motion.angle = radians;
+		// print mouse position
+		printf("Mouse position: %f, %f\n", pos.x, pos.y); 
 	}
 }
 
