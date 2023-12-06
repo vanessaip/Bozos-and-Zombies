@@ -124,7 +124,7 @@ Entity createZombie(RenderSystem* renderer, vec2 position, TEXTURE_ASSET_ID text
 	registry.zombies.emplace(entity);
 	registry.colors.insert(entity, { 1, 1, 1 });
 	std::vector<int> spriteCounts = { 4, 6, 6, 6 };
-	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.0f, 0.0f));
+	renderer->initializeSpriteSheet(entity, ANIMATION_MODE::RUN, spriteCounts, 100.f, vec2(0.0f, 0.01f));
 
 	registry.renderRequests.insert(
 		entity,
@@ -523,6 +523,32 @@ Entity createDangerous(RenderSystem* renderer, vec2 position, vec2 scale, TEXTUR
 		{ assetID,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE_SHEET });
+
+	return entity;
+}
+
+Entity createBus(RenderSystem* renderer, vec2 position, vec2 scale, vec2 velocity) {
+	// Reserve en entity
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	motion.velocity = velocity;
+
+	registry.buses.emplace(entity);
+	
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::BUSLOOP_BUS,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }

@@ -136,7 +136,7 @@ private:
 	float enemySpawnTimer = 0.f;
 	float npcSpawnTimer = 0.f;
 	float doorOpenTimer = 0.f;
-	int max_level = 9;
+	int max_level = 13;
 	float collectibles_collected_pos = 50;
 	int collectibles_collected = 0;
 	Entity loadingScreen;
@@ -145,6 +145,7 @@ private:
 	vec2 platformDimensions{ 0.f, 0.f }; // unused
 	std::chrono::time_point<std::chrono::steady_clock> level_start_time;
 	Json::Value save_state;
+	std::vector<Entity> bus_array;
 	Entity boss;
 	Entity hp_bar;
 	Entity hp;
@@ -173,6 +174,8 @@ private:
 	bool student_spawn_on;
 	float zombie_spawn_threshold;
 	float student_spawn_threshold;
+	uint num_start_zombies;
+	uint num_start_students;
 	uint num_collectibles;
 	std::vector<Entity> mm_boss_rain;
 
