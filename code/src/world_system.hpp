@@ -106,6 +106,7 @@ private:
 	void playCutscene(RenderSystem* renderer);
 	void addAnimatedMMBossTextures(RenderSystem* renderer);
 	void updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_motion, float elapsed_ms_since_last_update);
+	void handleJumpPoints(Motion& motion, int level);
 
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
