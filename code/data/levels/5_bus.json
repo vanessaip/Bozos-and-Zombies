@@ -89,7 +89,7 @@
       }
     ]
   },
-  "bgm": "soundtrack.wav",
+  "bgm": "an-alien-presence.wav",
   "door": {
     "position": [ 1370, 780 ],
     "scale": [ 40, 60 ]
