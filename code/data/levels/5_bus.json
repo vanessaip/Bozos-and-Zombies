@@ -84,14 +84,14 @@
     },
     "positions": [
       {
-        "x": 1310,
+        "x": 1380,
         "y": 790
       }
     ]
   },
-  "bgm": "soundtrack.wav",
+  "bgm": "an-alien-presence.wav",
   "door": {
-    "position": [ 1370, 780 ],
+    "position": [ 1300, 780 ],
     "scale": [ 40, 60 ]
   }
 }
