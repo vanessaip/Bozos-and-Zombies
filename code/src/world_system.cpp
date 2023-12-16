@@ -1469,11 +1469,7 @@ void WorldSystem::restart_level()
 		bus_array.push_back(createBus(renderer, { 1322, 720 }, { 230.f, 80.f }, { -300, 0}));
 	}
 
-
-	if (curr_level == NEST)
-		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, 0.f, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, false, { 250.f, 250.f }); // egg
-
-	else if (curr_level == SEWERS) 
+	if (curr_level == SEWERS) 
 	{
 		glm::vec3 lights[8] =
 		{
