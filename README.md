@@ -354,7 +354,8 @@ Magic Forest Level Assets - craftpix.net - TINY FOREST TILESET PLATFORMER PIXEL 
 Lab level bgm - https://www.chosic.com/download-audio/28510/
 
  
-To be Continue music - "Grim Grinning Ghosts (Electro Swing Mix)" by Glenn Gatsby and Ashley Slater  
+To be Continue music - "Grim Grinning Ghosts (Electro Swing Mix)" by Glenn Gatsby and Ashley Slater
+Nightmare Sewer level background music = Ghost Story by Kevin MacLeod | https://incompetech.com/ Music promoted by https://www.chosic.com/free-music/all/ Creative Commons CC BY 3.0 https://creativecommons.org/licenses/by/3.0/
 Tutorial level assets - craftpix.net  
 
 Library level assets:  
