@@ -1727,6 +1727,8 @@ void WorldSystem::transitionToMenuState() {
 	while (registry.lights.entities.size() > 0)
 		registry.remove_all_components_of(registry.lights.entities.back());
 
+    screen.is_poisoned = false;
+
     Mix_HaltMusic();
 
 }
@@ -1966,7 +1968,7 @@ void WorldSystem::handle_collisions()
 		}
 
 		// Check Spike - Zombie collision
-		else if (!game_over && (registry.zombies.has(entity) || registry.bosses.has(entity)) && registry.spikes.has(entity_other)) {
+		else if (!game_over && registry.zombies.has(entity) && registry.spikes.has(entity_other)) {
 			removeEntity(entity);
 		}
 
