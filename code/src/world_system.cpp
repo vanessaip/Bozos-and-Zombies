@@ -155,7 +155,7 @@ GLFWwindow* WorldSystem::create_window()
 			audio_path("player_land.wav").c_str(),
 			audio_path("Mario-coin-sound.wav").c_str(),
 			audio_path("library.wav").c_str(),
-			audio_path("forest.wav").c_str());
+			audio_path("forest-level.wav").c_str());
 		return nullptr;
 	}
 
@@ -1723,6 +1723,8 @@ void WorldSystem::transitionToMenuState() {
 	while (registry.lights.entities.size() > 0)
 		registry.remove_all_components_of(registry.lights.entities.back());
 
+    screen.is_poisoned = false;
+
     Mix_HaltMusic();
 
 }
@@ -1962,7 +1964,7 @@ void WorldSystem::handle_collisions()
 		}
 
 		// Check Spike - Zombie collision
-		else if (!game_over && (registry.zombies.has(entity) || registry.bosses.has(entity)) && registry.spikes.has(entity_other)) {
+		else if (!game_over && registry.zombies.has(entity) && registry.spikes.has(entity_other)) {
 			removeEntity(entity);
 		}
 
