@@ -1444,7 +1444,7 @@ void WorldSystem::restart_level()
 	// update BGM
 	background_music = Mix_LoadMUS(audio_path(jsonData["bgm"].asString()).c_str());
 	Mix_PlayMusic(background_music, -1);
-	Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
+	Mix_VolumeMusic(MIX_MAX_VOLUME / 2);
 
 	// set paltform dimensions
 	PLATFORM_WIDTH = jsonData["platform_scale"]["x"].asFloat();

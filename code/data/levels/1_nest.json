@@ -140,7 +140,7 @@
         }
         ]
     },
-    "bgm": "soundtrack.wav",
+    "bgm": "nest-bgm.wav",
     "door": {
         "position": [ 700, 754 ],
         "scale": [ 40, 60 ]
