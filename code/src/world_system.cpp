@@ -1107,7 +1107,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 		else if (curr_level == NEST && bozo_level == 0 && zombie_level == 0 && bozo_motion.position.x > 700 && motion.position.x < 700)
 		{
-			float target_ladder = getClosestLadder(zombie_level, motion);
+			float target_ladder = getClosestLadder(zombie_level, bozo_motion);
 
 			if ((target_ladder - motion.position.x) > 0)
 			{
@@ -1171,7 +1171,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 
 		// Move toward the target_ladder
-		float target_ladder = getClosestLadder(zombie_level, motion);
+		float target_ladder = getClosestLadder(zombie_level, bozo_motion);
 
 		if ((target_ladder - motion.position.x) > 0)
 		{
@@ -1201,7 +1201,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	{
 		// Zombie is a level above bozo and needs to climb down
 		// Move toward the target_ladder
-		float target_ladder = getClosestLadder(zombie_level - 1, motion);
+		float target_ladder = getClosestLadder(zombie_level - 1, bozo_motion);
 
 		if ((target_ladder - motion.position.x) > 0)
 		{
