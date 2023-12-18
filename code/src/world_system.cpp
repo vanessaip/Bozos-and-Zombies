@@ -1107,7 +1107,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 		else if (curr_level == NEST && bozo_level == 0 && zombie_level == 0 && bozo_motion.position.x > 700 && motion.position.x < 700)
 		{
-			float target_ladder = getClosestLadder(zombie_level, motion);
+			float target_ladder = getClosestLadder(zombie_level, bozo_motion);
 
 			if ((target_ladder - motion.position.x) > 0)
 			{
@@ -1171,7 +1171,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 		}
 
 		// Move toward the target_ladder
-		float target_ladder = getClosestLadder(zombie_level, motion);
+		float target_ladder = getClosestLadder(zombie_level, bozo_motion);
 
 		if ((target_ladder - motion.position.x) > 0)
 		{
@@ -1201,7 +1201,7 @@ void WorldSystem::updateZombieMovement(Motion& motion, Motion& bozo_motion, Enti
 	{
 		// Zombie is a level above bozo and needs to climb down
 		// Move toward the target_ladder
-		float target_ladder = getClosestLadder(zombie_level - 1, motion);
+		float target_ladder = getClosestLadder(zombie_level - 1, bozo_motion);
 
 		if ((target_ladder - motion.position.x) > 0)
 		{
@@ -1444,7 +1444,7 @@ void WorldSystem::restart_level()
 	// update BGM
 	background_music = Mix_LoadMUS(audio_path(jsonData["bgm"].asString()).c_str());
 	Mix_PlayMusic(background_music, -1);
-	Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
+	Mix_VolumeMusic(MIX_MAX_VOLUME / 2);
 
 	// set paltform dimensions
 	PLATFORM_WIDTH = jsonData["platform_scale"]["x"].asFloat();
@@ -1469,11 +1469,7 @@ void WorldSystem::restart_level()
 		bus_array.push_back(createBus(renderer, { 1322, 720 }, { 230.f, 80.f }, { -300, 0}));
 	}
 
-
-	if (curr_level == NEST)
-		Entity egg0 = createBackground(renderer, TEXTURE_ASSET_ID::EGG0, 0.f, { window_width_px / 2 - 80.f, window_height_px * 0.4 }, false, { 250.f, 250.f }); // egg
-
-	else if (curr_level == SEWERS) 
+	if (curr_level == SEWERS) 
 	{
 		glm::vec3 lights[8] =
 		{

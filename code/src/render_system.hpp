@@ -69,7 +69,7 @@ class RenderSystem
 		textures_path("background_0.png"),
 		textures_path("background_1.png"),
 		textures_path("background_2.png"),
-		textures_path("background_3.png"),
+		textures_path("indoor_0.png"),
 		textures_path("beach/beach-plat.png"),
 		textures_path("beach/beach-ladder.png"),
 		textures_path("beach/spikeball.png"),
@@ -212,6 +212,8 @@ class RenderSystem
         textures_path("menu/bus.png"),
         textures_path("menu/forest.png"),
 		textures_path("locations/label_lab.png"),
+		textures_path("egg/nest-background.png"),
+		textures_path("egg/nest-decor.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;
