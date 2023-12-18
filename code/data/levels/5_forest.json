@@ -373,7 +373,7 @@
       }
     ]
   },
-  "bgm": "forest.wav",
+  "bgm": "forest-level.wav",
   "door": {
     "position": [ 750, 180 ],
     "scale": [ 60, 60 ]
