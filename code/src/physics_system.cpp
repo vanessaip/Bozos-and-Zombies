@@ -318,9 +318,14 @@ void PhysicsSystem::step(float elapsed_ms)
 
 	// Check for collisions between all moving entities
 	for (uint i = 0; i < motion_container.components.size(); i++)
-	{
+	{	
 		Motion &motion_i = motion_container.components[i];
 		Entity entity_i = motion_container.entities[i];
+
+		if (registry.platforms.has(entity_i) || registry.walls.has(entity_i)) { // hack to optimize, block collisions handled in world_system
+			continue;
+		}
+
 		Mesh *mesh_i = meshPtr_container.get(entity_i); // Get the second mesh
 
 		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
@@ -328,6 +333,11 @@ void PhysicsSystem::step(float elapsed_ms)
 		{
 			Motion &motion_j = motion_container.components[j];
 			Entity entity_j = motion_container.entities[j];
+
+			if (registry.platforms.has(entity_j) || registry.walls.has(entity_j)) { // hack to optimize, block collisions handled in world_system
+				continue;
+			}
+
 			Mesh *mesh_j = meshPtr_container.get(entity_j); // Get the second mesh
 
 			if ((registry.players.has(entity_i) && registry.spikes.has(entity_j)) || (registry.players.has(entity_j) && registry.spikes.has(entity_i)))
