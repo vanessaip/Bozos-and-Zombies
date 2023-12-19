@@ -677,7 +677,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 		}
 
 	}
-	// Bounding entities to window
+	// Bounding entities to blocks
 	if (isHuman || isZombie || isBook || isWheel || isBoss || isBus)
 	{
 		float entityRightSide = motion.position.x + abs(motion.scale[0]) / 2.f;
@@ -692,13 +692,20 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 		bool offAll = true;
 
 		std::vector<Entity> blocks;
+		// only check if the block is close enough
 		for (int i = 0; i < platforms.size(); i++)
 		{
-			blocks.push_back(platforms.entities[i]);
+			Motion& m = motion_container.get(platforms.entities[i]);
+			if (abs(motion.position.x - m.position.x) < 200 || abs(motion.position.y - m.position.y) < 200) {
+				blocks.push_back(platforms.entities[i]);
+			}
 		}
 		for (int i = 0; i < walls.size(); i++)
 		{
-			blocks.push_back(walls.entities[i]);
+			Motion& m = motion_container.get(walls.entities[i]);
+			if (abs(motion.position.x - m.position.x) < 200 || abs(motion.position.y - m.position.y) < 200) {
+				blocks.push_back(walls.entities[i]);
+			}
 		}
 
 		if (isZombie) {

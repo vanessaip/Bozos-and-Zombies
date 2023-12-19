@@ -131,7 +131,7 @@
         {"x": 592, "y": 190},
         {"x": 1136, "y": 286}
       ],
-      "spawn_timer": 40
+      "spawn_timer": null
     },
     "students": {
       "num_starting": 6,
