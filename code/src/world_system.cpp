@@ -1997,10 +1997,10 @@ void WorldSystem::handle_collisions()
 
 					// Determine knockback direction
 					if (motion_book.velocity.x > 0) {
-						boss_motion.velocity.x = 500;
+						boss_motion.velocity.x = BOSS_KNOCKBACK;
 					}
 					else {
-						boss_motion.velocity.x = -500;
+						boss_motion.velocity.x = -BOSS_KNOCKBACK;
 					}
 				}
 				else {
