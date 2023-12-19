@@ -20,6 +20,7 @@ const vec2 CLIMBABLE_DIM = { 30.f, 32.f };
 const float ZOMBIE_SPEED = 120.f;
 const float PLAYER_SPEED = 230;
 const float MMBOSS_SPEED = 140.f;
+const float BOSS_KNOCKBACK = 300.f;
 
 // the player
 Entity createBozo(RenderSystem* renderer, vec2 pos);

@@ -265,51 +265,51 @@ void PhysicsSystem::step(float elapsed_ms)
 
 			Dangerous &dangerous = registry.dangerous.get(entity);
 
-      if (dangerous.bezier) {
-        vec2 p0 = dangerous.p0;
-        vec2 p1 = dangerous.p1;
-        vec2 p2 = dangerous.p2;
-        vec2 p3 = dangerous.p3;
+			if (dangerous.bezier) {
+				vec2 p0 = dangerous.p0;
+				vec2 p1 = dangerous.p1;
+				vec2 p2 = dangerous.p2;
+				vec2 p3 = dangerous.p3;
 
-        if (dangerous.bezier_time < 2000)
-        {
+				if (dangerous.bezier_time < 2000)
+				{
 
-          float t = dangerous.bezier_time / 1000;
+				float t = dangerous.bezier_time / 1000;
 
-          vec2 L0 = (1 - t) * p0 + t * p1;
-          vec2 L1 = (1 - t) * p1 + t * p2;
+				vec2 L0 = (1 - t) * p0 + t * p1;
+				vec2 L1 = (1 - t) * p1 + t * p2;
 
-          vec2 Q0 = (1 - t) * L0 + t * L1;
+				vec2 Q0 = (1 - t) * L0 + t * L1;
 
-          if (!dangerous.cubic)
-          {
-            motion.position = Q0;
-            dangerous.bezier_time += 10;
-          }
-          else
-          {
-            vec2 L2 = (1 - t) * p2 + t * p3;
+				if (!dangerous.cubic)
+				{
+					motion.position = Q0;
+					dangerous.bezier_time += 10;
+				}
+				else
+				{
+					vec2 L2 = (1 - t) * p2 + t * p3;
 
-            vec2 Q1 = (1 - t) * L1 + t * L2;
+					vec2 Q1 = (1 - t) * L1 + t * L2;
 
-            vec2 C0 = (1 - t) * Q0 + t * Q1;
+					vec2 C0 = (1 - t) * Q0 + t * Q1;
 
-            motion.position = C0;
-            dangerous.bezier_time += 4;
-          }
-        }
-        else if (dangerous.bezier_time > 4000)
-        {
-          dangerous.bezier_time = 0;
-          motion.position = p0;
-        }
-        else
-        {
-          dangerous.bezier_time += 10;
-        }
-      } else {
-        motion.position[1] += 300 * elapsed_ms / 1000.f;
-      }
+					motion.position = C0;
+					dangerous.bezier_time += 4;
+				}
+				}
+				else if (dangerous.bezier_time > 4000)
+				{
+				dangerous.bezier_time = 0;
+				motion.position = p0;
+				}
+				else
+				{
+				dangerous.bezier_time += 10;
+				}
+			} else {
+				motion.position[1] += 300 * elapsed_ms / 1000.f;
+      		}
 		}
 
 		motion.position[0] += motion.velocity[0] * step_seconds;
@@ -318,9 +318,14 @@ void PhysicsSystem::step(float elapsed_ms)
 
 	// Check for collisions between all moving entities
 	for (uint i = 0; i < motion_container.components.size(); i++)
-	{
+	{	
 		Motion &motion_i = motion_container.components[i];
 		Entity entity_i = motion_container.entities[i];
+
+		if (registry.platforms.has(entity_i) || registry.walls.has(entity_i)) { // hack to optimize, block collisions handled in world_system
+			continue;
+		}
+
 		Mesh *mesh_i = meshPtr_container.get(entity_i); // Get the second mesh
 
 		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
@@ -328,6 +333,11 @@ void PhysicsSystem::step(float elapsed_ms)
 		{
 			Motion &motion_j = motion_container.components[j];
 			Entity entity_j = motion_container.entities[j];
+
+			if (registry.platforms.has(entity_j) || registry.walls.has(entity_j)) { // hack to optimize, block collisions handled in world_system
+				continue;
+			}
+
 			Mesh *mesh_j = meshPtr_container.get(entity_j); // Get the second mesh
 
 			if ((registry.players.has(entity_i) && registry.spikes.has(entity_j)) || (registry.players.has(entity_j) && registry.spikes.has(entity_i)))
