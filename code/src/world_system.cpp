@@ -2022,7 +2022,7 @@ void WorldSystem::handle_collisions()
 		else if (!game_over && registry.collectible.has(entity) && registry.players.has(entity_other)) {
 			Mix_PlayChannel(-1, collected_sound, 0);
 			TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID)registry.collectible.get(entity).collectible_id;
-			Entity collectible = createCollectible(renderer, collectibles_collected_pos, 50, id, { 60, 60 }, true, false);
+			Entity collectible = createOverlay(renderer, {collectibles_collected_pos, 50}, {60,60}, id, false);
 			if (registry.poisonous.has(entity)){
 				ScreenState& screen = registry.screenStates.components[0];
 				screen.is_poisoned = true;
