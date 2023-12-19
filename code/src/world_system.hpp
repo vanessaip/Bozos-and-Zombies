@@ -105,7 +105,9 @@ private:
 	void handlePlatformCollision(Motion& blockMotion, vec4 entityBB);
 	void playCutscene(RenderSystem* renderer);
 	void addAnimatedMMBossTextures(RenderSystem* renderer);
-	void updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_motion, float elapsed_ms_since_last_update);
+	void handleBossTimer(Motion& bozo_motion, Motion& boss_motion, float elapsed_ms_since_last_update);
+	void updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_motion);
+	void updateLabBossMovement(Motion& bozo_motion, Motion& boss_motion);
 	void handleJumpPoints(Motion& motion, int level);
 
 	// Input callback functions

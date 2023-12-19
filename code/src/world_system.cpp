@@ -215,6 +215,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	Motion& bozo_motion = registry.motions.get(player_bozo);
 	std::vector<std::tuple<Motion*, Motion*>> charactersOnMovingPlat = {};
 
+	// If it is a boss level
+	if ((curr_level == MMBOSS || (curr_level == LAB && boss_active)) && registry.bosses.has(boss)) {
+
+		if (!registry.zombieDeathTimers.has(hp) && registry.motions.has(hp)) {
+			updateHPBar(bossHealth / registry.bosses.get(boss).health * 100);
+		}
+		if (!registry.zombieDeathTimers.has(boss)) {
+			updateBossMotion(bozo_motion, elapsed_ms_since_last_update);
+		}
+	}
+
 	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i)
 	{
 		Motion& motion = motion_container.components[i];
@@ -265,17 +276,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 					bus_motion.reflect[0] = false;
 				}
 			}
-		}
-	}
-
-	// If it is a boss level
-	else if ((curr_level == MMBOSS || (curr_level == LAB && boss_active)) && registry.bosses.has(boss)) {
-
-		if (!registry.zombieDeathTimers.has(hp) && registry.motions.has(hp)) {
-			updateHPBar(bossHealth / registry.bosses.get(boss).health * 100);
-		}
-		if (!registry.zombieDeathTimers.has(boss)) {
-			updateBossMotion(bozo_motion, elapsed_ms_since_last_update);
 		}
 	}
 	return true;
@@ -742,7 +742,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 			if (entityLeftSide < xBlockRightBound &&
 				entityLeftSide > xBlockRightBound - abs(motion.scale[0]) / 3.f &&
 				entityTop < yBlockBottom &&
-				entityBottom > yBlockTop && (player.keyPresses[0] || isZombie || isNPC || isWheel || isBook))
+				entityBottom > yBlockTop && (player.keyPresses[0] || isZombie || isNPC || isWheel || isBook || isBoss))
 			{
 				if (isNPC || isWheel) {
 					if (registry.platforms.has(blocks[i])) {
@@ -762,6 +762,9 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 						motion.velocity[1] -= 200;
 					}
 				}
+				else if (isBoss) {
+					motion.velocity.x = -motion.velocity.x;
+				}
 				else {
 					motion.velocity.x = 0;
 				}
@@ -771,7 +774,7 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 			if (entityRightSide > xBlockLeftBound &&
 				entityRightSide < xBlockLeftBound + abs(motion.scale[0]) / 3.f &&
 				entityTop < yBlockBottom &&
-				entityBottom > yBlockTop && (player.keyPresses[1] || isZombie || isNPC || isWheel || isBook))
+				entityBottom > yBlockTop && (player.keyPresses[1] || isZombie || isNPC || isWheel || isBook || isBoss))
 			{
 				if (isNPC || isWheel) {
 					if (registry.platforms.has(blocks[i])) {
@@ -790,6 +793,9 @@ void WorldSystem::handleWorldCollisions(Motion& motion, Entity motionEntity, Mot
 						motion.offGround = true;
 						motion.velocity[1] -= 200;
 					}
+				}
+				else if (isBoss) {
+					motion.velocity.x = -motion.velocity.x;
 				}
 				else {
 					motion.velocity.x = 0;
@@ -899,7 +905,7 @@ void WorldSystem::updateBossMotion(Motion& bozo_motion, float elapsed_ms_since_l
 		if (!registry.lostLifeTimer.has(boss)) {
 
 			if (curr_level == MMBOSS || curr_level == LAB) {
-				updateMainMallBossMovement(bozo_motion, bossMotion, elapsed_ms_since_last_update);
+				handleBossTimer(bozo_motion, bossMotion, elapsed_ms_since_last_update);
 			}
 
 			vec3& color = registry.colors.get(boss);
@@ -931,11 +937,7 @@ void WorldSystem::updateBossMotion(Motion& bozo_motion, float elapsed_ms_since_l
 	}
 }
 
-void WorldSystem::updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_motion, float elapsed_ms_since_last_update)
-{
-	int bozo_level = checkLevel(bozo_motion);
-	int boss_level = checkLevel(boss_motion);
-
+void WorldSystem::handleBossTimer(Motion& bozo_motion, Motion& boss_motion, float elapsed_ms_since_last_update) {
 	Boss& boss_entity = registry.bosses.get(boss);
 
 	SpriteSheet& mmBossSheet = registry.spriteSheets.get(boss);
@@ -970,58 +972,98 @@ void WorldSystem::updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_m
 			createZombie(renderer, { boss_motion.position.x + direction * 20, boss_motion.position.y }, ZOMBIE_ASSET[asset_mapping[curr_level]]);
 		}
 
-	}
-	else if (boss_entity.summon_timer_ms <= 10000) {
-
+	} else if (boss_entity.summon_timer_ms <= 10000) {
 		boss_entity.rain_active = false;
 		boss_entity.summon_timer_ms -= elapsed_ms_since_last_update;
 
-		if (boss_level == bozo_level)
-		{
-			boss_motion.climbing = false;
-			float direction = -1;
-			if ((bozo_motion.position.x - boss_motion.position.x) > 0)
-			{
-				direction = 1;
-			}
-			boss_motion.velocity.x = direction * MMBOSS_SPEED;
-			if (direction == 1) {
-				boss_motion.reflect[0] = false;
-			}
-			else {
-				boss_motion.reflect[0] = true;
-			}
-
-			handleJumpPoints(boss_motion, boss_level);
-
-			// This is actually run
-			// TODO-Will fix the sprite sheet
-			mmBossSheet.updateAnimation(ANIMATION_MODE::ATTACK);
-
+		// update movement
+		if (curr_level == MMBOSS) {
+			updateMainMallBossMovement(bozo_motion, boss_motion);
+		} else if (curr_level == LAB) {
+			updateLabBossMovement(bozo_motion, boss_motion);
 		}
-		else if (curr_level == MMBOSS && boss_level < bozo_level)
-		{
-			// Boss floats to bozo's level
+	} else {
+		boss_entity.summon_timer_ms -= elapsed_ms_since_last_update;
+	}
+}
 
-			// Fly up to bozo
-			boss_motion.velocity.y = -MMBOSS_SPEED;
-			boss_motion.climbing = true;
+void WorldSystem::updateLabBossMovement(Motion& bozo_motion, Motion& boss_motion)
+{
+	SpriteSheet& mmBossSheet = registry.spriteSheets.get(boss);
+	int bozo_level = checkLevel(bozo_motion);
+	int boss_level = checkLevel(boss_motion);
 
-			// Update to flying animation
-			mmBossSheet.updateAnimation(ANIMATION_MODE::SEVENTH_INDEX);
-		}
-		else if (curr_level == MMBOSS)
-		{
-			boss_motion.position.y += 20;
-			boss_motion.velocity.y = MMBOSS_SPEED;
-			boss_motion.climbing = true;
+	boss_motion.climbing = false;
+	bool reflect = boss_motion.velocity.x < 0;
+	if (boss_level == bozo_level ) {
+		reflect = (bozo_motion.position.x - boss_motion.position.x) < 0;
+	}
 
-			// Update to flying animation
-			mmBossSheet.updateAnimation(ANIMATION_MODE::SEVENTH_INDEX);
-		}
+	boss_motion.reflect[0] = reflect;
+
+	if (reflect) {
+		boss_motion.velocity.x = -MMBOSS_SPEED;
 	}
 	else {
-		boss_entity.summon_timer_ms -= elapsed_ms_since_last_update;
+		boss_motion.velocity.x = MMBOSS_SPEED;
+	}
+	
+	handleJumpPoints(boss_motion, boss_level);
+
+	// This is actually run
+	// TODO-Will fix the sprite sheet
+	mmBossSheet.updateAnimation(ANIMATION_MODE::ATTACK);
+}
+
+void WorldSystem::updateMainMallBossMovement(Motion& bozo_motion, Motion& boss_motion)
+{
+	int bozo_level = checkLevel(bozo_motion);
+	int boss_level = checkLevel(boss_motion);
+
+	SpriteSheet& mmBossSheet = registry.spriteSheets.get(boss);
+
+	if (boss_level == bozo_level)
+	{
+		boss_motion.climbing = false;
+		float direction = -1;
+		if ((bozo_motion.position.x - boss_motion.position.x) > 0)
+		{
+			direction = 1;
+		}
+		boss_motion.velocity.x = direction * MMBOSS_SPEED;
+		if (direction == 1) {
+			boss_motion.reflect[0] = false;
+		}
+		else {
+			boss_motion.reflect[0] = true;
+		}
+
+		handleJumpPoints(boss_motion, boss_level);
+
+		// This is actually run
+		// TODO-Will fix the sprite sheet
+		mmBossSheet.updateAnimation(ANIMATION_MODE::ATTACK);
+
+	}
+	else if (boss_level < bozo_level)
+	{
+		// Boss floats to bozo's level
+
+		// Fly up to bozo
+		boss_motion.velocity.y = -MMBOSS_SPEED;
+		boss_motion.climbing = true;
+
+		// Update to flying animation
+		mmBossSheet.updateAnimation(ANIMATION_MODE::SEVENTH_INDEX);
+	}
+	else
+	{
+		boss_motion.position.y += 20;
+		boss_motion.velocity.y = MMBOSS_SPEED;
+		boss_motion.climbing = true;
+
+		// Update to flying animation
+		mmBossSheet.updateAnimation(ANIMATION_MODE::SEVENTH_INDEX);
 	}
 }
 
@@ -1265,7 +1307,7 @@ void WorldSystem::handleJumpPoints(Motion& motion, int level) {
 		for (float pos : jump_positions[level]) {
 			if ((pos - 20.f < motion.position.x && motion.position.x < pos + 20.f))
 			{
-				motion.velocity.x *= 10;
+				motion.velocity.x = 1400;
 				motion.velocity.y = -575;
 				motion.offGround = true;
 			}
@@ -1649,7 +1691,7 @@ void WorldSystem::restart_level()
 	printf("asset_mapping[curr_level]: %d\n", asset_mapping[curr_level]);
 	printf("curr_level: %d\n", curr_level);	
 	printf("num_collectibles: %d, collectible_assets.size(): %d\n", num_collectibles, collectible_assets.size());
-	assert(num_collectibles == collectible_assets.size());
+	assert(num_collectibles <= collectible_assets.size());
 	for (uint i = 0; i < num_collectibles; i++) {
 		bool isPoisonous = collectible_assets[i] == TEXTURE_ASSET_ID::FOREST_MUSHROOM ? true : false;
 		createCollectible(renderer, collectiblesPositions[i]["x"].asFloat(), collectiblesPositions[i]["y"].asFloat(), collectible_assets[i], collectible_scale, false, isPoisonous);

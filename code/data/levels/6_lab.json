@@ -26,7 +26,7 @@
       {"x": 720, "y": 400, "num_tiles": 2, "visible": false},
       {"x": 16, "y": 656, "num_tiles": 6, "visible": false},
       {"x": 240, "y": 592, "num_tiles": 2, "visible": false},
-      {"x": 304, "y": 720, "num_tiles": 4, "visible": false},
+      {"x": 304, "y": 710, "num_tiles": 4, "visible": true},
       {"x": 400, "y": 656, "num_tiles": 4, "visible": false},
       {"x": 496, "y": 688, "num_tiles": 3, "visible": false},
       {"x": 432, "y": 560, "num_tiles": 6, "visible": false},
@@ -40,13 +40,14 @@
       {"x": 1040, "y": 400, "num_tiles": 1, "visible": false},
 
       {"x": 16, "y": 816, "num_tiles": 34, "visible": false},
+      {"x": 1072, "y": 848, "num_tiles": 7, "visible": false},
 
       {"x": 1232, "y": 752, "num_tiles": 7, "visible": false},
       {"x": 1360, "y": 624, "num_tiles": 3, "visible": false},
       {"x": 1360, "y": 528, "num_tiles": 3, "visible": false}
     ],
     "floor_positions": [
-        816,
+        848,
         592,
         528,
         432,
@@ -71,8 +72,8 @@
         {"x": 304, "y": 464, "height": 96, "visible": false},
         {"x": 432, "y": 496, "height": 160, "visible": false},
         {"x": 592, "y": 624, "height": 160, "visible": false},
-        {"x": 400, "y": 688, "height": 96, "visible": false},
-        {"x": 304, "y": 656, "height": 160, "visible": false},
+        {"x": 400, "y": 683, "height": 86, "visible": true},
+        {"x": 304, "y": 651, "height": 150, "visible": true},
         {"x": 208, "y": 624, "height": 96, "visible": false},
         {"x": 16, "y": 736, "height": 192, "visible": false},
 
@@ -85,7 +86,7 @@
 
         {"x": 1232, "y": 784, "height": 96, "visible": false},
         {"x": 1424, "y": 688, "height": 160, "visible": false},
-        {"x": 1328, "y": 576, "height": 128, "visible": false}
+        {"x": 1338, "y": 576, "height": 128, "visible": false}
     ],
     "climbables": [
       {"x": 496, "y": 238, "sections": 6},
@@ -99,15 +100,17 @@
       [496],
       [496],
       [0],
+      [0],
       [0]
     ],
     "zombie_jump_points": [
-      [1104, 1216],
+      [1104, 1136, 1168, 1200],
       [816, 1056],
       [224, 672, 912],
       [0],
       [0],
-      [224, 816, 944]
+      [224, 816, 944],
+      [0]
     ],
     "spikes": [
       {"x": 1152, "y": 810, "colour": [100, 255, 0], "angle": 3.14}
@@ -128,7 +131,7 @@
         {"x": 592, "y": 190},
         {"x": 1136, "y": 286}
       ],
-      "spawn_timer": null
+      "spawn_timer": 40
     },
     "students": {
       "num_starting": 6,
